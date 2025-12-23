@@ -1579,5 +1579,95 @@
   },
   "App information and credits": {
     "string": ""
+  },
+  "Enter PIN": {
+    "string": ""
+  },
+  "Set PIN": {
+    "string": ""
+  },
+  "Confirm PIN": {
+    "string": ""
+  },
+  "Enter your PIN to unlock passwords.": {
+    "string": ""
+  },
+  "Create a 4+ digit PIN to protect passwords.": {
+    "string": ""
+  },
+  "Re-enter your PIN to confirm.": {
+    "string": ""
+  },
+  "Unlock": {
+    "string": ""
+  },
+  "Next": {
+    "string": ""
+  },
+  "Save": {
+    "string": ""
+  },
+  "Set App PIN": {
+    "string": ""
+  },
+  "Confirm App PIN": {
+    "string": ""
+  },
+  "Create a 4+ digit PIN to lock the app.": {
+    "string": ""
+  },
+  "Settings": {
+    "string": ""
+  },
+  "Done": {
+    "string": ""
+  },
+  "Search settings...": {
+    "string": ""
+  },
+  "Options": {
+    "string": ""
+  },
+  "PIN": {
+    "string": ""
+  },
+  "Backup / Restore": {
+    "string": ""
+  },
+  "Copy this JSON to back up. To restore, paste backup JSON and tap Restore.": {
+    "string": ""
+  },
+  "Backup JSON appears here": {
+    "string": ""
+  },
+  "Per-Channel Notifications": {
+    "string": ""
+  },
+  "Add a channel to override global notification settings.": {
+    "string": ""
+  },
+  "#channel": {
+    "string": ""
+  },
+  "Add": {
+    "string": ""
+  },
+  "All messages": {
+    "string": ""
+  },
+  "Mentions only": {
+    "string": ""
+  },
+  " • DND": {
+    "string": ""
+  },
+  "All": {
+    "string": ""
+  },
+  "Mentions": {
+    "string": ""
+  },
+  "No channel overrides set.": {
+    "string": ""
   }
 }

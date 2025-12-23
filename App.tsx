@@ -1826,7 +1826,18 @@ safeSetState(() => {
     };
 
     try {
-      console.log('App: Attempting to connect to IRC server using ConnectionManager...', config);
+      const safeConfig = {
+        ...config,
+        password: config.password ? '[redacted]' : undefined,
+        sasl: config.sasl
+          ? { ...config.sasl, password: config.sasl.password ? '[redacted]' : '' }
+          : undefined,
+        proxy: config.proxy
+          ? { ...config.proxy, password: config.proxy.password ? '[redacted]' : undefined }
+          : config.proxy,
+        clientKey: config.clientKey ? '[redacted]' : undefined,
+      };
+      console.log('App: Attempting to connect to IRC server using ConnectionManager...', safeConfig);
       // Use ConnectionManager for multi-server support
       const finalId = await connectionManager.connect(desiredId, networkToUse, config);
       console.log('App: Connection successful');

@@ -24,6 +24,12 @@ class DCCChatService {
   private servers: Map<string, Server> = new Map();
   private sessionListeners: SessionCallback[] = [];
   private messageListeners: MessageCallback[] = [];
+  private idCounter = 0;
+
+  private nextId(prefix: string): string {
+    this.idCounter = (this.idCounter + 1) % 1000000;
+    return `${prefix}-${Date.now()}-${this.idCounter}`;
+  }
 
   onSessionUpdate(callback: SessionCallback): () => void {
     this.sessionListeners.push(callback);
@@ -72,7 +78,7 @@ class DCCChatService {
 
   handleIncomingInvite(peerNick: string, networkId: string, host: string, port: number): DCCChatSession {
     const session: DCCChatSession = {
-      id: `dcc-${Date.now()}-${Math.random()}`,
+      id: this.nextId('dcc'),
       networkId,
       peerNick,
       direction: 'incoming',
@@ -98,7 +104,7 @@ class DCCChatService {
       this.emitSession(session);
       // announce connection in log
       this.appendMessage(sessionId, {
-        id: `${Date.now()}-${Math.random()}`,
+        id: this.nextId('dccmsg'),
         type: 'message',
         from: session.peerNick,
         text: '*** DCC CHAT connected',
@@ -118,7 +124,7 @@ class DCCChatService {
     networkId: string
   ): Promise<DCCChatSession> {
     const session: DCCChatSession = {
-      id: `dcc-${Date.now()}-${Math.random()}`,
+      id: this.nextId('dcc'),
       networkId,
       peerNick,
       direction: 'outgoing',
@@ -137,7 +143,7 @@ class DCCChatService {
       this.sockets.set(session.id, socket);
       this.attachSocketHandlers(session.id, socket);
       this.appendMessage(session.id, {
-        id: `${Date.now()}-${Math.random()}`,
+        id: this.nextId('dccmsg'),
         type: 'message',
         from: session.peerNick,
         text: '*** DCC CHAT connected',
@@ -172,7 +178,7 @@ class DCCChatService {
     if (!socket || !session || session.status !== 'connected') return;
     socket.write(text + '\n', 'utf8');
     this.appendMessage(sessionId, {
-      id: `${Date.now()}-${Math.random()}`,
+      id: this.nextId('dccmsg'),
       type: 'message',
       from: 'You',
       text,
@@ -207,7 +213,7 @@ class DCCChatService {
       const text = data.toString('utf8').trim();
       if (!session || !text) return;
       this.appendMessage(sessionId, {
-        id: `${Date.now()}-${Math.random()}`,
+        id: this.nextId('dccmsg'),
         type: 'message',
         from: session.peerNick,
         text,

@@ -103,7 +103,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             style={styles.iconButton}
             onPress={onLockPress}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Text style={styles.icon}>{lockState === 'locked' ? '🔓' : '🔒'}</Text>
+            <Text style={styles.icon}>{lockState === 'locked' ? '\u{1F512}' : '\u{1F513}'}</Text>
           </TouchableOpacity>
         )}
 
@@ -199,4 +199,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+
 

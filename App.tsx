@@ -463,6 +463,7 @@ function AppContent() {
   const [autoSwitchPrivate, setAutoSwitchPrivate] = useState(false);
   const [showEncryptionIndicators, setShowEncryptionIndicators] = useState(true);
   const [autoConnectFavoriteServer, setAutoConnectFavoriteServer] = useState(false);
+  const autoConnectFavoriteServerRef = useRef(false);
   const [tabSortAlphabetical, setTabSortAlphabetical] = useState(true);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
 
@@ -598,6 +599,11 @@ function AppContent() {
       unsubAutoFavorite && unsubAutoFavorite();
     };
   }, []);
+
+  useEffect(() => {
+    autoConnectFavoriteServerRef.current = autoConnectFavoriteServer;
+  }, [autoConnectFavoriteServer]);
+
   const [channelUsers, setChannelUsers] = useState<Map<string, ChannelUser[]>>(new Map());
   const [showChannelModal, setShowChannelModal] = useState(false);
   const [channelName, setChannelName] = useState('');
@@ -1767,7 +1773,7 @@ safeSetState(() => {
     if (serverId) {
       serverToUse = networkToUse.servers.find(s => s.id === serverId);
     }
-    if (!serverToUse && autoConnectFavoriteServer) {
+    if (!serverToUse && autoConnectFavoriteServerRef.current) {
       serverToUse = networkToUse.servers.find(s => s.favorite);
     }
     if (!serverToUse && networkToUse.defaultServerId) {
@@ -3473,7 +3479,7 @@ safeSetState(() => {
         transparent
         animationType="fade"
         onRequestClose={() => {}}>
-        <View style={styles.modalOverlay}>
+        <View style={styles.lockOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>App Locked</Text>
             {appLockUsePin && (
@@ -3568,12 +3574,18 @@ safeSetState(() => {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: colors.modalOverlay,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: colors.modalOverlay,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    lockOverlay: {
+      flex: 1,
+      backgroundColor: colors.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
   modalContent: {
     backgroundColor: colors.modalBackground,
     borderRadius: 8,

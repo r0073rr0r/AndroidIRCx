@@ -1669,5 +1669,14 @@
   },
   "No channel overrides set.": {
     "string": ""
+  },
+  "Language": {
+    "string": ""
+  },
+  "System Default": {
+    "string": ""
+  },
+  "Use device language": {
+    "string": ""
   }
 }

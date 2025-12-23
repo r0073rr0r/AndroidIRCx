@@ -756,7 +756,7 @@
     "string": "Desno"
   },
   "User List Position": {
-    "string": ""
+    "string": "Pozicija liste korisnika"
   },
   "User list at {position}": {
     "string": ""
@@ -1668,6 +1668,15 @@
     "string": ""
   },
   "No channel overrides set.": {
+    "string": ""
+  },
+  "Language": {
+    "string": ""
+  },
+  "System Default": {
+    "string": ""
+  },
+  "Use device language": {
     "string": ""
   }
 }

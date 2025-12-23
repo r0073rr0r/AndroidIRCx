@@ -52,7 +52,7 @@ export const AboutScreen: React.FC<AboutScreenProps> = ({
         </View>
         <View style={styles.section}>
           <Text style={styles.appName}>AndroidIRCX</Text>
-          <Text style={styles.version}>Version 1.3.2</Text>
+          <Text style={styles.version}>Version 1.3.3</Text>
         </View>
         <View style={styles.section}>
           <Text style={styles.label}>Made by</Text>
@@ -93,12 +93,6 @@ export const AboutScreen: React.FC<AboutScreenProps> = ({
           </TouchableOpacity>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>IRC Database</Text>
-          <TouchableOpacity onPress={() => handleOpenURL('https://irc.dbase.in.rs')}>
-            <Text style={[styles.value, styles.link]}>https://irc.dbase.in.rs</Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
       </View>
     </Modal>

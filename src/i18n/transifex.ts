@@ -14,10 +14,31 @@ const resolveLocale = (preferred?: string): string => {
   return normalizeLocale(best?.languageTag || DEFAULT_LOCALE);
 };
 
+const normalizeTranslations = (translations: Record<string, unknown>): Record<string, string> => {
+  const normalized: Record<string, string> = {};
+  Object.entries(translations).forEach(([key, value]) => {
+    if (typeof value === 'string') {
+      normalized[key] = value;
+      return;
+    }
+    if (value && typeof value === 'object' && 'string' in value) {
+      const entry = value as { string?: unknown };
+      if (typeof entry.string === 'string') {
+        normalized[key] = entry.string;
+      }
+    }
+  });
+  return normalized;
+};
+
 const preloadBundledTranslations = () => {
   Object.entries(bundledTranslations).forEach(([locale, translations]) => {
-    if (translations && Object.keys(translations).length > 0) {
-      tx.cache.update(locale, translations);
+    if (!translations || Object.keys(translations).length === 0) {
+      return;
+    }
+    const normalized = normalizeTranslations(translations as Record<string, unknown>);
+    if (Object.keys(normalized).length > 0) {
+      tx.cache.update(locale, normalized);
     }
   });
 };
@@ -25,7 +46,6 @@ const preloadBundledTranslations = () => {
 export const initTransifex = async (): Promise<void> => {
   if (!TRANSIFEX_NATIVE_TOKEN) {
     console.warn('Transifex Native token missing; translations will use source strings.');
-    return;
   }
 
   tx.init({
@@ -41,11 +61,11 @@ export const initTransifex = async (): Promise<void> => {
 };
 
 export const applyTransifexLocale = async (preferred?: string): Promise<void> => {
+  const locale = resolveLocale(preferred);
+  await tx.setCurrentLocale(locale);
   if (!TRANSIFEX_NATIVE_TOKEN) {
     return;
   }
-  const locale = resolveLocale(preferred);
-  await tx.setCurrentLocale(locale);
   await tx.fetchTranslations(locale, { refresh: true });
 };
 

@@ -1,5 +1,7 @@
-export const TRANSIFEX_NATIVE_TOKEN = '';
-export const TRANSIFEX_CDS_HOST = 'https://cds.svc.transifex.net';
+import Config from 'react-native-config';
+
+export const TRANSIFEX_NATIVE_TOKEN = Config.TRANSIFEX_NATIVE_TOKEN ?? '';
+export const TRANSIFEX_CDS_HOST = Config.TRANSIFEX_CDS_HOST ?? 'https://cds.svc.transifex.net';
 
 export const DEFAULT_LOCALE = 'en';
 export const SUPPORTED_LOCALES = [
@@ -13,3 +15,4 @@ export const SUPPORTED_LOCALES = [
   'sr',
   'es',
 ];
+

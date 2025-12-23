@@ -4,6 +4,13 @@ apply plugin: "com.facebook.react"
 apply plugin: "com.google.gms.google-services"
 apply plugin: "com.google.firebase.crashlytics"
 
+project.ext.envConfigFiles = [
+        debug  : "secrets/transifex.env",
+        release: "secrets/transifex.env"
+]
+
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
+
 import java.util.Properties
 
 def repoRootDir = rootProject.projectDir.parentFile
@@ -188,3 +195,4 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.android.play:integrity:1.6.0")
 }
+

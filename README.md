@@ -237,7 +237,7 @@ This client implements the IRC protocol according to:
 - [PROJECT](PROJECT.md) - Project explained
 ## 🔄 Development Status
 
-**Current Version**: 1.3.1 (Dignity)
+**Current Version**: 1.3.3 (Dignity)
 
 ---
 

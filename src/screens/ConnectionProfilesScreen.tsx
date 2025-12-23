@@ -15,6 +15,7 @@ import { settingsService, IRCNetworkConfig, IRCServerConfig } from '../services/
 import { identityProfilesService, IdentityProfile } from '../services/IdentityProfilesService';
 import { NetworkSettingsScreen } from './NetworkSettingsScreen';
 import { ServerSettingsScreen } from './ServerSettingsScreen';
+import { useT } from '../i18n/transifex';
 
 interface ConnectionProfilesScreenProps {
   visible: boolean;
@@ -27,6 +28,8 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
 }) => {
   const { colors } = useTheme();
   const styles = createStyles(colors);
+  const t = useT();
+  const tags = 'screen:connection-profiles,file:ConnectionProfilesScreen.tsx,feature:connection-profiles';
   const [networks, setNetworks] = useState<IRCNetworkConfig[]>([]);
   const [identityProfiles, setIdentityProfiles] = useState<IdentityProfile[]>([]);
   const [expandedNetworkId, setExpandedNetworkId] = useState<string | null>(null);
@@ -66,7 +69,10 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
       setIdentityProfiles(loadedProfiles);
     } catch (error) {
       console.error('Failed to load data:', error);
-      Alert.alert('Error', 'Failed to load networks and profiles');
+      Alert.alert(
+        t('Error', { _tags: tags }),
+        t('Failed to load networks and profiles', { _tags: tags })
+      );
     }
   };
 
@@ -76,7 +82,10 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
       await loadData();
     } catch (error) {
       console.error('Failed to update connection type:', error);
-      Alert.alert('Error', 'Failed to update connection type');
+      Alert.alert(
+        t('Error', { _tags: tags }),
+        t('Failed to update connection type', { _tags: tags })
+      );
     }
   };
 
@@ -86,7 +95,10 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
       await loadData();
     } catch (error) {
       console.error('Failed to update identity profile:', error);
-      Alert.alert('Error', 'Failed to update identity profile');
+      Alert.alert(
+        t('Error', { _tags: tags }),
+        t('Failed to update identity profile', { _tags: tags })
+      );
     }
   };
 
@@ -112,7 +124,10 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
       await loadData();
     } catch (error) {
       console.error('Failed to save network changes:', error);
-      Alert.alert('Error', 'Failed to save network changes');
+      Alert.alert(
+        t('Error', { _tags: tags }),
+        t('Failed to save network changes', { _tags: tags })
+      );
     } finally {
       setShowNetworkEditor(false);
       setEditingNetworkId(null);
@@ -134,7 +149,10 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
       await loadData();
     } catch (error) {
       console.error('Failed to save server changes:', error);
-      Alert.alert('Error', 'Failed to save server changes');
+      Alert.alert(
+        t('Error', { _tags: tags }),
+        t('Failed to save server changes', { _tags: tags })
+      );
     } finally {
       setShowServerEditor(false);
       setEditingServerId(null);
@@ -173,10 +191,13 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
         <TouchableOpacity
           style={styles.networkHeader}
           onPress={() => toggleNetworkExpanded(item.id)}>
-          <View style={styles.networkHeaderContent}>
+            <View style={styles.networkHeaderContent}>
             <Text style={styles.networkName}>{item.name}</Text>
             <Text style={styles.networkServers}>
-              {item.servers.length} server{item.servers.length !== 1 ? 's' : ''}
+              {item.servers.length}{' '}
+              {item.servers.length === 1
+                ? t('server', { _tags: tags })
+                : t('servers', { _tags: tags })}
             </Text>
           </View>
           <Text style={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</Text>
@@ -191,12 +212,12 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
                 setShowNetworkEditor(true);
               }}>
               <Text style={[styles.editButtonText, { color: colors.onPrimary }]}>
-                Edit Network Settings
+                {t('Edit Network Settings', { _tags: tags })}
               </Text>
             </TouchableOpacity>
 
             <View style={styles.pickerSection}>
-              <Text style={styles.pickerLabel}>Connection Type</Text>
+              <Text style={styles.pickerLabel}>{t('Connection Type', { _tags: tags })}</Text>
               <View style={styles.buttonGroup}>
                 {connectionTypes.map((type) => (
                   <TouchableOpacity
@@ -219,14 +240,14 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
             </View>
 
             <View style={styles.pickerSection}>
-              <Text style={styles.pickerLabel}>Identity Profile</Text>
+              <Text style={styles.pickerLabel}>{t('Identity Profile', { _tags: tags })}</Text>
               <View style={styles.identityHeaderRow}>
                 <TouchableOpacity
                   style={[styles.addProfileButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
                   onPress={() => openIdentityProfileModal(undefined, item.id)}>
-                  <Text style={[styles.addProfileButtonText, { color: colors.text }]}>
-                    + Add / Edit Identity
-                  </Text>
+                <Text style={[styles.addProfileButtonText, { color: colors.text }]}>
+                  {t('+ Add / Edit Identity', { _tags: tags })}
+                </Text>
                 </TouchableOpacity>
               </View>
               <ScrollView
@@ -259,7 +280,7 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
                       style={[styles.editProfileIconButton, { backgroundColor: colors.primary }]}
                       onPress={() => openIdentityProfileModal(profile, item.id)}>
                       <Text style={[styles.editProfileIconButtonText, { color: colors.onPrimary }]}>
-                        Edit
+                        {t('Edit', { _tags: tags })}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -268,7 +289,7 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
             </View>
 
             <View style={styles.serversSection}>
-              <Text style={styles.serversSectionTitle}>Servers</Text>
+              <Text style={styles.serversSectionTitle}>{t('Servers', { _tags: tags })}</Text>
               <TouchableOpacity
                 style={[styles.addServerButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
                 onPress={() => {
@@ -276,7 +297,9 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
                   setEditingServerNetworkId(item.id);
                   setShowServerEditor(true);
                 }}>
-                <Text style={[styles.addServerButtonText, { color: colors.text }]}>+ Add Server</Text>
+                <Text style={[styles.addServerButtonText, { color: colors.text }]}>
+                  {t('+ Add Server', { _tags: tags })}
+                </Text>
               </TouchableOpacity>
               {item.servers.map((server, index) => (
                 <View key={server.id} style={styles.serverItem}>
@@ -299,7 +322,7 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
                       setShowServerEditor(true);
                     }}>
                     <Text style={[styles.editServerButtonText, { color: colors.onPrimary }]}>
-                      Edit
+                      {t('Edit', { _tags: tags })}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -307,11 +330,21 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
             </View>
 
             <View style={styles.infoSection}>
-              <Text style={styles.infoLabel}>Nick: {item.nick}</Text>
-              {item.altNick && <Text style={styles.infoLabel}>Alt Nick: {item.altNick}</Text>}
-              <Text style={styles.infoLabel}>Real Name: {item.realname}</Text>
+              <Text style={styles.infoLabel}>
+                {t('Nick: {nick}', { nick: item.nick, _tags: tags })}
+              </Text>
+              {item.altNick && (
+                <Text style={styles.infoLabel}>
+                  {t('Alt Nick: {altNick}', { altNick: item.altNick, _tags: tags })}
+                </Text>
+              )}
+              <Text style={styles.infoLabel}>
+                {t('Real Name: {name}', { name: item.realname, _tags: tags })}
+              </Text>
               {currentIdentityProfile && (
-                <Text style={styles.infoLabel}>Current Profile: {currentIdentityProfile.name}</Text>
+                <Text style={styles.infoLabel}>
+                  {t('Current Profile: {name}', { name: currentIdentityProfile.name, _tags: tags })}
+                </Text>
               )}
             </View>
           </View>
@@ -329,9 +362,13 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.header, { backgroundColor: colors.primary }]}>
           <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
-            <Text style={[styles.cancelText, { color: colors.onPrimary }]}>Close</Text>
+            <Text style={[styles.cancelText, { color: colors.onPrimary }]}>
+              {t('Close', { _tags: tags })}
+            </Text>
           </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.onPrimary }]}>Connection Profiles</Text>
+          <Text style={[styles.title, { color: colors.onPrimary }]}>
+            {t('Connection Profiles', { _tags: tags })}
+          </Text>
           <TouchableOpacity
             onPress={() => {
               setEditingNetworkId(null);
@@ -339,7 +376,9 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
             }}
             style={styles.addButton}
           >
-            <Text style={[styles.addButtonText, { color: colors.onPrimary }]}>Add</Text>
+            <Text style={[styles.addButtonText, { color: colors.onPrimary }]}>
+              {t('Add', { _tags: tags })}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -353,7 +392,7 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                No networks configured yet. Add a network to get started!
+                {t('No networks configured yet. Add a network to get started!', { _tags: tags })}
               </Text>
             </View>
           }
@@ -395,107 +434,131 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
           <View style={styles.modalOverlay}>
             <View style={[styles.editProfileModal, { backgroundColor: colors.background }]}>
               <ScrollView>
-                <Text style={[styles.modalTitle, { color: colors.text }]}>Edit Identity Profile</Text>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>
+                  {t('Edit Identity Profile', { _tags: tags })}
+                </Text>
 
-                <Text style={[styles.inputLabel, { color: colors.text }]}>Profile Name</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  {t('Profile Name', { _tags: tags })}
+                </Text>
                 <TextInput
                   style={[styles.modalInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                   value={editProfileName}
                   onChangeText={setEditProfileName}
-                  placeholder="Profile Name"
+                  placeholder={t('Profile Name', { _tags: tags })}
                   placeholderTextColor={colors.textSecondary}
                 />
 
-                <Text style={[styles.inputLabel, { color: colors.text }]}>Nick</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  {t('Nick', { _tags: tags })}
+                </Text>
                 <TextInput
                   style={[styles.modalInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                   value={editProfileNick}
                   onChangeText={setEditProfileNick}
-                  placeholder="Nick"
+                  placeholder={t('Nick', { _tags: tags })}
                   placeholderTextColor={colors.textSecondary}
                 />
 
-                <Text style={[styles.inputLabel, { color: colors.text }]}>Alt Nick</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  {t('Alt Nick', { _tags: tags })}
+                </Text>
                 <TextInput
                   style={[styles.modalInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                   value={editProfileAltNick}
                   onChangeText={setEditProfileAltNick}
-                  placeholder="Alt Nick"
+                  placeholder={t('Alt Nick', { _tags: tags })}
                   placeholderTextColor={colors.textSecondary}
                 />
 
-                <Text style={[styles.inputLabel, { color: colors.text }]}>Real Name</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  {t('Real Name', { _tags: tags })}
+                </Text>
                 <TextInput
                   style={[styles.modalInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                   value={editProfileRealname}
                   onChangeText={setEditProfileRealname}
-                  placeholder="Real Name"
+                  placeholder={t('Real Name', { _tags: tags })}
                   placeholderTextColor={colors.textSecondary}
                 />
 
-                <Text style={[styles.inputLabel, { color: colors.text }]}>Ident/Username</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  {t('Ident/Username', { _tags: tags })}
+                </Text>
                 <TextInput
                   style={[styles.modalInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                   value={editProfileIdent}
                   onChangeText={setEditProfileIdent}
-                  placeholder="Ident"
+                  placeholder={t('Ident/Username', { _tags: tags })}
                   placeholderTextColor={colors.textSecondary}
                 />
 
-                <Text style={[styles.inputLabel, { color: colors.text }]}>SASL Account</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  {t('SASL Account', { _tags: tags })}
+                </Text>
                 <TextInput
                   style={[styles.modalInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                   value={editProfileSaslAccount}
                   onChangeText={setEditProfileSaslAccount}
-                  placeholder="SASL Account"
+                  placeholder={t('SASL Account', { _tags: tags })}
                   placeholderTextColor={colors.textSecondary}
                 />
 
-                <Text style={[styles.inputLabel, { color: colors.text }]}>SASL Password</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  {t('SASL Password', { _tags: tags })}
+                </Text>
                 <TextInput
                   style={[styles.modalInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                   value={editProfileSaslPassword}
                   onChangeText={setEditProfileSaslPassword}
-                  placeholder="SASL Password"
+                  placeholder={t('SASL Password', { _tags: tags })}
                   placeholderTextColor={colors.textSecondary}
                   secureTextEntry
                 />
 
-                <Text style={[styles.inputLabel, { color: colors.text }]}>NickServ Password</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  {t('NickServ Password', { _tags: tags })}
+                </Text>
                 <TextInput
                   style={[styles.modalInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                   value={editProfileNickservPassword}
                   onChangeText={setEditProfileNickservPassword}
-                  placeholder="NickServ Password"
+                  placeholder={t('NickServ Password', { _tags: tags })}
                   placeholderTextColor={colors.textSecondary}
                   secureTextEntry
                 />
 
-                <Text style={[styles.inputLabel, { color: colors.text }]}>Oper Username</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  {t('Oper Username', { _tags: tags })}
+                </Text>
                 <TextInput
                   style={[styles.modalInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                   value={editProfileOperUser}
                   onChangeText={setEditProfileOperUser}
-                  placeholder="Defaults to nick"
+                  placeholder={t('Defaults to nick', { _tags: tags })}
                   placeholderTextColor={colors.textSecondary}
                 />
 
-                <Text style={[styles.inputLabel, { color: colors.text }]}>Oper Password</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  {t('Oper Password', { _tags: tags })}
+                </Text>
                 <TextInput
                   style={[styles.modalInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                   value={editProfileOperPassword}
                   onChangeText={setEditProfileOperPassword}
-                  placeholder="Oper password"
+                  placeholder={t('Oper Password', { _tags: tags })}
                   placeholderTextColor={colors.textSecondary}
                   secureTextEntry
                 />
 
-                <Text style={[styles.inputLabel, { color: colors.text }]}>On-Connect Commands (one per line, runs after MOTD)</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  {t('On-Connect Commands (one per line, runs after MOTD)', { _tags: tags })}
+                </Text>
                 <TextInput
                   style={[styles.modalInputMultiline, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                   value={editProfileOnConnectCommands}
                   onChangeText={setEditProfileOnConnectCommands}
-                  placeholder="/mode +x\n/msg NickServ IDENTIFY password"
+                  placeholder={t('Example on-connect commands', { _tags: tags })}
                   placeholderTextColor={colors.textSecondary}
                   multiline
                   numberOfLines={4}
@@ -519,7 +582,10 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
                     style={[styles.modalButton, { backgroundColor: colors.buttonPrimary }]}
                     onPress={async () => {
                       if (!editProfileName.trim() || !editProfileNick.trim()) {
-                        Alert.alert('Error', 'Profile name and nick are required');
+                        Alert.alert(
+                          t('Error', { _tags: tags }),
+                          t('Profile name and nick are required', { _tags: tags })
+                        );
                         return;
                       }
 
@@ -535,7 +601,7 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
                         operUser: editProfileOperUser.trim() || undefined,
                         operPassword: editProfileOperPassword || undefined,
                         onConnectCommands: editProfileOnConnectCommands
-                          .split('\n')
+                          .split(String.fromCharCode(10))
                           .map(cmd => cmd.trim())
                           .filter(cmd => cmd.length > 0),
                       };
@@ -558,7 +624,10 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
                         }
                       } catch (error) {
                         console.error('Failed to save identity profile:', error);
-                        Alert.alert('Error', 'Failed to save identity profile');
+                        Alert.alert(
+                          t('Error', { _tags: tags }),
+                          t('Failed to save identity profile', { _tags: tags })
+                        );
                       } finally {
                         setShowEditProfileModal(false);
                         setEditingProfileId(null);

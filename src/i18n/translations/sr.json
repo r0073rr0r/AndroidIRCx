@@ -759,79 +759,79 @@
     "string": "Pozicija liste korisnika"
   },
   "User list at {position}": {
-    "string": ""
+    "string": "Lista korisnika na {position}"
   },
   "Select user list position:": {
-    "string": ""
+    "string": "Izaberite poziciju liste korisnika:"
   },
   "View Mode": {
-    "string": ""
+    "string": "Način prikaza"
   },
   "Current: {mode}": {
-    "string": ""
+    "string": "Trenutno: {mode}"
   },
   "Select view mode:": {
-    "string": ""
+    "string": "Izaberite način prikaza:"
   },
   "Compact": {
-    "string": ""
+    "string": "Kompaktno"
   },
   "Comfortable": {
-    "string": ""
+    "string": "Udobno"
   },
   "Spacious": {
-    "string": ""
+    "string": "Prostrano"
   },
   "Font Size": {
-    "string": ""
+    "string": "Veličina fonta"
   },
   "Current: {size}": {
-    "string": ""
+    "string": "Trenutno: {size}"
   },
   "Select font size:": {
-    "string": ""
+    "string": "Izaberite veličinu fonta:"
   },
   "Small": {
-    "string": ""
+    "string": "Mala"
   },
   "Medium": {
-    "string": ""
+    "string": "Srednja"
   },
   "Large": {
-    "string": ""
+    "string": "Velika"
   },
   "Extra Large": {
-    "string": ""
+    "string": "Jako velika"
   },
   "Raw Categories": {
-    "string": ""
+    "string": "Sirove kategorije"
   },
   "Choose which raw messages are shown": {
-    "string": ""
+    "string": "Izaberite koje sirove poruke će se prikazati"
   },
   "Notice Routing": {
-    "string": ""
+    "string": "Rukovanje obaveštenjima"
   },
   "Show notices in the active tab": {
-    "string": ""
+    "string": "Prikaži obaveštenja u aktivnoj kartici"
   },
   "Show notices in a Notices tab": {
-    "string": ""
+    "string": "Prikaži obaveštenja u kartici Obaveštenja"
   },
   "Show notices in a private/query tab": {
-    "string": ""
+    "string": "Prikaži obaveštenja u privatnoj/kartici za upite"
   },
   "Show notices in the server tab": {
-    "string": ""
+    "string": "Prikaži obaveštenja u kartici servera"
   },
   "Active window": {
-    "string": ""
+    "string": "Aktivni prozor"
   },
   "Server tab": {
-    "string": ""
+    "string": "Kartica servera"
   },
   "Notices tab": {
-    "string": ""
+    "string": "Kartica obaveštenja"
   },
   "Private/query tab": {
     "string": ""

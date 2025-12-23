@@ -1678,5 +1678,113 @@
   },
   "Use device language": {
     "string": "Use device language"
+  },
+  "Failed to load networks and profiles": {
+    "string": "Failed to load networks and profiles"
+  },
+  "Failed to update connection type": {
+    "string": "Failed to update connection type"
+  },
+  "Failed to update identity profile": {
+    "string": "Failed to update identity profile"
+  },
+  "Failed to save network changes": {
+    "string": "Failed to save network changes"
+  },
+  "Failed to save server changes": {
+    "string": "Failed to save server changes"
+  },
+  "server": {
+    "string": "server"
+  },
+  "servers": {
+    "string": "servers"
+  },
+  "Edit Network Settings": {
+    "string": "Edit Network Settings"
+  },
+  "Connection Type": {
+    "string": "Connection Type"
+  },
+  "Identity Profile": {
+    "string": "Identity Profile"
+  },
+  "+ Add / Edit Identity": {
+    "string": "+ Add / Edit Identity"
+  },
+  "Edit": {
+    "string": "Edit"
+  },
+  "Servers": {
+    "string": "Servers"
+  },
+  "+ Add Server": {
+    "string": "+ Add Server"
+  },
+  "Nick: {nick}": {
+    "string": "Nick: {nick}"
+  },
+  "Alt Nick: {altNick}": {
+    "string": "Alt Nick: {altNick}"
+  },
+  "Real Name: {name}": {
+    "string": "Real Name: {name}"
+  },
+  "Current Profile: {name}": {
+    "string": "Current Profile: {name}"
+  },
+  "Connection Profiles": {
+    "string": "Connection Profiles"
+  },
+  "No networks configured yet. Add a network to get started!": {
+    "string": "No networks configured yet. Add a network to get started!"
+  },
+  "Edit Identity Profile": {
+    "string": "Edit Identity Profile"
+  },
+  "Profile Name": {
+    "string": "Profile Name"
+  },
+  "Nick": {
+    "string": "Nick"
+  },
+  "Alt Nick": {
+    "string": "Alt Nick"
+  },
+  "Real Name": {
+    "string": "Real Name"
+  },
+  "Ident/Username": {
+    "string": "Ident/Username"
+  },
+  "SASL Account": {
+    "string": "SASL Account"
+  },
+  "SASL Password": {
+    "string": "SASL Password"
+  },
+  "NickServ Password": {
+    "string": "NickServ Password"
+  },
+  "Oper Username": {
+    "string": "Oper Username"
+  },
+  "Defaults to nick": {
+    "string": "Defaults to nick"
+  },
+  "Oper Password": {
+    "string": "Oper Password"
+  },
+  "On-Connect Commands (one per line, runs after MOTD)": {
+    "string": "On-Connect Commands (one per line, runs after MOTD)"
+  },
+  "Example on-connect commands": {
+    "string": "Example on-connect commands"
+  },
+  "Profile name and nick are required": {
+    "string": "Profile name and nick are required"
+  },
+  "Failed to save identity profile": {
+    "string": "Failed to save identity profile"
   }
 }

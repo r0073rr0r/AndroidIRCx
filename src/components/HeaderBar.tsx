@@ -32,6 +32,10 @@ interface HeaderBarProps {
 
   showLockButton?: boolean;
 
+  showEncryptionButton?: boolean;
+
+  onEncryptionPress?: () => void;
+
 }
 
 
@@ -59,6 +63,10 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   lockState = 'unlocked',
 
   showLockButton = false,
+
+  showEncryptionButton = false,
+
+  onEncryptionPress,
 
 }) => {
 
@@ -97,6 +105,15 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
       </View>
 
       <View style={styles.rightSection}>
+
+        {showEncryptionButton && onEncryptionPress && (
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={onEncryptionPress}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Text style={styles.icon}>🔐</Text>
+          </TouchableOpacity>
+        )}
 
         {showLockButton && onLockPress && (
           <TouchableOpacity

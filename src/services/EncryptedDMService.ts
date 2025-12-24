@@ -34,10 +34,24 @@ type KeyRequestCallback = (
   }
 ) => void;
 
+// Exported types for UI components
+export type StoredKey = {
+  network: string;
+  nick: string;
+  fingerprint: string;
+  verified: boolean;
+  firstSeen: number;
+  lastSeen: number;
+};
+
 const SELF_KEY = 'encdm:self';
 const BUNDLE_PREFIX = 'encdm:bundle:';
 const PENDING_PREFIX = 'encdm:pending:';
 const TRUST_PREFIX = 'encdm:trust:';
+
+// V2: Network-aware storage keys
+const BUNDLE_PREFIX_V2 = 'encdm:bundle:v2:';
+const TRUST_PREFIX_V2 = 'encdm:trust:v2:';
 
 class EncryptedDMService {
   private ready: Promise<void> = sodium.ready;
@@ -76,6 +90,15 @@ class EncryptedDMService {
 
   private formatFingerprint(hex: string): string {
     return hex.match(/.{1,4}/g)?.join(' ') || hex;
+  }
+
+  // V2: Network-aware storage key helpers
+  private getBundleKeyV2(network: string, nick: string): string {
+    return `${BUNDLE_PREFIX_V2}${network}:${nick.toLowerCase()}`;
+  }
+
+  private getTrustKeyV2(network: string, nick: string): string {
+    return `${TRUST_PREFIX_V2}${network}:${nick.toLowerCase()}`;
   }
 
   private async bundleFingerprint(bundle: Bundle): Promise<string> {
@@ -408,6 +431,94 @@ class EncryptedDMService {
     };
   }
 
+  // ====================================================================
+  // V2: Network-Aware Methods (new, network+nick storage)
+  // ====================================================================
+
+  async getBundleForNetwork(network: string, nick: string): Promise<Bundle | null> {
+    const stored = await secureStorageService.getSecret(this.getBundleKeyV2(network, nick));
+    return stored ? (JSON.parse(stored) as Bundle) : null;
+  }
+
+  async storeBundleForNetwork(network: string, nick: string, bundle: Bundle): Promise<void> {
+    await secureStorageService.setSecret(this.getBundleKeyV2(network, nick), JSON.stringify(bundle));
+    const fingerprint = await this.bundleFingerprint(bundle);
+    const existingTrust = await this.getTrustRecordForNetwork(network, nick);
+    const now = Date.now();
+    const trust: TrustRecord = {
+      v: 1,
+      fingerprint,
+      verified: existingTrust?.verified ?? false,
+      firstSeen: existingTrust?.firstSeen ?? now,
+      lastSeen: now,
+    };
+    await secureStorageService.setSecret(this.getTrustKeyV2(network, nick), JSON.stringify(trust));
+    // Notify listeners
+    this.bundleListeners.forEach(listener => listener(nick));
+  }
+
+  async getBundleFingerprintForNetwork(network: string, nick: string): Promise<string | null> {
+    const bundle = await this.getBundleForNetwork(network, nick);
+    if (!bundle) return null;
+    return this.bundleFingerprint(bundle);
+  }
+
+  async getTrustRecordForNetwork(network: string, nick: string): Promise<TrustRecord | null> {
+    const stored = await secureStorageService.getSecret(this.getTrustKeyV2(network, nick));
+    return stored ? (JSON.parse(stored) as TrustRecord) : null;
+  }
+
+  async setVerifiedForNetwork(network: string, nick: string, verified: boolean): Promise<void> {
+    const record = await this.getTrustRecordForNetwork(network, nick);
+    if (!record) return;
+    await secureStorageService.setSecret(this.getTrustKeyV2(network, nick), JSON.stringify({
+      ...record,
+      verified,
+      lastSeen: Date.now(),
+    }));
+  }
+
+  async isEncryptedForNetwork(network: string, nick: string): Promise<boolean> {
+    const bundle = await this.getBundleForNetwork(network, nick);
+    return bundle !== null;
+  }
+
+  private async compareBundleForNetwork(network: string, nick: string, bundle: Bundle): Promise<{
+    status: 'new' | 'same' | 'changed';
+    existingFingerprint?: string;
+    newFingerprint: string;
+  }> {
+    const newFingerprint = await this.bundleFingerprint(bundle);
+    const existingBundle = await this.getBundleForNetwork(network, nick);
+    if (!existingBundle) {
+      return { status: 'new', newFingerprint };
+    }
+    const existingFingerprint = await this.bundleFingerprint(existingBundle);
+    if (existingFingerprint === newFingerprint) {
+      return { status: 'same', existingFingerprint, newFingerprint };
+    }
+    return { status: 'changed', existingFingerprint, newFingerprint };
+  }
+
+  async acceptExternalBundleForNetwork(network: string, nick: string, bundle: Bundle, allowReplace: boolean): Promise<void> {
+    const compare = await this.compareBundleForNetwork(network, nick, bundle);
+    if (compare.status === 'changed' && !allowReplace) {
+      throw new Error('key changed');
+    }
+    await this.storeBundleForNetwork(network, nick, bundle);
+  }
+
+  async getVerificationStatusForNetwork(network: string, nick: string): Promise<{ fingerprint: string | null; verified: boolean }> {
+    const record = await this.getTrustRecordForNetwork(network, nick);
+    if (record) return { fingerprint: record.fingerprint, verified: record.verified };
+    const fp = await this.getBundleFingerprintForNetwork(network, nick);
+    return { fingerprint: fp, verified: false };
+  }
+
+  // ====================================================================
+  // End V2 Network-Aware Methods
+  // ====================================================================
+
   private async deriveKey(theirEncPubB64: string) {
     const self = await this.getOrCreateIdentity();
     const shared = x25519.getSharedSecret(this.fromB64(self.encPriv), this.fromB64(theirEncPubB64));
@@ -452,6 +563,175 @@ class EncryptedDMService {
     );
     return this.toString(plain);
   }
+
+  // V2: Network-aware encryption/decryption
+  async encryptForNetwork(plaintext: string, network: string, nick: string) {
+    await this.ensureReady();
+    const bundle = await this.getBundleForNetwork(network, nick);
+    if (!bundle) throw new Error('no bundle');
+    const key = await this.deriveKey(bundle.encPub);
+    const nonce = sodium.randombytes_buf(sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES);
+    const cipher = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
+      this.fromString(plaintext),
+      '',  // additional_data must be string (not null) for native
+      null,
+      nonce,
+      key,
+    );
+    const self = await this.getOrCreateIdentity();
+    return {
+      v: 1,
+      from: self.encPub,
+      nonce: this.toB64(nonce),
+      cipher: this.toB64(cipher),
+    };
+  }
+
+  async decryptForNetwork(msg: EncPayload, network: string, fromNick: string): Promise<string> {
+    await this.ensureReady();
+    if (msg.v !== 1) throw new Error('version');
+    const bundle = await this.getBundleForNetwork(network, fromNick);
+    if (!bundle) throw new Error('missing bundle');
+    if (bundle.encPub !== msg.from) throw new Error('pubkey mismatch');
+    const key = await this.deriveKey(bundle.encPub);
+    const plain = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
+      null,
+      this.fromB64(msg.cipher),
+      '',  // additional_data must be string (not null) for native
+      this.fromB64(msg.nonce),
+      key,
+    );
+    return this.toString(plain);
+  }
+
+  // ====================================================================
+  // Key Management Methods
+  // ====================================================================
+
+  async listAllKeys(): Promise<Array<{
+    network: string;
+    nick: string;
+    fingerprint: string;
+    verified: boolean;
+    firstSeen: number;
+    lastSeen: number;
+  }>> {
+    const allSecrets = await secureStorageService.getAllSecretKeys();
+    const keys: Array<{
+      network: string;
+      nick: string;
+      fingerprint: string;
+      verified: boolean;
+      firstSeen: number;
+      lastSeen: number;
+    }> = [];
+
+    for (const secretKey of allSecrets) {
+      // Match V2 bundle keys: "encdm:bundle:v2:NetworkName:nickname"
+      if (secretKey.startsWith(BUNDLE_PREFIX_V2)) {
+        const parts = secretKey.substring(BUNDLE_PREFIX_V2.length).split(':');
+        if (parts.length >= 2) {
+          const network = parts[0];
+          const nick = parts.slice(1).join(':'); // Handle nicks with colons
+
+          try {
+            const bundle = await this.getBundleForNetwork(network, nick);
+            if (bundle) {
+              const fingerprint = await this.bundleFingerprint(bundle);
+              const trust = await this.getTrustRecordForNetwork(network, nick);
+
+              keys.push({
+                network,
+                nick,
+                fingerprint,
+                verified: trust?.verified ?? false,
+                firstSeen: trust?.firstSeen ?? 0,
+                lastSeen: trust?.lastSeen ?? 0,
+              });
+            }
+          } catch (e) {
+            console.warn(`Failed to load key for ${network}:${nick}`, e);
+          }
+        }
+      }
+    }
+
+    // Sort by network, then nick
+    return keys.sort((a, b) => {
+      const networkCompare = a.network.localeCompare(b.network);
+      if (networkCompare !== 0) return networkCompare;
+      return a.nick.localeCompare(b.nick);
+    });
+  }
+
+  async deleteBundleForNetwork(network: string, nick: string): Promise<void> {
+    await secureStorageService.removeSecret(this.getBundleKeyV2(network, nick));
+    await secureStorageService.removeSecret(this.getTrustKeyV2(network, nick));
+  }
+
+  async copyBundleToNetwork(fromNetwork: string, toNetwork: string, nick: string): Promise<void> {
+    const bundle = await this.getBundleForNetwork(fromNetwork, nick);
+    if (!bundle) {
+      throw new Error(`No key found for ${nick} on ${fromNetwork}`);
+    }
+    const trust = await this.getTrustRecordForNetwork(fromNetwork, nick);
+
+    // Store in new network
+    await this.storeBundleForNetwork(toNetwork, nick, bundle);
+
+    // Copy trust record if exists
+    if (trust) {
+      await secureStorageService.setSecret(
+        this.getTrustKeyV2(toNetwork, nick),
+        JSON.stringify(trust)
+      );
+    }
+  }
+
+  async moveBundleToNetwork(fromNetwork: string, toNetwork: string, nick: string): Promise<void> {
+    await this.copyBundleToNetwork(fromNetwork, toNetwork, nick);
+    await this.deleteBundleForNetwork(fromNetwork, nick);
+  }
+
+  async migrateOldKeysToNetwork(network: string): Promise<number> {
+    const allSecrets = await secureStorageService.getAllSecretKeys();
+    let migratedCount = 0;
+
+    for (const secretKey of allSecrets) {
+      // Match old format keys: "encdm:bundle:nickname" (no network prefix)
+      if (secretKey.startsWith(BUNDLE_PREFIX) && !secretKey.startsWith(BUNDLE_PREFIX_V2)) {
+        const nick = secretKey.substring(BUNDLE_PREFIX.length);
+
+        try {
+          // Get old bundle
+          const bundle = await this.getBundle(nick);
+          if (bundle) {
+            // Store in new format with network
+            await this.storeBundleForNetwork(network, nick, bundle);
+
+            // Migrate trust record if exists
+            const oldTrust = await this.getTrustRecord(nick);
+            if (oldTrust) {
+              await secureStorageService.setSecret(
+                this.getTrustKeyV2(network, nick),
+                JSON.stringify(oldTrust)
+              );
+            }
+
+            migratedCount++;
+          }
+        } catch (e) {
+          console.warn(`Failed to migrate key for ${nick}`, e);
+        }
+      }
+    }
+
+    return migratedCount;
+  }
+
+  // ====================================================================
+  // End Key Management Methods
+  // ====================================================================
 }
 
 export const encryptedDMService = new EncryptedDMService();

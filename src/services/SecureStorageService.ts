@@ -50,6 +50,21 @@ class SecureStorageService {
     }
     await AsyncStorage.removeItem(`${FALLBACK_PREFIX}${key}`);
   }
+
+  async getAllSecretKeys(): Promise<string[]> {
+    if (this.isKeychainAvailable()) {
+      // Keychain doesn't provide a way to list all keys
+      // Fall back to AsyncStorage for listing
+      const keys = await AsyncStorage.getAllKeys();
+      return keys
+        .filter(key => key.startsWith(FALLBACK_PREFIX))
+        .map(key => key.substring(FALLBACK_PREFIX.length));
+    }
+    const keys = await AsyncStorage.getAllKeys();
+    return keys
+      .filter(key => key.startsWith(FALLBACK_PREFIX))
+      .map(key => key.substring(FALLBACK_PREFIX.length));
+  }
 }
 
 export const secureStorageService = new SecureStorageService();

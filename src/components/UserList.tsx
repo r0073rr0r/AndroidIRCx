@@ -62,6 +62,7 @@ export const UserList: React.FC<UserListProps> = ({
   const [allowNfcExchange, setAllowNfcExchange] = useState(true);
   const [showKeyQr, setShowKeyQr] = useState(false);
   const [qrPayload, setQrPayload] = useState<string | null>(null);
+  const [qrType, setQrType] = useState<'bundle' | 'fingerprint'>('bundle');
   const [showKeyScan, setShowKeyScan] = useState(false);
   const [scanError, setScanError] = useState('');
   const device = useCameraDevice('back');
@@ -189,7 +190,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
       }
 
       if (payload.type === 'encdm-fingerprint') {
-        const currentFp = await encryptedDMService.getBundleFingerprint(targetNick);
+        const currentFp = network ? await encryptedDMService.getBundleFingerprintForNetwork(network, targetNick) : await encryptedDMService.getBundleFingerprint(targetNick);
         if (!currentFp) {
           Alert.alert('No Key', `No DM key stored for ${targetNick}.`);
           return;
@@ -205,7 +206,11 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                 {
                   text: 'Mark Verified',
                   onPress: async () => {
-                    await encryptedDMService.setVerified(targetNick, true);
+                    if (network) {
+                      await encryptedDMService.setVerifiedForNetwork(network, targetNick, true);
+                    } else {
+                      await encryptedDMService.setVerified(targetNick, true);
+                    }
                     setActionMessage(`Key verified for ${targetNick}`);
                   },
                 },
@@ -217,7 +222,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
       }
 
       encryptedDMService.verifyBundle(payload.bundle);
-      const existingFp = await encryptedDMService.getBundleFingerprint(targetNick);
+      const existingFp = network ? await encryptedDMService.getBundleFingerprintForNetwork(network, targetNick) : await encryptedDMService.getBundleFingerprint(targetNick);
       const newDisplay = encryptedDMService.formatFingerprintForDisplay(payload.fingerprint);
       const oldDisplay = existingFp
         ? encryptedDMService.formatFingerprintForDisplay(existingFp)
@@ -233,8 +238,37 @@ const getModeColor = (modes?: string[], colors?: any): string => {
           {
             text: isChange ? 'Replace' : 'Accept',
             onPress: async () => {
-              await encryptedDMService.acceptExternalBundle(targetNick, payload.bundle, isChange);
+              if (network) {
+                await encryptedDMService.acceptExternalBundleForNetwork(network, targetNick, payload.bundle, isChange);
+              } else {
+                await encryptedDMService.acceptExternalBundle(targetNick, payload.bundle, isChange);
+              }
               setActionMessage(`Key ${isChange ? 'replaced' : 'imported'} for ${targetNick}`);
+
+              // Prompt to share key back for bidirectional encryption (offline only)
+              setTimeout(() => {
+                Alert.alert(
+                  'Share Your Key?',
+                  `You imported ${targetNick}'s key offline. For encrypted chat to work both ways, ${targetNick} also needs your key.\n\n💡 Show your QR code for them to scan (no server messages)`,
+                  [
+                    { text: 'Later', style: 'cancel' },
+                    {
+                      text: 'Show QR Code',
+                      onPress: async () => {
+                        try {
+                          const selfNick = activeIrc.getCurrentNick();
+                          const sharePayload = await encryptedDMService.exportBundlePayload(selfNick);
+                          setQrPayload(sharePayload);
+                          setQrType('bundle');
+                          setShowKeyQr(true);
+                        } catch (e) {
+                          setActionMessage('Failed to generate QR');
+                        }
+                      },
+                    },
+                  ]
+                );
+              }, 500);
             },
           },
         ]
@@ -303,11 +337,23 @@ const getModeColor = (modes?: string[], colors?: any): string => {
           .then(() => setActionMessage(`Key saved for ${selectedUser.nick}`))
           .catch(() => setActionMessage('Key not received (timeout)'));
         break;
-      case 'enc_qr_show':
+      case 'enc_qr_show_fingerprint':
         try {
           const selfNick = activeIrc.getCurrentNick();
           const payload = await encryptedDMService.exportFingerprintPayload(selfNick);
           setQrPayload(payload);
+          setQrType('fingerprint');
+          setShowKeyQr(true);
+        } catch (e) {
+          setActionMessage('Failed to generate QR');
+        }
+        break;
+      case 'enc_qr_show_bundle':
+        try {
+          const selfNick = activeIrc.getCurrentNick();
+          const payload = await encryptedDMService.exportBundlePayload(selfNick);
+          setQrPayload(payload);
+          setQrType('bundle');
           setShowKeyQr(true);
         } catch (e) {
           setActionMessage('Failed to generate QR');
@@ -403,7 +449,9 @@ const getModeColor = (modes?: string[], colors?: any): string => {
         break;
       case 'enc_verify':
         try {
-          const status = await encryptedDMService.getVerificationStatus(selectedUser.nick);
+          const status = network
+            ? await encryptedDMService.getVerificationStatusForNetwork(network, selectedUser.nick)
+            : await encryptedDMService.getVerificationStatus(selectedUser.nick);
           if (!status.fingerprint) {
             setActionMessage(`No DM key for ${selectedUser.nick}`);
             break;
@@ -419,7 +467,11 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                 text: verifiedLabel,
                 onPress: async () => {
                   if (!status.verified) {
-                    await encryptedDMService.setVerified(selectedUser.nick, true);
+                    if (network) {
+                      await encryptedDMService.setVerifiedForNetwork(network, selectedUser.nick, true);
+                    } else {
+                      await encryptedDMService.setVerified(selectedUser.nick, true);
+                    }
                     setActionMessage(`Key marked verified for ${selectedUser.nick}`);
                   }
                 },
@@ -750,13 +802,18 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                       <>
                         <TouchableOpacity
                           style={styles.contextMenuItem}
-                          onPress={() => handleContextMenuAction('enc_qr_show')}>
-                          <Text style={styles.contextMenuText}>Show Fingerprint QR</Text>
+                          onPress={() => handleContextMenuAction('enc_qr_show_bundle')}>
+                          <Text style={styles.contextMenuText}>Share Key Bundle QR</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.contextMenuItem}
+                          onPress={() => handleContextMenuAction('enc_qr_show_fingerprint')}>
+                          <Text style={styles.contextMenuText}>Show Fingerprint QR (Verify)</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           style={styles.contextMenuItem}
                           onPress={() => handleContextMenuAction('enc_qr_scan')}>
-                          <Text style={styles.contextMenuText}>Scan Fingerprint QR</Text>
+                          <Text style={styles.contextMenuText}>Scan QR Code</Text>
                         </TouchableOpacity>
                       </>
                     )}
@@ -984,21 +1041,35 @@ const getModeColor = (modes?: string[], colors?: any): string => {
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setShowKeyQr(false)}>
-          <View style={styles.contextMenu}>
-            <View style={styles.contextMenuHeader}>
-              <Text style={styles.contextMenuTitle}>Fingerprint QR</Text>
-              <Text style={styles.contextMenuSubtitle}>Scan to verify out-of-band</Text>
+          <View style={styles.qrModal}>
+            <View style={styles.qrModalHeader}>
+              <Text style={styles.qrModalTitle}>
+                {qrType === 'bundle' ? 'Share Key Bundle' : 'Fingerprint QR'}
+              </Text>
+              <Text style={styles.qrModalSubtitle}>
+                {qrType === 'bundle'
+                  ? 'Scan to import encryption key'
+                  : 'Scan to verify out-of-band'}
+              </Text>
             </View>
-            <View style={{ alignItems: 'center', padding: 16 }}>
-              {qrPayload ? <QRCode value={qrPayload} size={220} /> : null}
+            <View style={styles.qrCodeContainer}>
+              {qrPayload ? (
+                <QRCode
+                  value={qrPayload}
+                  size={260}
+                  backgroundColor="#FFFFFF"
+                  color="#000000"
+                  ecl="H"
+                />
+              ) : null}
             </View>
             <TouchableOpacity
-              style={styles.contextMenuItem}
+              style={styles.qrModalButton}
               onPress={() => {
                 if (qrPayload) Clipboard.setString(qrPayload);
                 setActionMessage('QR payload copied');
               }}>
-              <Text style={styles.contextMenuText}>Copy Payload</Text>
+              <Text style={styles.qrModalButtonText}>Copy Payload</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -1241,5 +1312,54 @@ const createStyles = (colors: any = {}) => StyleSheet.create({
     fontSize: 12,
     color: '#616161',
     textAlign: 'center',
+  },
+  qrModal: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    minWidth: 300,
+    maxWidth: 360,
+    width: '90%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  qrModalHeader: {
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  qrModalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#212121',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  qrModalSubtitle: {
+    fontSize: 13,
+    color: '#757575',
+    textAlign: 'center',
+  },
+  qrCodeContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: '#FFFFFF',
+  },
+  qrModalButton: {
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+  },
+  qrModalButtonText: {
+    fontSize: 15,
+    color: '#2196F3',
+    textAlign: 'center',
+    fontWeight: '500',
   },
 });

@@ -57,23 +57,46 @@ class BiometricAuthService {
     }
   }
 
-  async authenticate(promptTitle: string, scope?: string): Promise<boolean> {
-    if (!Keychain?.getGenericPassword) return false;
+  async authenticate(promptTitle: string, promptDescription?: string, scope?: string): Promise<{ success: boolean; error?: string }> {
+    if (!Keychain?.getGenericPassword) {
+      return { success: false, error: 'Biometric authentication not available' };
+    }
     const service = this.getService(scope);
+    console.log('[BiometricAuthService] Authenticating with scope:', scope, 'service:', service);
+
     const options: any = {
-      authenticationPrompt: { title: promptTitle },
+      authenticationPrompt: {
+        title: promptTitle,
+        subtitle: promptDescription || '',
+      },
     };
-    if (Keychain.AUTHENTICATION_TYPE?.BIOMETRICS) {
+    if (Keychain.AUTHENTICATION_TYPE?.DEVICE_PASSCODE_OR_BIOMETRICS) {
+      // Allow both biometrics AND device PIN/passcode
+      options.authenticationType = Keychain.AUTHENTICATION_TYPE.DEVICE_PASSCODE_OR_BIOMETRICS;
+      console.log('[BiometricAuthService] Using DEVICE_PASSCODE_OR_BIOMETRICS');
+    } else if (Keychain.AUTHENTICATION_TYPE?.BIOMETRICS) {
       options.authenticationType = Keychain.AUTHENTICATION_TYPE.BIOMETRICS;
+      console.log('[BiometricAuthService] Using BIOMETRICS only');
     }
     if (service) {
       options.service = service;
     }
     try {
+      console.log('[BiometricAuthService] Calling getGenericPassword with options:', JSON.stringify(options));
       const result = await Keychain.getGenericPassword(options);
-      return Boolean(result);
-    } catch {
-      return false;
+      console.log('[BiometricAuthService] getGenericPassword result:', result);
+
+      if (result === false) {
+        return { success: false, error: 'Authentication cancelled or credentials not found' };
+      }
+
+      return { success: Boolean(result) };
+    } catch (error) {
+      console.error('[BiometricAuthService] Auth exception:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Authentication failed'
+      };
     }
   }
 }

@@ -49,10 +49,11 @@ export const AboutScreen: React.FC<AboutScreenProps> = ({
             style={styles.logo}
             resizeMode="contain"
           />
+
         </View>
         <View style={styles.section}>
           <Text style={styles.appName}>AndroidIRCX</Text>
-          <Text style={styles.version}>Version 1.3.3</Text>
+          <Text style={styles.version}>Version 1.4.0</Text>
         </View>
         <View style={styles.section}>
           <Text style={styles.label}>Made by</Text>

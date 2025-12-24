@@ -37,6 +37,7 @@ import { ChannelTabs } from './src/components/ChannelTabs';
 import { MessageArea } from './src/components/MessageArea';
 import { MessageInput } from './src/components/MessageInput';
 import { UserList } from './src/components/UserList';
+import { QueryEncryptionMenu } from './src/components/QueryEncryptionMenu';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ircService, IRCMessage, IRCConnectionConfig, ChannelUser, RawMessageCategory, getDefaultRawCategoryVisibility } from './src/services/IRCService';
 import { settingsService, IRCNetworkConfig, IRCServerConfig, DEFAULT_SERVER, DEFAULT_PART_MESSAGE, DEFAULT_QUIT_MESSAGE } from './src/services/SettingsService';
@@ -280,8 +281,8 @@ function AppContent() {
 
   const attemptBiometricUnlock = useCallback(async () => {
     if (!appLockUseBiometric) return false;
-    const ok = await biometricAuthService.authenticate('Unlock AndroidIRCX', 'app');
-    if (ok) {
+    const result = await biometricAuthService.authenticate('Unlock AndroidIRCX', 'Authenticate to unlock the app', 'app');
+    if (result.success) {
       safeSetState(() => {
         setAppLocked(false);
         setAppUnlockModalVisible(false);
@@ -289,7 +290,7 @@ function AppContent() {
         setAppPinError('');
       });
     }
-    return ok;
+    return result.success;
   }, [appLockUseBiometric, safeSetState]);
 
   const handleAppPinUnlock = useCallback(async () => {
@@ -612,6 +613,7 @@ function AppContent() {
   const [showIgnoreList, setShowIgnoreList] = useState(false);
   const [showWHOIS, setShowWHOIS] = useState(false);
   const [whoisNick, setWhoisNick] = useState<string>('');
+  const [showQueryEncryptionMenu, setShowQueryEncryptionMenu] = useState(false);
   const [showChannelList, setShowChannelList] = useState(false);
   const [showUserList, setShowUserList] = useState(true);
   const [showChannelSettings, setShowChannelSettings] = useState(false); // New state for ChannelSettingsScreen
@@ -2975,6 +2977,8 @@ safeSetState(() => {
         showLockButton={appLockEnabled}
         lockState={appLocked ? 'locked' : 'unlocked'}
         onLockPress={handleLockButtonPress}
+        showEncryptionButton={activeTab.type === 'query'}
+        onEncryptionPress={() => setShowQueryEncryptionMenu(true)}
       />
       {layoutConfig.tabPosition === 'top' && (
         <ChannelTabs
@@ -3215,6 +3219,14 @@ safeSetState(() => {
             setShowWHOIS(false);
             setWhoisNick('');
           }}
+        />
+      )}
+      {showQueryEncryptionMenu && activeTab.type === 'query' && (
+        <QueryEncryptionMenu
+          visible={showQueryEncryptionMenu}
+          onClose={() => setShowQueryEncryptionMenu(false)}
+          nick={activeTab.name}
+          network={activeTab.networkId}
         />
       )}
       {showChannelList && (

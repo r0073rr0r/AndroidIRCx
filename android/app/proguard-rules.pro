@@ -14,6 +14,10 @@
 # Firebase App / App Check
 -keep class com.google.firebase.appcheck.** { *; }
 -keep class com.google.firebase.installations.** { *; }
+-keep class com.google.firebase.appcheck.interop.** { *; }
+-keep class com.google.firebase.appcheck.debug.** { *; }
+-keep class com.google.firebase.appcheck.playintegrity.** { *; }
+-dontwarn com.google.firebase.appcheck.**
 
 # Play Integrity
 -keep class com.google.android.play.core.integrity.** { *; }

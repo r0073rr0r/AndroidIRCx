@@ -40,9 +40,12 @@ import { dataBackupService } from '../services/DataBackupService';
 import { identityProfilesService, IdentityProfile } from '../services/IdentityProfilesService';
 import { biometricAuthService } from '../services/BiometricAuthService';
 import { secureStorageService } from '../services/SecureStorageService';
+import { encryptedDMService } from '../services/EncryptedDMService';
+import { connectionManager } from '../services/ConnectionManager';
 import { ScriptingScreen } from './ScriptingScreen';
 import { ScriptingHelpScreen } from './ScriptingHelpScreen';
 import { BackupScreen } from './BackupScreen';
+import { KeyManagementScreen } from './KeyManagementScreen';
 import { userManagementService, UserNote, UserAlias } from '../services/UserManagementService';
 import { RawMessageCategory, RAW_MESSAGE_CATEGORIES, getDefaultRawCategoryVisibility } from '../services/IRCService';
 import { applyTransifexLocale, useT } from '../i18n/transifex';
@@ -147,6 +150,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [backupData, setBackupData] = useState('');
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [showBackupScreen, setShowBackupScreen] = useState(false);
+  const [showKeyManagement, setShowKeyManagement] = useState(false);
+  const [showMigrationDialog, setShowMigrationDialog] = useState(false);
+  const [migrationNetwork, setMigrationNetwork] = useState('');
   const [storageStats, setStorageStats] = useState<{ keyCount: number; totalBytes: number }>({ keyCount: 0, totalBytes: 0 });
   const [identityProfiles, setIdentityProfiles] = useState<IdentityProfile[]>([]);
   const [showScripting, setShowScripting] = useState(false);
@@ -616,6 +622,39 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     }
   };
 
+  const handleMigration = async () => {
+    try {
+      if (!migrationNetwork) {
+        Alert.alert(
+          t('Select Network', { _tags: tags }),
+          t('Please select a network to migrate keys to', { _tags: tags })
+        );
+        return;
+      }
+
+      const migratedCount = await encryptedDMService.migrateOldKeysToNetwork(migrationNetwork);
+      setShowMigrationDialog(false);
+      setMigrationNetwork('');
+
+      if (migratedCount === 0) {
+        Alert.alert(
+          t('Migration Complete', { _tags: tags }),
+          t('No old keys found to migrate', { _tags: tags })
+        );
+      } else {
+        Alert.alert(
+          t('Migration Complete', { _tags: tags }),
+          t(`Successfully migrated ${migratedCount} key(s) to ${migrationNetwork}`, { _tags: tags })
+        );
+      }
+    } catch (error) {
+      Alert.alert(
+        t('Migration Error', { _tags: tags }),
+        error instanceof Error ? error.message : t('Failed to migrate keys', { _tags: tags })
+      );
+    }
+  };
+
   const handleBackupSaveToFile = async () => {
     try {
       // Generate filename with timestamp
@@ -804,16 +843,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         );
         return false;
       }
-      const ok = await biometricAuthService.authenticate(
-        t('Unlock passwords', { _tags: tags })
+      const result = await biometricAuthService.authenticate(
+        t('Unlock passwords', { _tags: tags }),
+        t('Authenticate to view passwords', { _tags: tags })
       );
-      if (ok) {
+      if (result.success) {
         setPasswordsUnlocked(true);
         return true;
       }
       Alert.alert(
         t('Authentication failed', { _tags: tags }),
-        t('Unable to unlock passwords.', { _tags: tags })
+        result.error || t('Unable to unlock passwords.', { _tags: tags })
       );
       return false;
     }
@@ -2258,6 +2298,20 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     {
       title: t('Security', { _tags: tags }),
       data: [
+        {
+          id: 'security-manage-keys',
+          title: t('Manage Encryption Keys', { _tags: tags }),
+          description: 'View, delete, copy, and move encryption keys',
+          type: 'button' as const,
+          onPress: () => setShowKeyManagement(true),
+        },
+        {
+          id: 'security-migrate-keys',
+          title: t('Migrate Old Keys', { _tags: tags }),
+          description: 'Move old nick-only keys to network-based storage',
+          type: 'button' as const,
+          onPress: () => setShowMigrationDialog(true),
+        },
         {
           id: 'security-qr',
           title: t('Allow QR Verification', { _tags: tags }),
@@ -3897,6 +3951,75 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         visible={showBackupScreen}
         onClose={() => setShowBackupScreen(false)}
       />
+      <KeyManagementScreen
+        visible={showKeyManagement}
+        onClose={() => setShowKeyManagement(false)}
+      />
+
+      <Modal
+        visible={showMigrationDialog}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowMigrationDialog(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.migrationDialog}>
+            <Text style={styles.migrationDialogTitle}>
+              {t('Migrate Old Keys', { _tags: tags })}
+            </Text>
+            <Text style={styles.migrationDialogDescription}>
+              {t('Select the network to migrate your old nick-only encryption keys to:', { _tags: tags })}
+            </Text>
+
+            <ScrollView style={styles.networkList}>
+              {connectionManager.getAllConnections().map((conn) => (
+                <TouchableOpacity
+                  key={conn.networkId}
+                  style={[
+                    styles.networkItem,
+                    migrationNetwork === conn.networkId && styles.networkItemSelected,
+                  ]}
+                  onPress={() => setMigrationNetwork(conn.networkId)}>
+                  <Text
+                    style={[
+                      styles.networkItemText,
+                      migrationNetwork === conn.networkId && styles.networkItemTextSelected,
+                    ]}>
+                    {conn.networkId}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <View style={styles.migrationDialogButtons}>
+              <TouchableOpacity
+                style={[styles.migrationDialogButton, styles.migrationDialogButtonCancel]}
+                onPress={() => {
+                  setShowMigrationDialog(false);
+                  setMigrationNetwork('');
+                }}>
+                <Text style={styles.migrationDialogButtonText}>
+                  {t('Cancel', { _tags: tags })}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.migrationDialogButton,
+                  styles.migrationDialogButtonMigrate,
+                  !migrationNetwork && styles.migrationDialogButtonDisabled,
+                ]}
+                onPress={handleMigration}
+                disabled={!migrationNetwork}>
+                <Text style={[
+                  styles.migrationDialogButtonText,
+                  styles.migrationDialogButtonTextMigrate,
+                ]}>
+                  {t('Migrate', { _tags: tags })}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Modal>
   );
 };
@@ -4127,6 +4250,83 @@ const createStyles = (colors: any, theme: Theme) => {
   identityDeleteText: {
     color: colors.error,
     fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  migrationDialog: {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: 20,
+    width: '85%',
+    maxWidth: 400,
+    maxHeight: '70%',
+  },
+  migrationDialogTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 12,
+  },
+  migrationDialogDescription: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: 16,
+  },
+  networkList: {
+    maxHeight: 200,
+    marginBottom: 16,
+  },
+  networkItem: {
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: 8,
+    backgroundColor: colors.background,
+  },
+  networkItemSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  networkItemText: {
+    fontSize: 16,
+    color: colors.text,
+  },
+  networkItemTextSelected: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  migrationDialogButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  migrationDialogButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  migrationDialogButtonCancel: {
+    backgroundColor: colors.surfaceVariant,
+  },
+  migrationDialogButtonMigrate: {
+    backgroundColor: colors.primary,
+  },
+  migrationDialogButtonDisabled: {
+    opacity: 0.5,
+  },
+  migrationDialogButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  migrationDialogButtonTextMigrate: {
+    color: '#FFFFFF',
   },
 });
 };

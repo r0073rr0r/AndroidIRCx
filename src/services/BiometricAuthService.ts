@@ -82,7 +82,7 @@ class BiometricAuthService {
       options.service = service;
     }
     try {
-      console.log('[BiometricAuthService] Calling getGenericPassword with options:', JSON.stringify(options));
+      console.log('[BiometricAuthService] Calling getGenericPassword');
       const result = await Keychain.getGenericPassword(options);
       console.log('[BiometricAuthService] getGenericPassword result:', result);
 

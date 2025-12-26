@@ -10,9 +10,10 @@ Modern IRC client for Android and iOS built with React Native, inspired by the c
 ## 📸 Screenshots
 
 <p align="center">
-  <a href="https://cloud.dbase.in.rs/core/preview?fileId=1001705&x=1920&y=1080&a=true&etag=6dc8973fe555cd64a830cebb4bbda42e"
+  <a 
+href="https://cloud.dbase.in.rs/apps/files_sharing/publicpreview/N4nTYTLQy7C5CeH?file=/&fileId=1001705&x=1920&y=1080&a=true&etag=6dc8973fe555cd64a830cebb4bbda42e"
      target="_blank" rel="noopener noreferrer">
-    <img src="https://cloud.dbase.in.rs/core/preview?fileId=1001705&x=1920&y=1080&a=true&etag=6dc8973fe555cd64a830cebb4bbda42e"
+    <img src="https://cloud.dbase.in.rs/apps/files_sharing/publicpreview/N4nTYTLQy7C5CeH?file=/&fileId=1001705&x=1920&y=1080&a=true&etag=6dc8973fe555cd64a830cebb4bbda42e"
          alt="AndroidIRCX screenshot 1"
       />
   </a>

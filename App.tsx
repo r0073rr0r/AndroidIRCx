@@ -36,6 +36,7 @@ import { keyboardShortcutService } from './src/services/KeyboardShortcutService'
 import { ChannelTabs } from './src/components/ChannelTabs';
 import { MessageArea } from './src/components/MessageArea';
 import { MessageInput } from './src/components/MessageInput';
+import { TypingIndicator } from './src/components/TypingIndicator';
 import { UserList } from './src/components/UserList';
 import { QueryEncryptionMenu } from './src/components/QueryEncryptionMenu';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -231,6 +232,9 @@ function AppContent() {
   const [tabs, setTabs] = useState<ChannelTab[]>([]);
   const tabsRef = useRef(tabs);
   tabsRef.current = tabs;
+
+  // Typing indicator state: Map<channelId, Map<nick, {status, timestamp}>>
+  const [typingUsers, setTypingUsers] = useState<Map<string, Map<string, { status: 'active' | 'paused' | 'done'; timestamp: number }>>>(new Map());
   const [appLockEnabled, setAppLockEnabled] = useState(false);
   const [appLockUseBiometric, setAppLockUseBiometric] = useState(false);
   const [appLockUsePin, setAppLockUsePin] = useState(false);
@@ -960,7 +964,9 @@ function AppContent() {
         // Load message history for each tab
         const tabsWithHistory = await Promise.all(
           ensuredServer.map(async (tab) => {
-            const history = await messageHistoryService.loadMessages(tab.networkId, tab.id);
+            // Use 'server' for server tabs, tab.name for channels/queries
+            const channelKey = tab.type === 'server' ? 'server' : tab.name;
+            const history = await messageHistoryService.loadMessages(tab.networkId, channelKey);
             return { ...tab, messages: history };
           })
         );
@@ -1574,6 +1580,32 @@ safeSetState(() => {
       });
     });
 
+      // Listen for typing indicators
+      const unsubscribeTyping = activeIRCService.on('typing-indicator', (target: string, nick: string, status: 'active' | 'paused' | 'done') => {
+      safeSetState(() => {
+        setTypingUsers(prev => {
+          const newMap = new Map(prev);
+          const channelMap = newMap.get(target) || new Map();
+
+          if (status === 'done' || status === 'paused') {
+            // Remove user from typing list
+            channelMap.delete(nick);
+          } else if (status === 'active') {
+            // Add/update user in typing list
+            channelMap.set(nick, { status, timestamp: Date.now() });
+          }
+
+          if (channelMap.size > 0) {
+            newMap.set(target, channelMap);
+          } else {
+            newMap.delete(target);
+          }
+
+          return newMap;
+        });
+      });
+    });
+
         // Simulate ping (in real implementation, measure actual ping)
         const pingInterval = setInterval(() => {
           if (isConnected) {
@@ -1588,6 +1620,7 @@ safeSetState(() => {
           unsubscribeEncryption();
           unsubscribeKeyRequests();
           unsubscribeChannelKeys();
+          unsubscribeTyping();
           clearInterval(pingInterval);
           unsubscribeRegistered && unsubscribeRegistered();
           unsubscribeMotd && unsubscribeMotd();
@@ -1645,6 +1678,40 @@ safeSetState(() => {
       unsubSession();
       unsubMsg();
     };
+  }, []);
+
+  // Auto-hide typing indicators after 5 seconds of inactivity
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const TYPING_TIMEOUT = 5000; // 5 seconds
+
+      setTypingUsers(prev => {
+        const newMap = new Map(prev);
+        let hasChanges = false;
+
+        newMap.forEach((channelMap, channel) => {
+          const updatedChannelMap = new Map(channelMap);
+
+          updatedChannelMap.forEach((data, nick) => {
+            if (now - data.timestamp > TYPING_TIMEOUT) {
+              updatedChannelMap.delete(nick);
+              hasChanges = true;
+            }
+          });
+
+          if (updatedChannelMap.size === 0) {
+            newMap.delete(channel);
+          } else {
+            newMap.set(channel, updatedChannelMap);
+          }
+        });
+
+        return hasChanges ? newMap : prev;
+      });
+    }, 2000); // Check every 2 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
   // Configure DCC port range from settings
@@ -1868,7 +1935,9 @@ safeSetState(() => {
       const withServerTab = normalizedTabs.some(t => t.type === 'server') ? normalizedTabs : [makeServerTab(finalId), ...normalizedTabs];
       const tabsWithHistory = await Promise.all(
         withServerTab.map(async (tab) => {
-          const history = await messageHistoryService.loadMessages(tab.networkId, tab.id);
+          // Use 'server' for server tabs, tab.name for channels/queries
+          const channelKey = tab.type === 'server' ? 'server' : tab.name;
+          const history = await messageHistoryService.loadMessages(tab.networkId, channelKey);
           return { ...tab, messages: history };
         })
       );
@@ -2123,27 +2192,31 @@ safeSetState(() => {
     if (activeTab.type === 'dcc') {
       if (activeTab.dccSessionId) {
         dccChatService.sendMessage(activeTab.dccSessionId, commandToSend);
+        const dccMessage: IRCMessage = {
+          id: `dcc-${Date.now()}`,
+          type: 'message',
+          from: 'You',
+          text: commandToSend,
+          timestamp: Date.now(),
+          channel: activeTab.name,
+          network: activeTab.networkId,
+        };
         setTabs(prev =>
           prev.map(t =>
             t.id === activeTab.id
               ? {
                   ...t,
-                  messages: [
-                    ...t.messages,
-                    {
-                      id: `dcc-${Date.now()}`,
-                      type: 'message',
-                      from: 'You',
-                      text: commandToSend,
-                      timestamp: Date.now(),
-                      channel: activeTab.name,
-                      network: activeTab.networkId,
-                    },
-                  ],
+                  messages: [...t.messages, dccMessage],
                 }
               : t
           )
         );
+        // Save DCC message to history
+        if (activeTab.networkId && activeTab.networkId !== 'Not connected') {
+          messageHistoryService.saveMessage(dccMessage, activeTab.networkId).catch(err => {
+            console.error('Error saving DCC message to history:', err);
+          });
+        }
       }
       return;
     }
@@ -2168,6 +2241,12 @@ safeSetState(() => {
             : tab
         )
       );
+      // Save pending message to history
+      if (activeTab.networkId && activeTab.networkId !== 'Not connected') {
+        messageHistoryService.saveMessage(pendingMessage, activeTab.networkId).catch(err => {
+          console.error('Error saving pending message to history:', err);
+        });
+      }
       return;
     }
 
@@ -2193,6 +2272,12 @@ safeSetState(() => {
               : tab
           )
         );
+        // Save error message to history
+        if (activeTab.networkId && activeTab.networkId !== 'Not connected') {
+          messageHistoryService.saveMessage(errorMsg, activeTab.networkId).catch(err => {
+            console.error('Error saving error message to history:', err);
+          });
+        }
         return;
       }
       try {
@@ -2216,6 +2301,12 @@ safeSetState(() => {
               : tab
           )
         );
+        // Save encrypted DM to history
+        if (activeTab.networkId && activeTab.networkId !== 'Not connected') {
+          messageHistoryService.saveMessage(sentMessage, activeTab.networkId).catch(err => {
+            console.error('Error saving encrypted DM to history:', err);
+          });
+        }
         return;
       } catch (e) {
         const errorMsg: IRCMessage = {
@@ -2233,6 +2324,12 @@ safeSetState(() => {
               : tab
           )
         );
+        // Save error message to history
+        if (activeTab.networkId && activeTab.networkId !== 'Not connected') {
+          messageHistoryService.saveMessage(errorMsg, activeTab.networkId).catch(err => {
+            console.error('Error saving error message to history:', err);
+          });
+        }
         return; // do not fall back to plaintext
       }
     }
@@ -2262,6 +2359,12 @@ safeSetState(() => {
                 : tab
             )
           );
+          // Save encrypted channel message to history
+          if (activeTab.networkId && activeTab.networkId !== 'Not connected') {
+            messageHistoryService.saveMessage(sentMessage, activeTab.networkId).catch(err => {
+              console.error('Error saving encrypted channel message to history:', err);
+            });
+          }
           return;
         } catch (e) {
           const errorMsg: IRCMessage = {
@@ -2279,6 +2382,12 @@ safeSetState(() => {
                 : tab
             )
           );
+          // Save error message to history
+          if (activeTab.networkId && activeTab.networkId !== 'Not connected') {
+            messageHistoryService.saveMessage(errorMsg, activeTab.networkId).catch(err => {
+              console.error('Error saving error message to history:', err);
+            });
+          }
           return;
         }
       } else {
@@ -2297,6 +2406,12 @@ safeSetState(() => {
               : tab
           )
         );
+        // Save error message to history
+        if (activeTab.networkId && activeTab.networkId !== 'Not connected') {
+          messageHistoryService.saveMessage(errorMsg, activeTab.networkId).catch(err => {
+            console.error('Error saving error message to history:', err);
+          });
+        }
         return;
       }
     }
@@ -3059,6 +3174,9 @@ safeSetState(() => {
           showEncryptionIndicators={showEncryptionIndicators}
           position="bottom"
         />
+      )}
+      {activeTab && typingUsers.has(activeTab.name) && (
+        <TypingIndicator typingUsers={typingUsers.get(activeTab.name)!} />
       )}
       <MessageInput
         placeholder="Enter a message"

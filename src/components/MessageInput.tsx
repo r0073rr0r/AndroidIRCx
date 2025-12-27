@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   TextInput,
@@ -10,6 +10,7 @@ import {
 import { useTheme } from '../hooks/useTheme';
 import { commandService } from '../services/CommandService';
 import { layoutService } from '../services/LayoutService';
+import { connectionManager } from '../services/ConnectionManager';
 
 interface MessageInputProps {
   placeholder?: string;
@@ -37,15 +38,56 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const totalBottomInset = bottomInset + layoutConfig.navigationBarOffset;
   const styles = createStyles(colors, totalBottomInset);
   const [message, setMessage] = useState('');
-  const [suggestions, setSuggestions] = useState<Array<{ text: string; description?: string; source: 'alias' | 'history' }>>([]);
+  const [suggestions, setSuggestions] = useState<Array<{ text: string; description?: string; source: 'command' | 'alias' | 'history' }>>([]);
+
+  // Typing indicator state
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isTypingRef = useRef(false);
+
+  const sendTypingIndicator = (status: 'active' | 'paused' | 'done') => {
+    if (!tabName || tabType === 'server' || disabled) return;
+
+    const activeNetworkId = connectionManager.getActiveNetworkId();
+    if (!activeNetworkId) return;
+
+    const connection = connectionManager.getConnection(activeNetworkId);
+    if (!connection?.ircService) return;
+
+    // Send TAGMSG with +typing tag
+    connection.ircService.sendRaw(`@+typing=${status} TAGMSG ${tabName}`);
+  };
 
   const handleSubmit = () => {
     if (message.trim() && !disabled) {
+      // Send typing=done before submitting
+      if (isTypingRef.current) {
+        sendTypingIndicator('done');
+        isTypingRef.current = false;
+      }
+
       onSubmit(message.trim());
       setMessage('');
       setSuggestions([]);
+
+      // Clear any pending typing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
     }
   };
+
+  // Cleanup typing indicator on unmount
+  useEffect(() => {
+    return () => {
+      if (isTypingRef.current) {
+        sendTypingIndicator('done');
+      }
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const scoreAliasForContext = (command: string): number => {
     // Simple heuristic: prefer channel aliases on channels, user aliases on queries, otherwise neutral
@@ -64,12 +106,76 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   const handleChangeText = (text: string) => {
     setMessage(text);
+
+    // Handle typing indicators
+    if (text.trim() && !disabled && tabName && tabType !== 'server') {
+      // Send typing=active if not already typing
+      if (!isTypingRef.current) {
+        sendTypingIndicator('active');
+        isTypingRef.current = true;
+      }
+
+      // Clear existing timeout and set new one for paused state
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      typingTimeoutRef.current = setTimeout(() => {
+        if (isTypingRef.current) {
+          sendTypingIndicator('paused');
+          isTypingRef.current = false;
+        }
+      }, 3000); // 3 seconds of inactivity = paused
+    } else if (!text.trim() && isTypingRef.current) {
+      // If text is cleared, send done
+      sendTypingIndicator('done');
+      isTypingRef.current = false;
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
+    }
+
     if (!text.trim()) {
       setSuggestions([]);
       return;
     }
     const typed = text.startsWith('/') ? text : `/${text}`;
     const typedLower = typed.toLowerCase();
+
+    // Built-in IRC commands
+    const builtInCommands = [
+      { cmd: 'join', desc: 'Join a channel' },
+      { cmd: 'part', desc: 'Leave a channel' },
+      { cmd: 'quit', desc: 'Disconnect from server' },
+      { cmd: 'nick', desc: 'Change nickname' },
+      { cmd: 'msg', desc: 'Send private message' },
+      { cmd: 'query', desc: 'Open private chat' },
+      { cmd: 'whois', desc: 'User information' },
+      { cmd: 'whowas', desc: 'Past user information' },
+      { cmd: 'mode', desc: 'Change channel/user modes' },
+      { cmd: 'topic', desc: 'View/set channel topic' },
+      { cmd: 'kick', desc: 'Kick user from channel' },
+      { cmd: 'me', desc: 'Send action message' },
+      { cmd: 'action', desc: 'Send action message' },
+      { cmd: 'setname', desc: 'Change real name' },
+      { cmd: 'bot', desc: 'Toggle bot mode' },
+      { cmd: 'sharekey', desc: 'Share DM encryption key' },
+      { cmd: 'requestkey', desc: 'Request DM encryption key' },
+      { cmd: 'encmsg', desc: 'Send encrypted DM' },
+      { cmd: 'enc', desc: 'DM encryption help' },
+      { cmd: 'chankey', desc: 'Channel encryption commands' },
+      { cmd: 'quote', desc: 'Send raw IRC command' },
+    ];
+
+    const commandMatches = builtInCommands
+      .filter(item => `/${item.cmd}`.toLowerCase().startsWith(typedLower))
+      .map(item => ({
+        text: `/${item.cmd}`,
+        description: item.desc,
+        source: 'command' as const,
+      }))
+      .slice(0, 6);
 
     // Aliases
     const aliasMatches = commandService.getAliases()
@@ -97,9 +203,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       .map(cmd => ({ text: cmd, source: 'history' as const }))
       .slice(0, 6);
 
-    // Merge, prefer aliases first, dedupe by text
-    const merged: Array<{ text: string; description?: string; source: 'alias' | 'history' }> = [];
-    [...aliasMatches, ...historyMatches].forEach(item => {
+    // Merge: commands first, then aliases, then history - dedupe by text
+    const merged: Array<{ text: string; description?: string; source: 'command' | 'alias' | 'history' }> = [];
+    [...commandMatches, ...aliasMatches, ...historyMatches].forEach(item => {
       if (!merged.some(m => m.text.toLowerCase() === item.text.toLowerCase())) {
         merged.push({ text: item.text, description: (item as any).description, source: item.source });
       }
@@ -144,7 +250,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             >
               <Text style={[styles.suggestionText, { color: colors.text }]}>
                 {suggestion.text}
-                {suggestion.description ? ` — ${suggestion.description}` : suggestion.source === 'alias' ? ' — alias' : ''}
+                {suggestion.description ? ` — ${suggestion.description}` : ''}
+                {!suggestion.description && suggestion.source === 'alias' ? ' — alias' : ''}
+                {!suggestion.description && suggestion.source === 'history' ? ' — recent' : ''}
               </Text>
             </TouchableOpacity>
           ))}

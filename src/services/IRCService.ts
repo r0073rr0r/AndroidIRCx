@@ -103,6 +103,12 @@ export interface IRCMessage {
   status?: 'pending' | 'sent';
   network?: string;
   isGrouped?: boolean;
+  account?: string; // IRCv3.2 account-tag: account name of message sender
+  msgid?: string; // IRCv3.3 message-ids: unique message identifier for replies/reactions
+  channelContext?: string; // draft/channel-context: which channel this PM relates to
+  replyTo?: string; // draft/reply: msgid of message being replied to
+  reactions?: string; // draft/react: reactions to message (format: msgid;emoji)
+  typing?: 'active' | 'paused' | 'done'; // +typing: typing indicator status
 }
 
 export interface ChannelUser {
@@ -161,7 +167,36 @@ export class IRCService {
   private awayNotify: boolean = false;
   private chghost: boolean = false;
   private messageTags: boolean = false;
-  
+
+  // Batch tracking (IRCv3.2)
+  private activeBatches: Map<string, {
+    type: string;
+    params: string[];
+    messages: IRCMessage[];
+    startTime: number;
+  }> = new Map();
+
+  // Labeled-response tracking (IRCv3.2)
+  private pendingLabels: Map<string, {
+    command: string;
+    timestamp: number;
+    callback?: (response: any) => void;
+  }> = new Map();
+  private labelCounter: number = 0;
+  private readonly LABEL_TIMEOUT = 30000; // 30 seconds
+
+  // Message deduplication tracking (IRCv3.3 message-ids)
+  private seenMessageIds: Set<string> = new Set();
+  private readonly MAX_MSGID_CACHE = 1000; // Keep last 1000 message IDs
+
+  // Multiline message tracking (draft/multiline)
+  private multilineBuffers: Map<string, {
+    from: string;
+    parts: string[];
+    timestamp: number;
+  }> = new Map();
+  private readonly MULTILINE_TIMEOUT = 5000; // 5 seconds timeout for multiline assembly
+
   // SASL state
   private saslAuthenticating: boolean = false;
 
@@ -663,6 +698,43 @@ export class IRCService {
       }
     }
 
+    // Extract batch tag (IRCv3.2)
+    const batchTag = tags.get('batch') || undefined;
+
+    // Extract label tag for labeled-response (IRCv3.2)
+    const labelTag = tags.get('label') || undefined;
+
+    // Extract account tag for account-tag (IRCv3.2)
+    const accountTag = tags.get('account') || undefined;
+
+    // Extract msgid tag for message-ids (IRCv3.3)
+    const msgidTag = tags.get('msgid') || undefined;
+
+    // Message deduplication: skip if we've already seen this msgid
+    if (msgidTag && this.seenMessageIds.has(msgidTag)) {
+      this.logRaw(`IRCService: Skipping duplicate message with msgid: ${msgidTag}`);
+      return;
+    }
+
+    // Track this msgid to prevent duplicates
+    if (msgidTag) {
+      this.seenMessageIds.add(msgidTag);
+      // Prevent unbounded growth - keep only the last MAX_MSGID_CACHE entries
+      if (this.seenMessageIds.size > this.MAX_MSGID_CACHE) {
+        const firstId = this.seenMessageIds.values().next().value;
+        this.seenMessageIds.delete(firstId);
+      }
+    }
+
+    // Extract client-only tags (draft)
+    const channelContextTag = tags.get('+draft/channel-context') || undefined;
+    const replyTag = tags.get('+draft/reply') || tags.get('+reply') || undefined;
+    const reactTag = tags.get('+draft/react') || tags.get('+react') || undefined;
+    const typingTag = tags.get('+typing') || undefined;
+
+    // Extract multiline concat tag (draft/multiline)
+    const multilineConcatTag = tags.get('draft/multiline-concat') || undefined;
+
     const parts = messageLine.split(' ');
     if (parts.length === 0) return;
 
@@ -718,6 +790,56 @@ export class IRCService {
         this.disconnect(errorText);
         return;
       }
+
+      case 'FAIL': {
+        // IRCv3.2 standard-replies: standardized error responses
+        const command = params[0] || 'UNKNOWN';
+        const code = params[1] || '';
+        const description = params[params.length - 1] || '';
+        const context = params.length > 3 ? params.slice(2, -1).join(' ') : '';
+        this.addMessage({
+          type: 'error',
+          text: `*** FAIL ${command} [${code}]${context ? ' ' + context : ''}: ${description}`,
+          timestamp: messageTimestamp,
+        });
+        this.emit('fail', command, code, context, description);
+        break;
+      }
+
+      case 'WARN': {
+        // IRCv3.2 standard-replies: standardized warning responses
+        const command = params[0] || 'UNKNOWN';
+        const code = params[1] || '';
+        const description = params[params.length - 1] || '';
+        const context = params.length > 3 ? params.slice(2, -1).join(' ') : '';
+        this.addMessage({
+          type: 'raw',
+          text: `*** WARN ${command} [${code}]${context ? ' ' + context : ''}: ${description}`,
+          timestamp: messageTimestamp,
+          isRaw: true,
+          rawCategory: 'server'
+        });
+        this.emit('warn', command, code, context, description);
+        break;
+      }
+
+      case 'NOTE': {
+        // IRCv3.2 standard-replies: standardized informational responses
+        const command = params[0] || 'UNKNOWN';
+        const code = params[1] || '';
+        const description = params[params.length - 1] || '';
+        const context = params.length > 3 ? params.slice(2, -1).join(' ') : '';
+        this.addMessage({
+          type: 'raw',
+          text: `*** NOTE ${command} [${code}]${context ? ' ' + context : ''}: ${description}`,
+          timestamp: messageTimestamp,
+          isRaw: true,
+          rawCategory: 'server'
+        });
+        this.emit('note', command, code, context, description);
+        break;
+      }
+
       case 'PONG':
         if (params.length > 1 && params[1]) {
             const token = params[1];
@@ -935,14 +1057,38 @@ export class IRCService {
             });
           return;
         }
-        
-        this.addMessage({
-          type: 'message',
-          channel: channelIdentifier,
-          from: fromNick,
-          text: msgText,
-          timestamp: messageTimestamp,
-        });
+
+        // Handle multiline messages (draft/multiline)
+        const finalText = this.handleMultilineMessage(
+          fromNick,
+          channelIdentifier,
+          msgText,
+          multilineConcatTag,
+          {
+            timestamp: messageTimestamp,
+            account: accountTag,
+            msgid: msgidTag,
+            channelContext: channelContextTag,
+            replyTo: replyTag,
+          }
+        );
+
+        // Only add message if multiline assembly is complete
+        if (finalText !== null) {
+          this.addMessage({
+            type: 'message',
+            channel: channelIdentifier,
+            from: fromNick,
+            text: finalText,
+            timestamp: messageTimestamp,
+            account: accountTag, // IRCv3.2 account-tag
+            msgid: msgidTag, // IRCv3.3 message-ids
+            channelContext: channelContextTag, // draft/channel-context
+            replyTo: replyTag, // draft/reply
+            reactions: reactTag, // draft/react
+            typing: typingTag as 'active' | 'paused' | 'done' | undefined, // +typing
+          });
+        }
         break;
 
       case 'NOTICE':
@@ -977,6 +1123,11 @@ export class IRCService {
           from: noticeFrom,
           text: displayText,
           timestamp: messageTimestamp,
+          account: accountTag, // IRCv3.2 account-tag
+          msgid: msgidTag, // IRCv3.3 message-ids
+          channelContext: channelContextTag, // draft/channel-context
+          replyTo: replyTag, // draft/reply
+          reactions: reactTag, // draft/react
         });
         break;
 
@@ -1240,6 +1391,89 @@ export class IRCService {
         this.emit('chghost', chghostNick, newHost);
         break;
 
+      case 'SETNAME': {
+        // IRCv3.2 setname: user changed their realname
+        const setnameNick = this.extractNick(prefix);
+        const newRealname = params[0] || '';
+        this.addMessage({
+          type: 'raw',
+          text: `*** ${setnameNick} changed realname to: ${newRealname}`,
+          timestamp: messageTimestamp,
+          isRaw: true,
+          rawCategory: 'user'
+        });
+        this.emit('setname', setnameNick, newRealname);
+        break;
+      }
+
+      case 'MARKREAD': {
+        // IRCv3 draft/read-marker: user marked messages as read
+        const target = params[0] || '';
+        const tsParam = params[1] || '';
+        const tsMatch = tsParam.match(/timestamp=(\d+)/);
+        const readTimestamp = tsMatch ? parseInt(tsMatch[1], 10) : Date.now();
+        const markerNick = this.extractNick(prefix);
+        this.logRaw(`IRCService: ${markerNick} marked ${target} as read (timestamp: ${readTimestamp})`);
+        this.emit('read-marker-received', target, markerNick, readTimestamp);
+        break;
+      }
+
+      case 'REDACT': {
+        // IRCv3 draft/message-redaction: message was deleted/redacted
+        const target = params[0] || '';
+        const redactedMsgid = params[1] || '';
+        const redactor = this.extractNick(prefix);
+        this.logRaw(`IRCService: ${redactor} redacted message ${redactedMsgid} in ${target}`);
+        this.addMessage({
+          type: 'raw',
+          text: `*** ${redactor} deleted a message`,
+          timestamp: messageTimestamp,
+          channel: target,
+          isRaw: true,
+          rawCategory: 'user'
+        });
+        this.emit('message-redacted', target, redactedMsgid, redactor);
+        break;
+      }
+
+      case 'TAGMSG': {
+        // IRCv3 TAGMSG: message with only tags (reactions, typing indicators)
+        const tagTarget = params[0] || '';
+        const tagFrom = this.extractNick(prefix);
+
+        // Handle reactions
+        if (reactTag) {
+          const [referencedMsgid, emoji] = reactTag.split(';');
+          this.logRaw(`IRCService: ${tagFrom} reacted ${emoji} to message ${referencedMsgid} in ${tagTarget}`);
+          this.emit('reaction-received', tagTarget, referencedMsgid, emoji, tagFrom);
+        }
+
+        // Handle typing indicators
+        if (typingTag) {
+          this.logRaw(`IRCService: ${tagFrom} typing status: ${typingTag} in ${tagTarget}`);
+          this.emit('typing-indicator', tagTarget, tagFrom, typingTag);
+        }
+        break;
+      }
+
+      case 'BATCH': {
+        if (params.length === 0) break;
+        const batchId = params[0];
+
+        if (batchId.startsWith('+')) {
+          // Start batch: +reference-tag type [params...]
+          const refTag = batchId.substring(1);
+          const batchType = params[1] || '';
+          const batchParams = params.slice(2);
+          this.handleBatchStart(refTag, batchType, batchParams, messageTimestamp);
+        } else if (batchId.startsWith('-')) {
+          // End batch: -reference-tag
+          const refTag = batchId.substring(1);
+          this.handleBatchEnd(refTag, messageTimestamp);
+        }
+        break;
+      }
+
       default:
         const fullMessage = `${prefix ? `:${prefix} ` : ''}${command} ${params.join(' ')}`;
         this.addMessage({
@@ -1250,6 +1484,11 @@ export class IRCService {
           rawCategory: 'server',
         });
         break;
+    }
+
+    // Handle labeled-response (IRCv3.2) - match responses to commands
+    if (labelTag) {
+      this.handleLabeledResponse(labelTag, { command, params, prefix, timestamp: messageTimestamp, tags });
     }
   }
 
@@ -3273,8 +3512,56 @@ export class IRCService {
           this.logRaw(`IRCService: CAP rejected: ${cap}`);
           this.capRequested.delete(cap);
         });
-        
+
         this.endCAPNegotiation();
+        break;
+
+      case 'NEW':
+        // cap-notify: server advertises new capabilities
+        const newCapsString = params.slice(1).join(' ').replace(/^:/, '');
+        const newCaps = newCapsString.split(/\s+/).filter(c => c);
+
+        newCaps.forEach(cap => {
+          const [capName, capValue] = cap.split('=');
+          if (capName && !this.capAvailable.has(capName)) {
+            this.capAvailable.add(capName);
+            this.logRaw(`IRCService: CAP NEW: ${capName}${capValue ? '='+capValue : ''}`);
+            this.emit('capability-added', capName, capValue || null);
+          }
+        });
+
+        // Auto-request new capabilities we support
+        const supportedNewCaps = newCaps
+          .map(c => c.split('=')[0])
+          .filter(c => [
+            'server-time', 'account-notify', 'extended-join', 'userhost-in-names',
+            'away-notify', 'chghost', 'message-tags', 'batch', 'labeled-response',
+            'echo-message', 'multi-prefix', 'invite-notify', 'monitor', 'account-tag',
+            'setname', 'metadata', 'draft/multiline', 'draft/chathistory', 'draft/read-marker',
+            'draft/message-redaction'
+          ].includes(c));
+
+        if (supportedNewCaps.length > 0) {
+          supportedNewCaps.forEach(cap => this.capRequested.add(cap));
+          this.sendRaw(`CAP REQ :${supportedNewCaps.join(' ')}`);
+          this.logRaw(`IRCService: Auto-requesting new capabilities: ${supportedNewCaps.join(' ')}`);
+        }
+        break;
+
+      case 'DEL':
+        // cap-notify: server removes capabilities
+        const delCapsString = params.slice(1).join(' ').replace(/^:/, '');
+        const delCaps = delCapsString.split(/\s+/).filter(c => c);
+
+        delCaps.forEach(cap => {
+          if (this.capAvailable.has(cap)) {
+            this.capAvailable.delete(cap);
+            this.capEnabledSet.delete(cap);
+            this.capRequested.delete(cap);
+            this.logRaw(`IRCService: CAP DEL: ${cap}`);
+            this.emit('capability-removed', cap);
+          }
+        });
         break;
     }
   }
@@ -3294,7 +3581,10 @@ export class IRCService {
     const capsToRequest: string[] = [
       'server-time', 'account-notify', 'extended-join', 'userhost-in-names',
       'away-notify', 'chghost', 'message-tags', 'batch', 'labeled-response',
-      'echo-message', 'multi-prefix', 'invite-notify', 'monitor', 'sts'
+      'echo-message', 'multi-prefix', 'invite-notify', 'monitor', 'extended-monitor',
+      'cap-notify', 'account-tag', 'setname', 'standard-replies', 'message-ids',
+      'bot', 'utf8only', 'draft/chathistory', 'draft/multiline', 'draft/read-marker',
+      'draft/message-redaction', 'sts'
     ].filter(cap => this.capAvailable.has(cap));
     
     if ((this.config?.sasl || (this.config?.clientCert && this.config?.clientKey)) && this.capAvailable.has('sasl')) {
@@ -3522,6 +3812,8 @@ export class IRCService {
     this.channelUsers.clear();
     this.namesBuffer.clear();
     this.channelUsers.forEach((_, channel) => this.emit('clear-channel', channel));
+    this.cleanupLabels(); // Clean up pending labeled-response commands
+    this.seenMessageIds.clear(); // Clear message ID cache for deduplication
   }
 
   /**
@@ -3671,10 +3963,419 @@ export class IRCService {
     return this.monitoredNicks.has(nick);
   }
 
+  /**
+   * Handle multiline message assembly (draft/multiline)
+   */
+  private handleMultilineMessage(
+    from: string,
+    target: string,
+    text: string,
+    concatTag: string | undefined,
+    otherTags: {
+      timestamp: number;
+      account?: string;
+      msgid?: string;
+      channelContext?: string;
+      replyTo?: string;
+    }
+  ): string | null {
+    // If no concat tag, it's a regular single-line message
+    if (!concatTag) {
+      return text;
+    }
+
+    const bufferKey = `${from}:${target}`;
+
+    // Clean up old buffers (timeout)
+    const now = Date.now();
+    this.multilineBuffers.forEach((buffer, key) => {
+      if (now - buffer.timestamp > this.MULTILINE_TIMEOUT) {
+        this.multilineBuffers.delete(key);
+      }
+    });
+
+    // Get or create buffer for this sender/target pair
+    let buffer = this.multilineBuffers.get(bufferKey);
+    if (!buffer) {
+      buffer = { from, parts: [], timestamp: now };
+      this.multilineBuffers.set(bufferKey, buffer);
+    }
+
+    // Add this part to the buffer
+    buffer.parts.push(text);
+    buffer.timestamp = now;
+
+    // Check if this is the last part (empty concat tag means last part)
+    const isLastPart = concatTag === '';
+
+    if (isLastPart) {
+      // Combine all parts with newlines
+      const fullMessage = buffer.parts.join('\n');
+      this.multilineBuffers.delete(bufferKey);
+      return fullMessage;
+    }
+
+    // Not the last part, return null to indicate we're still buffering
+    return null;
+  }
+
+  /**
+   * Handle start of BATCH (IRCv3.2)
+   */
+  private handleBatchStart(refTag: string, type: string, params: string[], timestamp: number): void {
+    this.logRaw(`IRCService: BATCH START - ref=${refTag}, type=${type}, params=${params.join(' ')}`);
+
+    this.activeBatches.set(refTag, {
+      type,
+      params,
+      messages: [],
+      startTime: timestamp,
+    });
+
+    // Log batch start for debugging
+    this.addRawMessage(`*** BATCH START: ${type} (${refTag})`, 'server');
+  }
+
+  /**
+   * Handle end of BATCH (IRCv3.2)
+   */
+  private handleBatchEnd(refTag: string, timestamp: number): void {
+    const batch = this.activeBatches.get(refTag);
+    if (!batch) {
+      this.logRaw(`IRCService: BATCH END - unknown batch ref=${refTag}`);
+      return;
+    }
+
+    this.logRaw(`IRCService: BATCH END - ref=${refTag}, type=${batch.type}, messages=${batch.messages.length}`);
+
+    // Process completed batch based on type
+    this.processBatch(refTag, batch, timestamp);
+
+    // Remove batch from active batches
+    this.activeBatches.delete(refTag);
+  }
+
+  /**
+   * Process completed batch based on type
+   */
+  private processBatch(
+    refTag: string,
+    batch: { type: string; params: string[]; messages: IRCMessage[]; startTime: number },
+    timestamp: number
+  ): void {
+    const { type, params, messages } = batch;
+
+    switch (type) {
+      case 'netsplit': {
+        // Netsplit: group quit messages
+        const serverNames = params.join(' ');
+        this.addMessage({
+          type: 'raw',
+          text: `*** Netsplit detected: ${serverNames} (${messages.length} users quit)`,
+          timestamp,
+          isRaw: true,
+          rawCategory: 'server',
+        });
+        break;
+      }
+
+      case 'netjoin': {
+        // Netjoin: group join messages after netsplit recovery
+        const serverNames = params.join(' ');
+        this.addMessage({
+          type: 'raw',
+          text: `*** Netjoin: ${serverNames} (${messages.length} users rejoined)`,
+          timestamp,
+          isRaw: true,
+          rawCategory: 'server',
+        });
+        break;
+      }
+
+      case 'chathistory': {
+        // Chat history playback: emit messages in order
+        this.addMessage({
+          type: 'raw',
+          text: `*** Loading chat history (${messages.length} messages)`,
+          timestamp,
+          isRaw: true,
+          rawCategory: 'server',
+        });
+        // Messages are already added during batch, just log completion
+        break;
+      }
+
+      case 'cap-notify': {
+        // Capability notification batch
+        this.addRawMessage(`*** Capability changes (${messages.length} updates)`, 'server');
+        break;
+      }
+
+      default: {
+        // Unknown batch type: log for debugging
+        this.addRawMessage(`*** BATCH END: ${type} (${refTag}) - ${messages.length} messages`, 'server');
+        break;
+      }
+    }
+
+    // Emit batch completion event
+    this.emit('batch-end', refTag, type, messages);
+  }
+
+  /**
+   * Associate message with active batch if batch tag is present
+   */
+  private addMessageToBatch(message: IRCMessage, batchTag?: string): void {
+    if (!batchTag) return;
+
+    const batch = this.activeBatches.get(batchTag);
+    if (batch) {
+      batch.messages.push(message);
+      this.logRaw(`IRCService: Message added to batch ${batchTag} (${batch.messages.length} total)`);
+    }
+  }
+
+  /**
+   * Generate unique label for labeled-response (IRCv3.2)
+   */
+  private generateLabel(): string {
+    this.labelCounter++;
+    const timestamp = Date.now();
+    return `androidircx-${timestamp}-${this.labelCounter}`;
+  }
+
+  /**
+   * Send command with label for tracking response
+   */
+  sendRawWithLabel(command: string, callback?: (response: any) => void): string {
+    if (!this.capEnabledSet.has('labeled-response')) {
+      // Fallback: send without label if capability not enabled
+      this.sendRaw(command);
+      return '';
+    }
+
+    const label = this.generateLabel();
+    this.pendingLabels.set(label, {
+      command,
+      timestamp: Date.now(),
+      callback,
+    });
+
+    // Set timeout to cleanup stale labels
+    setTimeout(() => {
+      if (this.pendingLabels.has(label)) {
+        this.logRaw(`IRCService: Label timeout for ${label} (command: ${command})`);
+        this.pendingLabels.delete(label);
+        if (callback) {
+          callback({ error: 'timeout', label, command });
+        }
+      }
+    }, this.LABEL_TIMEOUT);
+
+    // Send command with label tag
+    this.sendRaw(`@label=${label} ${command}`);
+    this.logRaw(`IRCService: Sent labeled command: ${command} (label: ${label})`);
+    return label;
+  }
+
+  /**
+   * Handle response with label tag
+   */
+  private handleLabeledResponse(label: string, response: any): void {
+    const pending = this.pendingLabels.get(label);
+    if (!pending) {
+      this.logRaw(`IRCService: Received response for unknown label: ${label}`);
+      return;
+    }
+
+    this.logRaw(`IRCService: Matched labeled response: ${label} (command: ${pending.command})`);
+
+    // Call callback if provided
+    if (pending.callback) {
+      pending.callback(response);
+    }
+
+    // Emit event for labeled response
+    this.emit('labeled-response', label, pending.command, response);
+
+    // Remove from pending labels
+    this.pendingLabels.delete(label);
+  }
+
+  /**
+   * Clean up all pending labels (on disconnect)
+   */
+  private cleanupLabels(): void {
+    const count = this.pendingLabels.size;
+    if (count > 0) {
+      this.logRaw(`IRCService: Cleaning up ${count} pending labels`);
+      this.pendingLabels.forEach((pending, label) => {
+        if (pending.callback) {
+          pending.callback({ error: 'disconnected', label, command: pending.command });
+        }
+      });
+      this.pendingLabels.clear();
+    }
+  }
+
   partChannel(channel: string, message?: string): void {
     if (this.isConnected) {
       const partMessage = message && message.trim() ? message : DEFAULT_PART_MESSAGE;
       this.sendRaw(partMessage ? `PART ${channel} :${partMessage}` : `PART ${channel}`);
+    }
+  }
+
+  setRealname(newRealname: string): void {
+    // IRCv3.2 setname capability - change realname without reconnecting
+    if (this.isConnected && this.capEnabledSet.has('setname')) {
+      this.sendRaw(`SETNAME :${newRealname}`);
+    } else if (!this.capEnabledSet.has('setname')) {
+      this.addMessage({
+        type: 'error',
+        text: 'SETNAME command is not supported by this server',
+        timestamp: Date.now(),
+      });
+    }
+  }
+
+  toggleBotMode(enable: boolean): void {
+    // IRCv3 bot capability - mark user as a bot with +B mode
+    if (this.isConnected && this.capEnabledSet.has('bot')) {
+      const mode = enable ? '+B' : '-B';
+      this.sendRaw(`MODE ${this.currentNick} ${mode}`);
+    } else if (!this.capEnabledSet.has('bot')) {
+      this.addMessage({
+        type: 'error',
+        text: 'BOT mode is not supported by this server',
+        timestamp: Date.now(),
+      });
+    }
+  }
+
+  requestChatHistory(target: string, limit: number = 100, before?: string): void {
+    // IRCv3 draft/chathistory capability - request message history
+    if (this.isConnected && this.capEnabledSet.has('draft/chathistory')) {
+      // CHATHISTORY LATEST <target> <timestamp|msgid|*> <limit>
+      const reference = before || '*';
+      this.sendRaw(`CHATHISTORY LATEST ${target} ${reference} ${limit}`);
+      this.logRaw(`IRCService: Requesting chat history for ${target} (limit: ${limit})`);
+    } else if (!this.capEnabledSet.has('draft/chathistory')) {
+      this.addMessage({
+        type: 'error',
+        text: 'CHATHISTORY is not supported by this server',
+        timestamp: Date.now(),
+      });
+    }
+  }
+
+  sendReadMarker(target: string, timestamp?: number): void {
+    // IRCv3 draft/read-marker capability - mark messages as read
+    if (this.isConnected && this.capEnabledSet.has('draft/read-marker')) {
+      const ts = timestamp || Date.now();
+      // MARKREAD <target> timestamp=<timestamp>
+      this.sendRaw(`MARKREAD ${target} timestamp=${ts}`);
+      this.logRaw(`IRCService: Sent read marker for ${target} at ${ts}`);
+      this.emit('read-marker-sent', target, ts);
+    }
+  }
+
+  redactMessage(target: string, msgid: string): void {
+    // IRCv3 draft/message-redaction capability - delete/redact a message
+    if (this.isConnected && this.capEnabledSet.has('draft/message-redaction')) {
+      // REDACT <target> <msgid>
+      this.sendRaw(`REDACT ${target} ${msgid}`);
+      this.logRaw(`IRCService: Sent redaction for message ${msgid} in ${target}`);
+      this.emit('message-redacted-sent', target, msgid);
+    } else if (!this.capEnabledSet.has('draft/message-redaction')) {
+      this.addMessage({
+        type: 'error',
+        text: 'MESSAGE-REDACTION is not supported by this server',
+        timestamp: Date.now(),
+      });
+    }
+  }
+
+  sendMessageWithTags(target: string, message: string, options?: {
+    channelContext?: string;
+    replyTo?: string;
+    typing?: 'active' | 'paused' | 'done';
+  }): void {
+    // Send message with client-only tags
+    if (this.isConnected) {
+      const tags: string[] = [];
+
+      if (options?.channelContext) {
+        tags.push(`+draft/channel-context=${options.channelContext}`);
+      }
+      if (options?.replyTo) {
+        tags.push(`+draft/reply=${options.replyTo}`);
+      }
+      if (options?.typing) {
+        tags.push(`+typing=${options.typing}`);
+      }
+
+      const tagString = tags.length > 0 ? `@${tags.join(';')} ` : '';
+      this.sendRaw(`${tagString}PRIVMSG ${target} :${message}`);
+
+      // Echo message locally
+      this.addMessage({
+        type: 'message',
+        channel: target,
+        from: this.currentNick,
+        text: message,
+        timestamp: Date.now(),
+        status: 'sent',
+        channelContext: options?.channelContext,
+        replyTo: options?.replyTo,
+        typing: options?.typing,
+      });
+    }
+  }
+
+  sendReaction(target: string, msgid: string, emoji: string): void {
+    // Send reaction using client-only tag
+    if (this.isConnected && msgid) {
+      this.sendRaw(`@+draft/react=${msgid};${emoji} TAGMSG ${target}`);
+      this.logRaw(`IRCService: Sent reaction ${emoji} to message ${msgid} in ${target}`);
+      this.emit('reaction-sent', target, msgid, emoji);
+    }
+  }
+
+  sendMultilineMessage(target: string, message: string): void {
+    // Send multiline message using draft/multiline capability
+    if (this.isConnected && this.capEnabledSet.has('draft/multiline')) {
+      const lines = message.split('\n');
+
+      if (lines.length === 1) {
+        // Single line, send normally
+        this.sendRaw(`PRIVMSG ${target} :${message}`);
+        return;
+      }
+
+      // Send each line with concat tag
+      lines.forEach((line, index) => {
+        const isLast = index === lines.length - 1;
+        const concatTag = isLast ? '' : 'concat'; // Empty string for last part
+        this.sendRaw(`@draft/multiline-concat=${concatTag} PRIVMSG ${target} :${line}`);
+      });
+
+      // Echo the full message locally
+      this.addMessage({
+        type: 'message',
+        channel: target,
+        from: this.currentNick,
+        text: message,
+        timestamp: Date.now(),
+        status: 'sent',
+      });
+    } else {
+      // Fallback: send as multiple separate messages
+      const lines = message.split('\n');
+      lines.forEach(line => {
+        if (line.trim()) {
+          this.sendRaw(`PRIVMSG ${target} :${line}`);
+        }
+      });
     }
   }
 
@@ -3695,6 +4396,12 @@ export class IRCService {
         case 'JOIN': if (args.length > 0) this.joinChannel(args[0], args[1]); break;
         case 'PART': this.partChannel(args.length > 0 ? args[0] : target, args.slice(1).join(' ')); break;
         case 'NICK': if (args.length > 0) this.sendRaw(`NICK ${args[0]}`); break;
+        case 'SETNAME': if (args.length > 0) this.setRealname(args.join(' ')); break;
+        case 'BOT': {
+          const enable = args.length === 0 || args[0].toLowerCase() !== 'off';
+          this.toggleBotMode(enable);
+          break;
+        }
         case 'QUIT': this.sendRaw(`QUIT :${args.join(' ') || DEFAULT_QUIT_MESSAGE}`); break;
         case 'WHOIS': if (args.length > 0) this.sendCommand(`WHOIS ${args.join(' ')}`); break;
         case 'WHOWAS':
@@ -3943,11 +4650,17 @@ export class IRCService {
     return () => this.connectionListeners = this.connectionListeners.filter(cb => cb !== callback);
   }
 
-  private addMessage(message: Omit<IRCMessage, 'id' | 'network'> & { status?: 'pending' | 'sent' }): void {
+  private addMessage(message: Omit<IRCMessage, 'id' | 'network'> & { status?: 'pending' | 'sent' }, batchTag?: string): void {
     const fullMessage: IRCMessage = { ...message, id: `${Date.now()}-${Math.random()}`, network: this.getNetworkName() };
     if (this.verboseLogging) {
       this.logRaw(`IRCService: Adding message - Type: ${fullMessage.type}, Channel: ${fullMessage.channel || 'N/A'}, Text: ${fullMessage.text?.substring(0, 50) || 'N/A'}`);
     }
+
+    // Add to batch if batch tag is present
+    if (batchTag) {
+      this.addMessageToBatch(fullMessage, batchTag);
+    }
+
     this.emitMessage(fullMessage);
   }
 

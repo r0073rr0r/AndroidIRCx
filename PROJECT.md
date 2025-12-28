@@ -1,7 +1,7 @@
 # Android IRC Client - Project Documentation
 
-**Last Updated:** 2025-12-23
-**Version:** 1.3.1
+**Last Updated:** 2025-12-28
+**Version:** 1.4.4
 **Status:** Active Development
 
 ---
@@ -32,6 +32,11 @@
 advanced features including:
 
 - Multi-network connections (connect to multiple IRC servers simultaneously)
+- **Full IRCv3 compliance with 18 capabilities** (BATCH, LABELED-RESPONSE, CAP-NOTIFY, ACCOUNT-TAG,
+  SETNAME, STANDARD-REPLIES, MESSAGE-IDS, BOT, UTF8ONLY, EXTENDED-MONITOR, CHATHISTORY, MULTILINE,
+  READ-MARKER, MESSAGE-REDACTION, REPLY, REACT, TYPING, CHANNEL-CONTEXT)
+- **Real-time typing indicators** with auto-hide and multi-user support
+- **Smart command autocomplete** with built-in commands, aliases (70+), and history
 - End-to-end encryption for DMs and channels
 - Proxy/Tor support
 - Background service for persistent connections
@@ -583,6 +588,69 @@ The fix includes multiple layers of defense:
 
 ## Recent Changes
 
+### v1.4.4 (2025-12-28)
+
+- **IRCv3 Full Compliance** - Implemented all 18 IRCv3 capabilities:
+    - **IRCv3.2 Standard Capabilities:**
+        - BATCH: Groups related messages for efficient processing (netsplit, netjoin, chathistory
+          batches)
+        - LABELED-RESPONSE: Correlates server responses with client commands (30s timeout,
+          auto-cleanup)
+        - CAP-NOTIFY: Dynamic capability notifications (CAP NEW/DEL handling)
+        - ACCOUNT-TAG: Tags messages with sender's account name
+        - SETNAME: Change realname without reconnecting (`/setname` command)
+        - STANDARD-REPLIES: Standardized FAIL/WARN/NOTE server responses
+        - MESSAGE-IDS: Unique message identifiers with deduplication (1000 msgid cache)
+        - BOT: Mark user account as bot (`/bot on|off` command)
+        - UTF8ONLY: UTF-8 encoding enforcement
+        - EXTENDED-MONITOR: Enhanced MONITOR with MONONLINE/MONOFFLINE tracking
+    - **Draft IRCv3 Capabilities:**
+        - CHATHISTORY: Request message history (`/chathistory` command, up to 100 messages)
+        - MULTILINE: Send/receive multi-line messages (5s assembly timeout)
+        - READ-MARKER: Mark messages as read (`/markread` command)
+        - MESSAGE-REDACTION: Delete/redact messages (`/redact` command)
+        - REPLY: Reply to specific messages (threaded conversations)
+        - REACT: Emoji reactions to messages (via MessageReactionsService)
+        - TYPING: Real-time typing indicators (see below)
+        - CHANNEL-CONTEXT: PM channel context tracking
+    - Complete CAP negotiation state machine with multi-line support (CAP LS 302)
+    - 27 total capabilities requested from servers
+    - Graceful fallbacks when capabilities unavailable
+    - Runtime capability checking for all features
+
+- **Typing Indicator Feature:**
+    - New `TypingIndicator.tsx` component with fade animations
+    - Real-time "nick is typing..." display above message input
+    - Multi-user support: "Alice and Bob are typing..." / "Alice, Bob, and 2 others are typing..."
+    - Protocol: Sends `+typing=active|paused|done` tags via TAGMSG
+    - Auto-hide after 5 seconds of inactivity
+    - Debounced typing detection (sends active, paused after 3s, done on submit)
+    - State management in App.tsx with automatic cleanup
+
+- **Command Autocomplete:**
+    - Smart dropdown above MessageInput with up to 8 suggestions
+    - Three autocomplete sources:
+        - Built-in commands (21): `/join`, `/msg`, `/setname`, `/bot`, etc.
+        - Aliases (70+): IRC shortcuts, ZNC commands, IRCop helpers, NickServ/ChanServ
+        - Command history (last 30 commands with deduplication)
+    - Context-aware scoring for aliases (prefers channel commands in channels, query commands in
+      PMs)
+    - Touch to autocomplete with auto-space insertion
+    - Real-time filtering as user types
+
+- **Architecture Enhancements:**
+    - Added 737 lines to IRCService.ts for IRCv3 protocol handling
+    - Batch processing with `activeBatches` Map
+    - Labeled response tracking with 30s timeout and auto-cleanup
+    - Multiline message assembly with 5s timeout
+    - Message deduplication via `seenMessageIds` Set (LRU-style, 1000 entries)
+    - New events: `capabilities`, `capability-added`, `capability-removed`, `fail`, `warn`, `note`,
+      `setname`, `read-marker-sent`, `read-marker-received`, `message-redacted`, `reaction-sent`,
+      `reaction-received`, `typing-indicator`, `labeled-response`
+    - MessageReactionsService integration for reaction tracking with AsyncStorage persistence
+
+- **Total Impact:** 1,073 lines added, 8 files changed, full IRCv3 compliance achieved
+
 ### Unreleased (2025-12-26)
 
 - **Major dependency upgrade:**
@@ -693,20 +761,22 @@ D:\AndroidProjects\androidircx\
 │   ├── components/             # React components
 │   │   ├── ChannelTabs.tsx
 │   │   ├── MessageArea.tsx
-│   │   ├── MessageInput.tsx
+│   │   ├── MessageInput.tsx    # Command autocomplete, typing indicator sender
+│   │   ├── TypingIndicator.tsx # Real-time typing display (NEW in v1.4.4)
 │   │   ├── UserList.tsx
 │   │   ├── HeaderBar.tsx
 │   │   └── ...
 │   │
 │   ├── services/               # Business logic services
-│   │   ├── IRCService.ts       # IRC protocol handler
+│   │   ├── IRCService.ts       # IRC protocol handler (Full IRCv3 - 18 capabilities)
 │   │   ├── ConnectionManager.ts # Multi-connection manager
 │   │   ├── TabService.ts       # Tab persistence
 │   │   ├── MessageHistoryService.ts
+│   │   ├── MessageReactionsService.ts # Reaction tracking (NEW in v1.4.4)
 │   │   ├── SettingsService.ts
 │   │   ├── ChannelEncryptionService.ts
 │   │   ├── EncryptedDMService.ts
-│   │   ├── CommandService.ts
+│   │   ├── CommandService.ts   # Command aliases (70+) and history
 │   │   └── ... (50+ services)
 │   │
 │   ├── screens/                # Screen components

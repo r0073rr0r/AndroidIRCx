@@ -69,22 +69,64 @@ maintaining full compatibility with IRCv3 standards.
     - Offline key exchange via file and NFC
     - TOFU + key pinning with change warnings
 
-- **IRCv3 Full Support** 🎉
-  - **Full CAP Negotiation**: Complete capability negotiation with multi-line support (CAP LS 302)
-  - **SASL Authentication**: Full SASL PLAIN mechanism support with proper CAP integration
-  - **Message Tags**: Complete parsing of IRCv3 message tags (@tag=value format)
-  - **Server-Time Extension**: Accurate server-provided timestamps for all messages
-  - **Account Notify**: Automatic tracking of account login/logout events
-  - **Extended Join**: Enhanced JOIN messages with account information
-  - **Userhost in Names**: Support for userhost information in NAMES replies
-  - **Away Notify**: Real-time away status notifications
-  - **CHGHOST**: Support for hostname changes
-  - **Message Tags**: Full support for batched messages and labeled responses
-  - **Echo Message**: Support for echo-message capability
+- **IRCv3 Full Compliance** 🎉
+    - **Complete Implementation**: All 18 IRCv3 capabilities supported (Standard + Draft)
+    - **Full CAP Negotiation**: Multi-line capability negotiation (CAP LS 302) with 27 total
+      capabilities requested
+    - **SASL Authentication**: Full SASL PLAIN mechanism with proper CAP integration
+
+    - **IRCv3.2 Standard Capabilities** (10):
+        - **BATCH**: Message grouping for efficient processing (netsplit, netjoin, chathistory
+          batches)
+        - **LABELED-RESPONSE**: Command/response correlation with unique labels (30s timeout)
+        - **CAP-NOTIFY**: Dynamic capability notifications (CAP NEW/DEL handling)
+        - **ACCOUNT-TAG**: Messages tagged with sender's account name
+        - **SETNAME**: Change realname without reconnecting (`/setname` command)
+        - **STANDARD-REPLIES**: Standardized FAIL/WARN/NOTE server responses
+        - **MESSAGE-IDS**: Unique message identifiers with deduplication (1000 msgid cache)
+        - **BOT**: Mark user account as bot (`/bot on|off` command)
+        - **UTF8ONLY**: UTF-8 encoding enforcement
+        - **EXTENDED-MONITOR**: Enhanced MONITOR with online/offline tracking
+
+    - **Draft IRCv3 Capabilities** (8):
+        - **CHATHISTORY**: Request message history from server (`/chathistory` command, up to 100
+          messages)
+        - **MULTILINE**: Send/receive multi-line messages (5s assembly timeout)
+        - **READ-MARKER**: Mark messages as read (`/markread` command)
+        - **MESSAGE-REDACTION**: Delete/redact messages (`/redact` command)
+        - **REPLY**: Reply to specific messages (threaded conversations)
+        - **REACT**: Emoji reactions to messages (MessageReactionsService integration)
+        - **TYPING**: Real-time typing indicators (see below for details)
+        - **CHANNEL-CONTEXT**: PM channel context tracking
+
+    - **IRCv3.1/3.2 Base Extensions**:
+        - **Message Tags**: Complete @tag=value parsing and client-only tags (+tag)
+        - **Server-Time**: Accurate server-provided timestamps for all messages
+        - **Account Notify**: Automatic tracking of account login/logout events
+        - **Extended Join**: Enhanced JOIN messages with account information
+        - **Userhost in Names**: Support for userhost information in NAMES replies
+        - **Away Notify**: Real-time away status notifications
+        - **CHGHOST**: Support for hostname changes
+        - **Echo Message**: Support for echo-message capability
+        - **Multi-Prefix**: Multiple user mode prefixes display
+        - **Invite Notify**: Real-time invite notifications
+        - **Monitor**: Track user online/offline status
 
 - **User Interface**
   - Clean, modern UI inspired by AndroIRC
   - Configurable channel tabs (top/bottom/left/right) for navigation
+  - **Real-time typing indicators**: "nick is typing..." with auto-hide (5s timeout)
+      - Multi-user support: "Alice and Bob are typing..." / "Alice, Bob, and 2 others are typing..."
+      - Fade animations for smooth display
+      - Protocol: `+typing=active|paused|done` tags via TAGMSG
+      - Debounced typing detection (active, paused after 3s, done on submit)
+  - **Smart command autocomplete**: Dropdown with up to 8 suggestions
+      - Built-in commands (21): `/join`, `/msg`, `/setname`, `/bot`, `/chathistory`, `/markread`,
+        `/redact`, etc.
+      - Aliases (70+): IRC shortcuts, ZNC commands, IRCop helpers, NickServ/ChanServ
+      - Command history (last 30 with deduplication)
+      - Context-aware scoring (prefers channel commands in channels, query commands in PMs)
+      - Touch to autocomplete with auto-space insertion
   - Real-time message display with server-accurate timestamps
   - User list for channels
   - User list dockable to left/right/top/bottom
@@ -152,10 +194,13 @@ AndroidIRCX/
 │   │   ├── HeaderBar.tsx    # Top navigation bar
 │   │   ├── ChannelTabs.tsx  # Channel/query tabs
 │   │   ├── MessageArea.tsx  # Message display area
-│   │   ├── MessageInput.tsx # Message input field
+│   │   ├── MessageInput.tsx # Message input (autocomplete + typing sender)
+│   │   ├── TypingIndicator.tsx # Real-time typing display (NEW v1.4.4)
 │   │   └── UserList.tsx     # Channel user list
 │   ├── services/            # Business logic
-│   │   ├── IRCService.ts    # IRC protocol implementation (IRCv3 compliant)
+│   │   ├── IRCService.ts    # IRC protocol (Full IRCv3 - 18 capabilities)
+│   │   ├── MessageReactionsService.ts # Reaction tracking (NEW v1.4.4)
+│   │   ├── CommandService.ts # Command aliases (70+) and history
 │   │   └── SettingsService.ts # Network/server configuration
 │   ├── screens/             # Full-screen views
 │   │   ├── NetworksListScreen.tsx
@@ -217,19 +262,48 @@ The client will automatically:
 
 This client implements the IRC protocol according to:
 
-- **RFC 1459** (Internet Relay Chat Protocol)
-- **IRCv3 Specifications** (Full support for major extensions)
-  - CAP Negotiation (RFC specification)
-  - SASL Authentication (RFC 4422)
+- **RFC 1459** (Internet Relay Chat Protocol) - Full compliance
+- **RFC 2812** (IRC Client Protocol) - Extended numeric support
+- **IRCv3 Specifications** (Complete implementation - 18 capabilities)
+
+  **IRCv3.2 Standard Capabilities** (10):
+    - CAP Negotiation (Multi-line LS 302 support)
+    - SASL Authentication (RFC 4422 - PLAIN mechanism)
   - Message Tags (IRCv3.2)
   - Server-Time (IRCv3.2)
+    - BATCH (IRCv3.2) - Message grouping
+    - LABELED-RESPONSE (IRCv3.2) - Command correlation
+    - CAP-NOTIFY (IRCv3.2) - Dynamic capabilities
+    - ACCOUNT-TAG (IRCv3.2) - Account identification
+    - SETNAME (IRCv3.2) - Realname changes
+    - STANDARD-REPLIES (IRCv3.2) - FAIL/WARN/NOTE
+
+  **IRCv3.3 Standard Capabilities** (1):
+    - MESSAGE-IDS (IRCv3.3) - Unique message identifiers with deduplication
+
+  **IRCv3 Additional Standards**:
+    - BOT (IRCv3.2) - Bot mode marking
+    - UTF8ONLY (IRCv3.2) - UTF-8 enforcement
+    - EXTENDED-MONITOR (IRCv3.2) - Enhanced user monitoring
   - Account Notify (IRCv3.1)
   - Extended Join (IRCv3.1)
   - Away Notify (IRCv3.1)
   - CHGHOST (IRCv3.2)
-  - Batch (IRCv3.2)
-  - Labeled Responses (IRCv3.2)
   - Echo Message (IRCv3.2)
+    - Multi-Prefix (IRCv3.1)
+    - Invite Notify (IRCv3.2)
+
+  **Draft IRCv3 Capabilities** (8):
+    - draft/chathistory - Message history retrieval
+    - draft/multiline - Multi-line message support
+    - draft/read-marker - Read status tracking
+    - draft/message-redaction - Message deletion
+    - +draft/reply - Threaded conversations
+    - +draft/react - Emoji reactions
+    - +typing - Real-time typing indicators
+    - +draft/channel-context - PM context tracking
+
+**Total**: 27 capabilities requested, 18 major features implemented with graceful fallbacks
 
 ## 📚 Additional Documentation
 
@@ -238,7 +312,7 @@ This client implements the IRC protocol according to:
 - [PROJECT](PROJECT.md) - Project explained
 ## 🔄 Development Status
 
-**Current Version**: 1.3.3 (Dignity)
+**Current Version**: 1.4.4 (Dignity)
 
 ---
 

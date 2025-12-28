@@ -215,39 +215,127 @@ AndroidIRCX/
 
 ## 🔧 Configuration
 
-### Adding a Network
+### Quick Connect
 
-1. Open the app and tap the hamburger menu (☰)
-2. Select "Networks"
-3. Tap the "+" button to add a new network
-4. Fill in network details:
-   - Network name
-   - Nickname and alternative nickname
-   - Real name and ident
-   - Auto-join channels (optional)
-   - SASL credentials (optional, fully supported)
+**When disconnected**, you can quickly connect by:
 
-### Adding a Server
+- **Tapping the network name** in the header → connects to that network
+- **Tapping the dropdown (▼)** → "Connect to Default" → connects using default configuration
 
-1. In the Networks screen, select a network
-2. Tap "+ Add Server"
-3. Configure server settings:
-   - Hostname and port
-   - SSL/TLS settings
-   - Server password (if required)
+### Adding a New Network
 
-### Connecting
+1. **Open Networks List:**
+    - Tap the **dropdown button (▼)** in the header
+    - Select **"Choose Network"** (when disconnected) or **"Connect Another Network"** (when
+      connected)
 
-- Tap the network name in the header (when disconnected)
-- Or use the "+" button → "Choose Network"
-- Select a network and server to connect
+2. **Create New Network:**
+    - In the Networks List screen, tap the **[+]** button in the header
+    - This opens the Network Settings screen
 
-The client will automatically:
+3. **Configure Network Details:**
+    - **Network Name** (e.g., "dbase.in.rs") - required
+    - **Nickname** (e.g., "MyNick") - required, set per network
+    - **Alternative Nickname** - fallback if primary nick is taken
+    - **Real Name** (e.g., "John Doe") - required
+    - **Ident/Username** - optional
+    - **Auto-Join Channels** - comma-separated (e.g., "#lobby, #help")
+    - **SASL PLAIN** - account and password for authentication
+    - **Proxy Settings** - Tor/SOCKS5/HTTP support
+    - **Client Certificate** - for SASL EXTERNAL
 
-- Start CAP negotiation before registration
-- Request all supported IRCv3 capabilities
-- Authenticate with SASL if configured
-- Display server-time accurate timestamps
+4. **Save the Network:**
+    - Tap **[Save]** in the header
+
+### Adding a Server to Network
+
+1. In the **Networks List**, find your network
+2. Tap **[+ Add Server]** under that network
+3. **Configure Server Settings:**
+    - **Hostname** (e.g., "irc.example.com") - required
+    - **Port** (default: 6697 for SSL, 6667 for plain) - required
+    - **Display Name** - optional friendly name
+    - **Use SSL/TLS** - recommended, enabled by default
+    - **Reject Unauthorized Certificates** - disabled by default (allows self-signed certs)
+    - **Server Password** - if required by server
+    - **Favorite Server** - mark as preferred server for this network
+
+4. **Save the Server:**
+    - Tap **[Save]**
+
+### Connecting to a Network
+
+**Method 1 - Quick Connect (when disconnected):**
+
+- Tap the **network name** in the header
+
+**Method 2 - Via Dropdown Menu:**
+
+1. Tap the **dropdown button (▼)** in the header
+2. Select:
+    - **"Connect to Default"** - uses default network
+    - **"Choose Network"** - opens Networks List to select a network
+
+**Method 3 - From Networks List:**
+
+1. Open Networks List (dropdown → "Choose Network")
+2. **Tap the network name** to connect to that network
+3. Or **tap a specific server** under that network to connect to that exact server
+
+**When already connected to one network:**
+
+- Use dropdown (▼) → **"Connect Another Network"** to connect to additional networks simultaneously
+
+### Changing Your Nickname
+
+**Setting Initial Nickname (per network):**
+
+1. Open Networks List (dropdown → "Choose Network")
+2. Find your network and tap **[Edit]**
+3. Edit the **"Nickname"** field
+4. Optionally set **"Alternative Nickname"** (used if primary is taken)
+5. Tap **[Save]**
+
+**Changing Nickname While Connected:**
+
+- Type in the message input:
+  ```
+  /nick NewNickname
+  ```
+  or use the alias:
+  ```
+  /n NewNickname
+  ```
+- This changes your nickname for the current session only
+- To make it permanent, edit the network settings as described above
+
+### Settings Access
+
+- **Hamburger Menu (☰)**: Opens Settings screen for app configuration (theme, notifications, etc.)
+- **Dropdown Menu (▼)**: Access connection menu and Networks List for network/server configuration
+
+**Note:** Network and server configuration is done through the **Dropdown Menu (▼)** → Networks
+List, **NOT** through the Hamburger Menu (☰).
+
+**Connection Sequence (IRCv3 Compliant):**
+
+1. **TCP Connection**: Establish connection via TcpSocketModule (with SSL/TLS if configured)
+2. **CAP Negotiation Start**: Send `CAP LS 302` (multi-line capability listing)
+3. **Server Capabilities**: Receive list of available capabilities from server
+4. **Request Capabilities**: Send `CAP REQ` with 27 supported capabilities
+5. **Capability Acknowledgment**: Receive `CAP ACK` for enabled capabilities
+6. **SASL Authentication** (if configured):
+    - Send `AUTHENTICATE PLAIN`
+    - Exchange SASL credentials
+    - Wait for authentication success (903)
+7. **End CAP Negotiation**: Send `CAP END`
+8. **IRC Registration**: Send `NICK` and `USER` commands
+9. **Connection Complete**: Receive `001` (RPL_WELCOME) - registered event
+10. **Post-Connection**:
+    - Load saved tabs for network
+    - Auto-join configured channels
+    - Enable server-time timestamps
+    - Activate all negotiated IRCv3 features
 
 ## 🔐 Security
 

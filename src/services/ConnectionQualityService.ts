@@ -1,6 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IRCService } from './IRCService';
 import { settingsService } from './SettingsService';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 export interface RateLimitConfig {
   enabled: boolean;
@@ -195,7 +198,7 @@ export class ConnectionQualityService {
     return new Promise((resolve, reject) => {
       // Check rate limiting
       if (this.rateLimitConfig.enabled && !this.checkRateLimit()) {
-        reject(new Error('Rate limit exceeded. Please slow down.'));
+        reject(new Error(t('Rate limit exceeded. Please slow down.')));
         return;
       }
 
@@ -219,7 +222,7 @@ export class ConnectionQualityService {
           socket.write(message + '\r\n');
           resolve();
         } else {
-          reject(new Error('Not connected'));
+          reject(new Error(t('Not connected')));
         }
       } catch (error) {
         reject(error);
@@ -393,7 +396,7 @@ export class ConnectionQualityService {
    */
   private clearMessageQueue(): void {
     this.messageQueue.forEach(item => {
-      item.reject(new Error('Connection closed'));
+      item.reject(new Error(t('Connection closed')));
     });
     this.messageQueue = [];
   }

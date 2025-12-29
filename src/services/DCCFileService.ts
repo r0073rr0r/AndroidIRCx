@@ -1,6 +1,9 @@
 import TcpSocket, { Socket, Server } from 'react-native-tcp-socket';
 import { Platform } from 'react-native';
 import type { IRCService } from './IRCService';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 type TransferStatus = 'pending' | 'downloading' | 'completed' | 'failed' | 'cancelled' | 'sending';
 
@@ -132,7 +135,7 @@ class DCCFileService {
       const t = this.transfers.get(transferId);
       if (!t) return;
       t.status = 'failed';
-      t.error = err?.message || 'Transfer failed';
+      t.error = err?.message || t('Transfer failed');
       this.transfers.set(transferId, t);
       this.emit(t);
       this.sockets.delete(transferId);
@@ -210,7 +213,7 @@ class DCCFileService {
         this.emit(transfer);
       } catch (e: any) {
         transfer.status = 'failed';
-        transfer.error = e?.message || 'Send failed';
+        transfer.error = e?.message || t('Send failed');
         this.transfers.set(transfer.id, transfer);
         this.emit(transfer);
       } finally {

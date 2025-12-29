@@ -1,5 +1,8 @@
 
 import notifee from '@notifee/react-native';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 class NotifeeService {
   async displayNotification(title: string, body: string) {
@@ -9,7 +12,7 @@ class NotifeeService {
     // Create a channel (required for Android)
     const channelId = await notifee.createChannel({
       id: 'default',
-      name: 'Default Channel',
+      name: t('Default Channel'),
     });
 
     // Display a notification

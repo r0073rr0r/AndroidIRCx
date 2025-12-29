@@ -11,6 +11,7 @@ import {
 import { IRCNetworkConfig, IRCServerConfig, settingsService } from '../services/SettingsService';
 import { NetworkSettingsScreen } from './NetworkSettingsScreen';
 import { ServerSettingsScreen } from './ServerSettingsScreen';
+import { useT } from '../i18n/transifex';
 
 interface NetworksListScreenProps {
   onSelectNetwork: (network: IRCNetworkConfig, serverId?: string) => void;
@@ -21,6 +22,7 @@ export const NetworksListScreen: React.FC<NetworksListScreenProps> = ({
   onSelectNetwork,
   onClose,
 }) => {
+  const t = useT();
   const [networks, setNetworks] = useState<IRCNetworkConfig[]>([]);
   const [showNetworkSettings, setShowNetworkSettings] = useState(false);
   const [showServerSettings, setShowServerSettings] = useState(false);
@@ -76,7 +78,7 @@ export const NetworksListScreen: React.FC<NetworksListScreenProps> = ({
       await loadNetworks();
       setShowNetworkSettings(false);
     } catch (error) {
-      Alert.alert('Error', 'Failed to save network');
+      Alert.alert(t('Error'), t('Failed to save network'));
     }
   };
 
@@ -92,18 +94,18 @@ export const NetworksListScreen: React.FC<NetworksListScreenProps> = ({
       await loadNetworks();
       setShowServerSettings(false);
     } catch (error) {
-      Alert.alert('Error', 'Failed to save server');
+      Alert.alert(t('Error'), t('Failed to save server'));
     }
   };
 
   const handleDeleteNetwork = (network: IRCNetworkConfig) => {
     Alert.alert(
-      'Delete Network',
-      `Are you sure you want to delete "${network.name}"?`,
+      t('Delete Network'),
+      t('Are you sure you want to delete "{networkName}"?').replace('{networkName}', network.name),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('Delete'),
           style: 'destructive',
           onPress: async () => {
             await settingsService.deleteNetwork(network.id);
@@ -129,11 +131,11 @@ export const NetworksListScreen: React.FC<NetworksListScreenProps> = ({
         <View style={styles.container}>
           <View style={styles.header}>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeText}>Close</Text>
+              <Text style={styles.closeText}>{t('Close')}</Text>
             </TouchableOpacity>
-            <Text style={styles.title}>Networks</Text>
+            <Text style={styles.title}>{t('Networks')}</Text>
             <TouchableOpacity onPress={handleAddNetwork} style={styles.addButton}>
-              <Text style={styles.addText}>+</Text>
+              <Text style={styles.addText}>{t('+')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -148,13 +150,13 @@ export const NetworksListScreen: React.FC<NetworksListScreenProps> = ({
               <View style={styles.networkInfo}>
                 <Text style={styles.networkName}>{item.name}</Text>
                 <Text style={styles.networkDetails}>
-                  {item.nick} • {item.servers?.length || 0} server{(item.servers?.length || 0) !== 1 ? 's' : ''}
+                  {item.nick} • {item.servers?.length || 0} {(item.servers?.length || 0) !== 1 ? t('servers') : t('server')}
                 </Text>
               </View>
               <TouchableOpacity
                 onPress={() => handleEditNetwork(item)}
                 style={styles.editButton}>
-                <Text style={styles.editText}>Edit</Text>
+                <Text style={styles.editText}>{t('Edit')}</Text>
               </TouchableOpacity>
             </TouchableOpacity>
 
@@ -170,20 +172,20 @@ export const NetworksListScreen: React.FC<NetworksListScreenProps> = ({
                       {server.name || server.hostname}
                     </Text>
                     <Text style={styles.serverDetails}>
-                      {server.hostname}:{server.port} {server.ssl ? '(SSL)' : ''}
+                      {server.hostname}:{server.port} {server.ssl ? t('(SSL)') : ''}
                     </Text>
                   </View>
                   <TouchableOpacity
                     onPress={() => handleEditServer(item.id, server.id)}
                     style={styles.serverEditButton}>
-                    <Text style={styles.editText}>Edit</Text>
+                    <Text style={styles.editText}>{t('Edit')}</Text>
                   </TouchableOpacity>
                 </TouchableOpacity>
               ))}
               <TouchableOpacity
                 style={styles.addServerButton}
                 onPress={() => handleAddServer(item.id)}>
-                <Text style={styles.addServerText}>+ Add Server</Text>
+                <Text style={styles.addServerText}>{t('+ Add Server')}</Text>
               </TouchableOpacity>
             </View>
           </View>

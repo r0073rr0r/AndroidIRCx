@@ -7,6 +7,9 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IRCMessage } from './IRCService';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 export interface MessageHistoryFilter {
   network?: string;
@@ -372,9 +375,9 @@ class MessageHistoryService {
    */
   private exportTXT(messages: IRCMessage[], options: ExportOptions): string {
     const lines: string[] = [];
-    lines.push('AndroidIRCX Message History Export');
-    lines.push(`Exported: ${new Date().toISOString()}`);
-    lines.push(`Messages: ${messages.length}`);
+    lines.push(t('AndroidIRCX Message History Export'));
+    lines.push(t('Exported: {timestamp}', { timestamp: new Date().toISOString() }));
+    lines.push(t('Messages: {count}', { count: messages.length }));
     lines.push('');
     lines.push('='.repeat(80));
     lines.push('');
@@ -401,7 +404,13 @@ class MessageHistoryService {
     const lines: string[] = [];
     
     // Header
-    const headers = ['Timestamp', 'Type', 'Channel', 'From', 'Text'];
+    const headers = [
+      t('Timestamp'),
+      t('Type'),
+      t('Channel'),
+      t('From'),
+      t('Text'),
+    ];
     if (!options.includeTimestamps) {
       headers.shift(); // Remove timestamp if not included
     }

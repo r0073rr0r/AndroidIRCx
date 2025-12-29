@@ -13,6 +13,7 @@ import {
   PermissionsAndroid,
   Platform,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import Clipboard from '@react-native-clipboard/clipboard';
 import RNFS from 'react-native-fs';
 import { notificationService, NotificationPreferences } from '../services/NotificationService';
@@ -47,6 +48,8 @@ import { ScriptingHelpScreen } from './ScriptingHelpScreen';
 import { BackupScreen } from './BackupScreen';
 import { KeyManagementScreen } from './KeyManagementScreen';
 import { FirstRunSetupScreen } from './FirstRunSetupScreen';
+import { PrivacyAdsScreen } from './PrivacyAdsScreen';
+import { DataPrivacyScreen } from './DataPrivacyScreen';
 import { userManagementService, UserNote, UserAlias } from '../services/UserManagementService';
 import { RawMessageCategory, RAW_MESSAGE_CATEGORIES, getDefaultRawCategoryVisibility } from '../services/IRCService';
 import { applyTransifexLocale, useT } from '../i18n/transifex';
@@ -78,6 +81,7 @@ interface SettingItem {
   disabled?: boolean;
   submenuItems?: SettingItem[];
   secureTextEntry?: boolean;
+  icon?: string;
 }
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
@@ -96,6 +100,24 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const { theme, colors } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
   const tags = 'screen:settings,file:SettingsScreen.tsx,feature:settings';
+  const settingIcons = useMemo(
+    () => ({
+      'display-theme': { name: 'palette', solid: true },
+      'app-language': { name: 'globe', solid: false },
+      'connection-global-proxy': { name: 'network-wired', solid: false },
+      'connection-auto-reconnect': { name: 'sync-alt', solid: false },
+      'connection-quality': { name: 'signal', solid: false },
+      'notifications-enabled': { name: 'bell', solid: false },
+      'notifications-per-channel': { name: 'bullhorn', solid: false },
+      'security-app-lock': { name: 'lock', solid: true },
+      'security-manage-keys': { name: 'key', solid: true },
+      'history-backup': { name: 'save', solid: false },
+      'history-export': { name: 'file-export', solid: false },
+      'identity-profiles': { name: 'user', solid: false },
+      'about-app': { name: 'info-circle', solid: false },
+    }),
+    []
+  );
   const aboutTitle = t('About', { _tags: tags });
   const languageLabels = useMemo(
     () => ({
@@ -148,6 +170,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [highlightWords, setHighlightWords] = useState<string[]>([]);
   const [newHighlightWord, setNewHighlightWord] = useState('');
   const [showAbout, setShowAbout] = useState(false);
+  const [showPrivacyAds, setShowPrivacyAds] = useState(false);
+  const [showDataPrivacy, setShowDataPrivacy] = useState(false);
   const [backupData, setBackupData] = useState('');
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [showBackupScreen, setShowBackupScreen] = useState(false);
@@ -418,7 +442,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       setGlobalProxyUsername('');
       setGlobalProxyPassword('');
     }
-    setClosePrivateMessage(await settingsService.getSetting('closePrivateMessage', true));
+    setClosePrivateMessage(await settingsService.getSetting('closePrivateMessage', false));
     setClosePrivateMessageText(await settingsService.getSetting('closePrivateMessageText', 'Closing window'));
     setIrcServices(await settingsService.getSetting('ircServices', ['nickserv', 'chanserv', 'memoserv', 'operserv', 'hostserv', 'botserv']));
     setNoticeTarget(await settingsService.getSetting('noticeTarget', 'server'));
@@ -853,9 +877,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         setPasswordsUnlocked(true);
         return true;
       }
+      const errorMessage = result.errorMessage
+        || (result.errorKey ? t(result.errorKey, { _tags: tags }) : t('Unable to unlock passwords.', { _tags: tags }));
       Alert.alert(
         t('Authentication failed', { _tags: tags }),
-        result.error || t('Unable to unlock passwords.', { _tags: tags })
+        errorMessage
       );
       return false;
     }
@@ -989,6 +1015,37 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       lastSearchTermRef.current = term;
     }
   }, [searchTerm, filteredSections]);
+
+  // Icon mapping for section headers and items
+  const getSectionIcon = (title: string): { name: string; solid?: boolean } => {
+    const iconMap: Record<string, { name: string; solid?: boolean }> = {
+      'Appearance': { name: 'palette', solid: true },
+      'Display & UI': { name: 'desktop', solid: false },
+      'Notifications': { name: 'bell', solid: true },
+      'Background Service': { name: 'circle', solid: false },
+      'Message History': { name: 'history', solid: false },
+      'Connectivity': { name: 'wifi', solid: false },
+      'Connection Quality': { name: 'signal', solid: false },
+      'Connection Profiles': { name: 'network-wired', solid: false },
+      'Auto-Reconnect': { name: 'sync', solid: false },
+      'Bouncer': { name: 'server', solid: false },
+      'Performance': { name: 'tachometer-alt', solid: false },
+      'Backup & Restore': { name: 'database', solid: false },
+      'Channels': { name: 'hashtag', solid: false },
+      'DCC': { name: 'exchange-alt', solid: false },
+      'Commands': { name: 'terminal', solid: false },
+      'Highlights': { name: 'highlighter', solid: false },
+      'Identity Profiles': { name: 'id-card', solid: true },
+      'Security': { name: 'shield-alt', solid: true },
+      'Encrypted Direct Messages': { name: 'lock', solid: true },
+      'Privacy & Legal': { name: 'user-shield', solid: true },
+      'Scripting': { name: 'code', solid: false },
+      'User Management': { name: 'users', solid: false },
+      'Advanced': { name: 'cogs', solid: false },
+      [aboutTitle]: { name: 'info-circle', solid: true },
+    };
+    return iconMap[title] || { name: 'cog', solid: false };
+  };
 
   const sections = [
     {
@@ -3361,6 +3418,25 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       ],
     },
     {
+      title: t('Privacy & Legal', { _tags: tags }),
+      data: [
+        {
+          id: 'my-data-privacy',
+          title: t('My Data & Privacy', { _tags: tags }),
+          description: t('Export or delete your data (GDPR/CCPA rights)', { _tags: tags }),
+          type: 'button' as const,
+          onPress: () => setShowDataPrivacy(true),
+        },
+        {
+          id: 'privacy-ads',
+          title: t('Privacy & Ads', { _tags: tags }),
+          description: t('Manage consent for personalized ads', { _tags: tags }),
+          type: 'button' as const,
+          onPress: () => setShowPrivacyAds(true),
+        },
+      ],
+    },
+    {
       title: aboutTitle,
       data: [
         {
@@ -3399,14 +3475,26 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   }, [orderedSections, searchTerm, matches]);
 
   const renderSettingItem = (item: SettingItem) => {
+    const itemIcon = item.icon || settingIcons[item.id];
     switch (item.type) {
       case 'switch':
         return (
           <View style={styles.settingItem}>
             <View style={styles.settingContent}>
-              <Text style={[styles.settingTitle, item.disabled && styles.disabledText]}>
-                {item.title}
-              </Text>
+              <View style={styles.settingTitleRow}>
+                {!!itemIcon && typeof itemIcon === 'object' && (
+                  <Icon
+                    name={itemIcon.name}
+                    size={16}
+                    color={item.disabled ? colors.textSecondary : colors.primary}
+                    solid={itemIcon.solid}
+                    style={{ marginRight: 8 }}
+                  />
+                )}
+                <Text style={[styles.settingTitle, item.disabled && styles.disabledText]}>
+                  {item.title}
+                </Text>
+              </View>
               {item.description && (
                 <Text style={[styles.settingDescription, item.disabled && styles.disabledText]}>
                   {item.description}
@@ -3425,9 +3513,20 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         return (
           <View style={[styles.settingItem, item.disabled && styles.disabledItem]}>
             <View style={styles.settingContent}>
-              <Text style={[styles.settingTitle, item.disabled && styles.disabledText]}>
-                {item.title}
-              </Text>
+              <View style={styles.settingTitleRow}>
+                {!!itemIcon && typeof itemIcon === 'object' && (
+                  <Icon
+                    name={itemIcon.name}
+                    size={16}
+                    color={item.disabled ? colors.textSecondary : colors.primary}
+                    solid={itemIcon.solid}
+                    style={{ marginRight: 8 }}
+                  />
+                )}
+                <Text style={[styles.settingTitle, item.disabled && styles.disabledText]}>
+                  {item.title}
+                </Text>
+              </View>
               {item.description && (
                 <Text style={[styles.settingDescription, item.disabled && styles.disabledText]}>
                   {item.description}
@@ -3464,9 +3563,20 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             onPress={item.onPress}
             disabled={item.disabled}>
             <View style={styles.settingContent}>
-              <Text style={[styles.settingTitle, item.disabled && styles.disabledText]}>
-                {item.title}
-              </Text>
+              <View style={styles.settingTitleRow}>
+                {!!itemIcon && typeof itemIcon === 'object' && (
+                  <Icon
+                    name={itemIcon.name}
+                    size={16}
+                    color={item.disabled ? colors.textSecondary : colors.primary}
+                    solid={itemIcon.solid}
+                    style={{ marginRight: 8 }}
+                  />
+                )}
+                <Text style={[styles.settingTitle, item.disabled && styles.disabledText]}>
+                  {item.title}
+                </Text>
+              </View>
               {item.description && (
                 <Text style={[styles.settingDescription, item.disabled && styles.disabledText]}>
                   {item.description}
@@ -3483,7 +3593,18 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             style={styles.settingItem}
             onPress={() => setShowSubmenu(item.id)}>
             <View style={styles.settingContent}>
-              <Text style={styles.settingTitle}>{item.title}</Text>
+              <View style={styles.settingTitleRow}>
+                {!!itemIcon && typeof itemIcon === 'object' && (
+                  <Icon
+                    name={itemIcon.name}
+                    size={16}
+                    color={colors.primary}
+                    solid={itemIcon.solid}
+                    style={{ marginRight: 8 }}
+                  />
+                )}
+                <Text style={styles.settingTitle}>{item.title}</Text>
+              </View>
               {item.description && (
                 <Text style={styles.settingDescription}>{item.description}</Text>
               )}
@@ -3578,18 +3699,30 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           sections={displaySections as any}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => renderSettingItem(item)}
-          renderSectionHeader={({ section: { title } }) => (
-            <TouchableOpacity
-              onPress={() => toggleSection(title)}
-              style={styles.sectionHeader}
-              disabled={title === aboutTitle}
-            >
-              <Text style={styles.sectionTitle}>{title}</Text>
-              {title !== aboutTitle && (
-                <Text style={styles.sectionToggle}>{expandedSections.has(title) ? '-' : '+'}</Text>
-              )}
-            </TouchableOpacity>
-          )}
+          renderSectionHeader={({ section: { title } }) => {
+            const iconInfo = getSectionIcon(title);
+            return (
+              <TouchableOpacity
+                onPress={() => toggleSection(title)}
+                style={styles.sectionHeader}
+                disabled={title === aboutTitle}
+              >
+                <View style={styles.sectionTitleContainer}>
+                  <Icon
+                    name={iconInfo.name}
+                    size={18}
+                    color={colors.primary}
+                    solid={iconInfo.solid}
+                    style={styles.sectionIcon}
+                  />
+                  <Text style={styles.sectionTitle}>{title}</Text>
+                </View>
+                {title !== aboutTitle && (
+                  <Text style={styles.sectionToggle}>{expandedSections.has(title) ? '-' : '+'}</Text>
+                )}
+              </TouchableOpacity>
+            );
+          }}
           style={styles.list}
           contentContainerStyle={styles.listContent}
         />
@@ -3958,6 +4091,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         visible={showAbout}
         onClose={() => setShowAbout(false)}
       />
+      <PrivacyAdsScreen
+        visible={showPrivacyAds}
+        onClose={() => setShowPrivacyAds(false)}
+      />
+      <DataPrivacyScreen
+        visible={showDataPrivacy}
+        onClose={() => setShowDataPrivacy(false)}
+      />
       <BackupScreen
         visible={showBackupScreen}
         onClose={() => setShowBackupScreen(false)}
@@ -4118,6 +4259,13 @@ const createStyles = (colors: any, theme: Theme) => {
     padding: 16,
     backgroundColor: sectionBg,
   },
+  sectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectionIcon: {
+    marginRight: 10,
+  },
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -4148,6 +4296,14 @@ const createStyles = (colors: any, theme: Theme) => {
     fontSize: 16,
     color: colors.text,
     marginBottom: 4,
+  },
+  settingTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  settingIcon: {
+    fontSize: 16,
+    marginRight: 8,
   },
   settingDescription: {
     fontSize: 12,

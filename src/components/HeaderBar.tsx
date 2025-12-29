@@ -7,6 +7,7 @@ import {
   Platform,
 } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
+import { useT } from '../i18n/transifex';
 
 interface HeaderBarProps {
 
@@ -69,7 +70,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   onEncryptionPress,
 
 }) => {
-
+  const t = useT();
   const { colors } = useTheme();
 
   const styles = createStyles(colors);
@@ -92,13 +93,13 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 
         {ping !== undefined && (
 
-          <Text style={styles.ping}>Ping: {ping.toFixed(1)} ms</Text>
+          <Text style={styles.ping}>{t('Ping: {ping} ms').replace('{ping}', ping.toFixed(1))}</Text>
 
         )}
 
         {!isConnected && onConnectPress && (
 
-          <Text style={styles.connectHint}>Tap to connect</Text>
+          <Text style={styles.connectHint}>{t('Tap to connect')}</Text>
 
         )}
 

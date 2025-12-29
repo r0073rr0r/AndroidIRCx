@@ -1,6 +1,9 @@
 import crashlytics from '@react-native-firebase/crashlytics';
 import { Linking, Platform } from 'react-native';
 import { logger } from './Logger';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 export interface ErrorContext {
   fatal?: boolean;
@@ -88,21 +91,22 @@ class ErrorReportingService {
     if (error && typeof error === 'object') {
       return new Error(JSON.stringify(error));
     }
-    return new Error('Unknown error');
+    return new Error(t('Unknown error'));
   }
 
   private async tryMailFallback(error: Error, context?: ErrorContext): Promise<void> {
+    const fatalValue = context?.fatal ? t('Yes') : t('No');
     const body = [
-      'Crash report fallback',
-      `Platform: ${Platform.OS}`,
-      `Fatal: ${context?.fatal ? 'yes' : 'no'}`,
-      context?.source ? `Source: ${context.source}` : '',
+      t('Crash report fallback'),
+      t('Platform: {platform}', { platform: Platform.OS }),
+      t('Fatal: {value}', { value: fatalValue }),
+      context?.source ? t('Source: {source}', { source: context.source }) : '',
       '',
-      `Message: ${error.message}`,
-      `Stack: ${error.stack || 'n/a'}`,
+      t('Message: {message}', { message: error.message }),
+      t('Stack: {stack}', { stack: error.stack || t('n/a') }),
     ].filter(Boolean).join('\n');
 
-    const mailto = `mailto:${this.fallbackEmail}?subject=${encodeURIComponent('AndroidIRCX Crash Report')}&body=${encodeURIComponent(body)}`;
+    const mailto = `mailto:${this.fallbackEmail}?subject=${encodeURIComponent(t('AndroidIRCX Crash Report'))}&body=${encodeURIComponent(body)}`;
     try {
       const canOpen = await Linking.canOpenURL(mailto);
       if (canOpen) {

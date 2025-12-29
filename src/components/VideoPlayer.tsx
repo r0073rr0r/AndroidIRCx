@@ -2,12 +2,14 @@ import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import Video, { VideoRef } from 'react-native-video';
 import { useTheme } from '../hooks/useTheme';
+import { useT } from '../i18n/transifex';
 
 interface VideoPlayerProps {
   url: string;
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({ url }) => {
+  const t = useT();
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const [loading, setLoading] = useState(true);
@@ -24,7 +26,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ url }) => {
         </View>
       )}
       {error ? (
-        <Text style={styles.error}>Video error: {error}</Text>
+        <Text style={styles.error}>{t('Video error: {error}', { error })}</Text>
       ) : (
         <Video
           ref={videoRef}
@@ -38,20 +40,20 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ url }) => {
           onLoad={() => setLoading(false)}
           onError={(e) => {
             setLoading(false);
-            setError(e?.error?.errorString || 'Failed to load video');
+            setError(e?.error?.errorString || t('Failed to load video'));
           }}
           resizeMode="contain"
         />
       )}
       <View style={styles.controlsRow}>
         <TouchableOpacity style={styles.actionButton} onPress={() => setPaused((p) => !p)}>
-          <Text style={styles.actionText}>{paused ? 'Play' : 'Pause'}</Text>
+          <Text style={styles.actionText}>{paused ? t('Play') : t('Pause')}</Text>
         </TouchableOpacity>
         {canUsePiP && (
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => videoRef.current?.enterPictureInPicture()}>
-            <Text style={styles.actionText}>PiP</Text>
+            <Text style={styles.actionText}>{t('PiP')}</Text>
           </TouchableOpacity>
         )}
       </View>

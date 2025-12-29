@@ -21,14 +21,19 @@ import { userManagementService } from '../services/UserManagementService';
 import { connectionManager } from '../services/ConnectionManager';
 import { dccChatService } from '../services/DCCChatService';
 import { useTheme } from '../hooks/useTheme';
+import { useT } from '../i18n/transifex';
 import { encryptedDMService } from '../services/EncryptedDMService';
 import { channelEncryptionService } from '../services/ChannelEncryptionService';
 import { settingsService } from '../services/SettingsService';
 import Clipboard from '@react-native-clipboard/clipboard';
 
-export const copyNickToClipboard = (nick: string): string => {
+// Note: This function cannot use useT() as it's exported outside the component
+// The translation will be handled where it's called
+export const copyNickToClipboard = (nick: string, t?: (key: string) => string): string => {
   Clipboard.setString(nick);
-  return `Copied ${nick}`;
+  const template = 'Copied {nick}';
+  const translated = t ? t(template) : template;
+  return translated.replace('{nick}', nick);
 };
 
 interface UserListProps {
@@ -40,14 +45,15 @@ interface UserListProps {
   position?: 'left' | 'right' | 'top' | 'bottom';
 }
 
-export const UserList: React.FC<UserListProps> = ({ 
-  users, 
+export const UserList: React.FC<UserListProps> = ({
+  users,
   channelName,
   network,
   onUserPress,
   onWHOISPress,
   position = 'right',
 }) => {
+  const t = useT();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -181,7 +187,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
 
   const handleExternalPayload = useCallback(async (raw: string) => {
     if (!selectedUser) {
-      setActionMessage('Select a user first');
+      setActionMessage(t('Select a user first'));
       return;
     }
     try {
@@ -189,9 +195,11 @@ const getModeColor = (modes?: string[], colors?: any): string => {
       const targetNick = selectedUser.nick;
       if (payload.nick && payload.nick.toLowerCase() !== targetNick.toLowerCase()) {
         Alert.alert(
-          'Mismatched Nick',
-          `This payload is for ${payload.nick}, but you selected ${targetNick}.`,
-          [{ text: 'OK', style: 'cancel' }]
+          t('Mismatched Nick'),
+          t('This payload is for {payloadNick}, but you selected {targetNick}.')
+            .replace('{payloadNick}', payload.nick)
+            .replace('{targetNick}', targetNick),
+          [{ text: t('OK'), style: 'cancel' }]
         );
         return;
       }
@@ -200,27 +208,30 @@ const getModeColor = (modes?: string[], colors?: any): string => {
         const storageNetwork = getNetworkForStorage();
         const currentFp = await encryptedDMService.getBundleFingerprintForNetwork(storageNetwork, targetNick);
         if (!currentFp) {
-          Alert.alert('No Key', `No DM key stored for ${targetNick}.`);
+          Alert.alert(t('No Key'), t('No DM key stored for {nick}.').replace('{nick}', targetNick));
           return;
         }
         const currentDisplay = encryptedDMService.formatFingerprintForDisplay(currentFp);
         const incomingDisplay = encryptedDMService.formatFingerprintForDisplay(payload.fingerprint);
         const matches = currentFp === payload.fingerprint;
         Alert.alert(
-          'Fingerprint Check',
-          `Stored: ${currentDisplay}\nScanned: ${incomingDisplay}\n\n${matches ? 'Match ✅' : 'Mismatch ⚠️'}`,
+          t('Fingerprint Check'),
+          t('Stored: {stored}\nScanned: {scanned}\n\n{result}')
+            .replace('{stored}', currentDisplay)
+            .replace('{scanned}', incomingDisplay)
+            .replace('{result}', matches ? t('Match ✅') : t('Mismatch ⚠️')),
           matches
             ? [
                 {
-                  text: 'Mark Verified',
+                  text: t('Mark Verified'),
                   onPress: async () => {
                     await encryptedDMService.setVerifiedForNetwork(storageNetwork, targetNick, true);
-                    setActionMessage(`Key verified for ${targetNick}`);
+                    setActionMessage(t('Key verified for {nick}').replace('{nick}', targetNick));
                   },
                 },
-                { text: 'Close', style: 'cancel' },
+                { text: t('Close'), style: 'cancel' },
               ]
-            : [{ text: 'Close', style: 'cancel' }]
+            : [{ text: t('Close'), style: 'cancel' }]
         );
         return;
       }
@@ -231,31 +242,38 @@ const getModeColor = (modes?: string[], colors?: any): string => {
       const newDisplay = encryptedDMService.formatFingerprintForDisplay(payload.fingerprint);
       const oldDisplay = existingFp
         ? encryptedDMService.formatFingerprintForDisplay(existingFp)
-        : 'None';
+        : t('None');
       const isChange = Boolean(existingFp && existingFp !== payload.fingerprint);
       Alert.alert(
-        isChange ? 'Replace DM Key' : 'Import DM Key',
+        isChange ? t('Replace DM Key') : t('Import DM Key'),
         isChange
-          ? `Existing: ${oldDisplay}\nNew: ${newDisplay}\n\nOnly replace if verified out-of-band.`
-          : `Fingerprint: ${newDisplay}\n\nAccept this key for ${targetNick}?`,
+          ? t('Existing: {old}\nNew: {new}\n\nOnly replace if verified out-of-band.')
+              .replace('{old}', oldDisplay)
+              .replace('{new}', newDisplay)
+          : t('Fingerprint: {fp}\n\nAccept this key for {nick}?')
+              .replace('{fp}', newDisplay)
+              .replace('{nick}', targetNick),
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: t('Cancel'), style: 'cancel' },
           {
-            text: isChange ? 'Replace' : 'Accept',
+            text: isChange ? t('Replace') : t('Accept'),
             onPress: async () => {
               // Always use network-aware storage
               await encryptedDMService.acceptExternalBundleForNetwork(storageNetwork, targetNick, payload.bundle, isChange);
-              setActionMessage(`Key ${isChange ? 'replaced' : 'imported'} for ${targetNick}`);
+              setActionMessage(t('Key {action} for {nick}')
+                .replace('{action}', isChange ? t('replaced') : t('imported'))
+                .replace('{nick}', targetNick));
 
               // Prompt to share key back for bidirectional encryption (offline only)
               setTimeout(() => {
                 Alert.alert(
-                  'Share Your Key?',
-                  `You imported ${targetNick}'s key offline. For encrypted chat to work both ways, ${targetNick} also needs your key.\n\n💡 Show your QR code for them to scan (no server messages)`,
+                  t('Share Your Key?'),
+                  t('You imported {nick}\'s key offline. For encrypted chat to work both ways, {nick} also needs your key.\n\n💡 Show your QR code for them to scan (no server messages)')
+                    .replace(/{nick}/g, targetNick),
                   [
-                    { text: 'Later', style: 'cancel' },
+                    { text: t('Later'), style: 'cancel' },
                     {
-                      text: 'Show QR Code',
+                      text: t('Show QR Code'),
                       onPress: async () => {
                         try {
                           const selfNick = activeIrc.getCurrentNick();
@@ -264,7 +282,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                           setQrType('bundle');
                           setShowKeyQr(true);
                         } catch (e) {
-                          setActionMessage('Failed to generate QR');
+                          setActionMessage(t('Failed to generate QR'));
                         }
                       },
                     },
@@ -276,9 +294,9 @@ const getModeColor = (modes?: string[], colors?: any): string => {
         ]
       );
     } catch (e) {
-      setActionMessage('Invalid key payload');
+      setActionMessage(t('Invalid key payload'));
     }
-  }, [selectedUser]);
+  }, [selectedUser, t, getNetworkForStorage, activeIrc]);
 
   // Check if current user is an operator in the channel
   const isCurrentUserOp = (): boolean => {
@@ -313,7 +331,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
           onWHOISPress(selectedUser.nick);
         } else {
           activeIrc.sendCommand(`WHOIS ${selectedUser.nick}`);
-          setActionMessage(`WHOIS requested for ${selectedUser.nick}`);
+          setActionMessage(t('WHOIS requested for {nick}').replace('{nick}', selectedUser.nick));
         }
         break;
       case 'query':
@@ -326,18 +344,18 @@ const getModeColor = (modes?: string[], colors?: any): string => {
         try {
           const bundle = await encryptedDMService.exportBundle();
           activeIrc.sendRaw(`PRIVMSG ${selectedUser.nick} :!enc-offer ${JSON.stringify(bundle)}`);
-          setActionMessage(`Enc key offer sent to ${selectedUser.nick}`);
+          setActionMessage(t('Enc key offer sent to {nick}').replace('{nick}', selectedUser.nick));
         } catch (e) {
-          setActionMessage('Failed to share key');
+          setActionMessage(t('Failed to share key'));
         }
         break;
       case 'enc_request':
         activeIrc.sendRaw(`PRIVMSG ${selectedUser.nick} :!enc-req`);
-        setActionMessage(`Requested key from ${selectedUser.nick}`);
+        setActionMessage(t('Requested key from {nick}').replace('{nick}', selectedUser.nick));
         encryptedDMService
           .awaitBundleForNick(selectedUser.nick, 36000)
-          .then(() => setActionMessage(`Key saved for ${selectedUser.nick}`))
-          .catch(() => setActionMessage('Key not received (timeout)'));
+          .then(() => setActionMessage(t('Key saved for {nick}').replace('{nick}', selectedUser.nick)))
+          .catch(() => setActionMessage(t('Key not received (timeout)')));
         break;
       case 'enc_qr_show_fingerprint':
         try {
@@ -347,7 +365,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
           setQrType('fingerprint');
           setShowKeyQr(true);
         } catch (e) {
-          setActionMessage('Failed to generate QR');
+          setActionMessage(t('Failed to generate QR'));
         }
         break;
       case 'enc_qr_show_bundle':
@@ -358,21 +376,21 @@ const getModeColor = (modes?: string[], colors?: any): string => {
           setQrType('bundle');
           setShowKeyQr(true);
         } catch (e) {
-          setActionMessage('Failed to generate QR');
+          setActionMessage(t('Failed to generate QR'));
         }
         break;
       case 'enc_qr_scan':
         try {
           const permission = hasCameraPermission || (await requestCameraPermission()) === 'authorized';
           if (!permission) {
-            setActionMessage('Camera permission denied');
+            setActionMessage(t('Camera permission denied'));
             break;
           }
           scanHandledRef.current = false;
           setShowKeyScan(true);
           setScanError('');
         } catch (e) {
-          setActionMessage('Failed to open camera');
+          setActionMessage(t('Failed to open camera'));
         }
         break;
       case 'enc_share_file':
@@ -383,9 +401,9 @@ const getModeColor = (modes?: string[], colors?: any): string => {
           const path = `${RNFS.DocumentDirectoryPath}/${filename}`;
           await RNFS.writeFile(path, payload, 'utf8');
           await Share.open({ url: `file://${path}`, type: 'application/json' });
-          setActionMessage('Key file shared');
+          setActionMessage(t('Key file shared'));
         } catch (e) {
-          setActionMessage('Failed to share key file');
+          setActionMessage(t('Failed to share key file'));
         }
         break;
       case 'enc_import_file':
@@ -400,7 +418,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
           await handleExternalPayload(contents);
         } catch (e: any) {
           if (!DocumentPicker.isCancel(e)) {
-            setActionMessage('Failed to import key file');
+            setActionMessage(t('Failed to import key file'));
           }
         }
         break;
@@ -408,7 +426,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
         try {
           const supported = await NfcManager.isSupported();
           if (!supported) {
-            setActionMessage('NFC not supported');
+            setActionMessage(t('NFC not supported'));
             break;
           }
           const selfNick = activeIrc.getCurrentNick();
@@ -419,9 +437,9 @@ const getModeColor = (modes?: string[], colors?: any): string => {
           if (bytes) {
             await NfcManager.writeNdefMessage(bytes);
           }
-          setActionMessage('NFC key ready, tap devices');
+          setActionMessage(t('NFC key ready, tap devices'));
         } catch (e) {
-          setActionMessage('Failed to share via NFC');
+          setActionMessage(t('Failed to share via NFC'));
         } finally {
           try { await NfcManager.cancelTechnologyRequest(); } catch {}
         }
@@ -430,7 +448,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
         try {
           const supported = await NfcManager.isSupported();
           if (!supported) {
-            setActionMessage('NFC not supported');
+            setActionMessage(t('NFC not supported'));
             break;
           }
           await NfcManager.start();
@@ -439,12 +457,12 @@ const getModeColor = (modes?: string[], colors?: any): string => {
           const ndefMessage = tag?.ndefMessage?.[0];
           const payload = ndefMessage ? Ndef.text.decodePayload(ndefMessage.payload) : null;
           if (!payload) {
-            setActionMessage('No NFC payload');
+            setActionMessage(t('No NFC payload'));
             break;
           }
           await handleExternalPayload(payload);
         } catch (e) {
-          setActionMessage('Failed to read NFC');
+          setActionMessage(t('Failed to read NFC'));
         } finally {
           try { await NfcManager.cancelTechnologyRequest(); } catch {}
         }
@@ -455,15 +473,18 @@ const getModeColor = (modes?: string[], colors?: any): string => {
             ? await encryptedDMService.getVerificationStatusForNetwork(network, selectedUser.nick)
             : await encryptedDMService.getVerificationStatus(selectedUser.nick);
           if (!status.fingerprint) {
-            setActionMessage(`No DM key for ${selectedUser.nick}`);
+            setActionMessage(t('No DM key for {nick}').replace('{nick}', selectedUser.nick));
             break;
           }
           const selfFp = encryptedDMService.formatFingerprintForDisplay(await encryptedDMService.getSelfFingerprint());
           const peerFp = encryptedDMService.formatFingerprintForDisplay(status.fingerprint);
-          const verifiedLabel = status.verified ? 'Verified' : 'Mark Verified';
+          const verifiedLabel = status.verified ? t('Verified') : t('Mark Verified');
           Alert.alert(
-            'Verify DM Key',
-            `Compare fingerprints out-of-band:\n\nYou: ${selfFp}\n${selectedUser.nick}: ${peerFp}`,
+            t('Verify DM Key'),
+            t('Compare fingerprints out-of-band:\n\nYou: {self}\n{nick}: {peer}')
+              .replace('{self}', selfFp)
+              .replace('{nick}', selectedUser.nick)
+              .replace('{peer}', peerFp),
             [
               {
                 text: verifiedLabel,
@@ -471,31 +492,31 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                   if (!status.verified) {
                     const storageNetwork = getNetworkForStorage();
                     await encryptedDMService.setVerifiedForNetwork(storageNetwork, selectedUser.nick, true);
-                    setActionMessage(`Key marked verified for ${selectedUser.nick}`);
+                    setActionMessage(t('Key marked verified for {nick}').replace('{nick}', selectedUser.nick));
                   }
                 },
               },
               {
-                text: 'Copy Fingerprints',
+                text: t('Copy Fingerprints'),
                 onPress: () => {
                   Clipboard.setString(`You: ${selfFp}\n${selectedUser.nick}: ${peerFp}`);
-                  setActionMessage('Fingerprints copied');
+                  setActionMessage(t('Fingerprints copied'));
                 },
               },
-              { text: 'Close', style: 'cancel' },
+              { text: t('Close'), style: 'cancel' },
             ]
           );
         } catch (e) {
-          setActionMessage('Failed to load fingerprints');
+          setActionMessage(t('Failed to load fingerprints'));
         }
         break;
       case 'chan_share':
         try {
           const keyData = await channelEncryptionService.exportChannelKey(channelName, network || activeIrc.getNetworkName());
           activeIrc.sendRaw(`PRIVMSG ${selectedUser.nick} :!chanenc-key ${keyData}`);
-          setActionMessage(`Shared channel key with ${selectedUser.nick}`);
+          setActionMessage(t('Shared channel key with {nick}').replace('{nick}', selectedUser.nick));
         } catch (e: any) {
-          setActionMessage(e?.message || 'Failed to share channel key');
+          setActionMessage(e?.message || t('Failed to share channel key'));
         }
         break;
       case 'chan_request':
@@ -504,33 +525,37 @@ const getModeColor = (modes?: string[], colors?: any): string => {
           activeIrc.sendRaw(
             `PRIVMSG ${selectedUser.nick} :Please share the channel key for ${channelName} with /chankey share ${requester}`
           );
-          setActionMessage(`Requested channel key for ${channelName} from ${selectedUser.nick}`);
+          setActionMessage(
+            t('Requested channel key for {channel} from {nick}')
+              .replace('{channel}', channelName)
+              .replace('{nick}', selectedUser.nick)
+          );
         } catch (e: any) {
-          setActionMessage(e?.message || 'Failed to request channel key');
+          setActionMessage(e?.message || t('Failed to request channel key'));
         }
         break;
       case 'copy':
-        setActionMessage(copyNickToClipboard(selectedUser.nick));
+        setActionMessage(copyNickToClipboard(selectedUser.nick, t));
         break;
       case 'ctcp_ping':
         activeIrc.sendCTCPRequest(selectedUser.nick, 'PING', Date.now().toString());
-        setActionMessage(`CTCP PING sent to ${selectedUser.nick}`);
+        setActionMessage(t('CTCP PING sent to {nick}').replace('{nick}', selectedUser.nick));
         break;
       case 'ctcp_version':
         activeIrc.sendCTCPRequest(selectedUser.nick, 'VERSION');
-        setActionMessage(`CTCP VERSION requested from ${selectedUser.nick}`);
+        setActionMessage(t('CTCP VERSION requested from {nick}').replace('{nick}', selectedUser.nick));
         break;
       case 'ctcp_time':
         activeIrc.sendCTCPRequest(selectedUser.nick, 'TIME');
-        setActionMessage(`CTCP TIME requested from ${selectedUser.nick}`);
+        setActionMessage(t('CTCP TIME requested from {nick}').replace('{nick}', selectedUser.nick));
         break;
       case 'dcc_chat':
         dccChatService.initiateChat(activeIrc, selectedUser.nick, network || activeIrc.getNetworkName());
-        setActionMessage(`DCC CHAT offer sent to ${selectedUser.nick}`);
+        setActionMessage(t('DCC CHAT offer sent to {nick}').replace('{nick}', selectedUser.nick));
         break;
       case 'dcc_send':
         activeIrc.sendRaw(`PRIVMSG ${selectedUser.nick} :\x01DCC SEND\x01`);
-        setActionMessage(`DCC SEND offer initiated to ${selectedUser.nick}`);
+        setActionMessage(t('DCC SEND offer initiated to {nick}').replace('{nick}', selectedUser.nick));
         break;
       case 'ignore':
         const isIgnored = userManagementService.isUserIgnored(
@@ -541,74 +566,82 @@ const getModeColor = (modes?: string[], colors?: any): string => {
         );
         if (isIgnored) {
           userManagementService.unignoreUser(selectedUser.nick, network);
-          setActionMessage(`${selectedUser.nick} unignored`);
+          setActionMessage(t('{nick} unignored').replace('{nick}', selectedUser.nick));
         } else {
           const mask = selectedUser.host
             ? `${selectedUser.nick}!*@${selectedUser.host}`
             : selectedUser.nick;
           userManagementService.ignoreUser(mask, undefined, network);
-          setActionMessage(`${selectedUser.nick} ignored`);
+          setActionMessage(t('{nick} ignored').replace('{nick}', selectedUser.nick));
         }
         break;
       case 'monitor_toggle':
         if (activeIrc.isMonitoring(selectedUser.nick)) {
           activeIrc.unmonitorNick(selectedUser.nick);
-          setActionMessage(`Stopped monitoring ${selectedUser.nick}`);
+          setActionMessage(t('Stopped monitoring {nick}').replace('{nick}', selectedUser.nick));
         } else {
           activeIrc.monitorNick(selectedUser.nick);
-          setActionMessage(`Monitoring ${selectedUser.nick}`);
+          setActionMessage(t('Monitoring {nick}').replace('{nick}', selectedUser.nick));
         }
         break;
 
       // Operator controls
       case 'give_voice':
         activeIrc.sendCommand(`MODE ${channelName} +v ${selectedUser.nick}`);
-        setActionMessage(`Gave voice to ${selectedUser.nick}`);
+        setActionMessage(t('Gave voice to {nick}').replace('{nick}', selectedUser.nick));
         break;
       case 'take_voice':
         activeIrc.sendCommand(`MODE ${channelName} -v ${selectedUser.nick}`);
-        setActionMessage(`Took voice from ${selectedUser.nick}`);
+        setActionMessage(t('Took voice from {nick}').replace('{nick}', selectedUser.nick));
         break;
       case 'give_halfop':
         activeIrc.sendCommand(`MODE ${channelName} +h ${selectedUser.nick}`);
-        setActionMessage(`Gave half-op to ${selectedUser.nick}`);
+        setActionMessage(t('Gave half-op to {nick}').replace('{nick}', selectedUser.nick));
         break;
       case 'take_halfop':
         activeIrc.sendCommand(`MODE ${channelName} -h ${selectedUser.nick}`);
-        setActionMessage(`Took half-op from ${selectedUser.nick}`);
+        setActionMessage(t('Took half-op from {nick}').replace('{nick}', selectedUser.nick));
         break;
       case 'give_op':
         activeIrc.sendCommand(`MODE ${channelName} +o ${selectedUser.nick}`);
-        setActionMessage(`Gave op to ${selectedUser.nick}`);
+        setActionMessage(t('Gave op to {nick}').replace('{nick}', selectedUser.nick));
         break;
       case 'take_op':
         activeIrc.sendCommand(`MODE ${channelName} -o ${selectedUser.nick}`);
-        setActionMessage(`Took op from ${selectedUser.nick}`);
+        setActionMessage(t('Took op from {nick}').replace('{nick}', selectedUser.nick));
         break;
       case 'kick':
         activeIrc.sendCommand(`KICK ${channelName} ${selectedUser.nick}`);
-        setActionMessage(`Kicked ${selectedUser.nick} from ${channelName}`);
+        setActionMessage(
+          t('Kicked {nick} from {channel}')
+            .replace('{nick}', selectedUser.nick)
+            .replace('{channel}', channelName)
+        );
         break;
       case 'kick_message':
         activeIrc.sendCommand(`KICK ${channelName} ${selectedUser.nick} :Kicked`);
-        setActionMessage(`Kicked ${selectedUser.nick} from ${channelName}`);
+        setActionMessage(
+          t('Kicked {nick} from {channel}')
+            .replace('{nick}', selectedUser.nick)
+            .replace('{channel}', channelName)
+        );
         break;
       case 'ban':
         const banMask = selectedUser.host ? `*!*@${selectedUser.host}` : `${selectedUser.nick}!*@*`;
         activeIrc.sendCommand(`MODE ${channelName} +b ${banMask}`);
-        setActionMessage(`Banned ${banMask}`);
+        setActionMessage(t('Banned {mask}').replace('{mask}', banMask));
         break;
       case 'kick_ban':
         const kbMask = selectedUser.host ? `*!*@${selectedUser.host}` : `${selectedUser.nick}!*@*`;
         activeIrc.sendCommand(`MODE ${channelName} +b ${kbMask}`);
         activeIrc.sendCommand(`KICK ${channelName} ${selectedUser.nick}`);
-        setActionMessage(`Kicked + banned ${selectedUser.nick}`);
+        setActionMessage(t('Kicked + banned {nick}').replace('{nick}', selectedUser.nick));
         break;
       case 'kick_ban_message':
         const kbmMask = selectedUser.host ? `*!*@${selectedUser.host}` : `${selectedUser.nick}!*@*`;
         activeIrc.sendCommand(`MODE ${channelName} +b ${kbmMask}`);
         activeIrc.sendCommand(`KICK ${channelName} ${selectedUser.nick} :Kicked`);
-        setActionMessage(`Kicked + banned ${selectedUser.nick}`);
+        setActionMessage(t('Kicked + banned {nick}').replace('{nick}', selectedUser.nick));
         break;
       default:
         break;
@@ -635,7 +668,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
       ]}>
       <View style={styles.header}>
         <Text style={styles.headerText}>
-          {users.length} {users.length === 1 ? 'user' : 'users'}
+          {users.length} {users.length === 1 ? t('user') : t('users')}
         </Text>
       </View>
       
@@ -643,7 +676,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search users..."
+          placeholder={t('Search users...')}
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -666,7 +699,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
         {filteredUsers.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>
-              {searchQuery ? 'No users found' : 'No users'}
+              {searchQuery ? t('No users found') : t('No users')}
             </Text>
           </View>
         ) : (
@@ -719,29 +752,29 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                   </Text>
                   {selectedUser.account && selectedUser.account !== '*' && (
                     <Text style={styles.contextMenuSubtitle}>
-                      Account: {selectedUser.account}
+                      {t('Account: {account}').replace('{account}', selectedUser.account)}
                     </Text>
                   )}
                 </View>
                 <View style={styles.contextMenuDivider} />
 
                 <View style={styles.contextMenuGroupHeader}>
-                  <Text style={styles.contextMenuGroupTitle}>Quick Actions</Text>
+                  <Text style={styles.contextMenuGroupTitle}>{t('Quick Actions')}</Text>
                 </View>
                 <TouchableOpacity
                   style={styles.contextMenuItem}
                   onPress={() => handleContextMenuAction('whois')}>
-                  <Text style={styles.contextMenuText}>WHOIS</Text>
+                  <Text style={styles.contextMenuText}>{t('WHOIS')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.contextMenuItem}
                   onPress={() => handleContextMenuAction('query')}>
-                  <Text style={styles.contextMenuText}>Open Query</Text>
+                  <Text style={styles.contextMenuText}>{t('Open Query')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.contextMenuItem}
                   onPress={() => handleContextMenuAction('copy')}>
-                  <Text style={styles.contextMenuText}>Copy Nickname</Text>
+                  <Text style={styles.contextMenuText}>{t('Copy Nickname')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.contextMenuItem}
@@ -753,8 +786,8 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                       selectedUser.host,
                       network
                     )
-                      ? 'Unignore User'
-                      : 'Ignore User'}
+                      ? t('Unignore User')
+                      : t('Ignore User')}
                   </Text>
                 </TouchableOpacity>
                 {activeIrc.capEnabledSet && activeIrc.capEnabledSet.has('monitor') && (
@@ -763,21 +796,21 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                     onPress={() => handleContextMenuAction('monitor_toggle')}>
                     <Text style={styles.contextMenuText}>
                       {activeIrc.isMonitoring(selectedUser.nick)
-                        ? 'Unmonitor Nick'
-                        : 'Monitor Nick'}
+                        ? t('Unmonitor Nick')
+                        : t('Monitor Nick')}
                     </Text>
                   </TouchableOpacity>
                 )}
                 <View style={styles.contextMenuDivider} />
 
                 <View style={styles.contextMenuGroupHeader}>
-                  <Text style={styles.contextMenuGroupTitle}>Encryption</Text>
+                  <Text style={styles.contextMenuGroupTitle}>{t('Encryption')}</Text>
                 </View>
                 <TouchableOpacity
                   style={styles.contextMenuItem}
                   onPress={() => setShowE2EGroup(prev => !prev)}>
                   <Text style={styles.contextMenuText}>
-                    {showE2EGroup ? 'E2E Encryption v' : 'E2E Encryption >'}
+                    {showE2EGroup ? t('E2E Encryption v') : t('E2E Encryption >')}
                   </Text>
                 </TouchableOpacity>
                 {showE2EGroup && (
@@ -785,34 +818,34 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                     <TouchableOpacity
                       style={styles.contextMenuItem}
                       onPress={() => handleContextMenuAction('enc_share')}>
-                      <Text style={styles.contextMenuText}>Share DM Key</Text>
+                      <Text style={styles.contextMenuText}>{t('Share DM Key')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.contextMenuItem}
                       onPress={() => handleContextMenuAction('enc_request')}>
-                      <Text style={styles.contextMenuText}>Request DM Key (36s)</Text>
+                      <Text style={styles.contextMenuText}>{t('Request DM Key (36s)')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.contextMenuItem}
                       onPress={() => handleContextMenuAction('enc_verify')}>
-                      <Text style={styles.contextMenuText}>Verify DM Key</Text>
+                      <Text style={styles.contextMenuText}>{t('Verify DM Key')}</Text>
                     </TouchableOpacity>
                     {allowQrVerification && (
                       <>
                         <TouchableOpacity
                           style={styles.contextMenuItem}
                           onPress={() => handleContextMenuAction('enc_qr_show_bundle')}>
-                          <Text style={styles.contextMenuText}>Share Key Bundle QR</Text>
+                          <Text style={styles.contextMenuText}>{t('Share Key Bundle QR')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           style={styles.contextMenuItem}
                           onPress={() => handleContextMenuAction('enc_qr_show_fingerprint')}>
-                          <Text style={styles.contextMenuText}>Show Fingerprint QR (Verify)</Text>
+                          <Text style={styles.contextMenuText}>{t('Show Fingerprint QR (Verify)')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           style={styles.contextMenuItem}
                           onPress={() => handleContextMenuAction('enc_qr_scan')}>
-                          <Text style={styles.contextMenuText}>Scan QR Code</Text>
+                          <Text style={styles.contextMenuText}>{t('Scan QR Code')}</Text>
                         </TouchableOpacity>
                       </>
                     )}
@@ -821,12 +854,12 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                         <TouchableOpacity
                           style={styles.contextMenuItem}
                           onPress={() => handleContextMenuAction('enc_share_file')}>
-                          <Text style={styles.contextMenuText}>Share Key File</Text>
+                          <Text style={styles.contextMenuText}>{t('Share Key File')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           style={styles.contextMenuItem}
                           onPress={() => handleContextMenuAction('enc_import_file')}>
-                          <Text style={styles.contextMenuText}>Import Key File</Text>
+                          <Text style={styles.contextMenuText}>{t('Import Key File')}</Text>
                         </TouchableOpacity>
                       </>
                     )}
@@ -835,12 +868,12 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                         <TouchableOpacity
                           style={styles.contextMenuItem}
                           onPress={() => handleContextMenuAction('enc_share_nfc')}>
-                          <Text style={styles.contextMenuText}>Share via NFC</Text>
+                          <Text style={styles.contextMenuText}>{t('Share via NFC')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           style={styles.contextMenuItem}
                           onPress={() => handleContextMenuAction('enc_receive_nfc')}>
-                          <Text style={styles.contextMenuText}>Receive via NFC</Text>
+                          <Text style={styles.contextMenuText}>{t('Receive via NFC')}</Text>
                         </TouchableOpacity>
                       </>
                     )}
@@ -849,12 +882,12 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                         <TouchableOpacity
                           style={styles.contextMenuItem}
                           onPress={() => handleContextMenuAction('chan_share')}>
-                          <Text style={styles.contextMenuText}>Share Channel Key</Text>
+                          <Text style={styles.contextMenuText}>{t('Share Channel Key')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           style={styles.contextMenuItem}
                           onPress={() => handleContextMenuAction('chan_request')}>
-                          <Text style={styles.contextMenuText}>Request Channel Key</Text>
+                          <Text style={styles.contextMenuText}>{t('Request Channel Key')}</Text>
                         </TouchableOpacity>
                       </>
                     )}
@@ -863,13 +896,13 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                 <View style={styles.contextMenuDivider} />
 
                 <View style={styles.contextMenuGroupHeader}>
-                  <Text style={styles.contextMenuGroupTitle}>CTCP</Text>
+                  <Text style={styles.contextMenuGroupTitle}>{t('CTCP')}</Text>
                 </View>
                 <TouchableOpacity
                   style={styles.contextMenuItem}
                   onPress={() => setShowCTCPGroup(prev => !prev)}>
                   <Text style={styles.contextMenuText}>
-                    {showCTCPGroup ? 'CTCP v' : 'CTCP >'}
+                    {showCTCPGroup ? t('CTCP v') : t('CTCP >')}
                   </Text>
                 </TouchableOpacity>
                 {showCTCPGroup && (
@@ -877,47 +910,47 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                     <TouchableOpacity
                       style={styles.contextMenuItem}
                       onPress={() => handleContextMenuAction('ctcp_ping')}>
-                      <Text style={styles.contextMenuText}>CTCP PING</Text>
+                      <Text style={styles.contextMenuText}>{t('CTCP PING')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.contextMenuItem}
                       onPress={() => handleContextMenuAction('ctcp_version')}>
-                      <Text style={styles.contextMenuText}>CTCP VERSION</Text>
+                      <Text style={styles.contextMenuText}>{t('CTCP VERSION')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.contextMenuItem}
                       onPress={() => handleContextMenuAction('ctcp_time')}>
-                      <Text style={styles.contextMenuText}>CTCP TIME</Text>
+                      <Text style={styles.contextMenuText}>{t('CTCP TIME')}</Text>
                     </TouchableOpacity>
                   </View>
                 )}
                 <View style={styles.contextMenuDivider} />
 
                 <View style={styles.contextMenuGroupHeader}>
-                  <Text style={styles.contextMenuGroupTitle}>DCC</Text>
+                  <Text style={styles.contextMenuGroupTitle}>{t('DCC')}</Text>
                 </View>
                 <TouchableOpacity
                   style={styles.contextMenuItem}
                   onPress={() => handleContextMenuAction('dcc_chat')}>
-                  <Text style={styles.contextMenuText}>Start DCC Chat</Text>
+                  <Text style={styles.contextMenuText}>{t('Start DCC Chat')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.contextMenuItem}
                   onPress={() => handleContextMenuAction('dcc_send')}>
-                  <Text style={styles.contextMenuText}>Offer DCC Send</Text>
+                  <Text style={styles.contextMenuText}>{t('Offer DCC Send')}</Text>
                 </TouchableOpacity>
 
                 {(isCurrentUserOp() || isCurrentUserHalfOp()) && (
                   <>
                     <View style={styles.contextMenuDivider} />
                     <View style={styles.contextMenuGroupHeader}>
-                      <Text style={styles.contextMenuGroupTitle}>Operator Controls</Text>
+                      <Text style={styles.contextMenuGroupTitle}>{t('Operator Controls')}</Text>
                     </View>
                     <TouchableOpacity
                       style={styles.contextMenuItem}
                       onPress={() => setShowOpsGroup(prev => !prev)}>
                       <Text style={[styles.contextMenuSubtitle, { fontWeight: '600' }]}>
-                        {showOpsGroup ? 'Operator Controls v' : 'Operator Controls >'}
+                        {showOpsGroup ? t('Operator Controls v') : t('Operator Controls >')}
                       </Text>
                     </TouchableOpacity>
 
@@ -929,13 +962,13 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                               <TouchableOpacity
                                 style={styles.contextMenuItem}
                                 onPress={() => handleContextMenuAction('take_voice')}>
-                                <Text style={styles.contextMenuText}>Take Voice</Text>
+                                <Text style={styles.contextMenuText}>{t('Take Voice')}</Text>
                               </TouchableOpacity>
                             ) : (
                               <TouchableOpacity
                                 style={styles.contextMenuItem}
                                 onPress={() => handleContextMenuAction('give_voice')}>
-                                <Text style={styles.contextMenuText}>Give Voice</Text>
+                                <Text style={styles.contextMenuText}>{t('Give Voice')}</Text>
                               </TouchableOpacity>
                             )}
                           </>
@@ -947,13 +980,13 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                               <TouchableOpacity
                                 style={styles.contextMenuItem}
                                 onPress={() => handleContextMenuAction('take_halfop')}>
-                                <Text style={styles.contextMenuText}>Take Half-Op</Text>
+                                <Text style={styles.contextMenuText}>{t('Take Half-Op')}</Text>
                               </TouchableOpacity>
                             ) : (
                               <TouchableOpacity
                                 style={styles.contextMenuItem}
                                 onPress={() => handleContextMenuAction('give_halfop')}>
-                                <Text style={styles.contextMenuText}>Give Half-Op</Text>
+                                <Text style={styles.contextMenuText}>{t('Give Half-Op')}</Text>
                               </TouchableOpacity>
                             )}
 
@@ -961,13 +994,13 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                               <TouchableOpacity
                                 style={styles.contextMenuItem}
                                 onPress={() => handleContextMenuAction('take_op')}>
-                                <Text style={styles.contextMenuText}>Take Op</Text>
+                                <Text style={styles.contextMenuText}>{t('Take Op')}</Text>
                               </TouchableOpacity>
                             ) : (
                               <TouchableOpacity
                                 style={styles.contextMenuItem}
                                 onPress={() => handleContextMenuAction('give_op')}>
-                                <Text style={styles.contextMenuText}>Give Op</Text>
+                                <Text style={styles.contextMenuText}>{t('Give Op')}</Text>
                               </TouchableOpacity>
                             )}
 
@@ -975,35 +1008,35 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                               style={styles.contextMenuItem}
                               onPress={() => handleContextMenuAction('kick')}>
                               <Text style={[styles.contextMenuText, styles.contextMenuWarning]}>
-                                Kick
+                                {t('Kick')}
                               </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                               style={styles.contextMenuItem}
                               onPress={() => handleContextMenuAction('kick_message')}>
                               <Text style={[styles.contextMenuText, styles.contextMenuWarning]}>
-                                Kick (with message)
+                                {t('Kick (with message)')}
                               </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                               style={styles.contextMenuItem}
                               onPress={() => handleContextMenuAction('ban')}>
                               <Text style={[styles.contextMenuText, styles.contextMenuDanger]}>
-                                Ban
+                                {t('Ban')}
                               </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                               style={styles.contextMenuItem}
                               onPress={() => handleContextMenuAction('kick_ban')}>
                               <Text style={[styles.contextMenuText, styles.contextMenuDanger]}>
-                                Kick + Ban
+                                {t('Kick + Ban')}
                               </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                               style={styles.contextMenuItem}
                               onPress={() => handleContextMenuAction('kick_ban_message')}>
                               <Text style={[styles.contextMenuText, styles.contextMenuDanger]}>
-                                Kick + Ban (with message)
+                                {t('Kick + Ban (with message)')}
                               </Text>
                             </TouchableOpacity>
                           </>
@@ -1023,7 +1056,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                   style={styles.contextMenuItem}
                   onPress={() => setShowContextMenu(false)}>
                   <Text style={[styles.contextMenuText, styles.contextMenuCancel]}>
-                    Cancel
+                    {t('Cancel')}
                   </Text>
                 </TouchableOpacity>
               </ScrollView>
@@ -1043,12 +1076,12 @@ const getModeColor = (modes?: string[], colors?: any): string => {
           <View style={styles.qrModal}>
             <View style={styles.qrModalHeader}>
               <Text style={styles.qrModalTitle}>
-                {qrType === 'bundle' ? 'Share Key Bundle' : 'Fingerprint QR'}
+                {qrType === 'bundle' ? t('Share Key Bundle') : t('Fingerprint QR')}
               </Text>
               <Text style={styles.qrModalSubtitle}>
                 {qrType === 'bundle'
-                  ? 'Scan to import encryption key'
-                  : 'Scan to verify out-of-band'}
+                  ? t('Scan to import encryption key')
+                  : t('Scan to verify out-of-band')}
               </Text>
             </View>
             <View style={styles.qrCodeContainer}>
@@ -1066,9 +1099,9 @@ const getModeColor = (modes?: string[], colors?: any): string => {
               style={styles.qrModalButton}
               onPress={() => {
                 if (qrPayload) Clipboard.setString(qrPayload);
-                setActionMessage('QR payload copied');
+                setActionMessage(t('QR payload copied'));
               }}>
-              <Text style={styles.qrModalButtonText}>Copy Payload</Text>
+              <Text style={styles.qrModalButtonText}>{t('Copy Payload')}</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -1089,16 +1122,16 @@ const getModeColor = (modes?: string[], colors?: any): string => {
           ) : (
             <View style={styles.scanFallback}>
               <Text style={styles.contextMenuText}>
-                {scanError || 'Camera unavailable'}
+                {scanError || t('Camera unavailable')}
               </Text>
             </View>
           )}
           <View style={styles.scanOverlay}>
-            <Text style={styles.scanText}>Scan a fingerprint QR</Text>
+            <Text style={styles.scanText}>{t('Scan a fingerprint QR')}</Text>
             <TouchableOpacity
               style={styles.scanClose}
               onPress={() => setShowKeyScan(false)}>
-              <Text style={styles.contextMenuText}>Close</Text>
+              <Text style={styles.contextMenuText}>{t('Close')}</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -123,8 +123,8 @@ android {
         applicationId = "com.androidircx"
         minSdkVersion = rootProject.ext.minSdkVersion
         targetSdkVersion = rootProject.ext.targetSdkVersion
-        versionCode = 47
-        versionName = "1.4.5"
+        versionCode = 48
+        versionName = "1.4.6"
     }
     signingConfigs {
         debug {
@@ -199,3 +199,5 @@ dependencies {
     implementation("com.google.android.play:integrity:1.6.0")
 }
 
+// React Native Vector Icons
+apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")

@@ -1,5 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { secureStorageService } from './SecureStorageService';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 export interface IdentityProfile {
   id: string;
@@ -144,7 +147,7 @@ class IdentityProfilesService {
     await this.ensureLoaded();
     const index = this.profiles.findIndex(p => p.id === id);
     if (index === -1) {
-      throw new Error(`Profile with id ${id} not found`);
+      throw new Error(t('Profile with id {id} not found', { id }));
     }
     this.profiles[index] = { ...this.profiles[index], ...updates };
     await this.persist();

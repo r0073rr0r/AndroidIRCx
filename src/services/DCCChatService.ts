@@ -1,5 +1,8 @@
 import TcpSocket, { Server, Socket } from 'react-native-tcp-socket';
 import { IRCMessage } from './IRCService';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 type DCCSessionStatus = 'pending' | 'offering' | 'connecting' | 'connected' | 'closed' | 'failed';
 type DCCDirection = 'incoming' | 'outgoing';
@@ -107,7 +110,7 @@ class DCCChatService {
         id: this.nextId('dccmsg'),
         type: 'message',
         from: session.peerNick,
-        text: '*** DCC CHAT connected',
+        text: t('*** DCC CHAT connected'),
         timestamp: Date.now(),
         channel: session.peerNick,
         network: session.networkId,
@@ -146,7 +149,7 @@ class DCCChatService {
         id: this.nextId('dccmsg'),
         type: 'message',
         from: session.peerNick,
-        text: '*** DCC CHAT connected',
+        text: t('*** DCC CHAT connected'),
         timestamp: Date.now(),
         channel: session.peerNick,
         network: session.networkId,
@@ -180,7 +183,7 @@ class DCCChatService {
     this.appendMessage(sessionId, {
       id: this.nextId('dccmsg'),
       type: 'message',
-      from: 'You',
+      from: t('You'),
       text,
       timestamp: Date.now(),
       channel: session.peerNick,

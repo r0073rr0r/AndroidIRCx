@@ -1,4 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 export interface BackupPayload {
   version: number;
@@ -64,7 +67,7 @@ class DataBackupService {
   async importAll(json: string): Promise<void> {
     const parsed: BackupPayload = JSON.parse(json);
     if (!parsed || typeof parsed !== 'object' || !parsed.data) {
-      throw new Error('Invalid backup format');
+      throw new Error(t('Invalid backup format'));
     }
     const pairs = Object.entries(parsed.data).map(([key, value]) => [key, value] as [string, string | null]);
     await AsyncStorage.multiSet(pairs);

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Switch, TextInput, 
 import { scriptingService, ScriptConfig, ScriptLogEntry } from '../services/ScriptingService';
 import { adRewardService } from '../services/AdRewardService';
 import { useTheme } from '../hooks/useTheme';
+import { useT } from '../i18n/transifex';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
@@ -14,6 +15,7 @@ interface Props {
 
 export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
   const { colors } = useTheme();
+  const t = useT();
   const styles = createStyles(colors);
   const [scripts, setScripts] = useState<ScriptConfig[]>([]);
   const [loggingEnabled, setLoggingEnabled] = useState<boolean>(scriptingService.isLoggingEnabled());
@@ -101,7 +103,7 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
       await scriptingService.setEnabled(id, enabled);
       setScripts(scriptingService.list());
     } catch (error) {
-      Alert.alert('Cannot Enable Script', error instanceof Error ? error.message : 'Unknown error');
+      Alert.alert(t('Cannot Enable Script'), error instanceof Error ? error.message : 'Unknown error');
       setScripts(scriptingService.list());
     }
   };
@@ -121,13 +123,13 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
         console.log('Show ad result:', success);
         if (success) {
           // Ad will call the reward callback automatically
-          Alert.alert('Thank You!', 'You earned scripting time!');
+          Alert.alert(t('Thank You!'), t('You earned scripting time!'));
         } else {
-          Alert.alert('Ad Failed', 'Could not show the ad. Please try again.');
+          Alert.alert(t('Ad Failed'), t('Could not show the ad. Please try again.'));
         }
       } catch (error) {
         console.error('Error showing ad:', error);
-        Alert.alert('Error', error instanceof Error ? error.message : 'Failed to show ad');
+        Alert.alert(t('Error'), error instanceof Error ? error.message : t('Failed to show ad'));
       } finally {
         setShowingAd(false);
       }
@@ -139,8 +141,8 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
     const result = await adRewardService.manualLoadAd();
     console.log('Manual load result:', result);
     Alert.alert(
-      result.success ? 'Loading Ad' : 'Cannot Load Ad',
-      result.message
+      result.success ? t('Loading Ad') : t('Cannot Load Ad'),
+      t(result.messageKey, result.messageParams as Record<string, any>)
     );
   };
 
@@ -173,7 +175,7 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
   const handleNewScript = () => {
     setEditing({
       id: `custom-${Date.now()}`,
-      name: 'New Script',
+      name: t('New Script'),
       enabled: false,
       code: '// module.exports = { onMessage: (msg) => { /* ... */ } };',
       config: {},
@@ -204,7 +206,7 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
   const handleLint = () => {
     if (!editing) return;
     const result = scriptingService.lint(editing.code);
-    Alert.alert(result.ok ? 'Lint Passed' : 'Syntax Error', result.message);
+    Alert.alert(result.ok ? t('Lint Passed') : t('Syntax Error'), result.message);
   };
   
   const highlightPartsFallback = (code: string) => {
@@ -294,13 +296,13 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
       </View>
       <View style={styles.row}>
         <TouchableOpacity style={styles.button} onPress={() => handleEdit(item)}>
-          <Text style={styles.buttonText}>Edit</Text>
+          <Text style={styles.buttonText}>{t('Edit')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, styles.danger]} onPress={() => removeScript(item.id)}>
-          <Text style={[styles.buttonText, styles.dangerText]}>Delete</Text>
+          <Text style={[styles.buttonText, styles.dangerText]}>{t('Delete')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={() => handleTestHook(item.id, 'onMessage')}>
-          <Text style={styles.buttonText}>Test</Text>
+          <Text style={styles.buttonText}>{t('Test')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -310,21 +312,21 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Scripts</Text>
+          <Text style={styles.headerTitle}>{t('Scripts')}</Text>
           <TouchableOpacity onPress={onClose}>
-            <Text style={styles.close}>Close</Text>
+            <Text style={styles.close}>{t('Close')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Scripting Time & Ad Reward Section */}
         <View style={styles.adRewardSection}>
           <View style={styles.timeDisplay}>
-            <Text style={styles.timeLabel}>Scripting Time Remaining:</Text>
+            <Text style={styles.timeLabel}>{t('Scripting Time Remaining:')}</Text>
             <Text style={[styles.timeValue, !hasTime && styles.timeExpired]}>{remainingTime}</Text>
           </View>
           {adUnitType === 'Fallback' && (
             <Text style={[styles.subtitle, { marginBottom: 8, fontStyle: 'italic' }]}>
-              Using fallback ad unit
+              {t('Using fallback ad unit')}
             </Text>
           )}
           <TouchableOpacity
@@ -337,12 +339,12 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
             ) : (
               <Text style={styles.watchAdButtonText}>
                 {adReady
-                  ? 'Watch Ad (+60 min)'
+                  ? t('Watch Ad (+60 min)')
                   : adCooldown
-                    ? `Cooldown (${cooldownSeconds}s)`
+                    ? t('Cooldown ({cooldownSeconds}s)').replace('{cooldownSeconds}', cooldownSeconds.toString())
                     : adLoading
-                      ? 'Loading Ad...'
-                      : 'Request Ad'}
+                      ? t('Loading Ad...')
+                      : t('Request Ad')}
               </Text>
             )}
           </TouchableOpacity>
@@ -350,69 +352,69 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
         {!hasTime && (
           <View style={styles.warningBox}>
             <Text style={styles.warningText}>
-              No scripting time available. Watch an ad to gain scripting access. Scripts will be automatically disabled when time runs out.
+              {t('No scripting time available. Watch an ad to gain scripting access. Scripts will be automatically disabled when time runs out.')}
             </Text>
           </View>
         )}
         {!adReady && !adLoading && !adCooldown && (
           <View style={[styles.warningBox, { backgroundColor: '#2196F3' + '20', borderLeftColor: '#2196F3' }]}>
             <Text style={[styles.warningText, { color: '#2196F3' }]}>
-              Tap "Request Ad" to load an ad from Google. First load may take a few moments.
+              {t('Tap "Request Ad" to load an ad from Google. First load may take a few moments.')}
             </Text>
           </View>
         )}
         {adCooldown && (
           <View style={[styles.warningBox, { backgroundColor: '#FF9800' + '20', borderLeftColor: '#FF9800' }]}>
             <Text style={[styles.warningText, { color: '#FF9800' }]}>
-              Ads temporarily unavailable. The app works fine without them. Retrying in {cooldownSeconds}s...
+              {t('Ads temporarily unavailable. The app works fine without them. Retrying in {cooldownSeconds}s...').replace('{cooldownSeconds}', cooldownSeconds.toString())}
             </Text>
           </View>
         )}
 
         <View style={styles.row}>
           <TouchableOpacity style={styles.button} onPress={handleNewScript}>
-            <Text style={styles.buttonText}>New Script</Text>
+            <Text style={styles.buttonText}>{t('New Script')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={installBuiltIns}>
-            <Text style={styles.buttonText}>Install Built-ins</Text>
+            <Text style={styles.buttonText}>{t('Install Built-ins')}</Text>
           </TouchableOpacity>
           <View style={styles.switchRow}>
-            <Text style={styles.subtitle}>Logging</Text>
+            <Text style={styles.subtitle}>{t('Logging')}</Text>
             <Switch value={loggingEnabled} onValueChange={toggleLogging} />
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>Repository</Text>
+        <Text style={styles.sectionTitle}>{t('Repository')}</Text>
         {repo.length === 0 ? (
-          <Text style={styles.subtitle}>No scripts in repository.</Text>
+          <Text style={styles.subtitle}>{t('No scripts in repository.')}</Text>
         ) : null}
 
         <FlatList
           data={scripts}
           keyExtractor={(item) => item.id}
           renderItem={renderScript}
-          ListEmptyComponent={<Text style={styles.subtitle}>No scripts installed.</Text>}
+          ListEmptyComponent={<Text style={styles.subtitle}>{t('No scripts installed.')}</Text>}
           contentContainerStyle={styles.list}
         />
 
         <View style={styles.logHeader}>
-          <Text style={styles.title}>Script Logs</Text>
+          <Text style={styles.title}>{t('Script Logs')}</Text>
           <TouchableOpacity onPress={clearLogs}>
-            <Text style={styles.buttonText}>Clear</Text>
+            <Text style={styles.buttonText}>{t('Clear')}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.switchRow}>
-          <Text style={styles.subtitle}>Filter by script</Text>
+          <Text style={styles.subtitle}>{t('Filter by script')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="script id"
+            placeholder={t('script id')}
             placeholderTextColor={colors.textSecondary}
             value={logFilter || ''}
             onChangeText={(t) => setLogFilter(t || null)}
           />
         </View>
         <ScrollView style={styles.logBox}>
-          {filteredLogs.length === 0 && <Text style={styles.subtitle}>No logs yet.</Text>}
+          {filteredLogs.length === 0 && <Text style={styles.subtitle}>{t('No logs yet.')}</Text>}
           {filteredLogs.map((log) => (
             <Text key={log.id} style={styles.logLine}>
               [{new Date(log.ts).toLocaleTimeString()}] {log.level.toUpperCase()} {log.scriptId ? `[${log.scriptId}]` : ''} {log.message}
@@ -424,27 +426,27 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
       <Modal visible={showEditor} animationType="slide" onRequestClose={() => setShowEditor(false)}>
         <View style={styles.container}>
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Edit Script</Text>
+            <Text style={styles.headerTitle}>{t('Edit Script')}</Text>
             <TouchableOpacity onPress={() => setShowEditor(false)}>
-              <Text style={styles.close}>Close</Text>
+              <Text style={styles.close}>{t('Close')}</Text>
             </TouchableOpacity>
           </View>
           {editing && (
             <>
-              <Text style={styles.label}>Name</Text>
+              <Text style={styles.label}>{t('Name')}</Text>
               <TextInput
                 style={styles.input}
                 value={editing.name}
                 onChangeText={(t) => setEditing({ ...editing, name: t })}
               />
               <View style={styles.switchRow}>
-                <Text style={styles.subtitle}>Enabled</Text>
+                <Text style={styles.subtitle}>{t('Enabled')}</Text>
                 <Switch value={editing.enabled} onValueChange={(v) => setEditing({ ...editing, enabled: v })} />
                 <View style={{ width: 16 }} />
-                <Text style={styles.subtitle}>Highlight</Text>
+                <Text style={styles.subtitle}>{t('Highlight')}</Text>
                 <Switch value={showHighlight} onValueChange={setShowHighlight} />
               </View>
-              <Text style={styles.label}>Code</Text>
+              <Text style={styles.label}>{t('Code')}</Text>
               <View style={styles.codeEditorWrapper}>
                 {showHighlight && (
                   <ScrollView
@@ -481,7 +483,7 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
                   caretColor={colors.primary}
                 />
               </View>
-              <Text style={styles.label}>Config (JSON)</Text>
+              <Text style={styles.label}>{t('Config (JSON)')}</Text>
               <TextInput
                 style={styles.codeInput}
                 multiline
@@ -491,15 +493,15 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
                     const parsed = JSON.parse(t || '{}');
                     setEditing({ ...editing, config: parsed });
                   } catch (err) {
-                    Alert.alert('Invalid JSON', String(err));
+                    Alert.alert(t('Invalid JSON'), String(err));
                   }
                 }}
               />
               <TouchableOpacity style={styles.button} onPress={handleSaveScript}>
-                <Text style={styles.buttonText}>Save</Text>
+                <Text style={styles.buttonText}>{t('Save')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.button} onPress={handleLint}>
-                <Text style={styles.buttonText}>Lint</Text>
+                <Text style={styles.buttonText}>{t('Lint')}</Text>
               </TouchableOpacity>
             </>
           )}

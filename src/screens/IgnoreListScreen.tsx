@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { userManagementService, IgnoredUser } from '../services/UserManagementService';
+import { useT } from '../i18n/transifex';
 
 interface IgnoreListScreenProps {
   visible: boolean;
@@ -22,6 +23,7 @@ export const IgnoreListScreen: React.FC<IgnoreListScreenProps> = ({
   network,
   onClose,
 }) => {
+  const t = useT();
   const [ignoredUsers, setIgnoredUsers] = useState<IgnoredUser[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newMask, setNewMask] = useState('');
@@ -49,23 +51,23 @@ export const IgnoreListScreen: React.FC<IgnoreListScreenProps> = ({
       setNewReason('');
       setShowAddModal(false);
       loadIgnoredUsers();
-      Alert.alert('Success', 'User added to ignore list');
+      Alert.alert(t('Success'), t('User added to ignore list'));
     }
   };
 
   const handleRemoveIgnore = async (mask: string) => {
     Alert.alert(
-      'Remove from Ignore List',
-      `Remove ${mask}?`,
+      t('Remove from Ignore List'),
+      t('Remove {mask}?').replace('{mask}', mask),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'Remove',
+          text: t('Remove'),
           style: 'destructive',
           onPress: async () => {
             await userManagementService.unignoreUser(mask, network);
             loadIgnoredUsers();
-            Alert.alert('Success', 'User removed from ignore list');
+            Alert.alert(t('Success'), t('User removed from ignore list'));
           },
         },
       ]
@@ -82,15 +84,15 @@ export const IgnoreListScreen: React.FC<IgnoreListScreenProps> = ({
       onRequestClose={onClose}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Ignore List</Text>
+          <Text style={styles.headerTitle}>{t('Ignore List')}</Text>
           <View style={styles.headerActions}>
             <TouchableOpacity
               style={styles.addButton}
               onPress={() => setShowAddModal(true)}>
-              <Text style={styles.addButtonText}>+ Add</Text>
+              <Text style={styles.addButtonText}>{t('+ Add')}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Close</Text>
+              <Text style={styles.closeButtonText}>{t('Close')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -98,9 +100,9 @@ export const IgnoreListScreen: React.FC<IgnoreListScreenProps> = ({
         <ScrollView style={styles.content}>
           {ignoredUsers.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No ignored users</Text>
+              <Text style={styles.emptyText}>{t('No ignored users')}</Text>
               <Text style={styles.emptySubtext}>
-                Add users to ignore their messages
+                {t('Add users to ignore their messages')}
               </Text>
             </View>
           ) : (
@@ -112,13 +114,13 @@ export const IgnoreListScreen: React.FC<IgnoreListScreenProps> = ({
                     <Text style={styles.ignoreReason}>{ignored.reason}</Text>
                   )}
                   <Text style={styles.ignoreDate}>
-                    Added {new Date(ignored.addedAt).toLocaleDateString()}
+                    {t('Added {date}').replace('{date}', new Date(ignored.addedAt).toLocaleDateString())}
                   </Text>
                 </View>
                 <TouchableOpacity
                   style={styles.removeButton}
                   onPress={() => handleRemoveIgnore(ignored.mask)}>
-                  <Text style={styles.removeButtonText}>Remove</Text>
+                  <Text style={styles.removeButtonText}>{t('Remove')}</Text>
                 </TouchableOpacity>
               </View>
             ))
@@ -133,18 +135,18 @@ export const IgnoreListScreen: React.FC<IgnoreListScreenProps> = ({
           onRequestClose={() => setShowAddModal(false)}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Add to Ignore List</Text>
+              <Text style={styles.modalTitle}>{t('Add to Ignore List')}</Text>
               <Text style={styles.modalDescription}>
-                Enter a mask to ignore. Examples:
-                {'\n'}• nick (ignore specific nick)
-                {'\n'}• *!*@host.com (ignore all from host)
-                {'\n'}• nick!*@* (ignore specific user)
+                {t('Enter a mask to ignore. Examples:')}
+                {'\n'}• {t('nick (ignore specific nick)')}
+                {'\n'}• {t('*!*@host.com (ignore all from host)')}
+                {'\n'}• {t('nick!*@* (ignore specific user)')}
               </Text>
               <TextInput
                 style={styles.input}
                 value={newMask}
                 onChangeText={setNewMask}
-                placeholder="nick or mask (e.g., *!*@host.com)"
+                placeholder={t('nick or mask (e.g., *!*@host.com)')}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
@@ -152,7 +154,7 @@ export const IgnoreListScreen: React.FC<IgnoreListScreenProps> = ({
                 style={[styles.input, styles.inputMultiline]}
                 value={newReason}
                 onChangeText={setNewReason}
-                placeholder="Reason (optional)"
+                placeholder={t('Reason (optional)')}
                 multiline
               />
               <View style={styles.modalButtons}>
@@ -163,13 +165,13 @@ export const IgnoreListScreen: React.FC<IgnoreListScreenProps> = ({
                     setNewMask('');
                     setNewReason('');
                   }}>
-                  <Text style={styles.modalButtonText}>Cancel</Text>
+                  <Text style={styles.modalButtonText}>{t('Cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.modalButton, styles.modalButtonPrimary]}
                   onPress={handleAddIgnore}>
                   <Text style={[styles.modalButtonText, styles.modalButtonTextPrimary]}>
-                    Add
+                    {t('Add')}
                   </Text>
                 </TouchableOpacity>
               </View>

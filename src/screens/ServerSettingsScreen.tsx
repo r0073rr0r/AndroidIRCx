@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { IRCServerConfig, settingsService } from '../services/SettingsService';
+import { useT } from '../i18n/transifex';
 
 interface ServerSettingsScreenProps {
   networkId: string;
@@ -26,6 +27,7 @@ export const ServerSettingsScreen: React.FC<ServerSettingsScreenProps> = ({
   onSave,
   onCancel,
 }) => {
+  const t = useT();
   const [name, setName] = useState('');
   const [hostname, setHostname] = useState('');
   const [port, setPort] = useState('6697');
@@ -63,10 +65,10 @@ export const ServerSettingsScreen: React.FC<ServerSettingsScreenProps> = ({
         setPassword(server.password || '');
         setFavorite(Boolean(server.favorite));
       } else {
-        setError('Server not found');
+        setError(t('Server not found'));
       }
     } catch (err) {
-      setError('Failed to load server');
+      setError(t('Failed to load server'));
       console.error('Error loading server:', err);
     } finally {
       setLoading(false);
@@ -75,13 +77,13 @@ export const ServerSettingsScreen: React.FC<ServerSettingsScreenProps> = ({
 
   const handleSave = () => {
     if (!hostname.trim()) {
-      Alert.alert('Error', 'Please enter a hostname');
+      Alert.alert(t('Error'), t('Please enter a hostname'));
       return;
     }
 
     const portNum = parseInt(port, 10);
     if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
-      Alert.alert('Error', 'Please enter a valid port number (1-65535)');
+      Alert.alert(t('Error'), t('Please enter a valid port number (1-65535)'));
       return;
     }
 
@@ -108,49 +110,49 @@ export const ServerSettingsScreen: React.FC<ServerSettingsScreenProps> = ({
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={onCancel} style={styles.cancelButton}>
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={styles.cancelText}>{t('Cancel')}</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Server Settings</Text>
+          <Text style={styles.title}>{t('Server Settings')}</Text>
           <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
-            <Text style={styles.saveText}>Save</Text>
+            <Text style={styles.saveText}>{t('Save')}</Text>
           </TouchableOpacity>
         </View>
 
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#2196F3" />
-            <Text style={styles.loadingText}>Loading...</Text>
+            <Text style={styles.loadingText}>{t('Loading...')}</Text>
           </View>
         ) : error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity onPress={loadServer} style={styles.retryButton}>
-              <Text style={styles.retryText}>Retry</Text>
+              <Text style={styles.retryText}>{t('Retry')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <ScrollView style={styles.content}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Connection</Text>
-          
+          <Text style={styles.sectionTitle}>{t('Connection')}</Text>
+
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Display Name (Optional)</Text>
+            <Text style={styles.label}>{t('Display Name (Optional)')}</Text>
             <TextInput
               style={styles.input}
               value={name}
               onChangeText={setName}
-              placeholder="Server display name"
+              placeholder={t('Server display name')}
               placeholderTextColor="#9E9E9E"
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Hostname *</Text>
+            <Text style={styles.label}>{t('Hostname *')}</Text>
             <TextInput
               style={styles.input}
               value={hostname}
               onChangeText={setHostname}
-              placeholder="irc.example.com"
+              placeholder={t('irc.example.com')}
               placeholderTextColor="#9E9E9E"
               autoCapitalize="none"
               autoCorrect={false}
@@ -158,25 +160,25 @@ export const ServerSettingsScreen: React.FC<ServerSettingsScreenProps> = ({
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Port *</Text>
+            <Text style={styles.label}>{t('Port *')}</Text>
             <TextInput
               style={styles.input}
               value={port}
               onChangeText={setPort}
-              placeholder="6697"
+              placeholder={t('6697')}
               placeholderTextColor="#9E9E9E"
               keyboardType="numeric"
             />
-            <Text style={styles.hint}>Standard ports: 6667 (plain), 6697 (SSL/TLS)</Text>
+            <Text style={styles.hint}>{t('Standard ports: 6667 (plain), 6697 (SSL/TLS)')}</Text>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Security</Text>
-          
+          <Text style={styles.sectionTitle}>{t('Security')}</Text>
+
           <View style={styles.switchGroup}>
             <View style={styles.switchRow}>
-              <Text style={styles.switchLabel}>Use SSL/TLS</Text>
+              <Text style={styles.switchLabel}>{t('Use SSL/TLS')}</Text>
               <Switch
                 value={ssl}
                 onValueChange={setSsl}
@@ -185,14 +187,14 @@ export const ServerSettingsScreen: React.FC<ServerSettingsScreenProps> = ({
               />
             </View>
             <Text style={styles.hint}>
-              Enable for secure connections (recommended for port 6697)
+              {t('Enable for secure connections (recommended for port 6697)')}
             </Text>
           </View>
 
           {ssl && (
             <View style={styles.switchGroup}>
               <View style={styles.switchRow}>
-                <Text style={styles.switchLabel}>Reject Unauthorized Certificates</Text>
+                <Text style={styles.switchLabel}>{t('Reject Unauthorized Certificates')}</Text>
                 <Switch
                   value={rejectUnauthorized}
                   onValueChange={setRejectUnauthorized}
@@ -201,34 +203,34 @@ export const ServerSettingsScreen: React.FC<ServerSettingsScreenProps> = ({
                 />
               </View>
               <Text style={styles.hint}>
-                Leave on (recommended). Turn off only for self-signed/expired certs.
+                {t('Leave on (recommended). Turn off only for self-signed/expired certs.')}
               </Text>
             </View>
           )}
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Authentication</Text>
-          
+          <Text style={styles.sectionTitle}>{t('Authentication')}</Text>
+
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Server Password (Optional)</Text>
+            <Text style={styles.label}>{t('Server Password (Optional)')}</Text>
             <TextInput
               style={styles.input}
               value={password}
               onChangeText={setPassword}
-              placeholder="Server connection password"
+              placeholder={t('Server connection password')}
               placeholderTextColor="#9E9E9E"
               secureTextEntry
               autoCapitalize="none"
             />
             <Text style={styles.hint}>
-              Some servers require a password to connect
+              {t('Some servers require a password to connect')}
             </Text>
           </View>
 
           <View style={styles.switchGroup}>
             <View style={styles.switchRow}>
-              <Text style={styles.switchLabel}>Favorite Server</Text>
+              <Text style={styles.switchLabel}>{t('Favorite Server')}</Text>
               <Switch
                 value={favorite}
                 onValueChange={setFavorite}
@@ -237,7 +239,7 @@ export const ServerSettingsScreen: React.FC<ServerSettingsScreenProps> = ({
               />
             </View>
             <Text style={styles.hint}>
-              Mark this server as the preferred choice for this network.
+              {t('Mark this server as the preferred choice for this network.')}
             </Text>
           </View>
         </View>

@@ -4,7 +4,15 @@ import * as RNLocalize from 'react-native-localize';
 
 import { bundledTranslations } from './translations';
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, TRANSIFEX_CDS_HOST, TRANSIFEX_NATIVE_TOKEN } from './config';
-import { settingsService } from '../services/SettingsService';
+
+const txWithT = tx as typeof tx & {
+  t?: (key: string, params?: Record<string, unknown>) => string;
+};
+if (typeof txWithT.t !== 'function') {
+  txWithT.t = tx.translate.bind(tx);
+}
+
+const getSettingsService = async () => (await import('../services/SettingsService')).settingsService;
 
 const resolveLocale = (preferred?: string): string => {
   if (preferred && preferred !== 'system') {
@@ -56,6 +64,7 @@ export const initTransifex = async (): Promise<void> => {
   });
 
   preloadBundledTranslations();
+  const settingsService = await getSettingsService();
   const preferredLocale = await settingsService.getSetting('appLanguage', 'system');
   await applyTransifexLocale(preferredLocale);
 };
@@ -66,19 +75,28 @@ export const applyTransifexLocale = async (preferred?: string): Promise<void> =>
   if (!TRANSIFEX_NATIVE_TOKEN) {
     return;
   }
-  await tx.fetchTranslations(locale, { refresh: true });
+  const bundled = bundledTranslations[locale];
+  if (bundled && Object.keys(bundled).length > 0) {
+    return;
+  }
+  try {
+    await tx.fetchTranslations(locale, { refresh: true });
+  } catch (error) {
+    console.warn('Transifex translation fetch failed:', error);
+  }
 };
 
 export const listenToLocaleChanges = (): (() => void) => {
   const handler = () => {
-    settingsService
-      .getSetting('appLanguage', 'system')
-      .then(preferred => {
-        if (preferred && preferred !== 'system') {
-          return;
-        }
-        return applyTransifexLocale('system');
-      })
+    getSettingsService()
+      .then(settingsService =>
+        settingsService.getSetting('appLanguage', 'system').then(preferred => {
+          if (preferred && preferred !== 'system') {
+            return;
+          }
+          return applyTransifexLocale('system');
+        })
+      )
       .catch(() => {});
   };
 
@@ -99,4 +117,4 @@ export const listenToLocaleChanges = (): (() => void) => {
   return () => removeListener('change', handler);
 };
 
-export { TXProvider, useT, tx };
+export { TXProvider, useT, txWithT as tx };

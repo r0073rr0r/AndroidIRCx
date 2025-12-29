@@ -1,4 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 export interface ThemeColors {
   // Background colors
@@ -97,7 +100,7 @@ export interface Theme {
 
 const DARK_THEME: Theme = {
   id: 'dark',
-  name: 'Dark',
+  name: t('Dark'),
   isCustom: false,
   colors: {
     background: '#121212',
@@ -176,7 +179,7 @@ const DARK_THEME: Theme = {
 
 const LIGHT_THEME: Theme = {
   id: 'light',
-  name: 'Light',
+  name: t('Light'),
   isCustom: false,
   colors: {
     background: '#FFFFFF',

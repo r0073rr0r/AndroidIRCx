@@ -1,6 +1,9 @@
 {
   "1080": {
-    "string": ""
+    "string": "1080"
+  },
+  "6697": {
+    "string": "6697"
   },
   "App lock disabled": {
     "string": "Закључавање апликације је онемогућено"
@@ -8,521 +11,20 @@
   "Enable app lock first.": {
     "string": "Прво омогућите закључавање апликације."
   },
-  "DCC Transfer Complete": {
-    "string": "Пренос DCC-а је завршен"
-  },
-  "{filename} received ({bytes} bytes).": {
-    "string": "Примљено {filename} ( {bytes} бајтова)."
-  },
-  "DCC Transfer Failed": {
-    "string": "Пренос DCC-а није успео"
-  },
-  "Transfer failed.": {
-    "string": "Пренос није успео."
-  },
-  "No Network": {
-    "string": "Нема мреже"
-  },
-  "No network available. Please configure a network first.": {
-    "string": "Нема доступне мреже. Прво конфигуришите мрежу."
-  },
   "Cancel": {
     "string": "Откажи"
-  },
-  "Configure": {
-    "string": "Конфигуриши"
-  },
-  "No Server Configured": {
-    "string": "Није конфигурисан сервер"
-  },
-  "No server configured for \"{networkName}\". Would you like to configure one?": {
-    "string": "Није конфигурисан сервер за „ {networkName} “. Да ли желите да га конфигуришете?"
   },
   "Error": {
     "string": "Грешка"
   },
-  "No server configured for \"{networkName}\"": {
-    "string": "Није конфигурисан сервер за „ {networkName} “"
-  },
-  "Connection failed": {
-    "string": "Повезивање није успело"
-  },
-  "{message}\n\nTried: {hostInfo}\nCheck host/port, SSL, and network reachability.": {
-    "string": "{message}\n\n Пробано: {hostInfo}\n Проверите хост/порт, SSL и доступност мреже."
-  },
-  "Not Connected": {
-    "string": "Није повезано"
-  },
-  "Please connect to a server first": {
-    "string": "Прво се повежите са сервером"
-  },
-  "Exit Application": {
-    "string": "Излаз из апликације"
-  },
-  "Are you sure you want to exit? This will disconnect from the server.": {
-    "string": "Да ли сте сигурни да желите да изађете? Ово ће вас искључити са сервера."
-  },
-  "Exit": {
-    "string": "Излаз"
-  },
-  "Disconnected": {
-    "string": "Искључено"
-  },
-  "You can now close the app from the app switcher.": {
-    "string": "Сада можете да затворите апликацију из пребацивача апликација."
-  },
-  "Network Not Found": {
-    "string": "Мрежа није пронађена"
-  },
-  "Cannot find saved configuration for \"{networkId}\". Please configure it first.": {
-    "string": "Није могуће пронаћи сачувану конфигурацију за „ {networkId} “. Прво је конфигуришите."
-  },
-  "DCC Send Error": {
-    "string": "Грешка при слању DCC-а"
-  },
-  "Failed to send file": {
-    "string": "Слање датотеке није успело"
-  },
-  "panel-tabOrder": {
-    "string": "редослед-табова-панела"
-  },
-  "panel-closeableTabs": {
-    "string": "Картице које се могу затворити панелом"
-  },
-  "emulation-set-location": {
-    "string": "локација-сет-емулације"
-  },
-  "emulation-set-timezone": {
-    "string": "емулација-подешавање-временске-зоне"
-  },
-  "emulation-set-locale": {
-    "string": "емулација-сет-локале"
-  },
-  "emulation-set-user-agent": {
-    "string": "емулација-сет-кориснички-агент"
-  },
-  "50%": {
-    "string": "50%"
-  },
-  "75%": {
-    "string": "75%"
-  },
-  "100%": {
-    "string": "100%"
-  },
-  "125%": {
-    "string": "125%"
-  },
-  "150%": {
-    "string": "150%"
-  },
-  "200%": {
-    "string": "200%"
-  },
-  "b": {
-    "string": "б"
-  },
-  "Could not find TimelineController": {
-    "string": "Није могуће пронаћи контролер временске линије"
-  },
-  "Could not load resourceModel": {
-    "string": "Није могуће учитати модел ресурса"
-  },
-  "(": {
-    "string": "("
-  },
-  "[": {
-    "string": "["
-  },
-  "{": {
-    "string": "{"
-  },
-  "requeststarted": {
-    "string": "захтев је покренут"
-  },
-  "requestfinished": {
-    "string": "захтевзавршен"
-  },
-  "next": {
-    "string": "следећи"
-  },
-  "throw": {
-    "string": "бацити"
-  },
-  ",key,ref,ref_for,ref_key,onVnodeBeforeMount,onVnodeMounted,onVnodeBeforeUpdate,onVnodeUpdated,onVnodeBeforeUnmount,onVnodeUnmounted": {
-    "string": ",кључ,реф,реф_за,реф_кључ,наВчворПреМонтирања,наВчворМонтиран,наВчворПреАжурирања,наВчворУпдатед,наВчворПреРамонтирања,наВчворНемонтиран"
-  },
-  "bind,cloak,else-if,else,for,html,if,model,on,once,pre,show,slot,text,memo": {
-    "string": "повезивање, прикривање, иначе-ако, иначе, за, хтмл, ако, модел, укључено, једном, пре, прикажи, слот, текст, мемо"
-  },
-  "html,body,base,head,link,meta,style,title,address,article,aside,footer,header,hgroup,h1,h2,h3,h4,h5,h6,nav,section,div,dd,dl,dt,figcaption,figure,picture,hr,img,li,main,ol,p,pre,ul,a,b,abbr,bdi,bdo,br,cite,code,data,dfn,em,i,kbd,mark,q,rp,rt,ruby,s,samp,small,span,strong,sub,sup,time,u,var,wbr,area,audio,map,track,video,embed,object,param,source,canvas,script,noscript,del,ins,caption,col,colgroup,table,thead,tbody,td,th,tr,button,datalist,fieldset,form,input,label,legend,meter,optgroup,option,output,progress,select,textarea,details,dialog,menu,summary,template,blockquote,iframe,tfoot": {
-    "string": "html,тело,основа,заглавље,линк,мета,стил,наслов,адреса,чланак,поред,подножје,заглавље,hgroup,h1,h2,h3,h4,h5,h6,навигација,одељак,div,dd,dl,dt,наслов,слика,слика,hr,img,li,главни,ol,p,pre,ul,a,b,скраћеница,bdi,bdo,br,цитирање,код,подаци,dfn,em,i,kbd,марк,q,rp,rt,ruby,s,samp,мали,span,strong,sub,sup,време,u,var,wbr област, аудио, мапа, траг, видео, уградња, објекат, параметар, извор, платно, скрипта, без скрипте, делите, инс, натпис, колона, група колона, табела, заглавље, тело, тд, тх, тр, дугме, листа података, скуп поља, образац, унос, ознака, легенда, мерач, група опција, опција, излаз, напредак, изаберите, област текста, детаљи, дијалог, мени, резиме, шаблон, блок цитат, iframe, тфут"
-  },
-  "svg,animate,animateMotion,animateTransform,circle,clipPath,color-profile,defs,desc,discard,ellipse,feBlend,feColorMatrix,feComponentTransfer,feComposite,feConvolveMatrix,feDiffuseLighting,feDisplacementMap,feDistantLight,feDropShadow,feFlood,feFuncA,feFuncB,feFuncG,feFuncR,feGaussianBlur,feImage,feMerge,feMergeNode,feMorphology,feOffset,fePointLight,feSpecularLighting,feSpotLight,feTile,feTurbulence,filter,foreignObject,g,hatch,hatchpath,image,line,linearGradient,marker,mask,mesh,meshgradient,meshpatch,meshrow,metadata,mpath,path,pattern,polygon,polyline,radialGradient,rect,set,solidcolor,stop,switch,symbol,text,textPath,title,tspan,unknown,use,view": {
-    "string": "svg, анимирати, анимирати кретање, анимирати трансформацију, круг, путања клипа, профил боја, дефиниције, опис, одбацивање, елипса, feBlend, feColorMatrix, feComponentTransfer, feComposite, feConvolveMatrix, feDiffuseLighting, feDisplacementMap, feDistantLight, feDropShadow, feFlood, feFuncA, feFuncB, feFuncG, feFuncR, feGaussianBlur, feImage, feMerge, feMergeNode, feMorpholog y, feОфсет, feПоинтЛајт, feСпекуларноОсветљење, feРефлекторскоОсветљење, feПлочица, feТурбуленција, филтер, страниОбјекат, g, шрафирање, путања шрафирања, слика, линија, линеарниГрадиент, маркер, маска, мрежа, градијент мреже, закрпа мреже, мрежа, метаподаци, mpath, путања, шаблон, полигон, полилинија, радијалниГрадиент, правоугаоник, скуп, чврста боја, стоп, прекидач, симбол, текст, путања текста, наслов, распон, непознато, употреба, приказ"
-  },
-  "annotation,annotation-xml,maction,maligngroup,malignmark,math,menclose,merror,mfenced,mfrac,mfraction,mglyph,mi,mlabeledtr,mlongdiv,mmultiscripts,mn,mo,mover,mpadded,mphantom,mprescripts,mroot,mrow,ms,mscarries,mscarry,msgroup,msline,mspace,msqrt,msrow,mstack,mstyle,msub,msubsup,msup,mtable,mtd,mtext,mtr,munder,munderover,none,semantics": {
-    "string": "анотација, анотација-xml, акција, малигнгрупа, малигнмарк, математика, менклоуз, грешка, мфенцед, мфрац, мфракциони, мглиф, ми, млабеледтр, млондив, ммултискриптс, мн, мо, померач, мпаддед, мпхантом, мпрескриптс, мроот, мров, мс, мсцаррис, мсцарри, мсгроуп, мслинија, мспаце, мскрт, мсров, мстек, мстил, мсуб, мсубсуп, мсуп, мтабле, мтд, мтекст, мтр, мундер, мундеровер, ниједан, семантика"
-  },
-  "area,base,br,col,embed,hr,img,input,link,meta,param,source,track,wbr": {
-    "string": "област, база, бр, колона, уградња, сат, слика, унос, веза, метаподаци, параметар, извор, праћење, wbr"
-  },
-  "passive,once,capture": {
-    "string": "пасивно, једном, хватање"
-  },
-  "stop,prevent,self,ctrl,shift,alt,meta,exact,middle": {
-    "string": "заустави, спречи, самостално, контрола, шифт, алт, мета, тачно, средина"
-  },
-  "left,right": {
-    "string": "лево, десно"
-  },
-  "onkeyup,onkeydown,onkeypress": {
-    "string": "притиском на тастер, притиском на тастер"
-  },
-  "string": {
-    "string": "низ"
-  },
-  "number": {
-    "string": "број"
-  },
-  "object": {
-    "string": "објекат"
-  },
-  "@firebase/functions": {
-    "string": "@firebase/functions"
-  },
-  "alternatives.any": {
-    "string": "алтернативе.било које"
-  },
-  "alternatives.types": {
-    "string": "алтернативе.врсте"
-  },
-  "alternatives.match": {
-    "string": "алтернативе.подударање"
-  },
-  "array.sort": {
-    "string": "низ.сортирање"
-  },
-  "boolean.base": {
-    "string": "boolean.base"
-  },
-  "object.assert": {
-    "string": "објекат.тврдња"
-  },
-  "string.isoDate": {
-    "string": "string.isoDate"
-  },
-  "string.normalize": {
-    "string": "string.normalize"
-  },
-  "symbol.base": {
-    "string": "база симбола"
-  },
-  "atStart": {
-    "string": "на почетку"
-  },
-  "inList": {
-    "string": "inList"
-  },
-  "inLink": {
-    "string": "уграђени линк"
-  },
-  "inBlock": {
-    "string": "у блоку"
-  },
-  "SemVer": {
-    "string": "СемВер"
-  },
-  "SemVer.compare": {
-    "string": "SemVer.compare"
-  },
-  "prerelease compare": {
-    "string": "поређење пре објављивања"
-  },
-  ",; \t": {
-    "string": ",; \t"
-  },
-  ", ": {
-    "string": ", "
-  },
-  " | ": {
-    "string": " | "
-  },
-  "stylus": {
-    "string": "стилус"
-  },
-  ",": {
-    "string": ","
-  },
-  "(?:[^{}']|'[^']*'|\\{(?:<SELF>)?\\})+": {
-    "string": "(?:[^{}&#39;]|&#39;[^&#39;]*&#39;|\\{(?:<SELF> )?\\})+"
-  },
-  "@": {
-    "string": "@"
-  },
-  "=": {
-    "string": "="
-  },
-  "\\+": {
-    "string": "\\+"
-  },
-  "switch(d%s){": {
-    "string": "прекидач(д%с){"
-  },
-  "default:": {
-    "string": "подразумевано:"
-  },
-  "break": {
-    "string": "пауза"
-  },
-  "case%j:": {
-    "string": "случај%ј:"
-  },
-  "}": {
-    "string": "}"
-  },
-  "if(typeof d%s!==\"object\")": {
-    "string": "ако(тип_d%s!==&quot;објекат&quot;)"
-  },
-  "m%s=Number(d%s)": {
-    "string": "m%s=Број(d%s)"
-  },
-  "m%s=d%s>>>0": {
-    "string": "м%с=д%с&gt;&gt;&gt;0"
-  },
-  "m%s=d%s|0": {
-    "string": "m%s=d%s|0"
-  },
-  "if(util.Long)": {
-    "string": "ако(корисни.Лонг)"
-  },
-  "if(typeof d%s===\"string\")": {
-    "string": "ако(типизd%s===&quot;стринг&quot;)"
-  },
-  "m%s=String(d%s)": {
-    "string": "m%s=Низ(d%s)"
-  },
-  "m%s=Boolean(d%s)": {
-    "string": "m%s=Булово(d%s)"
-  },
-  "d%s=o.enums===String?(types[%i].values[m%s]===undefined?m%s:types[%i].values[m%s]):m%s": {
-    "string": "d%s=o.enums===String?(типови[%i].вредности[m%s]===недефинисано?m%s:типови[%i].вредности[m%s]):m%s"
-  },
-  "d%s=types[%i].toObject(m%s,o)": {
-    "string": "d%s=типови[%i].toObject(m%s,o)"
-  },
-  "d%s=o.json&&!isFinite(m%s)?String(m%s):m%s": {
-    "string": "d%s=o.json&amp;&amp;!isFinite(m%s)?String(m%s):m%s"
-  },
-  "if(typeof m%s===\"number\")": {
-    "string": "ако(тип м%с===&quot;број&quot;)"
-  },
-  "d%s=o.bytes===String?util.base64.encode(m%s,0,m%s.length):o.bytes===Array?Array.prototype.slice.call(m%s):m%s": {
-    "string": "д%с=о.бајтова===Стринг?util.base64.encode(м%с,0,м%с.ленгтх):о.бајтова===Низ?Array.prototype.slice.call(м%с):м%с"
-  },
-  "d%s=m%s": {
-    "string": "d%s=m%s"
-  },
-  "types[%i].encode(%s,w.uint32(%i)).uint32(%i)": {
-    "string": "типови[%i].енкод(%s,w.uint32(%i)).uint32(%i)"
-  },
-  "types[%i].encode(%s,w.uint32(%i).fork()).ldelim()": {
-    "string": "типови[%i].енкодирање(%s,w.uint32(%i).форк()).лделим()"
-  },
-  "if(!util.key32Re.test(%s))": {
-    "string": "ако(!util.key32Re.test(%s))"
-  },
-  "if(!util.key64Re.test(%s))": {
-    "string": "ако(!util.key64Re.test(%s))"
-  },
-  "if(!util.key2Re.test(%s))": {
-    "string": "ако(!util.key2Re.test(%s))"
-  },
-  "switch(%s){": {
-    "string": "прекидач(%s){"
-  },
-  "case %i:": {
-    "string": "случај %i:"
-  },
-  "if(!util.isInteger(%s))": {
-    "string": "ако(!util.isInteger(%s))"
-  },
-  "if(!util.isInteger(%s)&&!(%s&&util.isInteger(%s.low)&&util.isInteger(%s.high)))": {
-    "string": "ако(!util.isInteger(%s)&amp;&amp;!(%s&amp;&amp;util.isInteger(%s.low)&amp;&amp;util.isInteger(%s.high)))"
-  },
-  "if(typeof %s!==\"number\")": {
-    "string": "ако(тип %s!==&quot;број&quot;)"
-  },
-  "if(typeof %s!==\"boolean\")": {
-    "string": "ако(тип %s!==&quot;булеан&quot;)"
-  },
-  "if(!util.isString(%s))": {
-    "string": "ако(!util.isString(%s))"
-  },
-  "if(!(%s&&typeof %s.length===\"number\"||util.isString(%s)))": {
-    "string": "ако(!(%s&amp;&amp;тип %s.ленгтх===&quot;број&quot;||утил.исНинг(%s)))"
-  },
-  "callee": {
-    "string": "позван"
-  },
-  "predicate": {
-    "string": "предикат"
-  },
-  "argument": {
-    "string": "аргумент"
-  },
-  "id": {
-    "string": "ИД"
-  },
-  "initializer": {
-    "string": "иницијализатор"
-  },
-  "init": {
-    "string": "иницијализација"
-  },
-  "body": {
-    "string": "тело"
-  },
-  "parameterName": {
-    "string": "Назив параметра"
-  },
-  "typeArguments": {
-    "string": "typeArguments"
-  },
-  "path": {
-    "string": "путања"
-  },
-  "hash": {
-    "string": "хеш"
-  },
-  "css": {
-    "string": "css"
-  },
-  "html": {
-    "string": "хтмл"
-  },
-  "svg": {
-    "string": "SVG"
-  },
-  "markdown": {
-    "string": "снижена цена"
-  },
-  "graphql": {
-    "string": "graphql"
-  },
-  "label": {
-    "string": "етикета"
-  },
-  "stackframe": {
-    "string": "стекфрејм"
-  },
-  "_process": {
-    "string": "_процес"
-  },
-  "source-map/lib/source-map-consumer": {
-    "string": "мапа-извора/библиотека/потрошач-мапе-извора"
-  },
-  "error-stack-parser": {
-    "string": "парсер-стека-грешки"
-  },
-  "stack-generator": {
-    "string": "генератор стека"
-  },
-  "stacktrace-gps": {
-    "string": "stacktrace-gps"
-  },
-  "Download complete": {
-    "string": "Преузимање завршено"
-  },
-  "Saved to {path}": {
-    "string": "Сачувано у {path}"
-  },
-  "Download failed": {
-    "string": "Преузимање није успело"
-  },
-  "Unable to download file": {
-    "string": "Није могуће преузети датотеку"
-  },
-  "...": {
-    "string": "..."
-  },
-  "Download": {
-    "string": "Преузми"
-  },
-  "Networks & Servers": {
-    "string": "Мреже и сервери"
-  },
-  "IRC network configurations and server settings": {
-    "string": "Конфигурације IRC мреже и подешавања сервера"
-  },
-  "App Settings": {
-    "string": "Подешавања апликације"
-  },
-  "General app preferences and configurations": {
-    "string": "Опште поставке и конфигурације апликација"
-  },
-  "Encryption Keys": {
-    "string": "Кључеви за шифровање"
-  },
-  "Channel encryption keys and DM bundles": {
-    "string": "Кључеви за шифровање канала и DM пакети"
-  },
-  "Identity & Connection Profiles": {
-    "string": "Профили идентитета и повезивања"
-  },
-  "User identity profiles and connection templates": {
-    "string": "Профили корисничког идентитета и шаблони за повезивање"
-  },
   "Channel Favorites": {
     "string": "Омиљени канали"
-  },
-  "Favorite channels and auto-join settings": {
-    "string": "Омиљени канали и подешавања аутоматског придруживања"
-  },
-  "Channel Notes & Bookmarks": {
-    "string": "Белешке и обележивачи канала"
-  },
-  "Channel notes, bookmarks, and user aliases": {
-    "string": "Белешке о каналу, обележивачи и кориснички алијаси"
-  },
-  "Highlights & Notifications": {
-    "string": "Истакнуто и обавештења"
-  },
-  "Highlight words and notification preferences": {
-    "string": "Истакните речи и подешавања обавештења"
-  },
-  "Open Tabs": {
-    "string": "Отворене картице"
-  },
-  "Currently open channel and query tabs": {
-    "string": "Тренутно отворене картице канала и упита"
   },
   "Message History": {
     "string": "Историја порука"
   },
-  "Saved message history for all tabs": {
-    "string": "Сачувана историја порука за све картице"
-  },
-  "Activity Logs": {
-    "string": "Евиденције активности"
-  },
-  "Channel activity logs and join/part history": {
-    "string": "Дневници активности канала и историја придруживања/учешћа"
-  },
-  "No Options Selected": {
-    "string": "Није изабрана ниједна опција"
-  },
-  "Please select at least one backup option": {
-    "string": "Изаберите барем једну резервну опцију"
-  },
   "Backup Ready": {
     "string": "Резервна копија је спремна"
-  },
-  "Generated backup with {count} items:\n{names}": {
-    "string": "Генерисана резервна копија са ставкама {count} :\n {names}"
-  },
-  "Failed to generate backup": {
-    "string": "Није успело генерисање резервне копије"
   },
   "Success": {
     "string": "Успех"
@@ -542,15 +44,6 @@
   "Failed to save backup file": {
     "string": "Чување резервне копије датотеке није успело"
   },
-  "Please paste backup data first": {
-    "string": "Прво налепите резервне податке"
-  },
-  "Confirm Restore": {
-    "string": "Потврди враћање"
-  },
-  "This will overwrite existing data. Are you sure?": {
-    "string": "Ово ће пребрисати постојеће податке. Јеси ли сигуран/сигурна?"
-  },
   "Restore": {
     "string": "Врати"
   },
@@ -560,56 +53,11 @@
   "Invalid backup data": {
     "string": "Неважећи подаци резервне копије"
   },
-  "Failed to restore backup": {
-    "string": "Враћање резервне копије није успело"
-  },
   "Backup & Restore": {
     "string": "Резервна копија и враћање"
   },
   "Close": {
     "string": "Затвори"
-  },
-  "Storage Statistics": {
-    "string": "Статистика складиштења"
-  },
-  "{count} items ~{size} KB": {
-    "string": "{count} ставке ~ {size} KB"
-  },
-  "Quick Presets": {
-    "string": "Брза подешавања"
-  },
-  "All Data": {
-    "string": "Сви подаци"
-  },
-  "Settings Only": {
-    "string": "Само подешавања"
-  },
-  "Minimal": {
-    "string": "Минимално"
-  },
-  "Clear All": {
-    "string": "Обриши све"
-  },
-  "Select Data to Backup ({count} selected)": {
-    "string": "Изаберите податке за резервну копију (изабрано {count} )"
-  },
-  "Generate Backup": {
-    "string": "Генериши резервну копију"
-  },
-  "Restore from Backup": {
-    "string": "Врати из резервне копије"
-  },
-  "Backup Data": {
-    "string": "Резервна копија података"
-  },
-  "Copy this JSON to save your backup, or save it to a file.": {
-    "string": "Копирајте овај JSON да бисте сачували резервну копију или га сачувајте у датотеку."
-  },
-  "Paste your backup JSON here to restore your data.": {
-    "string": "Налепите резервну JSON датотеку овде да бисте вратили податке."
-  },
-  "Backup JSON appears here...": {
-    "string": "Резервна копија JSON-а се појављује овде..."
   },
   "Copy to Clipboard": {
     "string": "Копирај у међуспремник"
@@ -834,607 +282,607 @@
     "string": "Kartica obaveštenja"
   },
   "Private/query tab": {
-    "string": ""
+    "string": "Private/query tab"
   },
   "Show Timestamps": {
-    "string": ""
+    "string": "Show Timestamps"
   },
   "Display message timestamps": {
-    "string": ""
+    "string": "Display message timestamps"
   },
   "Info": {
-    "string": ""
+    "string": "Info"
   },
   "Timestamp display setting coming soon": {
-    "string": ""
+    "string": "Timestamp display setting coming soon"
   },
   "Timestamp Display": {
-    "string": ""
+    "string": "Timestamp Display"
   },
   "Show timestamps: {mode}": {
-    "string": ""
+    "string": "Show timestamps: {mode}"
   },
   "Select when to show timestamps:": {
-    "string": ""
+    "string": "Select when to show timestamps:"
   },
   "Always": {
-    "string": ""
+    "string": "Always"
   },
   "Only for first message in a group": {
-    "string": ""
+    "string": "Only for first message in a group"
   },
   "Never": {
-    "string": ""
+    "string": "Never"
   },
   "Timestamp Format": {
-    "string": ""
+    "string": "Timestamp Format"
   },
   "Format: {format}": {
-    "string": ""
+    "string": "Format: {format}"
   },
   "Select format:": {
-    "string": ""
+    "string": "Select format:"
   },
   "12-hour (AM/PM)": {
-    "string": ""
+    "string": "12-hour (AM/PM)"
   },
   "24-hour": {
-    "string": ""
+    "string": "24-hour"
   },
   "Show Encryption Indicators": {
-    "string": ""
+    "string": "Show Encryption Indicators"
   },
   "Lock icons visible on tabs/messages": {
-    "string": ""
+    "string": "Lock icons visible on tabs/messages"
   },
   "Hide lock icons": {
-    "string": ""
+    "string": "Hide lock icons"
   },
   "Messages": {
-    "string": ""
+    "string": "Messages"
   },
   "Part Message": {
-    "string": ""
+    "string": "Part Message"
   },
   "Message to send when leaving a channel.": {
-    "string": ""
+    "string": "Message to send when leaving a channel."
   },
   "Quit Message": {
-    "string": ""
+    "string": "Quit Message"
   },
   "Message to send when disconnecting.": {
-    "string": ""
+    "string": "Message to send when disconnecting."
   },
   "Send Message on Query Close": {
-    "string": ""
+    "string": "Send Message on Query Close"
   },
   "Send a message when you close a private message window.": {
-    "string": ""
+    "string": "Send a message when you close a private message window."
   },
   "Query Close Message": {
-    "string": ""
+    "string": "Query Close Message"
   },
   "The message to send.": {
-    "string": ""
+    "string": "The message to send."
   },
   "Enter message...": {
-    "string": ""
+    "string": "Enter message..."
   },
   "Notifications": {
-    "string": ""
+    "string": "Notifications"
   },
   "Enable Notifications": {
-    "string": ""
+    "string": "Enable Notifications"
   },
   "Receive notifications for messages": {
-    "string": ""
+    "string": "Receive notifications for messages"
   },
   "Notify on Mentions": {
-    "string": ""
+    "string": "Notify on Mentions"
   },
   "Get notified when someone mentions your nickname": {
-    "string": ""
+    "string": "Get notified when someone mentions your nickname"
   },
   "Notify on Private Messages": {
-    "string": ""
+    "string": "Notify on Private Messages"
   },
   "Get notified for private messages": {
-    "string": ""
+    "string": "Get notified for private messages"
   },
   "Notify on All Messages": {
-    "string": ""
+    "string": "Notify on All Messages"
   },
   "Get notified for all channel messages": {
-    "string": ""
+    "string": "Get notified for all channel messages"
   },
   "Do Not Disturb": {
-    "string": ""
+    "string": "Do Not Disturb"
   },
   "Disable all notifications": {
-    "string": ""
+    "string": "Disable all notifications"
   },
   "Per-Channel Settings": {
-    "string": ""
+    "string": "Per-Channel Settings"
   },
   "Configure notifications for specific channels": {
-    "string": ""
+    "string": "Configure notifications for specific channels"
   },
   "Highlighting": {
-    "string": ""
+    "string": "Highlighting"
   },
   "Add Highlight Word": {
-    "string": ""
+    "string": "Add Highlight Word"
   },
   "Messages containing these words will be highlighted.": {
-    "string": ""
+    "string": "Messages containing these words will be highlighted."
   },
   "Enter a word to highlight...": {
-    "string": ""
+    "string": "Enter a word to highlight..."
   },
   "Remove Highlight Word": {
-    "string": ""
+    "string": "Remove Highlight Word"
   },
   "Are you sure you want to remove \"{word}\"?": {
-    "string": ""
+    "string": "Are you sure you want to remove \"{word}\"?"
   },
   "Remove": {
-    "string": ""
+    "string": "Remove"
   },
   "Connection & Network": {
-    "string": ""
+    "string": "Connection & Network"
   },
   "Auto-Connect to Favorite Server": {
-    "string": ""
+    "string": "Auto-Connect to Favorite Server"
   },
   "When opening a network, prefer the server marked as favorite.": {
-    "string": ""
+    "string": "When opening a network, prefer the server marked as favorite."
   },
   "Auto-Reconnect": {
-    "string": ""
+    "string": "Auto-Reconnect"
   },
   "{attempts} attempts, {mode}": {
-    "string": ""
+    "string": "{attempts} attempts, {mode}"
   },
   "rejoin channels": {
-    "string": ""
+    "string": "rejoin channels"
   },
   "no rejoin": {
-    "string": ""
+    "string": "no rejoin"
   },
   "Automatically reconnect on disconnect": {
-    "string": ""
+    "string": "Automatically reconnect on disconnect"
   },
   "Enable Auto-Reconnect": {
-    "string": ""
+    "string": "Enable Auto-Reconnect"
   },
   "Rejoin Channels After Reconnect": {
-    "string": ""
+    "string": "Rejoin Channels After Reconnect"
   },
   "Automatically rejoin channels you were in": {
-    "string": ""
+    "string": "Automatically rejoin channels you were in"
   },
   "Smart Reconnection": {
-    "string": ""
+    "string": "Smart Reconnection"
   },
   "Avoid flood by spacing reconnection attempts": {
-    "string": ""
+    "string": "Avoid flood by spacing reconnection attempts"
   },
   "Min Port": {
-    "string": ""
+    "string": "Min Port"
   },
   "Max Port": {
-    "string": ""
+    "string": "Max Port"
   },
   "No PIN is set.": {
-    "string": ""
+    "string": "No PIN is set."
   },
   "Incorrect PIN.": {
-    "string": ""
+    "string": "Incorrect PIN."
   },
   "Message Spacing": {
-    "string": ""
+    "string": "Message Spacing"
   },
   "Message Padding": {
-    "string": ""
+    "string": "Message Padding"
   },
   "Navigation Bar Offset (Android)": {
-    "string": ""
+    "string": "Navigation Bar Offset (Android)"
   },
   "Sort Tabs Alphabetically": {
-    "string": ""
+    "string": "Sort Tabs Alphabetically"
   },
   "Display & UI": {
-    "string": ""
+    "string": "Display & UI"
   },
   "Show Raw Commands": {
-    "string": ""
+    "string": "Show Raw Commands"
   },
   "Display raw IRC protocol messages": {
-    "string": ""
+    "string": "Display raw IRC protocol messages"
   },
   "Hide Join Messages": {
-    "string": ""
+    "string": "Hide Join Messages"
   },
   "Do not show join events in channels.": {
-    "string": ""
+    "string": "Do not show join events in channels."
   },
   "Hide Part Messages": {
-    "string": ""
+    "string": "Hide Part Messages"
   },
   "Do not show part/leave events in channels.": {
-    "string": ""
+    "string": "Do not show part/leave events in channels."
   },
   "Hide Quit Messages": {
-    "string": ""
+    "string": "Hide Quit Messages"
   },
   "Do not show quit events in channels.": {
-    "string": ""
+    "string": "Do not show quit events in channels."
   },
   "Hide IRCService Listener Messages": {
-    "string": ""
+    "string": "Hide IRCService Listener Messages"
   },
   "Suppress \"*** IRCService: Message listener registered...\" raw logs.": {
-    "string": ""
+    "string": "Suppress \"*** IRCService: Message listener registered...\" raw logs."
   },
   "Max Reconnection Attempts": {
-    "string": ""
+    "string": "Max Reconnection Attempts"
   },
   "Initial Delay (ms)": {
-    "string": ""
+    "string": "Initial Delay (ms)"
   },
   "Max Delay (ms)": {
-    "string": ""
+    "string": "Max Delay (ms)"
   },
   "Connection Quality": {
-    "string": ""
+    "string": "Connection Quality"
   },
   "Rate Limiting": {
-    "string": ""
+    "string": "Rate Limiting"
   },
   "Enable Rate Limiting": {
-    "string": ""
+    "string": "Enable Rate Limiting"
   },
   "Messages Per Second": {
-    "string": ""
+    "string": "Messages Per Second"
   },
   "Burst Limit": {
-    "string": ""
+    "string": "Burst Limit"
   },
   "Flood Protection": {
-    "string": ""
+    "string": "Flood Protection"
   },
   "Enable Flood Protection": {
-    "string": ""
+    "string": "Enable Flood Protection"
   },
   "Max Messages Per Window": {
-    "string": ""
+    "string": "Max Messages Per Window"
   },
   "Window Size (ms)": {
-    "string": ""
+    "string": "Window Size (ms)"
   },
   "Lag Monitoring": {
-    "string": ""
+    "string": "Lag Monitoring"
   },
   "Enable Lag Monitoring": {
-    "string": ""
+    "string": "Enable Lag Monitoring"
   },
   "Lag Check Method": {
-    "string": ""
+    "string": "Lag Check Method"
   },
   "Select the method to check for lag:": {
-    "string": ""
+    "string": "Select the method to check for lag:"
   },
   "Ping Interval (ms)": {
-    "string": ""
+    "string": "Ping Interval (ms)"
   },
   "Warning Threshold (ms)": {
-    "string": ""
+    "string": "Warning Threshold (ms)"
   },
   "Connection Statistics": {
-    "string": ""
+    "string": "Connection Statistics"
   },
   "Identity Profiles": {
-    "string": ""
+    "string": "Identity Profiles"
   },
   "Global Proxy": {
-    "string": ""
+    "string": "Global Proxy"
   },
   "Enable Global Proxy": {
-    "string": ""
+    "string": "Enable Global Proxy"
   },
   "Route all IRC connections through a proxy": {
-    "string": ""
+    "string": "Route all IRC connections through a proxy"
   },
   "Proxy Type": {
-    "string": ""
+    "string": "Proxy Type"
   },
   "Select proxy protocol": {
-    "string": ""
+    "string": "Select proxy protocol"
   },
   "Proxy Host": {
-    "string": ""
+    "string": "Proxy Host"
   },
   "Proxy server hostname or IP": {
-    "string": ""
+    "string": "Proxy server hostname or IP"
   },
   "proxy.example.com": {
-    "string": ""
+    "string": "proxy.example.com"
   },
   "Proxy Port": {
-    "string": ""
+    "string": "Proxy Port"
   },
   "Proxy server port": {
-    "string": ""
+    "string": "Proxy server port"
   },
   "Proxy Username (optional)": {
-    "string": ""
+    "string": "Proxy Username (optional)"
   },
   "Leave blank if no authentication required": {
-    "string": ""
+    "string": "Leave blank if no authentication required"
   },
   "username": {
-    "string": ""
+    "string": "username"
   },
   "Proxy Password (optional)": {
-    "string": ""
+    "string": "Proxy Password (optional)"
   },
   "password": {
-    "string": ""
+    "string": "password"
   },
   "Biometric Lock for Passwords": {
-    "string": ""
+    "string": "Biometric Lock for Passwords"
   },
   "PIN Lock for Passwords": {
-    "string": ""
+    "string": "PIN Lock for Passwords"
   },
   "Security": {
-    "string": ""
+    "string": "Security"
   },
   "Allow QR Verification": {
-    "string": ""
+    "string": "Allow QR Verification"
   },
   "Allow File Key Exchange": {
-    "string": ""
+    "string": "Allow File Key Exchange"
   },
   "Allow NFC Key Exchange": {
-    "string": ""
+    "string": "Allow NFC Key Exchange"
   },
   "App Lock": {
-    "string": ""
+    "string": "App Lock"
   },
   "App Lock with Biometrics": {
-    "string": ""
+    "string": "App Lock with Biometrics"
   },
   "App Lock with PIN": {
-    "string": ""
+    "string": "App Lock with PIN"
   },
   "PIN unlock enabled": {
-    "string": ""
+    "string": "PIN unlock enabled"
   },
   "Use a PIN to unlock": {
-    "string": ""
+    "string": "Use a PIN to unlock"
   },
   "Lock on Launch": {
-    "string": ""
+    "string": "Lock on Launch"
   },
   "Locks when app is opened": {
-    "string": ""
+    "string": "Locks when app is opened"
   },
   "Does not lock on launch": {
-    "string": ""
+    "string": "Does not lock on launch"
   },
   "Lock on Background": {
-    "string": ""
+    "string": "Lock on Background"
   },
   "Locks after app is backgrounded": {
-    "string": ""
+    "string": "Locks after app is backgrounded"
   },
   "Does not lock on background": {
-    "string": ""
+    "string": "Does not lock on background"
   },
   "Lock Now": {
-    "string": ""
+    "string": "Lock Now"
   },
   "Immediately lock the app": {
-    "string": ""
+    "string": "Immediately lock the app"
   },
   "Channels": {
-    "string": ""
+    "string": "Channels"
   },
   "{count} favorite across networks": {
-    "string": ""
+    "string": "{count} favorite across networks"
   },
   "{count} favorites across networks": {
-    "string": ""
+    "string": "{count} favorites across networks"
   },
   "Manage favorite channels": {
-    "string": ""
+    "string": "Manage favorite channels"
   },
   "No favorites yet": {
-    "string": ""
+    "string": "No favorites yet"
   },
   "Network: {network}": {
-    "string": ""
+    "string": "Network: {network}"
   },
   "Auto-join": {
-    "string": ""
+    "string": "Auto-join"
   },
   "Key set": {
-    "string": ""
+    "string": "Key set"
   },
   "Move to {name}": {
-    "string": ""
+    "string": "Move to {name}"
   },
   "No other networks available": {
-    "string": ""
+    "string": "No other networks available"
   },
   "Delete Favorite": {
     "string": "Obriši omiljeno"
   },
   "Remove {name} from {network}?": {
-    "string": ""
+    "string": "Remove {name} from {network}?"
   },
   "Auto-Join Favorites on Connect": {
-    "string": ""
+    "string": "Auto-Join Favorites on Connect"
   },
   "Join favorited channels after connect/identify": {
-    "string": ""
+    "string": "Join favorited channels after connect/identify"
   },
   "Auto-Rejoin on Kick": {
-    "string": ""
+    "string": "Auto-Rejoin on Kick"
   },
   "Automatically rejoin channel if kicked": {
-    "string": ""
+    "string": "Automatically rejoin channel if kicked"
   },
   "Auto-Voice on Join": {
-    "string": ""
+    "string": "Auto-Voice on Join"
   },
   "Enable Auto-Voice": {
-    "string": ""
+    "string": "Enable Auto-Voice"
   },
   "For All Users": {
-    "string": ""
+    "string": "For All Users"
   },
   "For Operators/Halfops": {
-    "string": ""
+    "string": "For Operators/Halfops"
   },
   "For IRC Ops (Admin/Netadmin)": {
-    "string": ""
+    "string": "For IRC Ops (Admin/Netadmin)"
   },
   "DCC Settings": {
-    "string": ""
+    "string": "DCC Settings"
   },
   "Users & Services": {
-    "string": ""
+    "string": "Users & Services"
   },
   "Add Service Nickname": {
-    "string": ""
+    "string": "Add Service Nickname"
   },
   "Prevent sending \"close query\" messages to these nicks.": {
-    "string": ""
+    "string": "Prevent sending \"close query\" messages to these nicks."
   },
   "Enter a service name (e.g., Q)": {
-    "string": ""
+    "string": "Enter a service name (e.g., Q)"
   },
   "Ignore List": {
-    "string": ""
+    "string": "Ignore List"
   },
   "Manage ignored users": {
-    "string": ""
+    "string": "Manage ignored users"
   },
   "Ignore list feature coming soon": {
-    "string": ""
+    "string": "Ignore list feature coming soon"
   },
   "User Notes": {
-    "string": ""
+    "string": "User Notes"
   },
   "No notes saved": {
-    "string": ""
+    "string": "No notes saved"
   },
   "User Aliases": {
-    "string": ""
+    "string": "User Aliases"
   },
   "No aliases saved": {
-    "string": ""
+    "string": "No aliases saved"
   },
   "Commands": {
-    "string": ""
+    "string": "Commands"
   },
   "Command History": {
-    "string": ""
+    "string": "Command History"
   },
   "Clear All History": {
-    "string": ""
+    "string": "Clear All History"
   },
   "Delete every command entry": {
     "string": "Izbriši svaki unos komande"
   },
   "Clear Command History": {
-    "string": ""
+    "string": "Clear Command History"
   },
   "Are you sure you want to delete all command history?": {
     "string": "Da li ste sigurni da želite da obrišete celu istoriju komandi?"
   },
   "Command Aliases": {
-    "string": ""
+    "string": "Command Aliases"
   },
   "Alias Name (without /)": {
-    "string": ""
+    "string": "Alias Name (without /)"
   },
   "e.g. j": {
-    "string": ""
+    "string": "e.g. j"
   },
   "Alias Command": {
-    "string": ""
+    "string": "Alias Command"
   },
   "Example: /join {channel}": {
-    "string": ""
+    "string": "Example: /join {channel}"
   },
   "e.g. /join {channel}": {
-    "string": ""
+    "string": "e.g. /join {channel}"
   },
   "Add Alias": {
-    "string": ""
+    "string": "Add Alias"
   },
   "Create or update alias": {
-    "string": ""
+    "string": "Create or update alias"
   },
   "Custom Commands": {
-    "string": ""
+    "string": "Custom Commands"
   },
   "Command Name (without /)": {
-    "string": ""
+    "string": "Command Name (without /)"
   },
   "e.g. greet": {
-    "string": ""
+    "string": "e.g. greet"
   },
   "Command Template": {
-    "string": ""
+    "string": "Command Template"
   },
   "Use {param1}, {channel}, {nick} placeholders": {
-    "string": ""
+    "string": "Use {param1}, {channel}, {nick} placeholders"
   },
   "e.g. /msg {channel} Hello {param1}": {
-    "string": ""
+    "string": "e.g. /msg {channel} Hello {param1}"
   },
   "Add Custom Command": {
-    "string": ""
+    "string": "Add Custom Command"
   },
   "Save template with placeholders": {
-    "string": ""
+    "string": "Save template with placeholders"
   },
   "History Statistics": {
-    "string": ""
+    "string": "History Statistics"
   },
   "View message history statistics": {
-    "string": ""
+    "string": "View message history statistics"
   },
   "Export History": {
-    "string": ""
+    "string": "Export History"
   },
   "Export message history to file": {
-    "string": ""
+    "string": "Export message history to file"
   },
   "Export as JSON": {
-    "string": ""
+    "string": "Export as JSON"
   },
   "Export all messages in JSON format": {
-    "string": ""
+    "string": "Export all messages in JSON format"
   },
   "Export as TXT": {
-    "string": ""
+    "string": "Export as TXT"
   },
   "Export as plain text log": {
-    "string": ""
+    "string": "Export as plain text log"
   },
   "Export as CSV": {
-    "string": ""
+    "string": "Export as CSV"
   },
   "Export as spreadsheet-compatible CSV": {
-    "string": ""
+    "string": "Export as spreadsheet-compatible CSV"
   },
   "Clear History": {
-    "string": ""
+    "string": "Clear History"
   },
   "Delete all stored message history": {
     "string": "Izbriši svu sačuvanu istoriju poruka"
@@ -1443,381 +891,3411 @@
     "string": "Ovo će trajno obrisati sve sačuvane poruke. Nastaviti?"
   },
   "Storage Usage": {
-    "string": ""
+    "string": "Storage Usage"
   },
   "Backup or restore all app data": {
-    "string": ""
+    "string": "Backup or restore all app data"
   },
   "IRC Bouncer": {
-    "string": ""
+    "string": "IRC Bouncer"
   },
   "Bouncer Status": {
-    "string": ""
+    "string": "Bouncer Status"
   },
   "Bouncer Settings": {
-    "string": ""
+    "string": "Bouncer Settings"
   },
   "Enable Bouncer Support": {
-    "string": ""
+    "string": "Enable Bouncer Support"
   },
   "Bouncer Type": {
-    "string": ""
+    "string": "Bouncer Type"
   },
   "Select bouncer type:": {
-    "string": ""
+    "string": "Select bouncer type:"
   },
   "Handle Playback Buffer": {
-    "string": ""
+    "string": "Handle Playback Buffer"
   },
   "Process playback messages from bouncer": {
-    "string": ""
+    "string": "Process playback messages from bouncer"
   },
   "Mark Playback Messages": {
-    "string": ""
+    "string": "Mark Playback Messages"
   },
   "Add [Playback] indicator to old messages": {
-    "string": ""
+    "string": "Add [Playback] indicator to old messages"
   },
   "Skip Old Playback": {
-    "string": ""
+    "string": "Skip Old Playback"
   },
   "Playback Timeout (ms)": {
-    "string": ""
+    "string": "Playback Timeout (ms)"
   },
   "Playback Age Limit (hours)": {
-    "string": ""
+    "string": "Playback Age Limit (hours)"
   },
   "Request Playback (ZNC)": {
-    "string": ""
+    "string": "Request Playback (ZNC)"
   },
   "Request playback buffer from ZNC": {
-    "string": ""
+    "string": "Request playback buffer from ZNC"
   },
   "Playback requested from ZNC": {
-    "string": ""
+    "string": "Playback requested from ZNC"
   },
   "Performance": {
-    "string": ""
+    "string": "Performance"
   },
   "Message List Virtualization": {
-    "string": ""
+    "string": "Message List Virtualization"
   },
   "Use FlatList for better performance with large channels": {
-    "string": ""
+    "string": "Use FlatList for better performance with large channels"
   },
   "Lazy Load Old Messages": {
-    "string": ""
+    "string": "Lazy Load Old Messages"
   },
   "Load old messages when scrolling up": {
-    "string": ""
+    "string": "Load old messages when scrolling up"
   },
   "Render Optimization": {
-    "string": ""
+    "string": "Render Optimization"
   },
   "Use React.memo and useMemo for optimized rendering": {
-    "string": ""
+    "string": "Use React.memo and useMemo for optimized rendering"
   },
   "Automatic Message Cleanup": {
-    "string": ""
+    "string": "Automatic Message Cleanup"
   },
   "Automatically remove old messages to save memory": {
-    "string": ""
+    "string": "Automatically remove old messages to save memory"
   },
   "Message Limit Per Channel": {
-    "string": ""
+    "string": "Message Limit Per Channel"
   },
   "Max Visible Messages": {
-    "string": ""
+    "string": "Max Visible Messages"
   },
   "Message Load Chunk Size": {
-    "string": ""
+    "string": "Message Load Chunk Size"
   },
   "Lazy Load Images": {
-    "string": ""
+    "string": "Lazy Load Images"
   },
   "Only load images when they become visible": {
-    "string": ""
+    "string": "Only load images when they become visible"
   },
   "Background & Battery": {
-    "string": ""
+    "string": "Background & Battery"
   },
   "Keep Connection Alive": {
-    "string": ""
+    "string": "Keep Connection Alive"
   },
   "Maintain IRC connection in background": {
-    "string": ""
+    "string": "Maintain IRC connection in background"
   },
   "Battery Optimization": {
-    "string": ""
+    "string": "Battery Optimization"
   },
   "Open Battery Settings": {
-    "string": ""
+    "string": "Open Battery Settings"
   },
   "Configure battery optimization for this app": {
-    "string": ""
+    "string": "Configure battery optimization for this app"
   },
   "Advanced": {
-    "string": ""
+    "string": "Advanced"
   },
   "Scripts": {
-    "string": ""
+    "string": "Scripts"
   },
   "Manage IRC scripts and automation": {
-    "string": ""
+    "string": "Manage IRC scripts and automation"
   },
   "Scripting Help": {
-    "string": ""
+    "string": "Scripting Help"
   },
   "Learn how to write and use scripts": {
-    "string": ""
+    "string": "Learn how to write and use scripts"
   },
   "About": {
-    "string": ""
+    "string": "About"
   },
   "About AndroidIRCX": {
-    "string": ""
+    "string": "About AndroidIRCX"
   },
   "App information and credits": {
-    "string": ""
+    "string": "App information and credits"
   },
   "Enter PIN": {
-    "string": ""
+    "string": "Enter PIN"
   },
   "Set PIN": {
-    "string": ""
+    "string": "Set PIN"
   },
   "Confirm PIN": {
-    "string": ""
+    "string": "Confirm PIN"
   },
   "Enter your PIN to unlock passwords.": {
-    "string": ""
+    "string": "Enter your PIN to unlock passwords."
   },
   "Create a 4+ digit PIN to protect passwords.": {
-    "string": ""
+    "string": "Create a 4+ digit PIN to protect passwords."
   },
   "Re-enter your PIN to confirm.": {
-    "string": ""
+    "string": "Re-enter your PIN to confirm."
   },
   "Unlock": {
-    "string": ""
+    "string": "Unlock"
   },
   "Next": {
-    "string": ""
+    "string": "Next"
   },
   "Save": {
-    "string": ""
+    "string": "Save"
   },
   "Set App PIN": {
-    "string": ""
+    "string": "Set App PIN"
   },
   "Confirm App PIN": {
-    "string": ""
+    "string": "Confirm App PIN"
   },
   "Create a 4+ digit PIN to lock the app.": {
-    "string": ""
+    "string": "Create a 4+ digit PIN to lock the app."
   },
   "Settings": {
-    "string": ""
+    "string": "Settings"
   },
   "Done": {
-    "string": ""
+    "string": "Done"
   },
   "Search settings...": {
-    "string": ""
+    "string": "Search settings..."
   },
   "Options": {
-    "string": ""
+    "string": "Options"
   },
   "PIN": {
-    "string": ""
+    "string": "PIN"
   },
   "Backup / Restore": {
-    "string": ""
+    "string": "Backup / Restore"
   },
   "Copy this JSON to back up. To restore, paste backup JSON and tap Restore.": {
-    "string": ""
+    "string": "Copy this JSON to back up. To restore, paste backup JSON and tap Restore."
   },
   "Backup JSON appears here": {
-    "string": ""
+    "string": "Backup JSON appears here"
   },
   "Per-Channel Notifications": {
-    "string": ""
+    "string": "Per-Channel Notifications"
   },
   "Add a channel to override global notification settings.": {
-    "string": ""
+    "string": "Add a channel to override global notification settings."
   },
   "#channel": {
-    "string": ""
+    "string": "#channel"
   },
   "Add": {
-    "string": ""
+    "string": "Add"
   },
   "All messages": {
-    "string": ""
+    "string": "All messages"
   },
   "Mentions only": {
-    "string": ""
+    "string": "Mentions only"
   },
   " • DND": {
-    "string": ""
+    "string": " • DND"
   },
   "All": {
-    "string": ""
+    "string": "All"
   },
   "Mentions": {
-    "string": ""
+    "string": "Mentions"
   },
   "No channel overrides set.": {
-    "string": ""
+    "string": "No channel overrides set."
   },
   "Language": {
-    "string": ""
+    "string": "Language"
   },
   "System Default": {
-    "string": ""
+    "string": "System Default"
   },
   "Use device language": {
-    "string": ""
-  },
-  "Failed to load networks and profiles": {
-    "string": ""
-  },
-  "Failed to update connection type": {
-    "string": ""
-  },
-  "Failed to update identity profile": {
-    "string": ""
-  },
-  "Failed to save network changes": {
-    "string": ""
-  },
-  "Failed to save server changes": {
-    "string": ""
-  },
-  "server": {
-    "string": ""
-  },
-  "servers": {
-    "string": ""
-  },
-  "Edit Network Settings": {
-    "string": ""
-  },
-  "Connection Type": {
-    "string": ""
-  },
-  "Identity Profile": {
-    "string": ""
-  },
-  "+ Add / Edit Identity": {
-    "string": ""
-  },
-  "Edit": {
-    "string": ""
-  },
-  "Servers": {
-    "string": ""
-  },
-  "+ Add Server": {
-    "string": ""
-  },
-  "Nick: {nick}": {
-    "string": ""
-  },
-  "Alt Nick: {altNick}": {
-    "string": ""
-  },
-  "Real Name: {name}": {
-    "string": ""
-  },
-  "Current Profile: {name}": {
-    "string": ""
-  },
-  "Connection Profiles": {
-    "string": ""
-  },
-  "No networks configured yet. Add a network to get started!": {
-    "string": ""
-  },
-  "Edit Identity Profile": {
-    "string": ""
-  },
-  "Profile Name": {
-    "string": ""
-  },
-  "Nick": {
-    "string": ""
-  },
-  "Alt Nick": {
-    "string": ""
-  },
-  "Real Name": {
-    "string": ""
-  },
-  "Ident/Username": {
-    "string": ""
-  },
-  "SASL Account": {
-    "string": ""
-  },
-  "SASL Password": {
-    "string": ""
-  },
-  "NickServ Password": {
-    "string": ""
-  },
-  "Oper Username": {
-    "string": ""
-  },
-  "Defaults to nick": {
-    "string": ""
-  },
-  "Oper Password": {
-    "string": ""
-  },
-  "On-Connect Commands (one per line, runs after MOTD)": {
-    "string": ""
-  },
-  "Example on-connect commands": {
-    "string": ""
-  },
-  "Profile name and nick are required": {
-    "string": ""
-  },
-  "Failed to save identity profile": {
-    "string": ""
+    "string": "Use device language"
   },
   "Select Network": {
-    "string": ""
+    "string": "Select Network"
   },
   "Please select a network to migrate keys to": {
-    "string": ""
+    "string": "Please select a network to migrate keys to"
   },
   "Migration Complete": {
-    "string": ""
+    "string": "Migration Complete"
   },
   "No old keys found to migrate": {
-    "string": ""
+    "string": "No old keys found to migrate"
   },
   "Migration Error": {
-    "string": ""
+    "string": "Migration Error"
   },
   "Failed to migrate keys": {
-    "string": ""
+    "string": "Failed to migrate keys"
   },
   "Authenticate to view passwords": {
-    "string": ""
+    "string": "Authenticate to view passwords"
   },
   "Manage Encryption Keys": {
-    "string": ""
+    "string": "Manage Encryption Keys"
   },
   "Migrate Old Keys": {
-    "string": ""
+    "string": "Migrate Old Keys"
   },
   "Select the network to migrate your old nick-only encryption keys to:": {
-    "string": ""
+    "string": "Select the network to migrate your old nick-only encryption keys to:"
   },
   "Migrate": {
-    "string": ""
+    "string": "Migrate"
+  },
+  "Setup Wizard": {
+    "string": "Setup Wizard"
+  },
+  "Quick setup for identity and network connection": {
+    "string": "Quick setup for identity and network connection"
+  },
+  "DCC Transfer Complete": {
+    "string": "DCC Transfer Complete"
+  },
+  "{filename} received ({bytes} bytes).": {
+    "string": "{filename} received ({bytes} bytes)."
+  },
+  "DCC Transfer Failed": {
+    "string": "DCC Transfer Failed"
+  },
+  "Transfer failed.": {
+    "string": "Transfer failed."
+  },
+  "No Network": {
+    "string": "No Network"
+  },
+  "No network available. Please configure a network first.": {
+    "string": "No network available. Please configure a network first."
+  },
+  "Configure": {
+    "string": "Configure"
+  },
+  "No Server Configured": {
+    "string": "No Server Configured"
+  },
+  "No server configured for \"{networkName}\". Would you like to configure one?": {
+    "string": "No server configured for \"{networkName}\". Would you like to configure one?"
+  },
+  "No server configured for \"{networkName}\"": {
+    "string": "No server configured for \"{networkName}\""
+  },
+  "Connection failed": {
+    "string": "Connection failed"
+  },
+  "{message}\n\nTried: {hostInfo}\nCheck host/port, SSL, and network reachability.": {
+    "string": "{message}\n\nTried: {hostInfo}\nCheck host/port, SSL, and network reachability."
+  },
+  "Not Connected": {
+    "string": "Not Connected"
+  },
+  "Please connect to a server first": {
+    "string": "Please connect to a server first"
+  },
+  "Exit Application": {
+    "string": "Exit Application"
+  },
+  "Are you sure you want to exit? This will disconnect from the server.": {
+    "string": "Are you sure you want to exit? This will disconnect from the server."
+  },
+  "Exit": {
+    "string": "Exit"
+  },
+  "Disconnected": {
+    "string": "Disconnected"
+  },
+  "You can now close the app from the app switcher.": {
+    "string": "You can now close the app from the app switcher."
+  },
+  "Network Not Found": {
+    "string": "Network Not Found"
+  },
+  "Cannot find saved configuration for \"{networkId}\". Please configure it first.": {
+    "string": "Cannot find saved configuration for \"{networkId}\". Please configure it first."
+  },
+  "DCC Send Error": {
+    "string": "DCC Send Error"
+  },
+  "Failed to send file": {
+    "string": "Failed to send file"
+  },
+  "Download complete": {
+    "string": "Download complete"
+  },
+  "Saved to {path}": {
+    "string": "Saved to {path}"
+  },
+  "Download failed": {
+    "string": "Download failed"
+  },
+  "Unable to download file": {
+    "string": "Unable to download file"
+  },
+  "...": {
+    "string": "..."
+  },
+  "Download": {
+    "string": "Download"
+  },
+  "Networks & Servers": {
+    "string": "Networks & Servers"
+  },
+  "IRC network configurations and server settings": {
+    "string": "IRC network configurations and server settings"
+  },
+  "App Settings": {
+    "string": "App Settings"
+  },
+  "General app preferences and configurations": {
+    "string": "General app preferences and configurations"
+  },
+  "Encryption Keys": {
+    "string": "Encryption Keys"
+  },
+  "Channel encryption keys and DM bundles": {
+    "string": "Channel encryption keys and DM bundles"
+  },
+  "Identity & Connection Profiles": {
+    "string": "Identity & Connection Profiles"
+  },
+  "User identity profiles and connection templates": {
+    "string": "User identity profiles and connection templates"
+  },
+  "Favorite channels and auto-join settings": {
+    "string": "Favorite channels and auto-join settings"
+  },
+  "Channel Notes & Bookmarks": {
+    "string": "Channel Notes & Bookmarks"
+  },
+  "Channel notes, bookmarks, and user aliases": {
+    "string": "Channel notes, bookmarks, and user aliases"
+  },
+  "Highlights & Notifications": {
+    "string": "Highlights & Notifications"
+  },
+  "Highlight words and notification preferences": {
+    "string": "Highlight words and notification preferences"
+  },
+  "Open Tabs": {
+    "string": "Open Tabs"
+  },
+  "Currently open channel and query tabs": {
+    "string": "Currently open channel and query tabs"
+  },
+  "Saved message history for all tabs": {
+    "string": "Saved message history for all tabs"
+  },
+  "Activity Logs": {
+    "string": "Activity Logs"
+  },
+  "Channel activity logs and join/part history": {
+    "string": "Channel activity logs and join/part history"
+  },
+  "No Options Selected": {
+    "string": "No Options Selected"
+  },
+  "Please select at least one backup option": {
+    "string": "Please select at least one backup option"
+  },
+  "Generated backup with {count} items:\n{names}": {
+    "string": "Generated backup with {count} items:\n{names}"
+  },
+  "Failed to generate backup": {
+    "string": "Failed to generate backup"
+  },
+  "Please paste backup data first": {
+    "string": "Please paste backup data first"
+  },
+  "Confirm Restore": {
+    "string": "Confirm Restore"
+  },
+  "This will overwrite existing data. Are you sure?": {
+    "string": "This will overwrite existing data. Are you sure?"
+  },
+  "Failed to restore backup": {
+    "string": "Failed to restore backup"
+  },
+  "Storage Statistics": {
+    "string": "Storage Statistics"
+  },
+  "{count} items ~{size} KB": {
+    "string": "{count} items ~{size} KB"
+  },
+  "Quick Presets": {
+    "string": "Quick Presets"
+  },
+  "All Data": {
+    "string": "All Data"
+  },
+  "Settings Only": {
+    "string": "Settings Only"
+  },
+  "Minimal": {
+    "string": "Minimal"
+  },
+  "Clear All": {
+    "string": "Clear All"
+  },
+  "Select Data to Backup ({count} selected)": {
+    "string": "Select Data to Backup ({count} selected)"
+  },
+  "Generate Backup": {
+    "string": "Generate Backup"
+  },
+  "Restore from Backup": {
+    "string": "Restore from Backup"
+  },
+  "Backup Data": {
+    "string": "Backup Data"
+  },
+  "Copy this JSON to save your backup, or save it to a file.": {
+    "string": "Copy this JSON to save your backup, or save it to a file."
+  },
+  "Paste your backup JSON here to restore your data.": {
+    "string": "Paste your backup JSON here to restore your data."
+  },
+  "Backup JSON appears here...": {
+    "string": "Backup JSON appears here..."
+  },
+  "Failed to load networks and profiles": {
+    "string": "Failed to load networks and profiles"
+  },
+  "Failed to update connection type": {
+    "string": "Failed to update connection type"
+  },
+  "Failed to update identity profile": {
+    "string": "Failed to update identity profile"
+  },
+  "Failed to save network changes": {
+    "string": "Failed to save network changes"
+  },
+  "Failed to save server changes": {
+    "string": "Failed to save server changes"
+  },
+  "server": {
+    "string": "server"
+  },
+  "servers": {
+    "string": "servers"
+  },
+  "Edit Network Settings": {
+    "string": "Edit Network Settings"
+  },
+  "Connection Type": {
+    "string": "Connection Type"
+  },
+  "Identity Profile": {
+    "string": "Identity Profile"
+  },
+  "+ Add / Edit Identity": {
+    "string": "+ Add / Edit Identity"
+  },
+  "Edit": {
+    "string": "Edit"
+  },
+  "Servers": {
+    "string": "Servers"
+  },
+  "+ Add Server": {
+    "string": "+ Add Server"
+  },
+  "Nick: {nick}": {
+    "string": "Nick: {nick}"
+  },
+  "Alt Nick: {altNick}": {
+    "string": "Alt Nick: {altNick}"
+  },
+  "Real Name: {name}": {
+    "string": "Real Name: {name}"
+  },
+  "Current Profile: {name}": {
+    "string": "Current Profile: {name}"
+  },
+  "Connection Profiles": {
+    "string": "Connection Profiles"
+  },
+  "No networks configured yet. Add a network to get started!": {
+    "string": "No networks configured yet. Add a network to get started!"
+  },
+  "Edit Identity Profile": {
+    "string": "Edit Identity Profile"
+  },
+  "Profile Name": {
+    "string": "Profile Name"
+  },
+  "Nick": {
+    "string": "Nick"
+  },
+  "Alt Nick": {
+    "string": "Alt Nick"
+  },
+  "Real Name": {
+    "string": "Real Name"
+  },
+  "Ident/Username": {
+    "string": "Ident/Username"
+  },
+  "SASL Account": {
+    "string": "SASL Account"
+  },
+  "SASL Password": {
+    "string": "SASL Password"
+  },
+  "NickServ Password": {
+    "string": "NickServ Password"
+  },
+  "Oper Username": {
+    "string": "Oper Username"
+  },
+  "Defaults to nick": {
+    "string": "Defaults to nick"
+  },
+  "Oper Password": {
+    "string": "Oper Password"
+  },
+  "On-Connect Commands (one per line, runs after MOTD)": {
+    "string": "On-Connect Commands (one per line, runs after MOTD)"
+  },
+  "Example on-connect commands": {
+    "string": "Example on-connect commands"
+  },
+  "Profile name and nick are required": {
+    "string": "Profile name and nick are required"
+  },
+  "Failed to save identity profile": {
+    "string": "Failed to save identity profile"
+  },
+  "DCC Chat Request": {
+    "string": "DCC Chat Request"
+  },
+  "{from} wants to start a DCC chat. Accept?": {
+    "string": "{from} wants to start a DCC chat. Accept?"
+  },
+  "Decline": {
+    "string": "Decline"
+  },
+  "Accept": {
+    "string": "Accept"
+  },
+  "DCC SEND Offer": {
+    "string": "DCC SEND Offer"
+  },
+  "{from} offers \"{filename}\" ({size} bytes). Accept?": {
+    "string": "{from} offers \"{filename}\" ({size} bytes). Accept?"
+  },
+  "No Encryption Bundle": {
+    "string": "No Encryption Bundle"
+  },
+  "Always-encrypt is now enabled, but no encryption bundle exists. Share your key with this user to enable encryption.": {
+    "string": "Always-encrypt is now enabled, but no encryption bundle exists. Share your key with this user to enable encryption."
+  },
+  "Ping: {ping} ms": {
+    "string": "Ping: {ping} ms"
+  },
+  "Tap to connect": {
+    "string": "Tap to connect"
+  },
+  "Copied {count} message": {
+    "string": "Copied {count} message"
+  },
+  "Copied {count} messages": {
+    "string": "Copied {count} messages"
+  },
+  "No messages yet": {
+    "string": "No messages yet"
+  },
+  "{count} selected": {
+    "string": "{count} selected"
+  },
+  "Copy": {
+    "string": "Copy"
+  },
+  "WHOIS": {
+    "string": "WHOIS"
+  },
+  "CTCP PING": {
+    "string": "CTCP PING"
+  },
+  "CTCP VERSION": {
+    "string": "CTCP VERSION"
+  },
+  "CTCP TIME": {
+    "string": "CTCP TIME"
+  },
+  "Start DCC Chat": {
+    "string": "Start DCC Chat"
+  },
+  "Unignore User": {
+    "string": "Unignore User"
+  },
+  "Ignore User": {
+    "string": "Ignore User"
+  },
+  "Unmonitor Nick": {
+    "string": "Unmonitor Nick"
+  },
+  "Monitor Nick": {
+    "string": "Monitor Nick"
+  },
+  "Join a channel": {
+    "string": "Join a channel"
+  },
+  "Leave a channel": {
+    "string": "Leave a channel"
+  },
+  "Disconnect from server": {
+    "string": "Disconnect from server"
+  },
+  "Change nickname": {
+    "string": "Change nickname"
+  },
+  "Send private message": {
+    "string": "Send private message"
+  },
+  "Open private chat": {
+    "string": "Open private chat"
+  },
+  "User information": {
+    "string": "User information"
+  },
+  "Past user information": {
+    "string": "Past user information"
+  },
+  "Change channel/user modes": {
+    "string": "Change channel/user modes"
+  },
+  "View/set channel topic": {
+    "string": "View/set channel topic"
+  },
+  "Kick user from channel": {
+    "string": "Kick user from channel"
+  },
+  "Send action message": {
+    "string": "Send action message"
+  },
+  "Change real name": {
+    "string": "Change real name"
+  },
+  "Toggle bot mode": {
+    "string": "Toggle bot mode"
+  },
+  "Share DM encryption key": {
+    "string": "Share DM encryption key"
+  },
+  "Request DM encryption key": {
+    "string": "Request DM encryption key"
+  },
+  "Send encrypted DM": {
+    "string": "Send encrypted DM"
+  },
+  "DM encryption help": {
+    "string": "DM encryption help"
+  },
+  "Channel encryption commands": {
+    "string": "Channel encryption commands"
+  },
+  "Send raw IRC command": {
+    "string": "Send raw IRC command"
+  },
+  "Enter a message": {
+    "string": "Enter a message"
+  },
+  "alias": {
+    "string": "alias"
+  },
+  "recent": {
+    "string": "recent"
+  },
+  "Select a user first": {
+    "string": "Select a user first"
+  },
+  "Mismatched Nick": {
+    "string": "Mismatched Nick"
+  },
+  "This payload is for {payloadNick}, but you selected {targetNick}.": {
+    "string": "This payload is for {payloadNick}, but you selected {targetNick}."
+  },
+  "No Key": {
+    "string": "No Key"
+  },
+  "No DM key stored for {nick}.": {
+    "string": "No DM key stored for {nick}."
+  },
+  "Fingerprint Check": {
+    "string": "Fingerprint Check"
+  },
+  "Stored: {stored}\nScanned: {scanned}\n\n{result}": {
+    "string": "Stored: {stored}\nScanned: {scanned}\n\n{result}"
+  },
+  "Match ✅": {
+    "string": "Match ✅"
+  },
+  "Mismatch ⚠️": {
+    "string": "Mismatch ⚠️"
+  },
+  "Mark Verified": {
+    "string": "Mark Verified"
+  },
+  "Key verified for {nick}": {
+    "string": "Key verified for {nick}"
+  },
+  "None": {
+    "string": "None"
+  },
+  "Replace DM Key": {
+    "string": "Replace DM Key"
+  },
+  "Import DM Key": {
+    "string": "Import DM Key"
+  },
+  "Existing: {old}\nNew: {new}\n\nOnly replace if verified out-of-band.": {
+    "string": "Existing: {old}\nNew: {new}\n\nOnly replace if verified out-of-band."
+  },
+  "Fingerprint: {fp}\n\nAccept this key for {nick}?": {
+    "string": "Fingerprint: {fp}\n\nAccept this key for {nick}?"
+  },
+  "Replace": {
+    "string": "Replace"
+  },
+  "Key {action} for {nick}": {
+    "string": "Key {action} for {nick}"
+  },
+  "replaced": {
+    "string": "replaced"
+  },
+  "imported": {
+    "string": "imported"
+  },
+  "Share Your Key?": {
+    "string": "Share Your Key?"
+  },
+  "You imported {nick}'s key offline. For encrypted chat to work both ways, {nick} also needs your key.\n\n💡 Show your QR code for them to scan (no server messages)": {
+    "string": "You imported {nick}'s key offline. For encrypted chat to work both ways, {nick} also needs your key.\n\n💡 Show your QR code for them to scan (no server messages)"
+  },
+  "Later": {
+    "string": "Later"
+  },
+  "Show QR Code": {
+    "string": "Show QR Code"
+  },
+  "Failed to generate QR": {
+    "string": "Failed to generate QR"
+  },
+  "Invalid key payload": {
+    "string": "Invalid key payload"
+  },
+  "Version 1.4.6": {
+    "string": "Version 1.4.6"
+  },
+  "Made by": {
+    "string": "Made by"
+  },
+  "Network": {
+    "string": "Network"
+  },
+  "IRC Database": {
+    "string": "IRC Database"
+  },
+  "IRC Nick": {
+    "string": "IRC Nick"
+  },
+  "Contact": {
+    "string": "Contact"
+  },
+  "AndroidIRCX Website": {
+    "string": "AndroidIRCX Website"
+  },
+  "AndroidIRCX Github": {
+    "string": "AndroidIRCX Github"
+  },
+  "{count} users": {
+    "string": "{count} users"
+  },
+  "Channel List": {
+    "string": "Channel List"
+  },
+  "Refresh": {
+    "string": "Refresh"
+  },
+  "Search channels...": {
+    "string": "Search channels..."
+  },
+  "Filters": {
+    "string": "Filters"
+  },
+  "Min users": {
+    "string": "Min users"
+  },
+  "Max users": {
+    "string": "Max users"
+  },
+  "Name pattern": {
+    "string": "Name pattern"
+  },
+  "Users": {
+    "string": "Users"
+  },
+  "Name": {
+    "string": "Name"
+  },
+  "Loading channel list...": {
+    "string": "Loading channel list..."
+  },
+  "No channels found": {
+    "string": "No channels found"
+  },
+  "Topic updated": {
+    "string": "Topic updated"
+  },
+  "Channel key set": {
+    "string": "Channel key set"
+  },
+  "Channel key removed": {
+    "string": "Channel key removed"
+  },
+  "Channel limit set to {limitNum}": {
+    "string": "Channel limit set to {limitNum}"
+  },
+  "Channel limit removed": {
+    "string": "Channel limit removed"
+  },
+  "Invalid limit value": {
+    "string": "Invalid limit value"
+  },
+  "Ban added": {
+    "string": "Ban added"
+  },
+  "Ban removed": {
+    "string": "Ban removed"
+  },
+  "Exception added": {
+    "string": "Exception added"
+  },
+  "Exception removed": {
+    "string": "Exception removed"
+  },
+  "No Encryption Key": {
+    "string": "No Encryption Key"
+  },
+  "Always-encrypt is now enabled, but no encryption key exists. Generate or request a key to enable encryption.": {
+    "string": "Always-encrypt is now enabled, but no encryption key exists. Generate or request a key to enable encryption."
+  },
+  "Always-encrypt enabled for {channel}": {
+    "string": "Always-encrypt enabled for {channel}"
+  },
+  "Always-encrypt disabled for {channel}": {
+    "string": "Always-encrypt disabled for {channel}"
+  },
+  "Failed to toggle always-encrypt": {
+    "string": "Failed to toggle always-encrypt"
+  },
+  "Encryption key generated. You can now share it with other users.": {
+    "string": "Encryption key generated. You can now share it with other users."
+  },
+  "Failed to generate key": {
+    "string": "Failed to generate key"
+  },
+  "Request Key": {
+    "string": "Request Key"
+  },
+  "Enter the nickname to request the encryption key from:": {
+    "string": "Enter the nickname to request the encryption key from:"
+  },
+  "Request": {
+    "string": "Request"
+  },
+  "Key request sent to {nick}": {
+    "string": "Key request sent to {nick}"
+  },
+  "Share Key": {
+    "string": "Share Key"
+  },
+  "Enter the nickname to share the encryption key with:": {
+    "string": "Enter the nickname to share the encryption key with:"
+  },
+  "Share": {
+    "string": "Share"
+  },
+  "Key shared with {nick}": {
+    "string": "Key shared with {nick}"
+  },
+  "Remove Encryption Key": {
+    "string": "Remove Encryption Key"
+  },
+  "Are you sure you want to remove the encryption key? You will not be able to decrypt messages until you get the key again.": {
+    "string": "Are you sure you want to remove the encryption key? You will not be able to decrypt messages until you get the key again."
+  },
+  "Encryption key removed": {
+    "string": "Encryption key removed"
+  },
+  "Channel Settings": {
+    "string": "Channel Settings"
+  },
+  "Topic": {
+    "string": "Topic"
+  },
+  "Channel topic": {
+    "string": "Channel topic"
+  },
+  "Set Topic": {
+    "string": "Set Topic"
+  },
+  "Set by {topicSetBy}": {
+    "string": "Set by {topicSetBy}"
+  },
+  "on {date}": {
+    "string": "on {date}"
+  },
+  "Channel Modes": {
+    "string": "Channel Modes"
+  },
+  "No modes set": {
+    "string": "No modes set"
+  },
+  "Invite Only (i)": {
+    "string": "Invite Only (i)"
+  },
+  "Topic Protected (t)": {
+    "string": "Topic Protected (t)"
+  },
+  "No External Messages (n)": {
+    "string": "No External Messages (n)"
+  },
+  "Moderated (m)": {
+    "string": "Moderated (m)"
+  },
+  "Private (p)": {
+    "string": "Private (p)"
+  },
+  "Secret (s)": {
+    "string": "Secret (s)"
+  },
+  "Channel Key (Password)": {
+    "string": "Channel Key (Password)"
+  },
+  "Channel key (leave empty to remove)": {
+    "string": "Channel key (leave empty to remove)"
+  },
+  "Set Key": {
+    "string": "Set Key"
+  },
+  "Remove Key": {
+    "string": "Remove Key"
+  },
+  "Key is currently set": {
+    "string": "Key is currently set"
+  },
+  "Encryption Settings": {
+    "string": "Encryption Settings"
+  },
+  "Always Encrypt Messages": {
+    "string": "Always Encrypt Messages"
+  },
+  "✓ Encryption key exists": {
+    "string": "✓ Encryption key exists"
+  },
+  "⚠ No encryption key": {
+    "string": "⚠ No encryption key"
+  },
+  "Generate Key": {
+    "string": "Generate Key"
+  },
+  "Request Key from...": {
+    "string": "Request Key from..."
+  },
+  "Share Key with...": {
+    "string": "Share Key with..."
+  },
+  "Messages will be encrypted automatically when a key is available.": {
+    "string": "Messages will be encrypted automatically when a key is available."
+  },
+  "Enable to automatically encrypt all messages to this channel.": {
+    "string": "Enable to automatically encrypt all messages to this channel."
+  },
+  "User Limit": {
+    "string": "User Limit"
+  },
+  "Maximum users (leave empty to remove)": {
+    "string": "Maximum users (leave empty to remove)"
+  },
+  "Set Limit": {
+    "string": "Set Limit"
+  },
+  "Remove Limit": {
+    "string": "Remove Limit"
+  },
+  "Current limit: {limit} users": {
+    "string": "Current limit: {limit} users"
+  },
+  "Ban List": {
+    "string": "Ban List"
+  },
+  "Ban mask (e.g., *!*@host.com)": {
+    "string": "Ban mask (e.g., *!*@host.com)"
+  },
+  "Refresh Ban List": {
+    "string": "Refresh Ban List"
+  },
+  "No bans": {
+    "string": "No bans"
+  },
+  "Exception List": {
+    "string": "Exception List"
+  },
+  "Exception mask": {
+    "string": "Exception mask"
+  },
+  "Refresh Exception List": {
+    "string": "Refresh Exception List"
+  },
+  "No exceptions": {
+    "string": "No exceptions"
+  },
+  "User added to ignore list": {
+    "string": "User added to ignore list"
+  },
+  "Remove from Ignore List": {
+    "string": "Remove from Ignore List"
+  },
+  "Remove {mask}?": {
+    "string": "Remove {mask}?"
+  },
+  "User removed from ignore list": {
+    "string": "User removed from ignore list"
+  },
+  "+ Add": {
+    "string": "+ Add"
+  },
+  "No ignored users": {
+    "string": "No ignored users"
+  },
+  "Add users to ignore their messages": {
+    "string": "Add users to ignore their messages"
+  },
+  "Added {date}": {
+    "string": "Added {date}"
+  },
+  "Add to Ignore List": {
+    "string": "Add to Ignore List"
+  },
+  "Enter a mask to ignore. Examples:": {
+    "string": "Enter a mask to ignore. Examples:"
+  },
+  "nick (ignore specific nick)": {
+    "string": "nick (ignore specific nick)"
+  },
+  "*!*@host.com (ignore all from host)": {
+    "string": "*!*@host.com (ignore all from host)"
+  },
+  "nick!*@* (ignore specific user)": {
+    "string": "nick!*@* (ignore specific user)"
+  },
+  "nick or mask (e.g., *!*@host.com)": {
+    "string": "nick or mask (e.g., *!*@host.com)"
+  },
+  "Reason (optional)": {
+    "string": "Reason (optional)"
+  },
+  "Network not found": {
+    "string": "Network not found"
+  },
+  "Failed to load network": {
+    "string": "Failed to load network"
+  },
+  "Please fill in all required fields (Name, Nick, Realname)": {
+    "string": "Please fill in all required fields (Name, Nick, Realname)"
+  },
+  "Network Settings": {
+    "string": "Network Settings"
+  },
+  "Loading...": {
+    "string": "Loading..."
+  },
+  "Retry": {
+    "string": "Retry"
+  },
+  "Basic Information": {
+    "string": "Basic Information"
+  },
+  "Network Name *": {
+    "string": "Network Name *"
+  },
+  "e.g., dbase.in.rs": {
+    "string": "e.g., dbase.in.rs"
+  },
+  "Nickname *": {
+    "string": "Nickname *"
+  },
+  "Your IRC nickname": {
+    "string": "Your IRC nickname"
+  },
+  "Alternative Nickname": {
+    "string": "Alternative Nickname"
+  },
+  "Fallback if primary nick is taken": {
+    "string": "Fallback if primary nick is taken"
+  },
+  "Real Name *": {
+    "string": "Real Name *"
+  },
+  "Your real name or description": {
+    "string": "Your real name or description"
+  },
+  "Ident / Username": {
+    "string": "Ident / Username"
+  },
+  "Username for ident (optional)": {
+    "string": "Username for ident (optional)"
+  },
+  "Auto-Join Channels": {
+    "string": "Auto-Join Channels"
+  },
+  "Channels (comma-separated)": {
+    "string": "Channels (comma-separated)"
+  },
+  "#channel1, #channel2": {
+    "string": "#channel1, #channel2"
+  },
+  "SASL PLAIN (Optional)": {
+    "string": "SASL PLAIN (Optional)"
+  },
+  "SASL account name": {
+    "string": "SASL account name"
+  },
+  "SASL password": {
+    "string": "SASL password"
+  },
+  "Proxy (Optional, per network)": {
+    "string": "Proxy (Optional, per network)"
+  },
+  "Enable proxy (Tor/SOCKS5/HTTP)": {
+    "string": "Enable proxy (Tor/SOCKS5/HTTP)"
+  },
+  "Type (socks5, http, tor)": {
+    "string": "Type (socks5, http, tor)"
+  },
+  "tor": {
+    "string": "tor"
+  },
+  "Host": {
+    "string": "Host"
+  },
+  "127.0.0.1 (Tor default)": {
+    "string": "127.0.0.1 (Tor default)"
+  },
+  "Port": {
+    "string": "Port"
+  },
+  "9050 for Tor, 1080 for SOCKS5": {
+    "string": "9050 for Tor, 1080 for SOCKS5"
+  },
+  "Username": {
+    "string": "Username"
+  },
+  "optional": {
+    "string": "optional"
+  },
+  "Password": {
+    "string": "Password"
+  },
+  "SASL EXTERNAL (Client Certificate)": {
+    "string": "SASL EXTERNAL (Client Certificate)"
+  },
+  "Client Certificate (PEM)": {
+    "string": "Client Certificate (PEM)"
+  },
+  "-----BEGIN CERTIFICATE-----...": {
+    "string": "-----BEGIN CERTIFICATE-----..."
+  },
+  "Client Private Key (PEM)": {
+    "string": "Client Private Key (PEM)"
+  },
+  "-----BEGIN PRIVATE KEY-----...": {
+    "string": "-----BEGIN PRIVATE KEY-----..."
+  },
+  "Failed to save network": {
+    "string": "Failed to save network"
+  },
+  "Failed to save server": {
+    "string": "Failed to save server"
+  },
+  "Delete Network": {
+    "string": "Delete Network"
+  },
+  "Are you sure you want to delete \"{networkName}\"?": {
+    "string": "Are you sure you want to delete \"{networkName}\"?"
+  },
+  "Networks": {
+    "string": "Networks"
+  },
+  "+": {
+    "string": "+"
+  },
+  "(SSL)": {
+    "string": "(SSL)"
+  },
+  "Quick Start": {
+    "string": "Quick Start"
+  },
+  "Scripts are plain JavaScript modules. Export hooks to react to events:": {
+    "string": "Scripts are plain JavaScript modules. Export hooks to react to events:"
+  },
+  "API": {
+    "string": "API"
+  },
+  "Available functions": {
+    "string": "Available functions"
+  },
+  "• api.log(text) — log to script log buffer": {
+    "string": "• api.log(text) — log to script log buffer"
+  },
+  "• api.sendMessage(channel, text, networkId?)": {
+    "string": "• api.sendMessage(channel, text, networkId?)"
+  },
+  "• api.sendCommand(command, networkId?)": {
+    "string": "• api.sendCommand(command, networkId?)"
+  },
+  "• api.userNick — current nick": {
+    "string": "• api.userNick — current nick"
+  },
+  "• api.getConfig() — script config JSON": {
+    "string": "• api.getConfig() — script config JSON"
+  },
+  "Hooks": {
+    "string": "Hooks"
+  },
+  "• onConnect(networkId)": {
+    "string": "• onConnect(networkId)"
+  },
+  "• onMessage(msg)": {
+    "string": "• onMessage(msg)"
+  },
+  "• onJoin(channel, nick, msg)": {
+    "string": "• onJoin(channel, nick, msg)"
+  },
+  "• onCommand(text, ctx) ⇒ string | { command, cancel }": {
+    "string": "• onCommand(text, ctx) ⇒ string | { command, cancel }"
+  },
+  "Examples": {
+    "string": "Examples"
+  },
+  "Auto-op": {
+    "string": "Auto-op"
+  },
+  "Welcome": {
+    "string": "Welcome"
+  },
+  "Alias (/hello)": {
+    "string": "Alias (/hello)"
+  },
+  "Tips": {
+    "string": "Tips"
+  },
+  "• Scripts are disabled by default; enable each one.": {
+    "string": "• Scripts are disabled by default; enable each one."
+  },
+  "• Use Lint to catch syntax errors.": {
+    "string": "• Use Lint to catch syntax errors."
+  },
+  "• Enable logging to see script output/errors in the log tab.": {
+    "string": "• Enable logging to see script output/errors in the log tab."
+  },
+  "• onCommand can cancel send by returning { cancel: true }.": {
+    "string": "• onCommand can cancel send by returning { cancel: true }."
+  },
+  "Cannot Enable Script": {
+    "string": "Cannot Enable Script"
+  },
+  "Thank You!": {
+    "string": "Thank You!"
+  },
+  "You earned scripting time!": {
+    "string": "You earned scripting time!"
+  },
+  "Ad Failed": {
+    "string": "Ad Failed"
+  },
+  "Could not show the ad. Please try again.": {
+    "string": "Could not show the ad. Please try again."
+  },
+  "Loading Ad": {
+    "string": "Loading Ad"
+  },
+  "Cannot Load Ad": {
+    "string": "Cannot Load Ad"
+  },
+  "New Script": {
+    "string": "New Script"
+  },
+  "Lint Passed": {
+    "string": "Lint Passed"
+  },
+  "Syntax Error": {
+    "string": "Syntax Error"
+  },
+  "Test": {
+    "string": "Test"
+  },
+  "Scripting Time Remaining:": {
+    "string": "Scripting Time Remaining:"
+  },
+  "Using fallback ad unit": {
+    "string": "Using fallback ad unit"
+  },
+  "Watch Ad (+60 min)": {
+    "string": "Watch Ad (+60 min)"
+  },
+  "Cooldown ({cooldownSeconds}s)": {
+    "string": "Cooldown ({cooldownSeconds}s)"
+  },
+  "Loading Ad...": {
+    "string": "Loading Ad..."
+  },
+  "Request Ad": {
+    "string": "Request Ad"
+  },
+  "No scripting time available. Watch an ad to gain scripting access. Scripts will be automatically disabled when time runs out.": {
+    "string": "No scripting time available. Watch an ad to gain scripting access. Scripts will be automatically disabled when time runs out."
+  },
+  "Tap \"Request Ad\" to load an ad from Google. First load may take a few moments.": {
+    "string": "Tap \"Request Ad\" to load an ad from Google. First load may take a few moments."
+  },
+  "Ads temporarily unavailable. The app works fine without them. Retrying in {cooldownSeconds}s...": {
+    "string": "Ads temporarily unavailable. The app works fine without them. Retrying in {cooldownSeconds}s..."
+  },
+  "Install Built-ins": {
+    "string": "Install Built-ins"
+  },
+  "Logging": {
+    "string": "Logging"
+  },
+  "Repository": {
+    "string": "Repository"
+  },
+  "No scripts in repository.": {
+    "string": "No scripts in repository."
+  },
+  "No scripts installed.": {
+    "string": "No scripts installed."
+  },
+  "Script Logs": {
+    "string": "Script Logs"
+  },
+  "Filter by script": {
+    "string": "Filter by script"
+  },
+  "script id": {
+    "string": "script id"
+  },
+  "No logs yet.": {
+    "string": "No logs yet."
+  },
+  "Edit Script": {
+    "string": "Edit Script"
+  },
+  "Enabled": {
+    "string": "Enabled"
+  },
+  "Highlight": {
+    "string": "Highlight"
+  },
+  "Code": {
+    "string": "Code"
+  },
+  "Config (JSON)": {
+    "string": "Config (JSON)"
+  },
+  "Invalid JSON": {
+    "string": "Invalid JSON"
+  },
+  "Lint": {
+    "string": "Lint"
+  },
+  "Server not found": {
+    "string": "Server not found"
+  },
+  "Failed to load server": {
+    "string": "Failed to load server"
+  },
+  "Please enter a hostname": {
+    "string": "Please enter a hostname"
+  },
+  "Please enter a valid port number (1-65535)": {
+    "string": "Please enter a valid port number (1-65535)"
+  },
+  "Server Settings": {
+    "string": "Server Settings"
+  },
+  "Connection": {
+    "string": "Connection"
+  },
+  "Display Name (Optional)": {
+    "string": "Display Name (Optional)"
+  },
+  "Server display name": {
+    "string": "Server display name"
+  },
+  "Hostname *": {
+    "string": "Hostname *"
+  },
+  "irc.example.com": {
+    "string": "irc.example.com"
+  },
+  "Port *": {
+    "string": "Port *"
+  },
+  "Standard ports: 6667 (plain), 6697 (SSL/TLS)": {
+    "string": "Standard ports: 6667 (plain), 6697 (SSL/TLS)"
+  },
+  "Use SSL/TLS": {
+    "string": "Use SSL/TLS"
+  },
+  "Enable for secure connections (recommended for port 6697)": {
+    "string": "Enable for secure connections (recommended for port 6697)"
+  },
+  "Reject Unauthorized Certificates": {
+    "string": "Reject Unauthorized Certificates"
+  },
+  "Leave on (recommended). Turn off only for self-signed/expired certs.": {
+    "string": "Leave on (recommended). Turn off only for self-signed/expired certs."
+  },
+  "Authentication": {
+    "string": "Authentication"
+  },
+  "Server Password (Optional)": {
+    "string": "Server Password (Optional)"
+  },
+  "Server connection password": {
+    "string": "Server connection password"
+  },
+  "Some servers require a password to connect": {
+    "string": "Some servers require a password to connect"
+  },
+  "Favorite Server": {
+    "string": "Favorite Server"
+  },
+  "Mark this server as the preferred choice for this network.": {
+    "string": "Mark this server as the preferred choice for this network."
+  },
+  "Invalid Color": {
+    "string": "Invalid Color"
+  },
+  "Please enter a valid hex color (e.g., #FF0000) or rgba value": {
+    "string": "Please enter a valid hex color (e.g., #FF0000) or rgba value"
+  },
+  "Please enter a theme name": {
+    "string": "Please enter a theme name"
+  },
+  "Background": {
+    "string": "Background"
+  },
+  "Text": {
+    "string": "Text"
+  },
+  "Primary": {
+    "string": "Primary"
+  },
+  "Secondary": {
+    "string": "Secondary"
+  },
+  "Status": {
+    "string": "Status"
+  },
+  "Borders": {
+    "string": "Borders"
+  },
+  "Input": {
+    "string": "Input"
+  },
+  "Buttons": {
+    "string": "Buttons"
+  },
+  "Tabs": {
+    "string": "Tabs"
+  },
+  "Modal": {
+    "string": "Modal"
+  },
+  "User List": {
+    "string": "User List"
+  },
+  "Edit Theme": {
+    "string": "Edit Theme"
+  },
+  "New Theme": {
+    "string": "New Theme"
+  },
+  "Theme Name": {
+    "string": "Theme Name"
+  },
+  "Enter theme name": {
+    "string": "Enter theme name"
+  },
+  "#FFFFFF": {
+    "string": "#FFFFFF"
+  },
+  "Audio error: {error}": {
+    "string": "Audio error: {error}"
+  },
+  "Failed to load audio": {
+    "string": "Failed to load audio"
+  },
+  "Play": {
+    "string": "Play"
+  },
+  "Pause": {
+    "string": "Pause"
+  },
+  "Failed to load image": {
+    "string": "Failed to load image"
+  },
+  "This payload is for {payloadNick}, but you selected {nick}.": {
+    "string": "This payload is for {payloadNick}, but you selected {nick}."
+  },
+  "Key replaced for {nick}": {
+    "string": "Key replaced for {nick}"
+  },
+  "Key imported for {nick}": {
+    "string": "Key imported for {nick}"
+  },
+  "Enc key offer sent to {nick}": {
+    "string": "Enc key offer sent to {nick}"
+  },
+  "Failed to share key": {
+    "string": "Failed to share key"
+  },
+  "Requested key from {nick}": {
+    "string": "Requested key from {nick}"
+  },
+  "Key saved for {nick}": {
+    "string": "Key saved for {nick}"
+  },
+  "Key not received (timeout)": {
+    "string": "Key not received (timeout)"
+  },
+  "Camera permission denied": {
+    "string": "Camera permission denied"
+  },
+  "Failed to open camera": {
+    "string": "Failed to open camera"
+  },
+  "Key file shared": {
+    "string": "Key file shared"
+  },
+  "Failed to share key file": {
+    "string": "Failed to share key file"
+  },
+  "Failed to import key file": {
+    "string": "Failed to import key file"
+  },
+  "NFC not supported": {
+    "string": "NFC not supported"
+  },
+  "NFC key ready, tap devices": {
+    "string": "NFC key ready, tap devices"
+  },
+  "Failed to share via NFC": {
+    "string": "Failed to share via NFC"
+  },
+  "No NFC payload": {
+    "string": "No NFC payload"
+  },
+  "Failed to read NFC": {
+    "string": "Failed to read NFC"
+  },
+  "No DM key for {nick}": {
+    "string": "No DM key for {nick}"
+  },
+  "Verified": {
+    "string": "Verified"
+  },
+  "Verify DM Key": {
+    "string": "Verify DM Key"
+  },
+  "Compare fingerprints out-of-band:\n\nYou: {self}\n{nick}: {peer}": {
+    "string": "Compare fingerprints out-of-band:\n\nYou: {self}\n{nick}: {peer}"
+  },
+  "Key marked verified for {nick}": {
+    "string": "Key marked verified for {nick}"
+  },
+  "Copy Fingerprints": {
+    "string": "Copy Fingerprints"
+  },
+  "Fingerprints copied": {
+    "string": "Fingerprints copied"
+  },
+  "Failed to load fingerprints": {
+    "string": "Failed to load fingerprints"
+  },
+  "E2E Encryption - {nick}": {
+    "string": "E2E Encryption - {nick}"
+  },
+  "Share DM Key": {
+    "string": "Share DM Key"
+  },
+  "Request DM Key (36s)": {
+    "string": "Request DM Key (36s)"
+  },
+  "Share Key Bundle QR": {
+    "string": "Share Key Bundle QR"
+  },
+  "Show Fingerprint QR (Verify)": {
+    "string": "Show Fingerprint QR (Verify)"
+  },
+  "Scan QR Code": {
+    "string": "Scan QR Code"
+  },
+  "Share Key File": {
+    "string": "Share Key File"
+  },
+  "Import Key File": {
+    "string": "Import Key File"
+  },
+  "Share via NFC": {
+    "string": "Share via NFC"
+  },
+  "Receive via NFC": {
+    "string": "Receive via NFC"
+  },
+  "Share Key Bundle": {
+    "string": "Share Key Bundle"
+  },
+  "Fingerprint QR": {
+    "string": "Fingerprint QR"
+  },
+  "Scan to import encryption key": {
+    "string": "Scan to import encryption key"
+  },
+  "Scan to verify out-of-band": {
+    "string": "Scan to verify out-of-band"
+  },
+  "QR payload copied": {
+    "string": "QR payload copied"
+  },
+  "Copy Payload": {
+    "string": "Copy Payload"
+  },
+  "Camera unavailable": {
+    "string": "Camera unavailable"
+  },
+  "Scan a fingerprint QR": {
+    "string": "Scan a fingerprint QR"
+  },
+  "{user} is typing...": {
+    "string": "{user} is typing..."
+  },
+  "{userA} and {userB} are typing...": {
+    "string": "{userA} and {userB} are typing..."
+  },
+  "{userA}, {userB}, and {userC} are typing...": {
+    "string": "{userA}, {userB}, and {userC} are typing..."
+  },
+  "{userA}, {userB}, and {count} others are typing...": {
+    "string": "{userA}, {userB}, and {count} others are typing..."
+  },
+  "Copied {nick}": {
+    "string": "Copied {nick}"
+  },
+  "WHOIS requested for {nick}": {
+    "string": "WHOIS requested for {nick}"
+  },
+  "Shared channel key with {nick}": {
+    "string": "Shared channel key with {nick}"
+  },
+  "Failed to share channel key": {
+    "string": "Failed to share channel key"
+  },
+  "Requested channel key for {channel} from {nick}": {
+    "string": "Requested channel key for {channel} from {nick}"
+  },
+  "Failed to request channel key": {
+    "string": "Failed to request channel key"
+  },
+  "CTCP PING sent to {nick}": {
+    "string": "CTCP PING sent to {nick}"
+  },
+  "CTCP VERSION requested from {nick}": {
+    "string": "CTCP VERSION requested from {nick}"
+  },
+  "CTCP TIME requested from {nick}": {
+    "string": "CTCP TIME requested from {nick}"
+  },
+  "DCC CHAT offer sent to {nick}": {
+    "string": "DCC CHAT offer sent to {nick}"
+  },
+  "DCC SEND offer initiated to {nick}": {
+    "string": "DCC SEND offer initiated to {nick}"
+  },
+  "{nick} unignored": {
+    "string": "{nick} unignored"
+  },
+  "{nick} ignored": {
+    "string": "{nick} ignored"
+  },
+  "Stopped monitoring {nick}": {
+    "string": "Stopped monitoring {nick}"
+  },
+  "Monitoring {nick}": {
+    "string": "Monitoring {nick}"
+  },
+  "Gave voice to {nick}": {
+    "string": "Gave voice to {nick}"
+  },
+  "Took voice from {nick}": {
+    "string": "Took voice from {nick}"
+  },
+  "Gave half-op to {nick}": {
+    "string": "Gave half-op to {nick}"
+  },
+  "Took half-op from {nick}": {
+    "string": "Took half-op from {nick}"
+  },
+  "Gave op to {nick}": {
+    "string": "Gave op to {nick}"
+  },
+  "Took op from {nick}": {
+    "string": "Took op from {nick}"
+  },
+  "Kicked {nick} from {channel}": {
+    "string": "Kicked {nick} from {channel}"
+  },
+  "Banned {mask}": {
+    "string": "Banned {mask}"
+  },
+  "Kicked + banned {nick}": {
+    "string": "Kicked + banned {nick}"
+  },
+  "user": {
+    "string": "user"
+  },
+  "users": {
+    "string": "users"
+  },
+  "Search users...": {
+    "string": "Search users..."
+  },
+  "No users found": {
+    "string": "No users found"
+  },
+  "No users": {
+    "string": "No users"
+  },
+  "Account: {account}": {
+    "string": "Account: {account}"
+  },
+  "Quick Actions": {
+    "string": "Quick Actions"
+  },
+  "Open Query": {
+    "string": "Open Query"
+  },
+  "Copy Nickname": {
+    "string": "Copy Nickname"
+  },
+  "Encryption": {
+    "string": "Encryption"
+  },
+  "E2E Encryption v": {
+    "string": "E2E Encryption v"
+  },
+  "E2E Encryption >": {
+    "string": "E2E Encryption >"
+  },
+  "Share Channel Key": {
+    "string": "Share Channel Key"
+  },
+  "Request Channel Key": {
+    "string": "Request Channel Key"
+  },
+  "CTCP": {
+    "string": "CTCP"
+  },
+  "CTCP v": {
+    "string": "CTCP v"
+  },
+  "CTCP >": {
+    "string": "CTCP >"
+  },
+  "DCC": {
+    "string": "DCC"
+  },
+  "Offer DCC Send": {
+    "string": "Offer DCC Send"
+  },
+  "Operator Controls": {
+    "string": "Operator Controls"
+  },
+  "Operator Controls v": {
+    "string": "Operator Controls v"
+  },
+  "Operator Controls >": {
+    "string": "Operator Controls >"
+  },
+  "Take Voice": {
+    "string": "Take Voice"
+  },
+  "Give Voice": {
+    "string": "Give Voice"
+  },
+  "Take Half-Op": {
+    "string": "Take Half-Op"
+  },
+  "Give Half-Op": {
+    "string": "Give Half-Op"
+  },
+  "Take Op": {
+    "string": "Take Op"
+  },
+  "Give Op": {
+    "string": "Give Op"
+  },
+  "Kick": {
+    "string": "Kick"
+  },
+  "Kick (with message)": {
+    "string": "Kick (with message)"
+  },
+  "Ban": {
+    "string": "Ban"
+  },
+  "Kick + Ban": {
+    "string": "Kick + Ban"
+  },
+  "Kick + Ban (with message)": {
+    "string": "Kick + Ban (with message)"
+  },
+  "Video error: {error}": {
+    "string": "Video error: {error}"
+  },
+  "Failed to load video": {
+    "string": "Failed to load video"
+  },
+  "PiP": {
+    "string": "PiP"
+  },
+  "WHOIS Error": {
+    "string": "WHOIS Error"
+  },
+  "Not connected or not registered yet.": {
+    "string": "Not connected or not registered yet."
+  },
+  "Note saved": {
+    "string": "Note saved"
+  },
+  "Note removed": {
+    "string": "Note removed"
+  },
+  "Alias saved": {
+    "string": "Alias saved"
+  },
+  "Alias removed": {
+    "string": "Alias removed"
+  },
+  "Ignore {nick}?": {
+    "string": "Ignore {nick}?"
+  },
+  "Ignore": {
+    "string": "Ignore"
+  },
+  "{nick} has been ignored": {
+    "string": "{nick} has been ignored"
+  },
+  "{nick} is no longer ignored": {
+    "string": "{nick} is no longer ignored"
+  },
+  "WHOIS: {nick}": {
+    "string": "WHOIS: {nick}"
+  },
+  "Loading WHOIS information...": {
+    "string": "Loading WHOIS information..."
+  },
+  "User Information": {
+    "string": "User Information"
+  },
+  "Real Name:": {
+    "string": "Real Name:"
+  },
+  "Host:": {
+    "string": "Host:"
+  },
+  "Account:": {
+    "string": "Account:"
+  },
+  "Server": {
+    "string": "Server"
+  },
+  "Server:": {
+    "string": "Server:"
+  },
+  "Away:": {
+    "string": "Away:"
+  },
+  "User is away": {
+    "string": "User is away"
+  },
+  "Activity": {
+    "string": "Activity"
+  },
+  "Idle:": {
+    "string": "Idle:"
+  },
+  "{minutes} minutes": {
+    "string": "{minutes} minutes"
+  },
+  "Signed on:": {
+    "string": "Signed on:"
+  },
+  "No WHOIS information available": {
+    "string": "No WHOIS information available"
+  },
+  "Request WHOIS": {
+    "string": "Request WHOIS"
+  },
+  "User Note": {
+    "string": "User Note"
+  },
+  "No note": {
+    "string": "No note"
+  },
+  "Edit Note": {
+    "string": "Edit Note"
+  },
+  "Add Note": {
+    "string": "Add Note"
+  },
+  "Enter note about this user": {
+    "string": "Enter note about this user"
+  },
+  "Last action: {action}{channel}": {
+    "string": "Last action: {action}{channel}"
+  },
+  "Last seen: {time}": {
+    "string": "Last seen: {time}"
+  },
+  "Context: ": {
+    "string": "Context: "
+  },
+  "No recent activity tracked": {
+    "string": "No recent activity tracked"
+  },
+  "User Alias": {
+    "string": "User Alias"
+  },
+  "No alias": {
+    "string": "No alias"
+  },
+  "Edit Alias": {
+    "string": "Edit Alias"
+  },
+  "Enter alias for this user": {
+    "string": "Enter alias for this user"
+  },
+  "Actions": {
+    "string": "Actions"
+  },
+  "WHOWAS (History)": {
+    "string": "WHOWAS (History)"
+  },
+  "Welcome to AndroidIRCX": {
+    "string": "Welcome to AndroidIRCX"
+  },
+  "Set Up Your Identity": {
+    "string": "Set Up Your Identity"
+  },
+  "Choose Your Network": {
+    "string": "Choose Your Network"
+  },
+  "All Set!": {
+    "string": "All Set!"
+  },
+  "Required": {
+    "string": "Required"
+  },
+  "Please enter a nickname": {
+    "string": "Please enter a nickname"
+  },
+  "Please enter your real name": {
+    "string": "Please enter your real name"
+  },
+  "{nick} Profile": {
+    "string": "{nick} Profile"
+  },
+  "Please enter network name and server": {
+    "string": "Please enter network name and server"
+  },
+  "Failed to save network configuration": {
+    "string": "Failed to save network configuration"
+  },
+  "AndroidIRCX": {
+    "string": "AndroidIRCX"
+  },
+  "Let's get you connected to IRC": {
+    "string": "Let's get you connected to IRC"
+  },
+  "Multi-network support": {
+    "string": "Multi-network support"
+  },
+  "Full IRCv3 compliance (18 capabilities)": {
+    "string": "Full IRCv3 compliance (18 capabilities)"
+  },
+  "End-to-end encryption": {
+    "string": "End-to-end encryption"
+  },
+  "Real-time typing indicators": {
+    "string": "Real-time typing indicators"
+  },
+  "Background connections": {
+    "string": "Background connections"
+  },
+  "This is how you'll appear to other users on IRC": {
+    "string": "This is how you'll appear to other users on IRC"
+  },
+  "Nickname": {
+    "string": "Nickname"
+  },
+  "AndroidIRCX_": {
+    "string": "AndroidIRCX_"
+  },
+  "Used if primary nickname is taken": {
+    "string": "Used if primary nickname is taken"
+  },
+  "Your Name": {
+    "string": "Your Name"
+  },
+  "Username/Ident": {
+    "string": "Username/Ident"
+  },
+  "androidircx": {
+    "string": "androidircx"
+  },
+  "Connect to an IRC server to start chatting": {
+    "string": "Connect to an IRC server to start chatting"
+  },
+  "Recommended Server": {
+    "string": "Recommended Server"
+  },
+  "irc.dbase.in.rs (Port 6697, SSL)": {
+    "string": "irc.dbase.in.rs (Port 6697, SSL)"
+  },
+  "Official AndroidIRCX server with full IRCv3 support": {
+    "string": "Official AndroidIRCX server with full IRCv3 support"
+  },
+  "Custom Server": {
+    "string": "Custom Server"
+  },
+  "Connect to a different IRC network": {
+    "string": "Connect to a different IRC network"
+  },
+  "Network Name": {
+    "string": "Network Name"
+  },
+  "libera": {
+    "string": "libera"
+  },
+  "Server Hostname": {
+    "string": "Server Hostname"
+  },
+  "irc.libera.chat": {
+    "string": "irc.libera.chat"
+  },
+  "Use SSL/TLS (Recommended)": {
+    "string": "Use SSL/TLS (Recommended)"
+  },
+  "You're all set!": {
+    "string": "You're all set!"
+  },
+  "Ready to connect to {server} as {nick}": {
+    "string": "Ready to connect to {server} as {nick}"
+  },
+  "Connect Now": {
+    "string": "Connect Now"
+  },
+  "Connect Later": {
+    "string": "Connect Later"
+  },
+  "Skip": {
+    "string": "Skip"
+  },
+  "Back": {
+    "string": "Back"
+  },
+  "Complete Setup": {
+    "string": "Complete Setup"
+  },
+  "Access Encryption Keys": {
+    "string": "Access Encryption Keys"
+  },
+  "Authenticate to view and manage your encryption keys": {
+    "string": "Authenticate to view and manage your encryption keys"
+  },
+  "You must authenticate to access encryption keys.": {
+    "string": "You must authenticate to access encryption keys."
+  },
+  "Authentication Failed": {
+    "string": "Authentication Failed"
+  },
+  "Authentication Error": {
+    "string": "Authentication Error"
+  },
+  "Failed to authenticate. Please try again.": {
+    "string": "Failed to authenticate. Please try again."
+  },
+  "Unknown error": {
+    "string": "Unknown error"
+  },
+  "Failed to load encryption keys: {error}": {
+    "string": "Failed to load encryption keys: {error}"
+  },
+  "Delete Encryption Key": {
+    "string": "Delete Encryption Key"
+  },
+  "Are you sure you want to delete the encryption key for {nick} on {network}?\n\nFingerprint: {fingerprint}\n\nThis cannot be undone.": {
+    "string": "Are you sure you want to delete the encryption key for {nick} on {network}?\n\nFingerprint: {fingerprint}\n\nThis cannot be undone."
+  },
+  "Key deleted successfully": {
+    "string": "Key deleted successfully"
+  },
+  "Failed to delete key": {
+    "string": "Failed to delete key"
+  },
+  "Key copied to {network}": {
+    "string": "Key copied to {network}"
+  },
+  "Failed to copy key": {
+    "string": "Failed to copy key"
+  },
+  "Move Key": {
+    "string": "Move Key"
+  },
+  "This will move the key from {fromNetwork} to {toNetwork} and delete it from {fromNetwork}.\n\nContinue?": {
+    "string": "This will move the key from {fromNetwork} to {toNetwork} and delete it from {fromNetwork}.\n\nContinue?"
+  },
+  "Move": {
+    "string": "Move"
+  },
+  "Key moved to {network}": {
+    "string": "Key moved to {network}"
+  },
+  "Failed to move key": {
+    "string": "Failed to move key"
+  },
+  "Failed to update verification status": {
+    "string": "Failed to update verification status"
+  },
+  "Password must be at least 6 characters": {
+    "string": "Password must be at least 6 characters"
+  },
+  "Exported {count} key(s). The encrypted backup has been copied to your clipboard. Save it to a secure location.": {
+    "string": "Exported {count} key(s). The encrypted backup has been copied to your clipboard. Save it to a secure location."
+  },
+  "Failed to export keys: {error}": {
+    "string": "Failed to export keys: {error}"
+  },
+  "Please provide both backup data and password": {
+    "string": "Please provide both backup data and password"
+  },
+  "Imported {count} key(s) successfully.": {
+    "string": "Imported {count} key(s) successfully."
+  },
+  "Failed to import keys: {error}": {
+    "string": "Failed to import keys: {error}"
+  },
+  "Last seen: {date}": {
+    "string": "Last seen: {date}"
+  },
+  "No encryption keys found": {
+    "string": "No encryption keys found"
+  },
+  "Exchange keys with users to enable encrypted messaging": {
+    "string": "Exchange keys with users to enable encrypted messaging"
+  },
+  "Authenticating...": {
+    "string": "Authenticating..."
+  },
+  "Loading keys...": {
+    "string": "Loading keys..."
+  },
+  "Search by nick or network...": {
+    "string": "Search by nick or network..."
+  },
+  "List View": {
+    "string": "List View"
+  },
+  "Group View": {
+    "string": "Group View"
+  },
+  "{count} key{suffix} · {verified} verified": {
+    "string": "{count} key{suffix} · {verified} verified"
+  },
+  "Export All Keys": {
+    "string": "Export All Keys"
+  },
+  "Import Keys": {
+    "string": "Import Keys"
+  },
+  "Key Details": {
+    "string": "Key Details"
+  },
+  "Network:": {
+    "string": "Network:"
+  },
+  "Nickname:": {
+    "string": "Nickname:"
+  },
+  "Fingerprint:": {
+    "string": "Fingerprint:"
+  },
+  "Status:": {
+    "string": "Status:"
+  },
+  "First Seen:": {
+    "string": "First Seen:"
+  },
+  "Last Seen:": {
+    "string": "Last Seen:"
+  },
+  "Mark as Unverified": {
+    "string": "Mark as Unverified"
+  },
+  "Mark as Verified": {
+    "string": "Mark as Verified"
+  },
+  "Copy to Network...": {
+    "string": "Copy to Network..."
+  },
+  "Move to Network...": {
+    "string": "Move to Network..."
+  },
+  "Delete Key": {
+    "string": "Delete Key"
+  },
+  "Copy Key to Network": {
+    "string": "Copy Key to Network"
+  },
+  "Copy key for {nick} to another network": {
+    "string": "Copy key for {nick} to another network"
+  },
+  "Move Key to Network": {
+    "string": "Move Key to Network"
+  },
+  "Move key for {nick} to another network (will delete from {network})": {
+    "string": "Move key for {nick} to another network (will delete from {network})"
+  },
+  "Create an encrypted backup of all {count} encryption key{suffix}.\nEnter a strong password to protect the backup.": {
+    "string": "Create an encrypted backup of all {count} encryption key{suffix}.\nEnter a strong password to protect the backup."
+  },
+  "Backup password (min 6 characters)": {
+    "string": "Backup password (min 6 characters)"
+  },
+  "Export": {
+    "string": "Export"
+  },
+  "Paste the encrypted backup data and enter the password used during export.": {
+    "string": "Paste the encrypted backup data and enter the password used during export."
+  },
+  "Paste backup data here...": {
+    "string": "Paste backup data here..."
+  },
+  "Backup password": {
+    "string": "Backup password"
+  },
+  "Import": {
+    "string": "Import"
+  },
+  "Failed to show ad": {
+    "string": "Failed to show ad"
+  },
+  "Unknown": {
+    "string": "Unknown"
+  },
+  "{channel} ({count} new message{suffix})": {
+    "string": "{channel} ({count} new message{suffix})"
+  },
+  "Quick aliases: /zncver, /zncm, /zncplay #chan, /zncclear #chan": {
+    "string": "Quick aliases: /zncver, /zncm, /zncplay #chan, /zncclear #chan"
+  },
+  "*** Detected bouncer type: {type}{hint}": {
+    "string": "*** Detected bouncer type: {type}{hint}"
+  },
+  "*** Creating new connection for {networkId}": {
+    "string": "*** Creating new connection for {networkId}"
+  },
+  "*** Warning: TLS certificate verification is disabled for this server. Enable \"Reject unauthorized certificates\" unless you trust this self-signed/expired cert.": {
+    "string": "*** Warning: TLS certificate verification is disabled for this server. Enable \"Reject unauthorized certificates\" unless you trust this self-signed/expired cert."
+  },
+  "*** Executed {count} on-connect command(s) from identity profile": {
+    "string": "*** Executed {count} on-connect command(s) from identity profile"
+  },
+  "*** Initializing services for {networkId}": {
+    "string": "*** Initializing services for {networkId}"
+  },
+  "*** Connecting to IRC server for {networkId}": {
+    "string": "*** Connecting to IRC server for {networkId}"
+  },
+  "Rate limit exceeded. Please slow down.": {
+    "string": "Rate limit exceeded. Please slow down."
+  },
+  "Not connected": {
+    "string": "Not connected"
+  },
+  "Connection closed": {
+    "string": "Connection closed"
+  },
+  "Invalid backup format": {
+    "string": "Invalid backup format"
+  },
+  "*** DCC CHAT connected": {
+    "string": "*** DCC CHAT connected"
+  },
+  "You": {
+    "string": "You"
+  },
+  "Transfer failed": {
+    "string": "Transfer failed"
+  },
+  "Send failed": {
+    "string": "Send failed"
+  },
+  "Invalid payload": {
+    "string": "Invalid payload"
+  },
+  "Invalid payload type": {
+    "string": "Invalid payload type"
+  },
+  "Key changed": {
+    "string": "Key changed"
+  },
+  "Invalid version": {
+    "string": "Invalid version"
+  },
+  "Bad signature": {
+    "string": "Bad signature"
+  },
+  "Timeout": {
+    "string": "Timeout"
+  },
+  "No pending offer": {
+    "string": "No pending offer"
+  },
+  "No bundle": {
+    "string": "No bundle"
+  },
+  "Missing bundle": {
+    "string": "Missing bundle"
+  },
+  "Public key mismatch": {
+    "string": "Public key mismatch"
+  },
+  "No key found for {nick} on {network}": {
+    "string": "No key found for {nick} on {network}"
+  },
+  "Unsupported backup version": {
+    "string": "Unsupported backup version"
+  },
+  "Failed to decrypt backup. Check your password.": {
+    "string": "Failed to decrypt backup. Check your password."
+  },
+  "Yes": {
+    "string": "Yes"
+  },
+  "No": {
+    "string": "No"
+  },
+  "Crash report fallback": {
+    "string": "Crash report fallback"
+  },
+  "Platform: {platform}": {
+    "string": "Platform: {platform}"
+  },
+  "Fatal: {value}": {
+    "string": "Fatal: {value}"
+  },
+  "Source: {source}": {
+    "string": "Source: {source}"
+  },
+  "Message: {message}": {
+    "string": "Message: {message}"
+  },
+  "Stack: {stack}": {
+    "string": "Stack: {stack}"
+  },
+  "n/a": {
+    "string": "n/a"
+  },
+  "AndroidIRCX Crash Report": {
+    "string": "AndroidIRCX Crash Report"
+  },
+  "Profile with id {id} not found": {
+    "string": "Profile with id {id} not found"
+  },
+  "IRC Connected": {
+    "string": "IRC Connected"
+  },
+  "Maintaining connection to {networkName}": {
+    "string": "Maintaining connection to {networkName}"
+  },
+  "Connect/disconnect, proxy, and registration flow messages.": {
+    "string": "Connect/disconnect, proxy, and registration flow messages."
+  },
+  "Incoming traffic": {
+    "string": "Incoming traffic"
+  },
+  "Raw lines received from the server.": {
+    "string": "Raw lines received from the server."
+  },
+  "Outgoing traffic": {
+    "string": "Outgoing traffic"
+  },
+  "Raw lines sent to the server.": {
+    "string": "Raw lines sent to the server."
+  },
+  "Server notices": {
+    "string": "Server notices"
+  },
+  "MOTD, account/away, and other server-emitted events.": {
+    "string": "MOTD, account/away, and other server-emitted events."
+  },
+  "Channel notices": {
+    "string": "Channel notices"
+  },
+  "Channel modes, lists, topics, and per-channel system notices.": {
+    "string": "Channel modes, lists, topics, and per-channel system notices."
+  },
+  "User notices": {
+    "string": "User notices"
+  },
+  "User account status, oper, and presence state changes.": {
+    "string": "User account status, oper, and presence state changes."
+  },
+  "Auth & identity": {
+    "string": "Auth & identity"
+  },
+  "SASL/authentication and nickname negotiation events.": {
+    "string": "SASL/authentication and nickname negotiation events."
+  },
+  "Debug": {
+    "string": "Debug"
+  },
+  "Verbose internal logging and diagnostics.": {
+    "string": "Verbose internal logging and diagnostics."
+  },
+  "Unknown connection error": {
+    "string": "Unknown connection error"
+  },
+  "*** Socket error [{code}]: {message}": {
+    "string": "*** Socket error [{code}]: {message}"
+  },
+  "Connection error [{code}]: {message}": {
+    "string": "Connection error [{code}]: {message}"
+  },
+  "{message} (Code: {code})": {
+    "string": "{message} (Code: {code})"
+  },
+  "Socket error: {message}": {
+    "string": "Socket error: {message}"
+  },
+  "*** Connection closed by server": {
+    "string": "*** Connection closed by server"
+  },
+  "*** Connected to {host}:{port}{tls}": {
+    "string": "*** Connected to {host}:{port}{tls}"
+  },
+  " (TLS)": {
+    "string": " (TLS)"
+  },
+  "*** TLS handshake completed": {
+    "string": "*** TLS handshake completed"
+  },
+  "Proxy host/port not set": {
+    "string": "Proxy host/port not set"
+  },
+  "*** TLS error over proxy: {message}": {
+    "string": "*** TLS error over proxy: {message}"
+  },
+  "TLS handshake failed: {message}": {
+    "string": "TLS handshake failed: {message}"
+  },
+  "*** Proxy error: {message}": {
+    "string": "*** Proxy error: {message}"
+  },
+  "Connection timeout": {
+    "string": "Connection timeout"
+  },
+  "*** Waiting for server registration...": {
+    "string": "*** Waiting for server registration..."
+  },
+  "Failed to create connection": {
+    "string": "Failed to create connection"
+  },
+  "Proxy read timeout": {
+    "string": "Proxy read timeout"
+  },
+  "HTTP proxy CONNECT failed: {status}": {
+    "string": "HTTP proxy CONNECT failed: {status}"
+  },
+  "SOCKS5 proxy: invalid version": {
+    "string": "SOCKS5 proxy: invalid version"
+  },
+  "SOCKS5 proxy: authentication failed": {
+    "string": "SOCKS5 proxy: authentication failed"
+  },
+  "SOCKS5 proxy: no acceptable auth method": {
+    "string": "SOCKS5 proxy: no acceptable auth method"
+  },
+  "SOCKS5 proxy: connect failed (code {code})": {
+    "string": "SOCKS5 proxy: connect failed (code {code})"
+  },
+  "(empty line)": {
+    "string": "(empty line)"
+  },
+  "Connection closed by server": {
+    "string": "Connection closed by server"
+  },
+  "*** Server error: {message}": {
+    "string": "*** Server error: {message}"
+  },
+  "UNKNOWN": {
+    "string": "UNKNOWN"
+  },
+  "*** FAIL {command} [{code}]{context}: {description}": {
+    "string": "*** FAIL {command} [{code}]{context}: {description}"
+  },
+  "*** WARN {command} [{code}]{context}: {description}": {
+    "string": "*** WARN {command} [{code}]{context}: {description}"
+  },
+  "*** NOTE {command} [{code}]{context}: {description}": {
+    "string": "*** NOTE {command} [{code}]{context}: {description}"
+  },
+  "{inviter} invited you to join {channel}": {
+    "string": "{inviter} invited you to join {channel}"
+  },
+  "*** {nick} accepted your encryption key. Encrypted chat enabled.": {
+    "string": "*** {nick} accepted your encryption key. Encrypted chat enabled."
+  },
+  "*** {nick} sent a different encryption key. Review and accept the new key to continue encrypted chat.": {
+    "string": "*** {nick} sent a different encryption key. Review and accept the new key to continue encrypted chat."
+  },
+  "*** {nick} rejected your encryption key offer.": {
+    "string": "*** {nick} rejected your encryption key offer."
+  },
+  "🔒 Invalid channel encryption payload": {
+    "string": "🔒 Invalid channel encryption payload"
+  },
+  "🔒 {message}": {
+    "string": "🔒 {message}"
+  },
+  "Missing channel key. Use /chankey request <nick> to get it.": {
+    "string": "Missing channel key. Use /chankey request <nick> to get it."
+  },
+  "Decryption failed": {
+    "string": "Decryption failed"
+  },
+  "*** Received channel key for {channel} from {nick}": {
+    "string": "*** Received channel key for {channel} from {nick}"
+  },
+  "*** Failed to import channel key: {message}": {
+    "string": "*** Failed to import channel key: {message}"
+  },
+  "Invalid encrypted payload": {
+    "string": "Invalid encrypted payload"
+  },
+  "Encrypted message from {nick} could not be decrypted": {
+    "string": "Encrypted message from {nick} could not be decrypted"
+  },
+  "CTCP PING reply: {latency}ms": {
+    "string": "CTCP PING reply: {latency}ms"
+  },
+  "CTCP PING reply from {nick}": {
+    "string": "CTCP PING reply from {nick}"
+  },
+  "CTCP {command} reply: {args}": {
+    "string": "CTCP {command} reply: {args}"
+  },
+  "CTCP {command} reply": {
+    "string": "CTCP {command} reply"
+  },
+  "{nick} joined {channel}": {
+    "string": "{nick} joined {channel}"
+  },
+  "{nick} ({account}) joined {channel}": {
+    "string": "{nick} ({account}) joined {channel}"
+  },
+  "{nick} left {channel}{message}": {
+    "string": "{nick} left {channel}{message}"
+  },
+  ": {message}": {
+    "string": ": {message}"
+  },
+  "User": {
+    "string": "User"
+  },
+  "{nick} quit{message}": {
+    "string": "{nick} quit{message}"
+  },
+  "Topic: {topic}": {
+    "string": "Topic: {topic}"
+  },
+  "{oldNick} is now known as {newNick}": {
+    "string": "{oldNick} is now known as {newNick}"
+  },
+  "Someone": {
+    "string": "Someone"
+  },
+  "{by} kicked {target} from {channel}{reason}": {
+    "string": "{by} kicked {target} from {channel}{reason}"
+  },
+  ": {reason}": {
+    "string": ": {reason}"
+  },
+  "Mode {channel} {modes}": {
+    "string": "Mode {channel} {modes}"
+  },
+  "*** {nick} logged out": {
+    "string": "*** {nick} logged out"
+  },
+  "*** {nick} logged in as {accountName}": {
+    "string": "*** {nick} logged in as {accountName}"
+  },
+  "*** {nick} is now away: {message}": {
+    "string": "*** {nick} is now away: {message}"
+  },
+  "*** {nick} is no longer away": {
+    "string": "*** {nick} is no longer away"
+  },
+  "*** {nick} changed host to {host}": {
+    "string": "*** {nick} changed host to {host}"
+  },
+  "*** {nick} changed realname to: {realname}": {
+    "string": "*** {nick} changed realname to: {realname}"
+  },
+  "*** {nick} deleted a message": {
+    "string": "*** {nick} deleted a message"
+  },
+  "*** RAW Command: {message}": {
+    "string": "*** RAW Command: {message}"
+  },
+  "*** Welcome to the {network} Network": {
+    "string": "*** Welcome to the {network} Network"
+  },
+  "IRC": {
+    "string": "IRC"
+  },
+  "*** {message}": {
+    "string": "*** {message}"
+  },
+  "*** Server: {server} | Version: {version} | User modes: {userModes} | Channel modes: {channelModes}": {
+    "string": "*** Server: {server} | Version: {version} | User modes: {userModes} | Channel modes: {channelModes}"
+  },
+  "*** Server supports: {features}": {
+    "string": "*** Server supports: {features}"
+  },
+  "*** [{numeric}] {message}": {
+    "string": "*** [{numeric}] {message}"
+  },
+  "End of STATS report": {
+    "string": "End of STATS report"
+  },
+  "*** {label}: {message}": {
+    "string": "*** {label}: {message}"
+  },
+  "*** Version: {version} on {server} {comments}": {
+    "string": "*** Version: {version} on {server} {comments}"
+  },
+  "End of INFO": {
+    "string": "End of INFO"
+  },
+  "You are now an IRC operator": {
+    "string": "You are now an IRC operator"
+  },
+  "Rehashing": {
+    "string": "Rehashing"
+  },
+  "You are service": {
+    "string": "You are service"
+  },
+  "*** Time on {server}: {time}": {
+    "string": "*** Time on {server}: {time}"
+  },
+  "operator(s) online": {
+    "string": "operator(s) online"
+  },
+  "*** {count} {message}": {
+    "string": "*** {count} {message}"
+  },
+  "unknown connection(s)": {
+    "string": "unknown connection(s)"
+  },
+  "channels formed": {
+    "string": "channels formed"
+  },
+  "Administrative info": {
+    "string": "Administrative info"
+  },
+  "Current local users {current}, max {max}": {
+    "string": "Current local users {current}, max {max}"
+  },
+  "Current global users {current}, max {max}": {
+    "string": "Current global users {current}, max {max}"
+  },
+  "*** - {server} Message of the Day -": {
+    "string": "*** - {server} Message of the Day -"
+  },
+  "*** End of /MOTD command.": {
+    "string": "*** End of /MOTD command."
+  },
+  "*** No Message of the Day.": {
+    "string": "*** No Message of the Day."
+  },
+  "No topic is set.": {
+    "string": "No topic is set."
+  },
+  "unknown": {
+    "string": "unknown"
+  },
+  "*** {channel} was created on {date}": {
+    "string": "*** {channel} was created on {date}"
+  },
+  "*** You have invited {nick} to {channel}": {
+    "string": "*** You have invited {nick} to {channel}"
+  },
+  "*** {channel} invite list: {mask}": {
+    "string": "*** {channel} invite list: {mask}"
+  },
+  "*** End of {channel} invite list": {
+    "string": "*** End of {channel} invite list"
+  },
+  " by {nick}": {
+    "string": " by {nick}"
+  },
+  " on {date}": {
+    "string": " on {date}"
+  },
+  "*** {channel} exception list: {mask}{by}{time}": {
+    "string": "*** {channel} exception list: {mask}{by}{time}"
+  },
+  "*** End of {channel} exception list": {
+    "string": "*** End of {channel} exception list"
+  },
+  "*** {channel} ban list: {mask}{by}{time}": {
+    "string": "*** {channel} ban list: {mask}{by}{time}"
+  },
+  "*** End of {channel} ban list": {
+    "string": "*** End of {channel} ban list"
+  },
+  "*** Channel list:": {
+    "string": "*** Channel list:"
+  },
+  "*** {channel} ({users} users): {topic}": {
+    "string": "*** {channel} ({users} users): {topic}"
+  },
+  "*** End of channel list": {
+    "string": "*** End of channel list"
+  },
+  " (away)": {
+    "string": " (away)"
+  },
+  " (IRCop)": {
+    "string": " (IRCop)"
+  },
+  "*** WHO {channel}: {nick} ({user}@{host}) [{server}]{away}{op} - {real}": {
+    "string": "*** WHO {channel}: {nick} ({user}@{host}) [{server}]{away}{op} - {real}"
+  },
+  "*** End of WHO list for {channel}": {
+    "string": "*** End of WHO list for {channel}"
+  },
+  "No such nick/channel": {
+    "string": "No such nick/channel"
+  },
+  "{label}: {message}": {
+    "string": "{label}: {message}"
+  },
+  "*** WHOWAS has no history for {nick}. If they are online, try /whois {nick}.": {
+    "string": "*** WHOWAS has no history for {nick}. If they are online, try /whois {nick}."
+  },
+  "No such channel": {
+    "string": "No such channel"
+  },
+  "Cannot send to channel": {
+    "string": "Cannot send to channel"
+  },
+  "Unknown command": {
+    "string": "Unknown command"
+  },
+  "Erroneous nickname": {
+    "string": "Erroneous nickname"
+  },
+  "Nickname is already in use: {nick}": {
+    "string": "Nickname is already in use: {nick}"
+  },
+  "*** Trying alternative nickname: {nick}": {
+    "string": "*** Trying alternative nickname: {nick}"
+  },
+  "*** Trying fallback nickname: {nick}": {
+    "string": "*** Trying fallback nickname: {nick}"
+  },
+  "Password incorrect": {
+    "string": "Password incorrect"
+  },
+  "Connection blocked or banned": {
+    "string": "Connection blocked or banned"
+  },
+  "*** Connection blocked: {message}": {
+    "string": "*** Connection blocked: {message}"
+  },
+  "They aren't on that channel": {
+    "string": "They aren't on that channel"
+  },
+  "{nick} {channel}: {message}": {
+    "string": "{nick} {channel}: {message}"
+  },
+  "You're not on that channel": {
+    "string": "You're not on that channel"
+  },
+  "Not enough parameters": {
+    "string": "Not enough parameters"
+  },
+  "Cannot join channel (channel is full)": {
+    "string": "Cannot join channel (channel is full)"
+  },
+  "is unknown mode char": {
+    "string": "is unknown mode char"
+  },
+  "Cannot join channel (invite only)": {
+    "string": "Cannot join channel (invite only)"
+  },
+  "Cannot join channel (you are banned)": {
+    "string": "Cannot join channel (you are banned)"
+  },
+  "Cannot join channel (bad key)": {
+    "string": "Cannot join channel (bad key)"
+  },
+  "Bad channel mask": {
+    "string": "Bad channel mask"
+  },
+  "Channel doesn't support modes": {
+    "string": "Channel doesn't support modes"
+  },
+  "Channel ban list is full": {
+    "string": "Channel ban list is full"
+  },
+  "You're not channel operator": {
+    "string": "You're not channel operator"
+  },
+  "You have joined too many channels": {
+    "string": "You have joined too many channels"
+  },
+  "There was no such nickname": {
+    "string": "There was no such nickname"
+  },
+  "Too many targets": {
+    "string": "Too many targets"
+  },
+  "No recipient given": {
+    "string": "No recipient given"
+  },
+  "No text to send": {
+    "string": "No text to send"
+  },
+  "No toplevel domain specified": {
+    "string": "No toplevel domain specified"
+  },
+  "Wildcard in toplevel domain": {
+    "string": "Wildcard in toplevel domain"
+  },
+  "Bad server/host mask": {
+    "string": "Bad server/host mask"
+  },
+  "No administrative info available": {
+    "string": "No administrative info available"
+  },
+  "No nickname given": {
+    "string": "No nickname given"
+  },
+  "Nickname collision": {
+    "string": "Nickname collision"
+  },
+  "Resource temporarily unavailable": {
+    "string": "Resource temporarily unavailable"
+  },
+  "is already on channel": {
+    "string": "is already on channel"
+  },
+  "You have not registered": {
+    "string": "You have not registered"
+  },
+  "You may not reregister": {
+    "string": "You may not reregister"
+  },
+  "Your host isn't among the privileged": {
+    "string": "Your host isn't among the privileged"
+  },
+  "You will be banned": {
+    "string": "You will be banned"
+  },
+  "Channel key already set": {
+    "string": "Channel key already set"
+  },
+  "Permission denied - You're not an IRC operator": {
+    "string": "Permission denied - You're not an IRC operator"
+  },
+  "You can't kill a server!": {
+    "string": "You can't kill a server!"
+  },
+  "No O-lines for your host": {
+    "string": "No O-lines for your host"
+  },
+  "Unknown MODE flag": {
+    "string": "Unknown MODE flag"
+  },
+  "Can't change mode for other users": {
+    "string": "Can't change mode for other users"
+  },
+  "*** SASL authentication successful": {
+    "string": "*** SASL authentication successful"
+  },
+  "SASL authentication failed": {
+    "string": "SASL authentication failed"
+  },
+  "You are now logged in as {account}": {
+    "string": "You are now logged in as {account}"
+  },
+  "You are now logged out": {
+    "string": "You are now logged out"
+  },
+  "You must use a nick assigned to you": {
+    "string": "You must use a nick assigned to you"
+  },
+  "SASL message too long": {
+    "string": "SASL message too long"
+  },
+  "SASL authentication aborted": {
+    "string": "SASL authentication aborted"
+  },
+  "You have already authenticated": {
+    "string": "You have already authenticated"
+  },
+  "are available SASL mechanisms": {
+    "string": "are available SASL mechanisms"
+  },
+  "*** {mechanisms} {message}": {
+    "string": "*** {mechanisms} {message}"
+  },
+  "logged online": {
+    "string": "logged online"
+  },
+  "*** {nick} ({user}@{host}) {message}": {
+    "string": "*** {nick} ({user}@{host}) {message}"
+  },
+  "logged offline": {
+    "string": "logged offline"
+  },
+  "*** Stopped watching {nick}": {
+    "string": "*** Stopped watching {nick}"
+  },
+  "is online": {
+    "string": "is online"
+  },
+  "is offline": {
+    "string": "is offline"
+  },
+  "*** WATCH list: {list}": {
+    "string": "*** WATCH list: {list}"
+  },
+  "End of WATCH list": {
+    "string": "End of WATCH list"
+  },
+  "WATCH list cleared": {
+    "string": "WATCH list cleared"
+  },
+  "*** MONITOR online: {list}": {
+    "string": "*** MONITOR online: {list}"
+  },
+  "*** MONITOR offline: {list}": {
+    "string": "*** MONITOR offline: {list}"
+  },
+  "*** MONITOR list: {list}": {
+    "string": "*** MONITOR list: {list}"
+  },
+  "End of MONITOR list": {
+    "string": "End of MONITOR list"
+  },
+  "Monitor list is full": {
+    "string": "Monitor list is full"
+  },
+  "{message} (limit: {limit}, tried: {nicks})": {
+    "string": "{message} (limit: {limit}, tried: {nicks})"
+  },
+  "STARTTLS successful": {
+    "string": "STARTTLS successful"
+  },
+  "STARTTLS failed": {
+    "string": "STARTTLS failed"
+  },
+  "is away": {
+    "string": "is away"
+  },
+  "*** {nick} is away: {message}": {
+    "string": "*** {nick} is away: {message}"
+  },
+  "You are no longer marked as being away": {
+    "string": "You are no longer marked as being away"
+  },
+  "You have been marked as being away": {
+    "string": "You have been marked as being away"
+  },
+  "*** USERHOST: {data}": {
+    "string": "*** USERHOST: {data}"
+  },
+  "*** Online: {nicks}": {
+    "string": "*** Online: {nicks}"
+  },
+  "*** {nick} is {user}@{host} * {real}": {
+    "string": "*** {nick} is {user}@{host} * {real}"
+  },
+  "{hours} hours, {minutes} minutes": {
+    "string": "{hours} hours, {minutes} minutes"
+  },
+  "{seconds} seconds": {
+    "string": "{seconds} seconds"
+  },
+  "*** {nick} has been idle {idle}, signed on {date}": {
+    "string": "*** {nick} has been idle {idle}, signed on {date}"
+  },
+  "*** End of WHOIS for {nick}": {
+    "string": "*** End of WHOIS for {nick}"
+  },
+  "*** {nick} is on channels: {channels}": {
+    "string": "*** {nick} is on channels: {channels}"
+  },
+  "has identified for this nick": {
+    "string": "has identified for this nick"
+  },
+  "*** {nick} {message}": {
+    "string": "*** {nick} {message}"
+  },
+  "is available for help": {
+    "string": "is available for help"
+  },
+  "is an IRC operator": {
+    "string": "is an IRC operator"
+  },
+  "*** You are now an IRC operator. Quick aliases: /oper /kill /gline /rehash /locops /wallops": {
+    "string": "*** You are now an IRC operator. Quick aliases: /oper /kill /gline /rehash /locops /wallops"
+  },
+  "is a bot": {
+    "string": "is a bot"
+  },
+  "is using a secure connection": {
+    "string": "is using a secure connection"
+  },
+  "*** {nick} was {user}@{host} * {real}": {
+    "string": "*** {nick} was {user}@{host} * {real}"
+  },
+  "*** {nick} using {server} {info}": {
+    "string": "*** {nick} using {server} {info}"
+  },
+  "*** {nick} is logged in as {account}": {
+    "string": "*** {nick} is logged in as {account}"
+  },
+  "*** {nick} is actually using host {host}": {
+    "string": "*** {nick} is actually using host {host}"
+  },
+  "*** End of WHOWAS for {nick}": {
+    "string": "*** End of WHOWAS for {nick}"
+  },
+  "Server response": {
+    "string": "Server response"
+  },
+  "[{numeric}] {message}": {
+    "string": "[{numeric}] {message}"
+  },
+  "*** Disconnected from server": {
+    "string": "*** Disconnected from server"
+  },
+  "*** Auto-reconnect cancelled": {
+    "string": "*** Auto-reconnect cancelled"
+  },
+  "*** Reconnecting in {seconds} second{suffix} (attempt {attempt})...": {
+    "string": "*** Reconnecting in {seconds} second{suffix} (attempt {attempt})..."
+  },
+  "*** Attempting to reconnect...": {
+    "string": "*** Attempting to reconnect..."
+  },
+  "*** Reconnected successfully": {
+    "string": "*** Reconnected successfully"
+  },
+  "*** Reconnection failed: {message}": {
+    "string": "*** Reconnection failed: {message}"
+  },
+  "*** BATCH START: {type} ({ref})": {
+    "string": "*** BATCH START: {type} ({ref})"
+  },
+  "*** Netsplit detected: {servers} ({count} users quit)": {
+    "string": "*** Netsplit detected: {servers} ({count} users quit)"
+  },
+  "*** Netjoin: {servers} ({count} users rejoined)": {
+    "string": "*** Netjoin: {servers} ({count} users rejoined)"
+  },
+  "*** Loading chat history ({count} messages)": {
+    "string": "*** Loading chat history ({count} messages)"
+  },
+  "*** Capability changes ({count} updates)": {
+    "string": "*** Capability changes ({count} updates)"
+  },
+  "*** BATCH END: {type} ({ref}) - {count} messages": {
+    "string": "*** BATCH END: {type} ({ref}) - {count} messages"
+  },
+  "SETNAME command is not supported by this server": {
+    "string": "SETNAME command is not supported by this server"
+  },
+  "BOT mode is not supported by this server": {
+    "string": "BOT mode is not supported by this server"
+  },
+  "CHATHISTORY is not supported by this server": {
+    "string": "CHATHISTORY is not supported by this server"
+  },
+  "MESSAGE-REDACTION is not supported by this server": {
+    "string": "MESSAGE-REDACTION is not supported by this server"
+  },
+  "Usage: /{command} <nick|channel> <message>": {
+    "string": "Usage: /{command} <nick|channel> <message>"
+  },
+  "*** Encryption key offer sent to {nick}. Waiting for acceptance...": {
+    "string": "*** Encryption key offer sent to {nick}. Waiting for acceptance..."
+  },
+  "*** Failed to share encryption key: {message}": {
+    "string": "*** Failed to share encryption key: {message}"
+  },
+  "Usage: /sharekey <nick>": {
+    "string": "Usage: /sharekey <nick>"
+  },
+  "*** Encryption key requested from {nick}": {
+    "string": "*** Encryption key requested from {nick}"
+  },
+  "Usage: /requestkey <nick>": {
+    "string": "Usage: /requestkey <nick>"
+  },
+  "*** Encrypted send failed ({message}). Use \"Request Encryption Key\" from the user menu.": {
+    "string": "*** Encrypted send failed ({message}). Use \"Request Encryption Key\" from the user menu."
+  },
+  "Usage: /encmsg <nick> <message>": {
+    "string": "Usage: /encmsg <nick> <message>"
+  },
+  "DM encryption:": {
+    "string": "DM encryption:"
+  },
+  "/sharekey <nick>          Offer your DM key": {
+    "string": "/sharekey <nick>          Offer your DM key"
+  },
+  "/requestkey <nick>        Request DM key": {
+    "string": "/requestkey <nick>        Request DM key"
+  },
+  "/encmsg <nick> <message>  Send encrypted DM": {
+    "string": "/encmsg <nick> <message>  Send encrypted DM"
+  },
+  "Tips: keys must be exchanged first; use /requestkey if not paired.": {
+    "string": "Tips: keys must be exchanged first; use /requestkey if not paired."
+  },
+  "Usage: /chankey <generate|share|request|remove|send|help> [args]": {
+    "string": "Usage: /chankey <generate|share|request|remove|send|help> [args]"
+  },
+  "Channel encryption:": {
+    "string": "Channel encryption:"
+  },
+  "/chankey generate          Create key for current channel": {
+    "string": "/chankey generate          Create key for current channel"
+  },
+  "/chankey share <nick>     Send key to a user (in channel)": {
+    "string": "/chankey share <nick>     Send key to a user (in channel)"
+  },
+  "/chankey request <nick>   Ask a user for the channel key": {
+    "string": "/chankey request <nick>   Ask a user for the channel key"
+  },
+  "/chankey send <msg>       Send encrypted message to channel": {
+    "string": "/chankey send <msg>       Send encrypted message to channel"
+  },
+  "/chankey remove           Delete stored key for channel": {
+    "string": "/chankey remove           Delete stored key for channel"
+  },
+  "*** Channel key can only be generated in a channel": {
+    "string": "*** Channel key can only be generated in a channel"
+  },
+  "*** Channel encryption key generated for {channel}. Use /chankey share <nick> to share with others.": {
+    "string": "*** Channel encryption key generated for {channel}. Use /chankey share <nick> to share with others."
+  },
+  "*** Failed to generate channel key: {message}": {
+    "string": "*** Failed to generate channel key: {message}"
+  },
+  "Usage: /chankey send <message>": {
+    "string": "Usage: /chankey send <message>"
+  },
+  "*** Channel key send must be used from a channel": {
+    "string": "*** Channel key send must be used from a channel"
+  },
+  "*** Channel encryption send failed: {message}": {
+    "string": "*** Channel encryption send failed: {message}"
+  },
+  "Missing channel key. Use /chankey generate and share first.": {
+    "string": "Missing channel key. Use /chankey generate and share first."
+  },
+  "Usage: /chankey share <nick>": {
+    "string": "Usage: /chankey share <nick>"
+  },
+  "*** Channel key can only be shared from a channel": {
+    "string": "*** Channel key can only be shared from a channel"
+  },
+  "*** Channel key for {channel} shared with {nick}": {
+    "string": "*** Channel key for {channel} shared with {nick}"
+  },
+  "*** Failed to share channel key: {message}. Generate a key first with /chankey generate": {
+    "string": "*** Failed to share channel key: {message}. Generate a key first with /chankey generate"
+  },
+  "Usage: /chankey request <nick>": {
+    "string": "Usage: /chankey request <nick>"
+  },
+  "*** Channel key request must be done from a channel": {
+    "string": "*** Channel key request must be done from a channel"
+  },
+  "Please share the channel key for {channel} with /chankey share {nick}": {
+    "string": "Please share the channel key for {channel} with /chankey share {nick}"
+  },
+  "*** Channel key requested from {nick} for {channel}": {
+    "string": "*** Channel key requested from {nick} for {channel}"
+  },
+  "*** Channel key can only be removed from a channel": {
+    "string": "*** Channel key can only be removed from a channel"
+  },
+  "*** Channel encryption key removed for {channel}": {
+    "string": "*** Channel encryption key removed for {channel}"
+  },
+  "*** Failed to remove channel key: {message}": {
+    "string": "*** Failed to remove channel key: {message}"
+  },
+  "*** {arrow} {line}": {
+    "string": "*** {arrow} {line}"
+  },
+  "IRC server": {
+    "string": "IRC server"
+  },
+  "Connected to {networkName}": {
+    "string": "Connected to {networkName}"
+  },
+  "AndroidIRCX Message History Export": {
+    "string": "AndroidIRCX Message History Export"
+  },
+  "Exported: {timestamp}": {
+    "string": "Exported: {timestamp}"
+  },
+  "Messages: {count}": {
+    "string": "Messages: {count}"
+  },
+  "Timestamp": {
+    "string": "Timestamp"
+  },
+  "Type": {
+    "string": "Type"
+  },
+  "Channel": {
+    "string": "Channel"
+  },
+  "From": {
+    "string": "From"
+  },
+  "Default Channel": {
+    "string": "Default Channel"
+  },
+  "Message from {name}": {
+    "string": "Message from {name}"
+  },
+  "{from}: {text}": {
+    "string": "{from}: {text}"
+  },
+  "Failed to load scripts: {error}": {
+    "string": "Failed to load scripts: {error}"
+  },
+  "No syntax errors detected.": {
+    "string": "No syntax errors detected."
+  },
+  "Cannot enable script: No scripting time available. Please watch an ad to gain 1 hour of scripting time.": {
+    "string": "Cannot enable script: No scripting time available. Please watch an ad to gain 1 hour of scripting time."
+  },
+  "Auto-Op": {
+    "string": "Auto-Op"
+  },
+  "Ops everyone who joins the channel.": {
+    "string": "Ops everyone who joins the channel."
+  },
+  "Welcome Message": {
+    "string": "Welcome Message"
+  },
+  "Greets users when they join.": {
+    "string": "Greets users when they join."
+  },
+  "Channel Logger": {
+    "string": "Channel Logger"
+  },
+  "Logs messages to scripting log buffer.": {
+    "string": "Logs messages to scripting log buffer."
+  },
+  "Custom Command Alias": {
+    "string": "Custom Command Alias"
+  },
+  "Adds /hello alias as example.": {
+    "string": "Adds /hello alias as example."
+  },
+  "Script {name} failed to compile: {error}": {
+    "string": "Script {name} failed to compile: {error}"
+  },
+  "All scripts disabled: Scripting time expired. Watch an ad to continue.": {
+    "string": "All scripts disabled: Scripting time expired. Watch an ad to continue."
+  },
+  "Error in script {name} hook {hook}: {error}": {
+    "string": "Error in script {name} hook {hook}: {error}"
+  },
+  "Test hook {hook} executed": {
+    "string": "Test hook {hook} executed"
+  },
+  "Test hook {hook} failed for {name}: {error}": {
+    "string": "Test hook {hook} failed for {name}: {error}"
+  },
+  "AndroidIRCX - Download from https://androidircx.com": {
+    "string": "AndroidIRCX - Download from https://androidircx.com"
+  },
+  "Goodbye from AndroidIRCX - download it from https://androidircx.com": {
+    "string": "Goodbye from AndroidIRCX - download it from https://androidircx.com"
+  },
+  "Dark": {
+    "string": "Dark"
+  },
+  "Light": {
+    "string": "Light"
+  },
+  "*** UserManagementService initialized": {
+    "string": "*** UserManagementService initialized"
+  },
+  "New WHOIS request for same nick, cancelling previous.": {
+    "string": "New WHOIS request for same nick, cancelling previous."
+  },
+  "WHOIS request for {nick} timed out.": {
+    "string": "WHOIS request for {nick} timed out."
+  },
+  "WHOIS data for {nick} not found after completion signal.": {
+    "string": "WHOIS data for {nick} not found after completion signal."
   }
 }

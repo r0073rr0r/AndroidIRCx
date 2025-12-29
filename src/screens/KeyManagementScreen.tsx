@@ -13,6 +13,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
+import { useT } from '../i18n/transifex';
 import { encryptedDMService, StoredKey } from '../services/EncryptedDMService';
 import { biometricAuthService } from '../services/BiometricAuthService';
 import { connectionManager } from '../services/ConnectionManager';
@@ -26,6 +27,7 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
   visible,
   onClose,
 }) => {
+  const t = useT();
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
@@ -100,8 +102,8 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
       }
 
       const result = await biometricAuthService.authenticate(
-        'Access Encryption Keys',
-        'Authenticate to view and manage your encryption keys',
+        t('Access Encryption Keys'),
+        t('Authenticate to view and manage your encryption keys'),
         'keymanagement' // Use dedicated scope for key management
       );
 
@@ -116,19 +118,21 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
       } else {
         console.log('[KeyManagement] Auth failed:', result.error);
         setLoading(false);
+        const errorMessage = result.errorMessage
+          || (result.errorKey ? t(result.errorKey) : t('You must authenticate to access encryption keys.'));
         Alert.alert(
-          'Authentication Failed',
-          result.error || 'You must authenticate to access encryption keys.',
-          [{ text: 'OK', onPress: onClose }]
+          t('Authentication Failed'),
+          errorMessage,
+          [{ text: t('OK'), onPress: onClose }]
         );
       }
     } catch (error) {
       console.error('[KeyManagement] Auth error:', error);
       setLoading(false);
       Alert.alert(
-        'Authentication Error',
-        error instanceof Error ? error.message : 'Failed to authenticate. Please try again.',
-        [{ text: 'OK', onPress: onClose }]
+        t('Authentication Error'),
+        error instanceof Error ? error.message : t('Failed to authenticate. Please try again.'),
+        [{ text: t('OK'), onPress: onClose }]
       );
     }
   };
@@ -149,7 +153,8 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
       setAvailableNetworks(networks);
     } catch (error) {
       console.error('[KeyManagement] Failed to load keys:', error);
-      Alert.alert('Error', 'Failed to load encryption keys: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      const message = error instanceof Error ? error.message : t('Unknown error');
+      Alert.alert(t('Error'), t('Failed to load encryption keys: {error}', { error: message }));
     }
   };
 
@@ -185,21 +190,28 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
 
   const handleDeleteKey = async (key: StoredKey) => {
     Alert.alert(
-      'Delete Encryption Key',
-      `Are you sure you want to delete the encryption key for ${key.nick} on ${key.network}?\n\nFingerprint: ${encryptedDMService.formatFingerprintForDisplay(key.fingerprint)}\n\nThis cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
+      t('Delete Encryption Key'),
+      t(
+        'Are you sure you want to delete the encryption key for {nick} on {network}?\n\nFingerprint: {fingerprint}\n\nThis cannot be undone.',
         {
-          text: 'Delete',
+          nick: key.nick,
+          network: key.network,
+          fingerprint: encryptedDMService.formatFingerprintForDisplay(key.fingerprint),
+        }
+      ),
+      [
+        { text: t('Cancel'), style: 'cancel' },
+        {
+          text: t('Delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await encryptedDMService.deleteBundleForNetwork(key.network, key.nick);
               await loadKeys();
               setShowKeyDetails(false);
-              Alert.alert('Success', 'Key deleted successfully');
+              Alert.alert(t('Success'), t('Key deleted successfully'));
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete key');
+              Alert.alert(t('Error'), t('Failed to delete key'));
             }
           },
         },
@@ -219,9 +231,9 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
       await loadKeys();
       setShowCopyDialog(false);
       setShowKeyDetails(false);
-      Alert.alert('Success', `Key copied to ${toNetwork}`);
+      Alert.alert(t('Success'), t('Key copied to {network}', { network: toNetwork }));
     } catch (error) {
-      Alert.alert('Error', 'Failed to copy key');
+      Alert.alert(t('Error'), t('Failed to copy key'));
     }
   };
 
@@ -229,12 +241,18 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
     if (!selectedKey) return;
 
     Alert.alert(
-      'Move Key',
-      `This will move the key from ${selectedKey.network} to ${toNetwork} and delete it from ${selectedKey.network}.\n\nContinue?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
+      t('Move Key'),
+      t(
+        'This will move the key from {fromNetwork} to {toNetwork} and delete it from {fromNetwork}.\n\nContinue?',
         {
-          text: 'Move',
+          fromNetwork: selectedKey.network,
+          toNetwork,
+        }
+      ),
+      [
+        { text: t('Cancel'), style: 'cancel' },
+        {
+          text: t('Move'),
           onPress: async () => {
             try {
               await encryptedDMService.moveBundleToNetwork(
@@ -245,9 +263,9 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
               await loadKeys();
               setShowMoveDialog(false);
               setShowKeyDetails(false);
-              Alert.alert('Success', `Key moved to ${toNetwork}`);
+              Alert.alert(t('Success'), t('Key moved to {network}', { network: toNetwork }));
             } catch (error) {
-              Alert.alert('Error', 'Failed to move key');
+              Alert.alert(t('Error'), t('Failed to move key'));
             }
           },
         },
@@ -268,13 +286,13 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
       await loadKeys();
       setSelectedKey({ ...selectedKey, verified: newVerified });
     } catch (error) {
-      Alert.alert('Error', 'Failed to update verification status');
+      Alert.alert(t('Error'), t('Failed to update verification status'));
     }
   };
 
   const handleExportKeys = async () => {
     if (!exportPassword || exportPassword.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      Alert.alert(t('Error'), t('Password must be at least 6 characters'));
       return;
     }
 
@@ -289,12 +307,15 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
       setShowExportDialog(false);
       setExportPassword('');
       Alert.alert(
-        'Success',
-        `Exported ${keys.length} key(s). The encrypted backup has been copied to your clipboard. Save it to a secure location.`,
-        [{ text: 'OK' }]
+        t('Success'),
+        t(
+          'Exported {count} key(s). The encrypted backup has been copied to your clipboard. Save it to a secure location.',
+          { count: keys.length }
+        ),
+        [{ text: t('OK') }]
       );
     } catch (error) {
-      Alert.alert('Error', `Failed to export keys: ${error}`);
+      Alert.alert(t('Error'), t('Failed to export keys: {error}', { error }));
     } finally {
       setLoading(false);
     }
@@ -302,7 +323,7 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
 
   const handleImportKeys = async () => {
     if (!importPassword || !importData) {
-      Alert.alert('Error', 'Please provide both backup data and password');
+      Alert.alert(t('Error'), t('Please provide both backup data and password'));
       return;
     }
 
@@ -315,12 +336,12 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
       setImportPassword('');
       setImportData('');
       Alert.alert(
-        'Success',
-        `Imported ${count} key(s) successfully.`,
-        [{ text: 'OK' }]
+        t('Success'),
+        t('Imported {count} key(s) successfully.', { count }),
+        [{ text: t('OK') }]
       );
     } catch (error) {
-      Alert.alert('Error', `Failed to import keys: ${error}`);
+      Alert.alert(t('Error'), t('Failed to import keys: {error}', { error }));
     } finally {
       setLoading(false);
     }
@@ -338,7 +359,7 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
         {encryptedDMService.formatFingerprintForDisplay(item.fingerprint)}
       </Text>
       <Text style={styles.keyDate}>
-        Last seen: {new Date(item.lastSeen).toLocaleDateString()}
+        {t('Last seen: {date}', { date: new Date(item.lastSeen).toLocaleDateString() })}
       </Text>
     </TouchableOpacity>
   );
@@ -364,9 +385,9 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
         ))}
         {Object.keys(groupedKeys).length === 0 && (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>No encryption keys found</Text>
+            <Text style={styles.emptyStateText}>{t('No encryption keys found')}</Text>
             <Text style={styles.emptyStateSubtext}>
-              Exchange keys with users to enable encrypted messaging
+              {t('Exchange keys with users to enable encrypted messaging')}
             </Text>
           </View>
         )}
@@ -382,7 +403,7 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.primary} />
             <Text style={styles.loadingText}>
-              {loading ? 'Authenticating...' : 'Loading keys...'}
+              {loading ? t('Authenticating...') : t('Loading keys...')}
             </Text>
           </View>
         </View>
@@ -396,9 +417,9 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Encryption Keys</Text>
+          <Text style={styles.headerTitle}>{t('Encryption Keys')}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Close</Text>
+            <Text style={styles.closeButtonText}>{t('Close')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -406,7 +427,7 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search by nick or network..."
+            placeholder={t('Search by nick or network...')}
             placeholderTextColor={colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -415,7 +436,7 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
             onPress={() => setGroupByNetwork(!groupByNetwork)}
             style={styles.groupButton}>
             <Text style={styles.groupButtonText}>
-              {groupByNetwork ? 'List View' : 'Group View'}
+              {groupByNetwork ? t('List View') : t('Group View')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -423,8 +444,11 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
         {/* Stats */}
         <View style={styles.stats}>
           <Text style={styles.statsText}>
-            {keys.length} key{keys.length !== 1 ? 's' : ''} • {' '}
-            {keys.filter(k => k.verified).length} verified
+            {t('{count} key{suffix} · {verified} verified', {
+              count: keys.length,
+              suffix: keys.length !== 1 ? 's' : '',
+              verified: keys.filter(k => k.verified).length,
+            })}
           </Text>
         </View>
 
@@ -435,13 +459,13 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
             style={styles.toolbarButton}
             disabled={keys.length === 0}>
             <Text style={[styles.toolbarButtonText, keys.length === 0 && styles.toolbarButtonDisabled]}>
-              Export All Keys
+              {t('Export All Keys')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setShowImportDialog(true)}
             style={styles.toolbarButton}>
-            <Text style={styles.toolbarButtonText}>Import Keys</Text>
+            <Text style={styles.toolbarButtonText}>{t('Import Keys')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -458,9 +482,9 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
             }
             ListEmptyComponent={
               <View style={styles.emptyState}>
-                <Text style={styles.emptyStateText}>No encryption keys found</Text>
+                <Text style={styles.emptyStateText}>{t('No encryption keys found')}</Text>
                 <Text style={styles.emptyStateSubtext}>
-                  Exchange keys with users to enable encrypted messaging
+                  {t('Exchange keys with users to enable encrypted messaging')}
                 </Text>
               </View>
             }
@@ -479,41 +503,41 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
               activeOpacity={1}
               onPress={() => setShowKeyDetails(false)}>
               <View style={styles.detailsModal}>
-                <Text style={styles.detailsTitle}>Key Details</Text>
+                <Text style={styles.detailsTitle}>{t('Key Details')}</Text>
 
                 <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Network:</Text>
+                  <Text style={styles.detailLabel}>{t('Network:')}</Text>
                   <Text style={styles.detailValue}>{selectedKey.network}</Text>
                 </View>
 
                 <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Nickname:</Text>
+                  <Text style={styles.detailLabel}>{t('Nickname:')}</Text>
                   <Text style={styles.detailValue}>{selectedKey.nick}</Text>
                 </View>
 
                 <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Fingerprint:</Text>
+                  <Text style={styles.detailLabel}>{t('Fingerprint:')}</Text>
                   <Text style={styles.detailValueMono}>
                     {encryptedDMService.formatFingerprintForDisplay(selectedKey.fingerprint)}
                   </Text>
                 </View>
 
                 <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Status:</Text>
+                  <Text style={styles.detailLabel}>{t('Status:')}</Text>
                   <Text style={styles.detailValue}>
                     {selectedKey.verified ? 'Verified ✅' : 'Unverified ⚠️'}
                   </Text>
                 </View>
 
                 <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>First Seen:</Text>
+                  <Text style={styles.detailLabel}>{t('First Seen:')}</Text>
                   <Text style={styles.detailValue}>
                     {new Date(selectedKey.firstSeen).toLocaleString()}
                   </Text>
                 </View>
 
                 <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Last Seen:</Text>
+                  <Text style={styles.detailLabel}>{t('Last Seen:')}</Text>
                   <Text style={styles.detailValue}>
                     {new Date(selectedKey.lastSeen).toLocaleString()}
                   </Text>
@@ -525,27 +549,27 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
                   style={styles.detailButton}
                   onPress={handleToggleVerified}>
                   <Text style={styles.detailButtonText}>
-                    {selectedKey.verified ? 'Mark as Unverified' : 'Mark as Verified'}
+                    {selectedKey.verified ? t('Mark as Unverified') : t('Mark as Verified')}
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.detailButton}
                   onPress={() => setShowCopyDialog(true)}>
-                  <Text style={styles.detailButtonText}>Copy to Network...</Text>
+                  <Text style={styles.detailButtonText}>{t('Copy to Network...')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.detailButton}
                   onPress={() => setShowMoveDialog(true)}>
-                  <Text style={styles.detailButtonText}>Move to Network...</Text>
+                  <Text style={styles.detailButtonText}>{t('Move to Network...')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[styles.detailButton, styles.deleteButton]}
                   onPress={() => handleDeleteKey(selectedKey)}>
                   <Text style={[styles.detailButtonText, styles.deleteButtonText]}>
-                    Delete Key
+                    {t('Delete Key')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -565,9 +589,9 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
               activeOpacity={1}
               onPress={() => setShowCopyDialog(false)}>
               <View style={styles.dialogModal}>
-                <Text style={styles.dialogTitle}>Copy Key to Network</Text>
+                <Text style={styles.dialogTitle}>{t('Copy Key to Network')}</Text>
                 <Text style={styles.dialogSubtitle}>
-                  Copy key for {selectedKey.nick} to another network
+                  {t('Copy key for {nick} to another network', { nick: selectedKey.nick })}
                 </Text>
 
                 <ScrollView style={styles.networkList}>
@@ -582,14 +606,14 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
                       </TouchableOpacity>
                     ))}
                   {availableNetworks.filter(net => net !== selectedKey.network).length === 0 && (
-                    <Text style={styles.noNetworksText}>No other networks available</Text>
+                    <Text style={styles.noNetworksText}>{t('No other networks available')}</Text>
                   )}
                 </ScrollView>
 
                 <TouchableOpacity
                   style={styles.dialogCancelButton}
                   onPress={() => setShowCopyDialog(false)}>
-                  <Text style={styles.dialogCancelText}>Cancel</Text>
+                  <Text style={styles.dialogCancelText}>{t('Cancel')}</Text>
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
@@ -608,9 +632,9 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
               activeOpacity={1}
               onPress={() => setShowMoveDialog(false)}>
               <View style={styles.dialogModal}>
-                <Text style={styles.dialogTitle}>Move Key to Network</Text>
+                <Text style={styles.dialogTitle}>{t('Move Key to Network')}</Text>
                 <Text style={styles.dialogSubtitle}>
-                  Move key for {selectedKey.nick} to another network (will delete from {selectedKey.network})
+                  {t('Move key for {nick} to another network (will delete from {network})', { nick: selectedKey.nick, network: selectedKey.network })}
                 </Text>
 
                 <ScrollView style={styles.networkList}>
@@ -625,14 +649,14 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
                       </TouchableOpacity>
                     ))}
                   {availableNetworks.filter(net => net !== selectedKey.network).length === 0 && (
-                    <Text style={styles.noNetworksText}>No other networks available</Text>
+                    <Text style={styles.noNetworksText}>{t('No other networks available')}</Text>
                   )}
                 </ScrollView>
 
                 <TouchableOpacity
                   style={styles.dialogCancelButton}
                   onPress={() => setShowMoveDialog(false)}>
-                  <Text style={styles.dialogCancelText}>Cancel</Text>
+                  <Text style={styles.dialogCancelText}>{t('Cancel')}</Text>
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
@@ -650,15 +674,17 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
             activeOpacity={1}
             onPress={() => setShowExportDialog(false)}>
             <View style={styles.dialogModal}>
-              <Text style={styles.dialogTitle}>Export All Keys</Text>
+              <Text style={styles.dialogTitle}>{t('Export All Keys')}</Text>
               <Text style={styles.dialogSubtitle}>
-                Create an encrypted backup of all {keys.length} encryption key{keys.length !== 1 ? 's' : ''}.
-                {'\n'}Enter a strong password to protect the backup.
+                {t('Create an encrypted backup of all {count} encryption key{suffix}.\nEnter a strong password to protect the backup.', {
+                  count: keys.length,
+                  suffix: keys.length !== 1 ? 's' : '',
+                })}
               </Text>
 
               <TextInput
                 style={styles.passwordInput}
-                placeholder="Backup password (min 6 characters)"
+                placeholder={t('Backup password (min 6 characters)')}
                 placeholderTextColor={colors.textSecondary}
                 value={exportPassword}
                 onChangeText={setExportPassword}
@@ -673,13 +699,13 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
                     setShowExportDialog(false);
                     setExportPassword('');
                   }}>
-                  <Text style={styles.dialogCancelText}>Cancel</Text>
+                  <Text style={styles.dialogCancelText}>{t('Cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.dialogConfirmButton, (!exportPassword || exportPassword.length < 6) && styles.dialogButtonDisabled]}
                   onPress={handleExportKeys}
                   disabled={!exportPassword || exportPassword.length < 6}>
-                  <Text style={styles.dialogConfirmText}>Export</Text>
+                  <Text style={styles.dialogConfirmText}>{t('Export')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -697,14 +723,14 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
             activeOpacity={1}
             onPress={() => setShowImportDialog(false)}>
             <View style={styles.dialogModal}>
-              <Text style={styles.dialogTitle}>Import Keys</Text>
+              <Text style={styles.dialogTitle}>{t('Import Keys')}</Text>
               <Text style={styles.dialogSubtitle}>
-                Paste the encrypted backup data and enter the password used during export.
+                {t('Paste the encrypted backup data and enter the password used during export.')}
               </Text>
 
               <TextInput
                 style={styles.multilineInput}
-                placeholder="Paste backup data here..."
+                placeholder={t('Paste backup data here...')}
                 placeholderTextColor={colors.textSecondary}
                 value={importData}
                 onChangeText={setImportData}
@@ -715,7 +741,7 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
 
               <TextInput
                 style={styles.passwordInput}
-                placeholder="Backup password"
+                placeholder={t('Backup password')}
                 placeholderTextColor={colors.textSecondary}
                 value={importPassword}
                 onChangeText={setImportPassword}
@@ -731,13 +757,13 @@ export const KeyManagementScreen: React.FC<KeyManagementScreenProps> = ({
                     setImportPassword('');
                     setImportData('');
                   }}>
-                  <Text style={styles.dialogCancelText}>Cancel</Text>
+                  <Text style={styles.dialogCancelText}>{t('Cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.dialogConfirmButton, (!importPassword || !importData) && styles.dialogButtonDisabled]}
                   onPress={handleImportKeys}
                   disabled={!importPassword || !importData}>
-                  <Text style={styles.dialogConfirmText}>Import</Text>
+                  <Text style={styles.dialogConfirmText}>{t('Import')}</Text>
                 </TouchableOpacity>
               </View>
             </View>

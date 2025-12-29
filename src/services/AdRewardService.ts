@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AdEventType, RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mobile-ads';
 import { logger } from './Logger';
+import { consentService } from './ConsentService';
 
 // Pull app version from app.json so bonuses track real builds
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -140,13 +141,21 @@ class AdRewardService {
       const adType = this.currentAdUnitIndex === 0 ? 'Primary' : 'Fallback';
       const mode = USE_TEST_ADS ? '🧪 TEST ADS' : '🚀 PRODUCTION ADS';
 
+      // Check consent status to determine if we can show personalized ads
+      const canShowPersonalizedAds = consentService.canShowPersonalizedAds();
+      const consentStatus = consentService.getConsentStatusText();
+
       logger.info('ad-reward', `Creating rewarded ad with unit ID: ${adUnitId} (${adType})`);
       logger.info('ad-reward', `Mode: ${mode}`);
+      logger.info('ad-reward', `Consent status: ${consentStatus}`);
+      logger.info('ad-reward', `Personalized ads: ${canShowPersonalizedAds ? 'Yes' : 'No (non-personalized)'}`);
       console.log(`📺 Ad Unit ID: ${adUnitId} (${adType})`);
       console.log(`🔧 Mode: ${mode}`);
+      console.log(`🔐 Consent: ${consentStatus}`);
+      console.log(`🎯 Personalized ads: ${canShowPersonalizedAds ? 'Yes' : 'No'}`);
 
       this.rewardedAd = RewardedAd.createForAdRequest(adUnitId, {
-        requestNonPersonalizedAdsOnly: false,
+        requestNonPersonalizedAdsOnly: !canShowPersonalizedAds,
       });
 
       // Load the ad
@@ -321,12 +330,12 @@ class AdRewardService {
     }
   }
 
-  async manualLoadAd(): Promise<{ success: boolean; message: string }> {
+  async manualLoadAd(): Promise<{ success: boolean; messageKey: string; messageParams?: Record<string, unknown> }> {
     // Check if ads are disabled due to too many failures
     if (this.adsDisabled) {
       return {
         success: false,
-        message: 'Ads unavailable. Please check your internet connection or update Google Play Services.'
+        messageKey: 'Ads unavailable. Please check your internet connection or update Google Play Services.'
       };
     }
 
@@ -335,7 +344,8 @@ class AdRewardService {
       const remainingCooldown = Math.ceil((this.cooldownEndTime - Date.now()) / 1000);
       return {
         success: false,
-        message: `Please wait ${remainingCooldown} seconds before trying again.`
+        messageKey: 'Please wait {seconds} seconds before trying again.',
+        messageParams: { seconds: remainingCooldown }
       };
     }
 
@@ -343,7 +353,7 @@ class AdRewardService {
     if (this.adLoaded) {
       return {
         success: true,
-        message: 'Ad is ready! Click again to watch.'
+        messageKey: 'Ad is ready! Click again to watch.'
       };
     }
 
@@ -351,7 +361,7 @@ class AdRewardService {
     if (this.adLoading) {
       return {
         success: false,
-        message: 'Ad is loading, please wait...'
+        messageKey: 'Ad is loading, please wait...'
       };
     }
 
@@ -359,7 +369,7 @@ class AdRewardService {
     this.loadAd();
     return {
       success: true,
-      message: 'Requesting ad from Google...'
+      messageKey: 'Requesting ad from Google...'
     };
   }
 

@@ -57,9 +57,13 @@ class BiometricAuthService {
     }
   }
 
-  async authenticate(promptTitle: string, promptDescription?: string, scope?: string): Promise<{ success: boolean; error?: string }> {
+  async authenticate(
+    promptTitle: string,
+    promptDescription?: string,
+    scope?: string
+  ): Promise<{ success: boolean; errorKey?: string; errorMessage?: string }> {
     if (!Keychain?.getGenericPassword) {
-      return { success: false, error: 'Biometric authentication not available' };
+      return { success: false, errorKey: 'Biometric authentication not available' };
     }
     const service = this.getService(scope);
     console.log('[BiometricAuthService] Authenticating with scope:', scope, 'service:', service);
@@ -87,7 +91,7 @@ class BiometricAuthService {
       console.log('[BiometricAuthService] getGenericPassword result:', result);
 
       if (result === false) {
-        return { success: false, error: 'Authentication cancelled or credentials not found' };
+        return { success: false, errorKey: 'Authentication cancelled or credentials not found' };
       }
 
       return { success: Boolean(result) };
@@ -95,7 +99,8 @@ class BiometricAuthService {
       console.error('[BiometricAuthService] Auth exception:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Authentication failed'
+        errorKey: 'Authentication failed',
+        errorMessage: error instanceof Error ? error.message : undefined
       };
     }
   }

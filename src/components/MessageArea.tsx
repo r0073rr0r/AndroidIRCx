@@ -10,6 +10,7 @@ import {
 import Clipboard from '@react-native-clipboard/clipboard';
 import { IRCMessage, RawMessageCategory } from '../services/IRCService';
 import { useTheme } from '../hooks/useTheme';
+import { useT } from '../i18n/transifex';
 import { parseMessage, isVideoUrl, isAudioUrl, isDownloadableFileUrl } from '../utils/MessageParser';
 import { LinkPreview } from './LinkPreview';
 import { ImagePreview } from './ImagePreview';
@@ -335,6 +336,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
   network,
   bottomInset = 0,
 }) => {
+  const t = useT();
   const { colors } = useTheme();
   const layoutConfig = layoutService.getConfig();
   const totalBottomInset = bottomInset + layoutConfig.navigationBarOffset;
@@ -587,7 +589,10 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
     });
 
     Clipboard.setString(lines.join('\n'));
-    setCopyStatus(`Copied ${sorted.length} message${sorted.length !== 1 ? 's' : ''}`);
+    const message = sorted.length === 1
+      ? t('Copied {count} message').replace('{count}', sorted.length.toString())
+      : t('Copied {count} messages').replace('{count}', sorted.length.toString());
+    setCopyStatus(message);
     setTimeout(() => setCopyStatus(''), 1500);
   }, [selectedMessageIds, displayMessages, layoutState.timestampFormat]);
 
@@ -632,7 +637,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
     return (
       <View style={styles.container}>
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No messages yet</Text>
+          <Text style={styles.emptyText}>{t('No messages yet')}</Text>
         </View>
       </View>
     );
@@ -674,13 +679,13 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
         />
         {selectionMode && (
           <View style={styles.selectionBar}>
-            <Text style={styles.selectionText}>{selectedMessageIds.size} selected</Text>
+            <Text style={styles.selectionText}>{t('{count} selected').replace('{count}', selectedMessageIds.size.toString())}</Text>
             <View style={styles.selectionActions}>
               <TouchableOpacity style={styles.selectionButton} onPress={handleCopySelected}>
-                <Text style={styles.selectionButtonText}>Copy</Text>
+                <Text style={styles.selectionButtonText}>{t('Copy')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.selectionButton, styles.selectionCancelButton]} onPress={clearSelection}>
-                <Text style={[styles.selectionButtonText, styles.selectionCancelText]}>Cancel</Text>
+                <Text style={[styles.selectionButtonText, styles.selectionCancelText]}>{t('Cancel')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -723,13 +728,13 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
       />
       {selectionMode && (
         <View style={styles.selectionBar}>
-          <Text style={styles.selectionText}>{selectedMessageIds.size} selected</Text>
+          <Text style={styles.selectionText}>{t('{count} selected').replace('{count}', selectedMessageIds.size.toString())}</Text>
           <View style={styles.selectionActions}>
             <TouchableOpacity style={styles.selectionButton} onPress={handleCopySelected}>
-              <Text style={styles.selectionButtonText}>Copy</Text>
+              <Text style={styles.selectionButtonText}>{t('Copy')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.selectionButton, styles.selectionCancelButton]} onPress={clearSelection}>
-              <Text style={[styles.selectionButtonText, styles.selectionCancelText]}>Cancel</Text>
+              <Text style={[styles.selectionButtonText, styles.selectionCancelText]}>{t('Cancel')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -764,6 +769,7 @@ const NickContextMenu: React.FC<NickContextMenuProps> = ({
   network,
   connection,
 }) => {
+  const t = useT();
   const activeIrc: any = connection?.ircService || ircService;
   const isMonitoring = nick && typeof activeIrc?.isMonitoring === 'function' ? activeIrc.isMonitoring(nick) : false;
   const canMonitor = Boolean(activeIrc?.capEnabledSet && activeIrc.capEnabledSet.has && activeIrc.capEnabledSet.has('monitor'));
@@ -779,30 +785,30 @@ const NickContextMenu: React.FC<NickContextMenuProps> = ({
         <View style={styles.contextBox}>
           <Text style={styles.contextTitle}>{nick}</Text>
           <TouchableOpacity style={styles.contextItem} onPress={() => onAction('whois')}>
-            <Text style={styles.contextText}>WHOIS</Text>
+            <Text style={styles.contextText}>{t('WHOIS')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.contextItem} onPress={() => onAction('ctcp_ping')}>
-            <Text style={styles.contextText}>CTCP PING</Text>
+            <Text style={styles.contextText}>{t('CTCP PING')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.contextItem} onPress={() => onAction('ctcp_version')}>
-            <Text style={styles.contextText}>CTCP VERSION</Text>
+            <Text style={styles.contextText}>{t('CTCP VERSION')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.contextItem} onPress={() => onAction('ctcp_time')}>
-            <Text style={styles.contextText}>CTCP TIME</Text>
+            <Text style={styles.contextText}>{t('CTCP TIME')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.contextItem} onPress={() => onAction('dcc_chat')}>
-            <Text style={styles.contextText}>Start DCC Chat</Text>
+            <Text style={styles.contextText}>{t('Start DCC Chat')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.contextItem} onPress={() => onAction('ignore_toggle')}>
-            <Text style={styles.contextText}>{isIgnored ? 'Unignore User' : 'Ignore User'}</Text>
+            <Text style={styles.contextText}>{isIgnored ? t('Unignore User') : t('Ignore User')}</Text>
           </TouchableOpacity>
           {canMonitor && (
             <TouchableOpacity style={styles.contextItem} onPress={() => onAction('monitor_toggle')}>
-              <Text style={styles.contextText}>{isMonitoring ? 'Unmonitor Nick' : 'Monitor Nick'}</Text>
+              <Text style={styles.contextText}>{isMonitoring ? t('Unmonitor Nick') : t('Monitor Nick')}</Text>
             </TouchableOpacity>
           )}
           <TouchableOpacity style={styles.contextCancel} onPress={onClose}>
-            <Text style={styles.contextCancelText}>Close</Text>
+            <Text style={styles.contextCancelText}>{t('Close')}</Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>

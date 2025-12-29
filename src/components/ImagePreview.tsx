@@ -10,6 +10,7 @@ import {
   Text,
 } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
+import { useT } from '../i18n/transifex';
 
 interface ImagePreviewProps {
   url: string;
@@ -17,6 +18,7 @@ interface ImagePreviewProps {
 }
 
 export const ImagePreview: React.FC<ImagePreviewProps> = ({ url, thumbnail = true }) => {
+  const t = useT();
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const [modalVisible, setModalVisible] = useState(false);
@@ -39,7 +41,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ url, thumbnail = tru
   if (error) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Failed to load image</Text>
+        <Text style={styles.errorText}>{t('Failed to load image')}</Text>
       </View>
     );
   }
@@ -73,7 +75,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ url, thumbnail = tru
           <TouchableOpacity
             style={styles.modalClose}
             onPress={() => setModalVisible(false)}>
-            <Text style={styles.modalCloseText}>Close</Text>
+            <Text style={styles.modalCloseText}>{t('Close')}</Text>
           </TouchableOpacity>
           <ScrollView
             contentContainerStyle={styles.modalContent}

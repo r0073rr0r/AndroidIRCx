@@ -3,6 +3,9 @@ import { encryptedDMService } from './EncryptedDMService';
 import { channelEncryptionService } from './ChannelEncryptionService';
 import { DEFAULT_PART_MESSAGE, DEFAULT_QUIT_MESSAGE, ProxyConfig } from './SettingsService';
 import { ircForegroundService } from './IRCForegroundService';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 // All other service imports are removed to break circular dependencies.
 // The functionality will be restored by using an event-based approach.
@@ -39,43 +42,43 @@ export type RawMessageCategory =
 export const RAW_MESSAGE_CATEGORIES: { id: RawMessageCategory; title: string; description: string }[] = [
   {
     id: 'connection',
-    title: 'Connection',
-    description: 'Connect/disconnect, proxy, and registration flow messages.',
+    title: t('Connection'),
+    description: t('Connect/disconnect, proxy, and registration flow messages.'),
   },
   {
     id: 'trafficIn',
-    title: 'Incoming traffic',
-    description: 'Raw lines received from the server.',
+    title: t('Incoming traffic'),
+    description: t('Raw lines received from the server.'),
   },
   {
     id: 'trafficOut',
-    title: 'Outgoing traffic',
-    description: 'Raw lines sent to the server.',
+    title: t('Outgoing traffic'),
+    description: t('Raw lines sent to the server.'),
   },
   {
     id: 'server',
-    title: 'Server notices',
-    description: 'MOTD, account/away, and other server-emitted events.',
+    title: t('Server notices'),
+    description: t('MOTD, account/away, and other server-emitted events.'),
   },
   {
     id: 'channel',
-    title: 'Channel notices',
-    description: 'Channel modes, lists, topics, and per-channel system notices.',
+    title: t('Channel notices'),
+    description: t('Channel modes, lists, topics, and per-channel system notices.'),
   },
   {
     id: 'user',
-    title: 'User notices',
-    description: 'User account status, oper, and presence state changes.',
+    title: t('User notices'),
+    description: t('User account status, oper, and presence state changes.'),
   },
   {
     id: 'auth',
-    title: 'Auth & identity',
-    description: 'SASL/authentication and nickname negotiation events.',
+    title: t('Auth & identity'),
+    description: t('SASL/authentication and nickname negotiation events.'),
   },
   {
     id: 'debug',
-    title: 'Debug',
-    description: 'Verbose internal logging and diagnostics.',
+    title: t('Debug'),
+    description: t('Verbose internal logging and diagnostics.'),
   },
 ];
 
@@ -352,7 +355,7 @@ export class IRCService {
           });
 
           this.socket.on('error', (error: any) => {
-            const errorMessage = error?.message || error?.toString() || 'Unknown connection error';
+            const errorMessage = error?.message || error?.toString() || t('Unknown connection error');
             const errorCode = error?.code || 'NO_CODE';
             if (!this.manualDisconnect) {
               console.error('IRC Connection Error:', {
@@ -361,22 +364,28 @@ export class IRCService {
                 error: error,
                 stack: error?.stack,
               });
-              this.addRawMessage(`*** Socket error [${errorCode}]: ${errorMessage}`, 'connection');
+              this.addRawMessage(
+                t('*** Socket error [{code}]: {message}', {
+                  code: errorCode,
+                  message: errorMessage,
+                }),
+                'connection'
+              );
             }
             
             if (!this.manualDisconnect) {
               if (!this.isConnected) {
                 this.addMessage({
                   type: 'error',
-                  text: `Connection error [${errorCode}]: ${errorMessage}`,
+                  text: t('Connection error [{code}]: {message}', { code: errorCode, message: errorMessage }),
                   timestamp: Date.now(),
                 });
                 this.disconnect();
-                reject(new Error(`${errorMessage} (Code: ${errorCode})`));
+                reject(new Error(t('{message} (Code: {code})', { message: errorMessage, code: errorCode })));
               } else {
                 this.addMessage({
                   type: 'error',
-                  text: `Socket error: ${errorMessage}`,
+                  text: t('Socket error: {message}', { message: errorMessage }),
                   timestamp: Date.now(),
                 });
               }
@@ -392,7 +401,7 @@ export class IRCService {
               return;
             }
             if (this.isConnected) {
-              this.addRawMessage('*** Connection closed by server', 'connection');
+              this.addRawMessage(t('*** Connection closed by server'), 'connection');
               this.isConnected = false;
               this.registered = false;
               this.socket = null;
@@ -413,10 +422,17 @@ export class IRCService {
             this.reconnectTimer = null;
           }
           this.emitConnection(true);
-          this.addRawMessage(`*** Connected to ${config.host}:${config.port}${tls ? ' (TLS)' : ''}`, 'connection');
+          this.addRawMessage(
+            t('*** Connected to {host}:{port}{tls}', {
+              host: config.host,
+              port: config.port,
+              tls: tls ? t(' (TLS)') : '',
+            }),
+            'connection'
+          );
           if (tls) {
             this.logRaw('IRCService: TLS handshake completed');
-            this.addRawMessage('*** TLS handshake completed', 'connection');
+            this.addRawMessage(t('*** TLS handshake completed'), 'connection');
           } else {
             this.logRaw('IRCService: Socket connected successfully');
           }
@@ -428,7 +444,7 @@ export class IRCService {
           const proxyHost = proxy.host || (proxy.type === 'tor' ? '127.0.0.1' : undefined);
           const proxyPort = proxy.port || (proxy.type === 'tor' ? 9050 : undefined);
           if (!proxyHost || !proxyPort) {
-            throw new Error('Proxy host/port not set');
+            throw new Error(t('Proxy host/port not set'));
           }
           this.logRaw(
             `IRCService: Connecting via proxy type=${proxy.type || 'socks5'} host=${proxyHost} port=${proxyPort}`
@@ -442,9 +458,12 @@ export class IRCService {
                 // Wait for TLS handshake to complete before attaching IRC listeners
                 const handleTLSError = (err: any) => {
                   const msg = err?.message || String(err);
-                  this.addRawMessage(`*** TLS error over proxy: ${msg}`, 'connection');
+                  this.addRawMessage(
+                    t('*** TLS error over proxy: {message}', { message: msg }),
+                    'connection'
+                  );
                   this.disconnect();
-                  reject(new Error(`TLS handshake failed: ${msg}`));
+                  reject(new Error(t('TLS handshake failed: {message}', { message: msg })));
                 };
                 this.socket.once('secureConnect', () => {
                   this.logRaw('IRCService: TLS handshake completed over proxy connection');
@@ -459,7 +478,7 @@ export class IRCService {
               }
             } catch (err: any) {
               const msg = err?.message || String(err);
-              this.addRawMessage(`*** Proxy error: ${msg}`, 'connection');
+              this.addRawMessage(t('*** Proxy error: {message}', { message: msg }), 'connection');
               this.disconnect();
               reject(err);
             }
@@ -480,7 +499,7 @@ export class IRCService {
         const connectionTimeout = setTimeout(() => {
           if (!this.isConnected) {
             this.disconnect();
-            reject(new Error('Connection timeout'));
+            reject(new Error(t('Connection timeout')));
           }
         }, 10000);
 
@@ -504,7 +523,7 @@ export class IRCService {
         
         const registrationTimeout = setTimeout(() => {
           if (!this.registered) {
-            this.addRawMessage('*** Waiting for server registration...', 'connection');
+            this.addRawMessage(t('*** Waiting for server registration...'), 'connection');
           }
         }, 10000);
         
@@ -521,7 +540,7 @@ export class IRCService {
         }, 15000);
 
       } catch (error: any) {
-        const errorMessage = error?.message || error?.toString() || 'Failed to create connection';
+        const errorMessage = error?.message || error?.toString() || t('Failed to create connection');
         console.error('IRC Service Error:', error);
         reject(new Error(errorMessage));
       }
@@ -549,7 +568,7 @@ export class IRCService {
       };
       const timer = setTimeout(() => {
         cleanup();
-        reject(new Error('Proxy read timeout'));
+        reject(new Error(t('Proxy read timeout')));
       }, timeoutMs);
       socket.on('data', onData);
       socket.on('error', onError);
@@ -577,7 +596,7 @@ export class IRCService {
     const response = responseBuffer.toString('utf8');
     const statusLine = response.split('\r\n')[0] || '';
     if (!statusLine.includes('200')) {
-      throw new Error(`HTTP proxy CONNECT failed: ${statusLine.trim()}`);
+      throw new Error(t('HTTP proxy CONNECT failed: {status}', { status: statusLine.trim() }));
     }
     this.logRaw(`IRCService: HTTP proxy CONNECT tunnel established (${statusLine.trim()})`);
   }
@@ -596,7 +615,7 @@ export class IRCService {
     this.socket.write(greeting);
     const methodResp = await this.readFromSocketUntil(this.socket, (buf) => buf.length >= 2);
     if (methodResp[0] !== 0x05) {
-      throw new Error('SOCKS5 proxy: invalid version');
+      throw new Error(t('SOCKS5 proxy: invalid version'));
     }
     const method = methodResp[1];
     if (method === 0x02 && wantAuth) {
@@ -606,11 +625,11 @@ export class IRCService {
       this.socket.write(authReq);
       const authResp = await this.readFromSocketUntil(this.socket, (buf) => buf.length >= 2);
       if (authResp[1] !== 0x00) {
-        throw new Error('SOCKS5 proxy: authentication failed');
+        throw new Error(t('SOCKS5 proxy: authentication failed'));
       }
       this.logRaw('IRCService: SOCKS5 authentication succeeded');
     } else if (method === 0xff) {
-      throw new Error('SOCKS5 proxy: no acceptable auth method');
+      throw new Error(t('SOCKS5 proxy: no acceptable auth method'));
     }
 
     const request = Buffer.concat([Buffer.from([0x05, 0x01, 0x00, 0x03, hostBuf.length]), hostBuf, portBuf]);
@@ -618,7 +637,7 @@ export class IRCService {
 
     const replyHead = await this.readFromSocketUntil(this.socket, (buf) => buf.length >= 5);
     if (replyHead[1] !== 0x00) {
-      throw new Error(`SOCKS5 proxy: connect failed (code ${replyHead[1]})`);
+      throw new Error(t('SOCKS5 proxy: connect failed (code {code})', { code: replyHead[1] }));
     }
     const atyp = replyHead[3];
     let addrLen = 0;
@@ -644,7 +663,7 @@ export class IRCService {
         this.handleIRCMessage(line);
       } else {
         // Show blank lines for troubleshooting proxy/http responses
-        this.addWireMessage('in', '(empty line)');
+        this.addWireMessage('in', t('(empty line)'));
       }
     }
   }
@@ -780,26 +799,31 @@ export class IRCService {
 
     switch (command) {
       case 'ERROR': {
-        const errorText = params.join(' ') || 'Connection closed by server';
+        const errorText = params.join(' ') || t('Connection closed by server');
         this.addMessage({
           type: 'error',
           text: errorText,
           timestamp: messageTimestamp,
         });
-        this.addRawMessage(`*** Server error: ${errorText}`, 'server');
+        this.addRawMessage(t('*** Server error: {message}', { message: errorText }), 'server');
         this.disconnect(errorText);
         return;
       }
 
       case 'FAIL': {
         // IRCv3.2 standard-replies: standardized error responses
-        const command = params[0] || 'UNKNOWN';
+        const command = params[0] || t('UNKNOWN');
         const code = params[1] || '';
         const description = params[params.length - 1] || '';
         const context = params.length > 3 ? params.slice(2, -1).join(' ') : '';
         this.addMessage({
           type: 'error',
-          text: `*** FAIL ${command} [${code}]${context ? ' ' + context : ''}: ${description}`,
+          text: t('*** FAIL {command} [{code}]{context}: {description}', {
+            command,
+            code,
+            context: context ? ` ${context}` : '',
+            description,
+          }),
           timestamp: messageTimestamp,
         });
         this.emit('fail', command, code, context, description);
@@ -808,13 +832,18 @@ export class IRCService {
 
       case 'WARN': {
         // IRCv3.2 standard-replies: standardized warning responses
-        const command = params[0] || 'UNKNOWN';
+        const command = params[0] || t('UNKNOWN');
         const code = params[1] || '';
         const description = params[params.length - 1] || '';
         const context = params.length > 3 ? params.slice(2, -1).join(' ') : '';
         this.addMessage({
           type: 'raw',
-          text: `*** WARN ${command} [${code}]${context ? ' ' + context : ''}: ${description}`,
+          text: t('*** WARN {command} [{code}]{context}: {description}', {
+            command,
+            code,
+            context: context ? ` ${context}` : '',
+            description,
+          }),
           timestamp: messageTimestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -825,13 +854,18 @@ export class IRCService {
 
       case 'NOTE': {
         // IRCv3.2 standard-replies: standardized informational responses
-        const command = params[0] || 'UNKNOWN';
+        const command = params[0] || t('UNKNOWN');
         const code = params[1] || '';
         const description = params[params.length - 1] || '';
         const context = params.length > 3 ? params.slice(2, -1).join(' ') : '';
         this.addMessage({
           type: 'raw',
-          text: `*** NOTE ${command} [${code}]${context ? ' ' + context : ''}: ${description}`,
+          text: t('*** NOTE {command} [{code}]{context}: {description}', {
+            command,
+            code,
+            context: context ? ` ${context}` : '',
+            description,
+          }),
           timestamp: messageTimestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -873,7 +907,7 @@ export class IRCService {
           type: 'invite',
           from: inviter,
           channel: invitedChannel,
-          text: `${inviter} invited you to join ${invitedChannel}`,
+          text: t('{inviter} invited you to join {channel}', { inviter, channel: invitedChannel }),
           timestamp: messageTimestamp,
         });
         return;
@@ -922,13 +956,13 @@ export class IRCService {
               if (result.status === 'stored') {
                 this.addMessage({
                   type: 'notice',
-                  text: `*** ${fromNick} accepted your encryption key. Encrypted chat enabled.`,
+                  text: t('*** {nick} accepted your encryption key. Encrypted chat enabled.', { nick: fromNick }),
                   timestamp: Date.now(),
                 });
               } else if (result.status === 'pending') {
                 this.addMessage({
                   type: 'notice',
-                  text: `*** ${fromNick} sent a different encryption key. Review and accept the new key to continue encrypted chat.`,
+                  text: t('*** {nick} sent a different encryption key. Review and accept the new key to continue encrypted chat.', { nick: fromNick }),
                   timestamp: Date.now(),
                 });
               }
@@ -941,7 +975,7 @@ export class IRCService {
         if (msgText === '!enc-reject') {
           this.addMessage({
             type: 'notice',
-            text: `*** ${fromNick} rejected your encryption key offer.`,
+            text: t('*** {nick} rejected your encryption key offer.', { nick: fromNick }),
             timestamp: Date.now(),
           });
           return;
@@ -969,7 +1003,7 @@ export class IRCService {
               type: 'error',
               channel: channelIdentifier,
               from: fromNick,
-              text: '🔒 Invalid channel encryption payload',
+              text: t('🔒 Invalid channel encryption payload'),
               timestamp: messageTimestamp,
             });
             return;
@@ -982,7 +1016,7 @@ export class IRCService {
                 type: 'message',
                 channel: channelIdentifier,
                 from: fromNick,
-                text: `🔒 ${plaintext}`,
+                text: t('🔒 {message}', { message: plaintext }),
                 timestamp: messageTimestamp,
               });
             })
@@ -991,7 +1025,11 @@ export class IRCService {
                 type: 'message',
                 channel: channelIdentifier,
                 from: fromNick,
-                text: `🔒 ${e.message === 'no channel key' ? 'Missing channel key. Use /chankey request <nick> to get it.' : 'Decryption failed'}`,
+                text: t('🔒 {message}', {
+                  message: e.message === 'no channel key'
+                    ? t('Missing channel key. Use /chankey request <nick> to get it.')
+                    : t('Decryption failed'),
+                }),
                 timestamp: messageTimestamp,
               });
             });
@@ -1005,14 +1043,14 @@ export class IRCService {
             .then(imported => {
               this.addMessage({
                 type: 'notice',
-                text: `*** Received channel key for ${imported.channel} from ${fromNick}`,
+                text: t('*** Received channel key for {channel} from {nick}', { channel: imported.channel, nick: fromNick }),
                 timestamp: Date.now(),
               });
             })
             .catch(e => {
               this.addMessage({
                 type: 'error',
-                text: `*** Failed to import channel key: ${e}`,
+                text: t('*** Failed to import channel key: {message}', { message: e }),
                 timestamp: Date.now(),
               });
             });
@@ -1029,7 +1067,7 @@ export class IRCService {
               type: 'error',
               channel: channelIdentifier,
               from: fromNick,
-              text: 'Invalid encrypted payload',
+              text: t('Invalid encrypted payload'),
               timestamp: messageTimestamp,
             });
             return;
@@ -1043,7 +1081,7 @@ export class IRCService {
                 type: 'message',
                 channel: channelIdentifier,
                 from: fromNick,
-                text: `🔒 ${plaintext}`,
+                text: t('🔒 {message}', { message: plaintext }),
                 timestamp: messageTimestamp,
               });
             })
@@ -1051,7 +1089,7 @@ export class IRCService {
               this.addMessage({
                 type: 'error',
                 channel: channelIdentifier,
-                text: `Encrypted message from ${fromNick} could not be decrypted`,
+                text: t('Encrypted message from {nick} could not be decrypted', { nick: fromNick }),
                 timestamp: messageTimestamp,
               });
             });
@@ -1107,13 +1145,15 @@ export class IRCService {
               const latency = Date.now() - sentTime;
               this.logRaw(`CTCP PING response from ${noticeFrom}: ${latency}ms`);
               this.emit('pong', sentTime);
-              displayText = `CTCP PING reply: ${latency}ms`;
+              displayText = t('CTCP PING reply: {latency}ms', { latency });
             } catch (e) {
-              displayText = `CTCP PING reply from ${noticeFrom}`;
+              displayText = t('CTCP PING reply from {nick}', { nick: noticeFrom });
             }
           } else {
             // Other CTCP responses (VERSION, TIME, etc.)
-            displayText = `CTCP ${noticeCTCP.command} reply${noticeCTCP.args ? ': ' + noticeCTCP.args : ''}`;
+            displayText = noticeCTCP.args
+              ? t('CTCP {command} reply: {args}', { command: noticeCTCP.command, args: noticeCTCP.args })
+              : t('CTCP {command} reply', { command: noticeCTCP.command });
           }
         }
 
@@ -1135,12 +1175,12 @@ export class IRCService {
         const channel = params[0] || '';
         const nick = this.extractNick(prefix);
         
-        let joinText = `${nick} joined ${channel}`;
+        let joinText = t('{nick} joined {channel}', { nick, channel });
         let account: string | undefined;
         if (this.extendedJoin && params.length >= 2) {
           account = params[1];
           if (account && account !== '*') {
-            joinText = `${nick} (${account}) joined ${channel}`;
+            joinText = t('{nick} ({account}) joined {channel}', { nick, account, channel });
           } else {
             account = undefined;
           }
@@ -1197,7 +1237,11 @@ export class IRCService {
           type: 'part',
           channel: partChannel,
           from: partNick,
-          text: `${partNick} left ${partChannel}${partMessage ? ': ' + partMessage : ''}`,
+          text: t('{nick} left {channel}{message}', {
+            nick: partNick,
+            channel: partChannel,
+            message: partMessage ? t(': {message}', { message: partMessage }) : '',
+          }),
           timestamp: messageTimestamp,
         });
         if (partNick === this.currentNick && partChannel) {
@@ -1220,8 +1264,11 @@ export class IRCService {
           });
         }
 
-        const quitDisplay = quitNick || 'User';
-        const quitText = `${quitDisplay} quit${quitMessage ? ': ' + quitMessage : ''}`;
+        const quitDisplay = quitNick || t('User');
+        const quitText = t('{nick} quit{message}', {
+          nick: quitDisplay,
+          message: quitMessage ? t(': {message}', { message: quitMessage }) : '',
+        });
         if (quitChannels.length > 0) {
           quitChannels.forEach(channelName => {
             this.addMessage({
@@ -1256,7 +1303,7 @@ export class IRCService {
           type: 'topic',
           channel: topicChannel,
           from: setBy,
-          text: `Topic: ${topic}`,
+          text: t('Topic: {topic}', { topic }),
           timestamp: messageTimestamp,
         });
         break;
@@ -1281,7 +1328,10 @@ export class IRCService {
             }
           });
         }
-        const nickText = `${oldNick || 'Someone'} is now known as ${newNick}`;
+        const nickText = t('{oldNick} is now known as {newNick}', {
+          oldNick: oldNick || t('Someone'),
+          newNick,
+        });
         if (affectedChannels.length > 0) {
           affectedChannels.forEach(channelName => {
             this.addMessage({
@@ -1324,7 +1374,12 @@ export class IRCService {
           type: 'mode',
           channel: kickChannel,
           from: kickBy,
-          text: `${kickBy} kicked ${kickTarget} from ${kickChannel}${kickReason ? ': ' + kickReason : ''}`,
+          text: t('{by} kicked {target} from {channel}{reason}', {
+            by: kickBy,
+            target: kickTarget,
+            channel: kickChannel,
+            reason: kickReason ? t(': {reason}', { reason: kickReason }) : '',
+          }),
           timestamp: messageTimestamp,
         });
         break;
@@ -1356,7 +1411,7 @@ export class IRCService {
           type: isUserModeChange ? 'raw' : 'mode',
           channel: isUserModeChange ? undefined : modeChannel,
           from: this.extractNick(prefix),
-          text: `Mode ${modeChannel} ${modeParams.join(' ')}`,
+          text: t('Mode {channel} {modes}', { channel: modeChannel, modes: modeParams.join(' ') }),
           timestamp: messageTimestamp,
           isRaw: isUserModeChange,
           rawCategory: isUserModeChange ? 'server' : undefined,
@@ -1367,9 +1422,9 @@ export class IRCService {
         const accountNick = this.extractNick(prefix);
         const accountName = params[0] || '';
         if (accountName === '*') {
-          this.addMessage({ type: 'raw', text: `*** ${accountNick} logged out`, timestamp: messageTimestamp, isRaw: true, rawCategory: 'user' });
+          this.addMessage({ type: 'raw', text: t('*** {nick} logged out', { nick: accountNick }), timestamp: messageTimestamp, isRaw: true, rawCategory: 'user' });
         } else {
-          this.addMessage({ type: 'raw', text: `*** ${accountNick} logged in as ${accountName}`, timestamp: messageTimestamp, isRaw: true, rawCategory: 'user' });
+          this.addMessage({ type: 'raw', text: t('*** {nick} logged in as {accountName}', { nick: accountNick, accountName }), timestamp: messageTimestamp, isRaw: true, rawCategory: 'user' });
         }
         this.emit('account', accountNick, accountName);
         break;
@@ -1378,16 +1433,16 @@ export class IRCService {
         const awayNick = this.extractNick(prefix);
         const awayMessage = params[0] || '';
         if (awayMessage) {
-          this.addMessage({ type: 'raw', text: `*** ${awayNick} is now away: ${awayMessage}`, timestamp: messageTimestamp, isRaw: true, rawCategory: 'user' });
+          this.addMessage({ type: 'raw', text: t('*** {nick} is now away: {message}', { nick: awayNick, message: awayMessage }), timestamp: messageTimestamp, isRaw: true, rawCategory: 'user' });
         } else {
-          this.addMessage({ type: 'raw', text: `*** ${awayNick} is no longer away`, timestamp: messageTimestamp, isRaw: true, rawCategory: 'user' });
+          this.addMessage({ type: 'raw', text: t('*** {nick} is no longer away', { nick: awayNick }), timestamp: messageTimestamp, isRaw: true, rawCategory: 'user' });
         }
         break;
 
       case 'CHGHOST':
         const chghostNick = this.extractNick(prefix);
         const newHost = params[1] || '';
-        this.addMessage({ type: 'raw', text: `*** ${chghostNick} changed host to ${newHost}`, timestamp: messageTimestamp, isRaw: true, rawCategory: 'server' });
+        this.addMessage({ type: 'raw', text: t('*** {nick} changed host to {host}', { nick: chghostNick, host: newHost }), timestamp: messageTimestamp, isRaw: true, rawCategory: 'server' });
         this.emit('chghost', chghostNick, newHost);
         break;
 
@@ -1397,7 +1452,7 @@ export class IRCService {
         const newRealname = params[0] || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${setnameNick} changed realname to: ${newRealname}`,
+          text: t('*** {nick} changed realname to: {realname}', { nick: setnameNick, realname: newRealname }),
           timestamp: messageTimestamp,
           isRaw: true,
           rawCategory: 'user'
@@ -1426,7 +1481,7 @@ export class IRCService {
         this.logRaw(`IRCService: ${redactor} redacted message ${redactedMsgid} in ${target}`);
         this.addMessage({
           type: 'raw',
-          text: `*** ${redactor} deleted a message`,
+          text: t('*** {nick} deleted a message', { nick: redactor }),
           timestamp: messageTimestamp,
           channel: target,
           isRaw: true,
@@ -1478,7 +1533,7 @@ export class IRCService {
         const fullMessage = `${prefix ? `:${prefix} ` : ''}${command} ${params.join(' ')}`;
         this.addMessage({
           type: 'raw',
-          text: `*** RAW Command: ${fullMessage}`,
+          text: t('*** RAW Command: {message}', { message: fullMessage }),
           timestamp: messageTimestamp,
           isRaw: true,
           rawCategory: 'server',
@@ -1501,7 +1556,13 @@ export class IRCService {
           const welcomeNick = params[0];
           if (welcomeNick) this.currentNick = welcomeNick;
         }
-        this.addMessage({ type: 'raw', text: `*** Welcome to the ${params[0] || 'IRC'} Network`, timestamp: timestamp, isRaw: true, rawCategory: 'server' });
+        this.addMessage({
+          type: 'raw',
+          text: t('*** Welcome to the {network} Network', { network: params[0] || t('IRC') }),
+          timestamp: timestamp,
+          isRaw: true,
+          rawCategory: 'server'
+        });
         this.emit('registered');
         break;
 
@@ -1510,7 +1571,7 @@ export class IRCService {
         const hostInfo = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${hostInfo}`,
+          text: t('*** {message}', { message: hostInfo }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1523,7 +1584,7 @@ export class IRCService {
         const createdInfo = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${createdInfo}`,
+          text: t('*** {message}', { message: createdInfo }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1539,7 +1600,12 @@ export class IRCService {
         const channelModes = params[4] || '';
         this.addMessage({
           type: 'raw',
-          text: `*** Server: ${serverName} | Version: ${version} | User modes: ${userModes} | Channel modes: ${channelModes}`,
+          text: t('*** Server: {server} | Version: {version} | User modes: {userModes} | Channel modes: {channelModes}', {
+            server: serverName,
+            version,
+            userModes,
+            channelModes,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1554,7 +1620,7 @@ export class IRCService {
         const supportText = tokens.join(' ');
         this.addMessage({
           type: 'raw',
-          text: `*** Server supports: ${supportText}`,
+          text: t('*** Server supports: {features}', { features: supportText }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1585,7 +1651,7 @@ export class IRCService {
         const statsData = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** [${numeric}] ${statsData}`,
+          text: t('*** [{numeric}] {message}', { numeric, message: statsData }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1596,10 +1662,10 @@ export class IRCService {
       case 219: {
         // RPL_ENDOFSTATS: :server 219 yournick query :End of STATS report
         const query = params[1] || '';
-        const message = params.slice(2).join(' ').replace(/^:/, '') || 'End of STATS report';
+        const message = params.slice(2).join(' ').replace(/^:/, '') || t('End of STATS report');
         this.addMessage({
           type: 'raw',
-          text: `*** ${query}: ${message}`,
+          text: t('*** {label}: {message}', { label: query, message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1614,7 +1680,7 @@ export class IRCService {
         const statsData = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** [${numeric}] ${statsData}`,
+          text: t('*** [{numeric}] {message}', { numeric, message: statsData }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1627,7 +1693,7 @@ export class IRCService {
         const uptime = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${uptime}`,
+          text: t('*** {message}', { message: uptime }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1642,7 +1708,7 @@ export class IRCService {
         const comments = params.slice(3).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** Version: ${version} on ${server} ${comments}`,
+          text: t('*** Version: {version} on {server} {comments}', { version, server, comments }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1655,7 +1721,7 @@ export class IRCService {
         const info = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${info}`,
+          text: t('*** {message}', { message: info }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1665,10 +1731,10 @@ export class IRCService {
 
       case 374: {
         // RPL_ENDOFINFO: :server 374 yournick :End of INFO
-        const message = params.slice(1).join(' ').replace(/^:/, '') || 'End of INFO';
+        const message = params.slice(1).join(' ').replace(/^:/, '') || t('End of INFO');
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1678,10 +1744,10 @@ export class IRCService {
 
       case 381: {
         // RPL_YOUREOPER: :server 381 yournick :You are now an IRC operator
-        const message = params.slice(1).join(' ').replace(/^:/, '') || 'You are now an IRC operator';
+        const message = params.slice(1).join(' ').replace(/^:/, '') || t('You are now an IRC operator');
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1692,10 +1758,10 @@ export class IRCService {
       case 382: {
         // RPL_REHASHING: :server 382 yournick config :Rehashing
         const config = params[1] || '';
-        const message = params.slice(2).join(' ').replace(/^:/, '') || 'Rehashing';
+        const message = params.slice(2).join(' ').replace(/^:/, '') || t('Rehashing');
         this.addMessage({
           type: 'raw',
-          text: `*** ${config}: ${message}`,
+          text: t('*** {label}: {message}', { label: config, message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1705,10 +1771,10 @@ export class IRCService {
 
       case 383: {
         // RPL_YOURESERVICE: :server 383 yournick :You are service
-        const message = params.slice(1).join(' ').replace(/^:/, '') || 'You are service';
+        const message = params.slice(1).join(' ').replace(/^:/, '') || t('You are service');
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1722,7 +1788,7 @@ export class IRCService {
         const timeStr = params.slice(2).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** Time on ${server}: ${timeStr}`,
+          text: t('*** Time on {server}: {time}', { server, time: timeStr }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1736,7 +1802,7 @@ export class IRCService {
         const message = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1747,10 +1813,10 @@ export class IRCService {
       case 252: {
         // RPL_LUSEROP: :server 252 yournick X :operator(s) online
         const count = params[1] || '0';
-        const message = params.slice(2).join(' ').replace(/^:/, '') || 'operator(s) online';
+        const message = params.slice(2).join(' ').replace(/^:/, '') || t('operator(s) online');
         this.addMessage({
           type: 'raw',
-          text: `*** ${count} ${message}`,
+          text: t('*** {count} {message}', { count, message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1761,10 +1827,10 @@ export class IRCService {
       case 253: {
         // RPL_LUSERUNKNOWN: :server 253 yournick X :unknown connection(s)
         const count = params[1] || '0';
-        const message = params.slice(2).join(' ').replace(/^:/, '') || 'unknown connection(s)';
+        const message = params.slice(2).join(' ').replace(/^:/, '') || t('unknown connection(s)');
         this.addMessage({
           type: 'raw',
-          text: `*** ${count} ${message}`,
+          text: t('*** {count} {message}', { count, message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1775,10 +1841,10 @@ export class IRCService {
       case 254: {
         // RPL_LUSERCHANNELS: :server 254 yournick X :channels formed
         const count = params[1] || '0';
-        const message = params.slice(2).join(' ').replace(/^:/, '') || 'channels formed';
+        const message = params.slice(2).join(' ').replace(/^:/, '') || t('channels formed');
         this.addMessage({
           type: 'raw',
-          text: `*** ${count} ${message}`,
+          text: t('*** {count} {message}', { count, message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1791,7 +1857,7 @@ export class IRCService {
         const message = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1801,10 +1867,10 @@ export class IRCService {
 
       case 256: {
         // RPL_ADMINME: :server 256 yournick :Administrative info
-        const message = params.slice(1).join(' ').replace(/^:/, '') || 'Administrative info';
+        const message = params.slice(1).join(' ').replace(/^:/, '') || t('Administrative info');
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1817,7 +1883,7 @@ export class IRCService {
         const location = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${location}`,
+          text: t('*** {message}', { message: location }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1830,7 +1896,7 @@ export class IRCService {
         const location = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${location}`,
+          text: t('*** {message}', { message: location }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1843,7 +1909,7 @@ export class IRCService {
         const email = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${email}`,
+          text: t('*** {message}', { message: email }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1855,10 +1921,10 @@ export class IRCService {
         // RPL_LOCALUSERS: :server 265 yournick current max :Current local users X, max Y
         const current = params[1] || '';
         const max = params[2] || '';
-        const message = params.slice(3).join(' ').replace(/^:/, '') || `Current local users ${current}, max ${max}`;
+        const message = params.slice(3).join(' ').replace(/^:/, '') || t('Current local users {current}, max {max}', { current, max });
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1870,10 +1936,10 @@ export class IRCService {
         // RPL_GLOBALUSERS: :server 266 yournick current max :Current global users X, max Y
         const current = params[1] || '';
         const max = params[2] || '';
-        const message = params.slice(3).join(' ').replace(/^:/, '') || `Current global users ${current}, max ${max}`;
+        const message = params.slice(3).join(' ').replace(/^:/, '') || t('Current global users {current}, max {max}', { current, max });
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -1882,20 +1948,20 @@ export class IRCService {
       }
 
       case 375:
-        this.addMessage({ type: 'raw', text: `*** - ${params[1]} Message of the Day -`, timestamp: timestamp, isRaw: true, rawCategory: 'server' });
+        this.addMessage({ type: 'raw', text: t('*** - {server} Message of the Day -', { server: params[1] }), timestamp: timestamp, isRaw: true, rawCategory: 'server' });
         break;
 
       case 372:
-        this.addMessage({ type: 'raw', text: `*** ${params[1]}`, timestamp: timestamp, isRaw: true, rawCategory: 'server' });
+        this.addMessage({ type: 'raw', text: t('*** {message}', { message: params[1] }), timestamp: timestamp, isRaw: true, rawCategory: 'server' });
         break;
 
       case 376:
-        this.addMessage({ type: 'raw', text: `*** End of /MOTD command.`, timestamp: timestamp, isRaw: true, rawCategory: 'server' });
+        this.addMessage({ type: 'raw', text: t('*** End of /MOTD command.'), timestamp: timestamp, isRaw: true, rawCategory: 'server' });
         this.emit('motdEnd');
         break;
 
       case 422:
-        this.addMessage({ type: 'raw', text: `*** No Message of the Day.`, timestamp: timestamp, isRaw: true, rawCategory: 'server' });
+        this.addMessage({ type: 'raw', text: t('*** No Message of the Day.'), timestamp: timestamp, isRaw: true, rawCategory: 'server' });
         this.emit('motdEnd');
         break;
 
@@ -1904,7 +1970,7 @@ export class IRCService {
         const channel = params[1] || '';
         if (channel) {
           const existing = this.channelTopics.get(channel) || {};
-          this.channelTopics.set(channel, { ...existing, topic: 'No topic is set.' });
+          this.channelTopics.set(channel, { ...existing, topic: t('No topic is set.') });
           this.maybeEmitChannelIntro(channel, timestamp);
         }
         break;
@@ -1955,10 +2021,10 @@ export class IRCService {
         const channel = params[1] || '';
         const createdAtRaw = params[2] || '';
         const createdAt = createdAtRaw ? parseInt(createdAtRaw, 10) : 0;
-        const createdDate = createdAt > 0 ? new Date(createdAt * 1000).toLocaleString() : 'unknown';
+        const createdDate = createdAt > 0 ? new Date(createdAt * 1000).toLocaleString() : t('unknown');
         this.addMessage({
           type: 'raw',
-          text: `*** ${channel} was created on ${createdDate}`,
+          text: t('*** {channel} was created on {date}', { channel, date: createdDate }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'channel'
@@ -1972,7 +2038,7 @@ export class IRCService {
         const channel = params[2] || '';
         this.addMessage({
           type: 'raw',
-          text: `*** You have invited ${invitedNick} to ${channel}`,
+          text: t('*** You have invited {nick} to {channel}', { nick: invitedNick, channel }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'channel'
@@ -1986,7 +2052,7 @@ export class IRCService {
         const inviteMask = params[2] || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${channel} invite list: ${inviteMask}`,
+          text: t('*** {channel} invite list: {mask}', { channel, mask: inviteMask }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'channel'
@@ -1999,7 +2065,7 @@ export class IRCService {
         const channel = params[1] || '';
         this.addMessage({
           type: 'raw',
-          text: `*** End of ${channel} invite list`,
+          text: t('*** End of {channel} invite list', { channel }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'channel'
@@ -2014,11 +2080,16 @@ export class IRCService {
         const setBy = params[3] || '';
         const setTime = params[4] ? parseInt(params[4], 10) : 0;
         const setDate = setTime > 0 ? new Date(setTime * 1000).toLocaleString() : '';
-        const byInfo = setBy ? ` by ${setBy}` : '';
-        const timeInfo = setDate ? ` on ${setDate}` : '';
+        const byInfo = setBy ? t(' by {nick}', { nick: setBy }) : '';
+        const timeInfo = setDate ? t(' on {date}', { date: setDate }) : '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${channel} exception list: ${exceptMask}${byInfo}${timeInfo}`,
+          text: t('*** {channel} exception list: {mask}{by}{time}', {
+            channel,
+            mask: exceptMask,
+            by: byInfo,
+            time: timeInfo,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'channel'
@@ -2031,7 +2102,7 @@ export class IRCService {
         const channel = params[1] || '';
         this.addMessage({
           type: 'raw',
-          text: `*** End of ${channel} exception list`,
+          text: t('*** End of {channel} exception list', { channel }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'channel'
@@ -2046,11 +2117,16 @@ export class IRCService {
         const setBanner = params[3] || '';
         const setTime = params[4] ? parseInt(params[4], 10) : 0;
         const setDate = setTime > 0 ? new Date(setTime * 1000).toLocaleString() : '';
-        const byInfo = setBanner ? ` by ${setBanner}` : '';
-        const timeInfo = setDate ? ` on ${setDate}` : '';
+        const byInfo = setBanner ? t(' by {nick}', { nick: setBanner }) : '';
+        const timeInfo = setDate ? t(' on {date}', { date: setDate }) : '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${channel} ban list: ${banMask}${byInfo}${timeInfo}`,
+          text: t('*** {channel} ban list: {mask}{by}{time}', {
+            channel,
+            mask: banMask,
+            by: byInfo,
+            time: timeInfo,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'channel'
@@ -2063,7 +2139,7 @@ export class IRCService {
         const channel = params[1] || '';
         this.addMessage({
           type: 'raw',
-          text: `*** End of ${channel} ban list`,
+          text: t('*** End of {channel} ban list', { channel }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'channel'
@@ -2076,7 +2152,7 @@ export class IRCService {
         // RPL_LISTSTART: :server 321 yournick Channel :Users  Name
         this.addMessage({
           type: 'raw',
-          text: `*** Channel list:`,
+          text: t('*** Channel list:'),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -2091,7 +2167,7 @@ export class IRCService {
         const topic = params.slice(3).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${channel} (${users} users): ${topic}`,
+          text: t('*** {channel} ({users} users): {topic}', { channel, users, topic }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -2103,7 +2179,7 @@ export class IRCService {
         // RPL_LISTEND: :server 323 yournick :End of LIST
         this.addMessage({
           type: 'raw',
-          text: `*** End of channel list`,
+          text: t('*** End of channel list'),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -2163,12 +2239,21 @@ export class IRCService {
         const whoHops = whoRealParts[0] || '0';
         const whoReal = whoRealParts.slice(1).join(' ') || '';
 
-        const awayStatus = whoFlags.includes('G') ? ' (away)' : '';
-        const opStatus = whoFlags.includes('*') ? ' (IRCop)' : '';
+        const awayStatus = whoFlags.includes('G') ? t(' (away)') : '';
+        const opStatus = whoFlags.includes('*') ? t(' (IRCop)') : '';
 
         this.addMessage({
           type: 'raw',
-          text: `*** WHO ${whoChannel}: ${whoNick} (${whoUser}@${whoHost}) [${whoServer}]${awayStatus}${opStatus} - ${whoReal}`,
+          text: t('*** WHO {channel}: {nick} ({user}@{host}) [{server}]{away}{op} - {real}', {
+            channel: whoChannel,
+            nick: whoNick,
+            user: whoUser,
+            host: whoHost,
+            server: whoServer,
+            away: awayStatus,
+            op: opStatus,
+            real: whoReal,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -2181,7 +2266,7 @@ export class IRCService {
         const whoChannel = params[1] || '';
         this.addMessage({
           type: 'raw',
-          text: `*** End of WHO list for ${whoChannel}`,
+          text: t('*** End of WHO list for {channel}', { channel: whoChannel }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -2193,16 +2278,16 @@ export class IRCService {
       case 401: {
         // ERR_NOSUCHNICK: :server 401 yournick nickname :No such nick/channel
         const target = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'No such nick/channel';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('No such nick/channel');
         this.addMessage({
           type: 'error',
-          text: `${target}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: target, message: errorMsg }),
           timestamp: timestamp
         });
         if (target && this.lastWhowasTarget === target && Date.now() - this.lastWhowasAt < 5000) {
           this.addMessage({
             type: 'notice',
-            text: `*** WHOWAS has no history for ${target}. If they are online, try /whois ${target}.`,
+            text: t('*** WHOWAS has no history for {nick}. If they are online, try /whois {nick}.', { nick: target }),
             timestamp: timestamp
           });
         }
@@ -2212,10 +2297,10 @@ export class IRCService {
       case 403: {
         // ERR_NOSUCHCHANNEL: :server 403 yournick channel :No such channel
         const channel = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'No such channel';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('No such channel');
         this.addMessage({
           type: 'error',
-          text: `${channel}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2224,10 +2309,10 @@ export class IRCService {
       case 404: {
         // ERR_CANNOTSENDTOCHAN: :server 404 yournick channel :Cannot send to channel
         const channel = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Cannot send to channel';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Cannot send to channel');
         this.addMessage({
           type: 'error',
-          text: `${channel}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2236,10 +2321,10 @@ export class IRCService {
       case 421: {
         // ERR_UNKNOWNCOMMAND: :server 421 yournick command :Unknown command
         const command = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Unknown command';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Unknown command');
         this.addMessage({
           type: 'error',
-          text: `${command}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: command, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2248,10 +2333,10 @@ export class IRCService {
       case 432: {
         // ERR_ERRONEUSNICKNAME: :server 432 yournick nickname :Erroneous nickname
         const badNick = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Erroneous nickname';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Erroneous nickname');
         this.addMessage({
           type: 'error',
-          text: `${badNick}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: badNick, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2261,7 +2346,7 @@ export class IRCService {
         const requestedNick = params[1] || this.currentNick;
         this.addMessage({
           type: 'error',
-          text: `Nickname is already in use: ${requestedNick}`,
+          text: t('Nickname is already in use: {nick}', { nick: requestedNick }),
           timestamp: timestamp,
         });
         
@@ -2270,14 +2355,14 @@ export class IRCService {
           this.logRaw(`IRCService: Trying altnick: ${this.altNick}`);
           this.sendRaw(`NICK ${this.altNick}`);
           this.currentNick = this.altNick;
-          this.addRawMessage(`*** Trying alternative nickname: ${this.altNick}`, 'auth');
+          this.addRawMessage(t('*** Trying alternative nickname: {nick}', { nick: this.altNick }), 'auth');
         } else {
           const randomSuffix = Math.floor(Math.random() * 1000);
           const fallbackNick = `${this.currentNick}${randomSuffix}`;
           this.logRaw(`IRCService: Trying fallback nick: ${fallbackNick}`);
           this.sendRaw(`NICK ${fallbackNick}`);
           this.currentNick = fallbackNick;
-          this.addRawMessage(`*** Trying fallback nickname: ${fallbackNick}`, 'auth');
+          this.addRawMessage(t('*** Trying fallback nickname: {nick}', { nick: fallbackNick }), 'auth');
         }
         break;
       }
@@ -2285,16 +2370,16 @@ export class IRCService {
       case 464:
         this.addMessage({
           type: 'error',
-          text: 'Password incorrect',
+          text: t('Password incorrect'),
           timestamp: timestamp,
         });
         break;
 
       case 465:
       case 484: {
-        const reason = params.slice(1).join(' ') || 'Connection blocked or banned';
+        const reason = params.slice(1).join(' ') || t('Connection blocked or banned');
         this.addMessage({ type: 'error', text: reason, timestamp });
-        this.addRawMessage(`*** Connection blocked: ${reason}`, 'connection');
+        this.addRawMessage(t('*** Connection blocked: {message}', { message: reason }), 'connection');
         this.disconnect(reason);
         break;
       }
@@ -2304,10 +2389,10 @@ export class IRCService {
         // ERR_USERNOTINCHANNEL: :server 441 yournick nick channel :They aren't on that channel
         const nick = params[1] || '';
         const channel = params[2] || '';
-        const errorMsg = params.slice(3).join(' ').replace(/^:/, '') || "They aren't on that channel";
+        const errorMsg = params.slice(3).join(' ').replace(/^:/, '') || t("They aren't on that channel");
         this.addMessage({
           type: 'error',
-          text: `${nick} ${channel}: ${errorMsg}`,
+          text: t('{nick} {channel}: {message}', { nick, channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2316,10 +2401,10 @@ export class IRCService {
       case 442: {
         // ERR_NOTONCHANNEL: :server 442 yournick channel :You're not on that channel
         const channel = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || "You're not on that channel";
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t("You're not on that channel");
         this.addMessage({
           type: 'error',
-          text: `${channel}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2328,10 +2413,10 @@ export class IRCService {
       case 461: {
         // ERR_NEEDMOREPARAMS: :server 461 yournick command :Not enough parameters
         const command = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Not enough parameters';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Not enough parameters');
         this.addMessage({
           type: 'error',
-          text: `${command}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: command, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2340,10 +2425,10 @@ export class IRCService {
       case 471: {
         // ERR_CHANNELISFULL: :server 471 yournick channel :Cannot join channel (+l)
         const channel = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Cannot join channel (channel is full)';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Cannot join channel (channel is full)');
         this.addMessage({
           type: 'error',
-          text: `${channel}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2352,10 +2437,10 @@ export class IRCService {
       case 472: {
         // ERR_UNKNOWNMODE: :server 472 yournick char :is unknown mode char to me
         const modeChar = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'is unknown mode char';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('is unknown mode char');
         this.addMessage({
           type: 'error',
-          text: `${modeChar}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: modeChar, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2364,10 +2449,10 @@ export class IRCService {
       case 473: {
         // ERR_INVITEONLYCHAN: :server 473 yournick channel :Cannot join channel (+i)
         const channel = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Cannot join channel (invite only)';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Cannot join channel (invite only)');
         this.addMessage({
           type: 'error',
-          text: `${channel}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2376,10 +2461,10 @@ export class IRCService {
       case 474: {
         // ERR_BANNEDFROMCHAN: :server 474 yournick channel :Cannot join channel (+b)
         const channel = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Cannot join channel (you are banned)';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Cannot join channel (you are banned)');
         this.addMessage({
           type: 'error',
-          text: `${channel}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2388,10 +2473,10 @@ export class IRCService {
       case 475: {
         // ERR_BADCHANNELKEY: :server 475 yournick channel :Cannot join channel (+k)
         const channel = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Cannot join channel (bad key)';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Cannot join channel (bad key)');
         this.addMessage({
           type: 'error',
-          text: `${channel}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2400,10 +2485,10 @@ export class IRCService {
       case 476: {
         // ERR_BADCHANMASK: :server 476 yournick channel :Bad Channel Mask
         const channel = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Bad channel mask';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Bad channel mask');
         this.addMessage({
           type: 'error',
-          text: `${channel}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2412,10 +2497,10 @@ export class IRCService {
       case 477: {
         // ERR_NOCHANMODES: :server 477 yournick channel :Channel doesn't support modes
         const channel = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || "Channel doesn't support modes";
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t("Channel doesn't support modes");
         this.addMessage({
           type: 'error',
-          text: `${channel}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2424,10 +2509,10 @@ export class IRCService {
       case 478: {
         // ERR_BANLISTFULL: :server 478 yournick channel char :Channel ban/ignore list is full
         const channel = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Channel ban list is full';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Channel ban list is full');
         this.addMessage({
           type: 'error',
-          text: `${channel}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2436,10 +2521,10 @@ export class IRCService {
       case 482: {
         // ERR_CHANOPRIVSNEEDED: :server 482 yournick channel :You're not channel operator
         const channel = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || "You're not channel operator";
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t("You're not channel operator");
         this.addMessage({
           type: 'error',
-          text: `${channel}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2449,10 +2534,10 @@ export class IRCService {
       case 405: {
         // ERR_TOOMANYCHANNELS: :server 405 yournick channel :You have joined too many channels
         const channel = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'You have joined too many channels';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('You have joined too many channels');
         this.addMessage({
           type: 'error',
-          text: `${channel}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2461,10 +2546,10 @@ export class IRCService {
       case 406: {
         // ERR_WASNOSUCHNICK: :server 406 yournick nick :There was no such nickname
         const nick = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'There was no such nickname';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('There was no such nickname');
         this.addMessage({
           type: 'error',
-          text: `${nick}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: nick, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2473,10 +2558,10 @@ export class IRCService {
       case 407: {
         // ERR_TOOMANYTARGETS: :server 407 yournick target :Too many targets
         const target = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Too many targets';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Too many targets');
         this.addMessage({
           type: 'error',
-          text: `${target}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: target, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2484,7 +2569,7 @@ export class IRCService {
 
       case 411: {
         // ERR_NORECIPIENT: :server 411 yournick :No recipient given
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || 'No recipient given';
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t('No recipient given');
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2495,7 +2580,7 @@ export class IRCService {
 
       case 412: {
         // ERR_NOTEXTTOSEND: :server 412 yournick :No text to send
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || 'No text to send';
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t('No text to send');
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2507,10 +2592,10 @@ export class IRCService {
       case 413: {
         // ERR_NOTOPLEVEL: :server 413 yournick mask :No toplevel domain specified
         const mask = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'No toplevel domain specified';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('No toplevel domain specified');
         this.addMessage({
           type: 'error',
-          text: `${mask}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: mask, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2519,10 +2604,10 @@ export class IRCService {
       case 414: {
         // ERR_WILDTOPLEVEL: :server 414 yournick mask :Wildcard in toplevel domain
         const mask = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Wildcard in toplevel domain';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Wildcard in toplevel domain');
         this.addMessage({
           type: 'error',
-          text: `${mask}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: mask, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2531,10 +2616,10 @@ export class IRCService {
       case 415: {
         // ERR_BADMASK: :server 415 yournick mask :Bad server/host mask
         const mask = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Bad server/host mask';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Bad server/host mask');
         this.addMessage({
           type: 'error',
-          text: `${mask}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: mask, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2543,10 +2628,10 @@ export class IRCService {
       case 423: {
         // ERR_NOADMININFO: :server 423 yournick server :No administrative info available
         const server = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'No administrative info available';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('No administrative info available');
         this.addMessage({
           type: 'error',
-          text: `${server}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: server, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2554,7 +2639,7 @@ export class IRCService {
 
       case 431: {
         // ERR_NONICKNAMEGIVEN: :server 431 yournick :No nickname given
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || 'No nickname given';
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t('No nickname given');
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2566,10 +2651,10 @@ export class IRCService {
       case 436: {
         // ERR_NICKCOLLISION: :server 436 yournick nickname :Nickname collision KILL
         const nick = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Nickname collision';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Nickname collision');
         this.addMessage({
           type: 'error',
-          text: `${nick}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: nick, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2578,10 +2663,10 @@ export class IRCService {
       case 437: {
         // ERR_UNAVAILRESOURCE: :server 437 yournick nick/channel :Nick/channel is temporarily unavailable
         const resource = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Resource temporarily unavailable';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Resource temporarily unavailable');
         this.addMessage({
           type: 'error',
-          text: `${resource}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: resource, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2591,10 +2676,10 @@ export class IRCService {
         // ERR_USERONCHANNEL: :server 443 yournick nick channel :is already on channel
         const nick = params[1] || '';
         const channel = params[2] || '';
-        const errorMsg = params.slice(3).join(' ').replace(/^:/, '') || 'is already on channel';
+        const errorMsg = params.slice(3).join(' ').replace(/^:/, '') || t('is already on channel');
         this.addMessage({
           type: 'error',
-          text: `${nick} ${channel}: ${errorMsg}`,
+          text: t('{nick} {channel}: {message}', { nick, channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2602,7 +2687,7 @@ export class IRCService {
 
       case 451: {
         // ERR_NOTREGISTERED: :server 451 yournick :You have not registered
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || 'You have not registered';
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t('You have not registered');
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2613,7 +2698,7 @@ export class IRCService {
 
       case 462: {
         // ERR_ALREADYREGISTRED: :server 462 yournick :You may not reregister
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || 'You may not reregister';
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t('You may not reregister');
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2624,7 +2709,7 @@ export class IRCService {
 
       case 463: {
         // ERR_NOPERMFORHOST: :server 463 yournick :Your host isn't among the privileged
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || "Your host isn't among the privileged";
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t("Your host isn't among the privileged");
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2635,7 +2720,7 @@ export class IRCService {
 
       case 466: {
         // ERR_YOUWILLBEBANNED: :server 466 yournick :You will be banned
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || 'You will be banned';
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t('You will be banned');
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2647,10 +2732,10 @@ export class IRCService {
       case 467: {
         // ERR_KEYSET: :server 467 yournick channel :Channel key already set
         const channel = params[1] || '';
-        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || 'Channel key already set';
+        const errorMsg = params.slice(2).join(' ').replace(/^:/, '') || t('Channel key already set');
         this.addMessage({
           type: 'error',
-          text: `${channel}: ${errorMsg}`,
+          text: t('{label}: {message}', { label: channel, message: errorMsg }),
           timestamp: timestamp
         });
         break;
@@ -2658,7 +2743,7 @@ export class IRCService {
 
       case 481: {
         // ERR_NOPRIVILEGES: :server 481 yournick :Permission Denied- You're not an IRC operator
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || "Permission denied - You're not an IRC operator";
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t("Permission denied - You're not an IRC operator");
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2669,7 +2754,7 @@ export class IRCService {
 
       case 483: {
         // ERR_CANTKILLSERVER: :server 483 yournick :You can't kill a server!
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || "You can't kill a server!";
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t("You can't kill a server!");
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2680,7 +2765,7 @@ export class IRCService {
 
       case 491: {
         // ERR_NOOPERHOST: :server 491 yournick :No O-lines for your host
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || 'No O-lines for your host';
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t('No O-lines for your host');
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2691,7 +2776,7 @@ export class IRCService {
 
       case 501: {
         // ERR_UMODEUNKNOWNFLAG: :server 501 yournick :Unknown MODE flag
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || 'Unknown MODE flag';
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t('Unknown MODE flag');
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2702,7 +2787,7 @@ export class IRCService {
 
       case 502: {
         // ERR_USERSDONTMATCH: :server 502 yournick :Can't change mode for other users
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || "Can't change mode for other users";
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t("Can't change mode for other users");
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2713,13 +2798,13 @@ export class IRCService {
 
       case 903:
         this.saslAuthenticating = false;
-        this.addMessage({ type: 'raw', text: '*** SASL authentication successful', timestamp: timestamp, isRaw: true, rawCategory: 'auth' });
+        this.addMessage({ type: 'raw', text: t('*** SASL authentication successful'), timestamp: timestamp, isRaw: true, rawCategory: 'auth' });
         this.endCAPNegotiation();
         break;
 
       case 904:
         this.saslAuthenticating = false;
-        this.addMessage({ type: 'error', text: 'SASL authentication failed', timestamp: timestamp });
+        this.addMessage({ type: 'error', text: t('SASL authentication failed'), timestamp: timestamp });
         this.endCAPNegotiation();
         break;
 
@@ -2728,10 +2813,10 @@ export class IRCService {
         // RPL_LOGGEDIN: :server 900 yournick nick!user@host account :You are now logged in as username
         const accountInfo = params[1] || '';
         const account = params[2] || '';
-        const message = params.slice(3).join(' ').replace(/^:/, '') || `You are now logged in as ${account}`;
+        const message = params.slice(3).join(' ').replace(/^:/, '') || t('You are now logged in as {account}', { account });
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'auth'
@@ -2741,10 +2826,10 @@ export class IRCService {
 
       case 901: {
         // RPL_LOGGEDOUT: :server 901 yournick nick!user@host :You are now logged out
-        const message = params.slice(2).join(' ').replace(/^:/, '') || 'You are now logged out';
+        const message = params.slice(2).join(' ').replace(/^:/, '') || t('You are now logged out');
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'auth'
@@ -2754,7 +2839,7 @@ export class IRCService {
 
       case 902: {
         // ERR_NICKLOCKED: :server 902 yournick :You must use a nick assigned to you
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || 'You must use a nick assigned to you';
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t('You must use a nick assigned to you');
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2765,7 +2850,7 @@ export class IRCService {
 
       case 905: {
         // ERR_SASLTOOLONG: :server 905 yournick :SASL message too long
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || 'SASL message too long';
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t('SASL message too long');
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2776,7 +2861,7 @@ export class IRCService {
 
       case 906: {
         // ERR_SASLABORTED: :server 906 yournick :SASL authentication aborted
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || 'SASL authentication aborted';
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t('SASL authentication aborted');
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2789,7 +2874,7 @@ export class IRCService {
 
       case 907: {
         // ERR_SASLALREADY: :server 907 yournick :You have already authenticated
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || 'You have already authenticated';
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t('You have already authenticated');
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -2801,10 +2886,10 @@ export class IRCService {
       case 908: {
         // RPL_SASLMECHS: :server 908 yournick mechanisms :are available SASL mechanisms
         const mechanisms = params[1] || '';
-        const message = params.slice(2).join(' ').replace(/^:/, '') || 'are available SASL mechanisms';
+        const message = params.slice(2).join(' ').replace(/^:/, '') || t('are available SASL mechanisms');
         this.addMessage({
           type: 'raw',
-          text: `*** ${mechanisms} ${message}`,
+          text: t('*** {mechanisms} {message}', { mechanisms, message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'auth'
@@ -2818,10 +2903,15 @@ export class IRCService {
         const watchNick = params[1] || '';
         const watchUser = params[2] || '';
         const watchHost = params[3] || '';
-        const message = params.slice(5).join(' ').replace(/^:/, '') || 'logged online';
+        const message = params.slice(5).join(' ').replace(/^:/, '') || t('logged online');
         this.addMessage({
           type: 'raw',
-          text: `*** ${watchNick} (${watchUser}@${watchHost}) ${message}`,
+          text: t('*** {nick} ({user}@{host}) {message}', {
+            nick: watchNick,
+            user: watchUser,
+            host: watchHost,
+            message,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'user'
@@ -2834,10 +2924,15 @@ export class IRCService {
         const watchNick = params[1] || '';
         const watchUser = params[2] || '';
         const watchHost = params[3] || '';
-        const message = params.slice(5).join(' ').replace(/^:/, '') || 'logged offline';
+        const message = params.slice(5).join(' ').replace(/^:/, '') || t('logged offline');
         this.addMessage({
           type: 'raw',
-          text: `*** ${watchNick} (${watchUser}@${watchHost}) ${message}`,
+          text: t('*** {nick} ({user}@{host}) {message}', {
+            nick: watchNick,
+            user: watchUser,
+            host: watchHost,
+            message,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'user'
@@ -2850,7 +2945,7 @@ export class IRCService {
         const watchNick = params[1] || '';
         this.addMessage({
           type: 'raw',
-          text: `*** Stopped watching ${watchNick}`,
+          text: t('*** Stopped watching {nick}', { nick: watchNick }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'user'
@@ -2863,7 +2958,7 @@ export class IRCService {
         const stats = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${stats}`,
+          text: t('*** {message}', { message: stats }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'user'
@@ -2876,10 +2971,15 @@ export class IRCService {
         const watchNick = params[1] || '';
         const watchUser = params[2] || '';
         const watchHost = params[3] || '';
-        const message = params.slice(5).join(' ').replace(/^:/, '') || 'is online';
+        const message = params.slice(5).join(' ').replace(/^:/, '') || t('is online');
         this.addMessage({
           type: 'raw',
-          text: `*** ${watchNick} (${watchUser}@${watchHost}) ${message}`,
+          text: t('*** {nick} ({user}@{host}) {message}', {
+            nick: watchNick,
+            user: watchUser,
+            host: watchHost,
+            message,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'user'
@@ -2892,10 +2992,15 @@ export class IRCService {
         const watchNick = params[1] || '';
         const watchUser = params[2] || '';
         const watchHost = params[3] || '';
-        const message = params.slice(5).join(' ').replace(/^:/, '') || 'is offline';
+        const message = params.slice(5).join(' ').replace(/^:/, '') || t('is offline');
         this.addMessage({
           type: 'raw',
-          text: `*** ${watchNick} (${watchUser}@${watchHost}) ${message}`,
+          text: t('*** {nick} ({user}@{host}) {message}', {
+            nick: watchNick,
+            user: watchUser,
+            host: watchHost,
+            message,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'user'
@@ -2908,7 +3013,7 @@ export class IRCService {
         const watchList = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** WATCH list: ${watchList}`,
+          text: t('*** WATCH list: {list}', { list: watchList }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'user'
@@ -2918,10 +3023,10 @@ export class IRCService {
 
       case 607: {
         // RPL_ENDOFWATCHLIST: :server 607 yournick :End of WATCH list
-        const message = params.slice(1).join(' ').replace(/^:/, '') || 'End of WATCH list';
+        const message = params.slice(1).join(' ').replace(/^:/, '') || t('End of WATCH list');
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'user'
@@ -2931,10 +3036,10 @@ export class IRCService {
 
       case 608: {
         // RPL_WATCHCLEAR: :server 608 yournick :WATCH list cleared
-        const message = params.slice(1).join(' ').replace(/^:/, '') || 'WATCH list cleared';
+        const message = params.slice(1).join(' ').replace(/^:/, '') || t('WATCH list cleared');
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'user'
@@ -2947,7 +3052,7 @@ export class IRCService {
         const onlineList = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** MONITOR online: ${onlineList}`,
+          text: t('*** MONITOR online: {list}', { list: onlineList }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -2960,7 +3065,7 @@ export class IRCService {
         const offlineList = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** MONITOR offline: ${offlineList}`,
+          text: t('*** MONITOR offline: {list}', { list: offlineList }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -2973,7 +3078,7 @@ export class IRCService {
         const monList = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** MONITOR list: ${monList}`,
+          text: t('*** MONITOR list: {list}', { list: monList }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -2983,10 +3088,10 @@ export class IRCService {
 
       case 733: {
         // RPL_ENDOFMONLIST: :server 733 yournick :End of MONITOR list
-        const message = params.slice(1).join(' ').replace(/^:/, '') || 'End of MONITOR list';
+        const message = params.slice(1).join(' ').replace(/^:/, '') || t('End of MONITOR list');
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -2998,10 +3103,10 @@ export class IRCService {
         // RPL_MONLISTFULL: :server 734 yournick limit nicks :Monitor list is full
         const limit = params[1] || '';
         const nicks = params[2] || '';
-        const message = params.slice(3).join(' ').replace(/^:/, '') || 'Monitor list is full';
+        const message = params.slice(3).join(' ').replace(/^:/, '') || t('Monitor list is full');
         this.addMessage({
           type: 'error',
-          text: `${message} (limit: ${limit}, tried: ${nicks})`,
+          text: t('{message} (limit: {limit}, tried: {nicks})', { message, limit, nicks }),
           timestamp: timestamp
         });
         break;
@@ -3010,10 +3115,10 @@ export class IRCService {
       // Security/extended numerics
       case 670: {
         // RPL_STARTTLS: :server 670 yournick :STARTTLS successful
-        const message = params.slice(1).join(' ').replace(/^:/, '') || 'STARTTLS successful';
+        const message = params.slice(1).join(' ').replace(/^:/, '') || t('STARTTLS successful');
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3023,7 +3128,7 @@ export class IRCService {
 
       case 691: {
         // ERR_STARTTLS: :server 691 yournick :STARTTLS failed
-        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || 'STARTTLS failed';
+        const errorMsg = params.slice(1).join(' ').replace(/^:/, '') || t('STARTTLS failed');
         this.addMessage({
           type: 'error',
           text: errorMsg,
@@ -3045,7 +3150,7 @@ export class IRCService {
         const extData = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** [${numeric}] ${extData}`,
+          text: t('*** [{numeric}] {message}', { numeric, message: extData }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3057,10 +3162,10 @@ export class IRCService {
       case 301: {
         // RPL_AWAY: :server 301 yournick theirnick :away message
         const awayNick = params[1] || '';
-        const awayMsg = params.slice(2).join(' ').replace(/^:/, '') || 'is away';
+        const awayMsg = params.slice(2).join(' ').replace(/^:/, '') || t('is away');
         this.addMessage({
           type: 'raw',
-          text: `*** ${awayNick} is away: ${awayMsg}`,
+          text: t('*** {nick} is away: {message}', { nick: awayNick, message: awayMsg }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3070,10 +3175,10 @@ export class IRCService {
 
       case 305: {
         // RPL_UNAWAY: :server 305 yournick :You are no longer marked as being away
-        const message = params.slice(1).join(' ').replace(/^:/, '') || 'You are no longer marked as being away';
+        const message = params.slice(1).join(' ').replace(/^:/, '') || t('You are no longer marked as being away');
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3083,10 +3188,10 @@ export class IRCService {
 
       case 306: {
         // RPL_NOWAWAY: :server 306 yournick :You have been marked as being away
-        const message = params.slice(1).join(' ').replace(/^:/, '') || 'You have been marked as being away';
+        const message = params.slice(1).join(' ').replace(/^:/, '') || t('You have been marked as being away');
         this.addMessage({
           type: 'raw',
-          text: `*** ${message}`,
+          text: t('*** {message}', { message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3100,7 +3205,7 @@ export class IRCService {
         const userhostData = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** USERHOST: ${userhostData}`,
+          text: t('*** USERHOST: {data}', { data: userhostData }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3113,7 +3218,7 @@ export class IRCService {
         const onlineNicks = params.slice(1).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** Online: ${onlineNicks}`,
+          text: t('*** Online: {nicks}', { nicks: onlineNicks }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3130,7 +3235,12 @@ export class IRCService {
         const whoisReal = params.slice(5).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${whoisNick} is ${whoisUser}@${whoisHost} * ${whoisReal}`,
+          text: t('*** {nick} is {user}@{host} * {real}', {
+            nick: whoisNick,
+            user: whoisUser,
+            host: whoisHost,
+            real: whoisReal,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3149,17 +3259,24 @@ export class IRCService {
 
         let idleText = '';
         if (idleHours > 0) {
-          idleText = `${idleHours} hours, ${remainingMinutes} minutes`;
+          idleText = t('{hours} hours, {minutes} minutes', {
+            hours: idleHours,
+            minutes: remainingMinutes,
+          });
         } else if (idleMinutes > 0) {
-          idleText = `${idleMinutes} minutes`;
+          idleText = t('{minutes} minutes', { minutes: idleMinutes });
         } else {
-          idleText = `${idleSeconds} seconds`;
+          idleText = t('{seconds} seconds', { seconds: idleSeconds });
         }
 
-        const signonDate = signonTime > 0 ? new Date(signonTime * 1000).toLocaleString() : 'unknown';
+        const signonDate = signonTime > 0 ? new Date(signonTime * 1000).toLocaleString() : t('unknown');
         this.addMessage({
           type: 'raw',
-          text: `*** ${whoisNick} has been idle ${idleText}, signed on ${signonDate}`,
+          text: t('*** {nick} has been idle {idle}, signed on {date}', {
+            nick: whoisNick,
+            idle: idleText,
+            date: signonDate,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3172,7 +3289,7 @@ export class IRCService {
         const whoisNick = params[1] || '';
         this.addMessage({
           type: 'raw',
-          text: `*** End of WHOIS for ${whoisNick}`,
+          text: t('*** End of WHOIS for {nick}', { nick: whoisNick }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3186,7 +3303,7 @@ export class IRCService {
         const channels = params.slice(2).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${whoisNick} is on channels: ${channels}`,
+          text: t('*** {nick} is on channels: {channels}', { nick: whoisNick, channels }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3198,10 +3315,10 @@ export class IRCService {
       case 307: {
         // RPL_WHOISREGNICK: :server 307 yournick theirnick :has identified for this nick
         const whoisNick = params[1] || '';
-        const message = params.slice(2).join(' ').replace(/^:/, '') || 'has identified for this nick';
+        const message = params.slice(2).join(' ').replace(/^:/, '') || t('has identified for this nick');
         this.addMessage({
           type: 'raw',
-          text: `*** ${whoisNick} ${message}`,
+          text: t('*** {nick} {message}', { nick: whoisNick, message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3212,10 +3329,10 @@ export class IRCService {
       case 310: {
         // RPL_WHOISHELP: :server 310 yournick theirnick :is available for help
         const whoisNick = params[1] || '';
-        const message = params.slice(2).join(' ').replace(/^:/, '') || 'is available for help';
+        const message = params.slice(2).join(' ').replace(/^:/, '') || t('is available for help');
         this.addMessage({
           type: 'raw',
-          text: `*** ${whoisNick} ${message}`,
+          text: t('*** {nick} {message}', { nick: whoisNick, message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3226,16 +3343,19 @@ export class IRCService {
       case 313: {
         // RPL_WHOISOPERATOR: :server 313 yournick theirnick :is an IRC operator
         const whoisNick = params[1] || '';
-        const message = params.slice(2).join(' ').replace(/^:/, '') || 'is an IRC operator';
+        const message = params.slice(2).join(' ').replace(/^:/, '') || t('is an IRC operator');
         this.addMessage({
           type: 'raw',
-          text: `*** ${whoisNick} ${message}`,
+          text: t('*** {nick} {message}', { nick: whoisNick, message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'user'
         });
         if (whoisNick && whoisNick === this.currentNick) {
-          this.addRawMessage('*** You are now an IRC operator. Quick aliases: /oper /kill /gline /rehash /locops /wallops', 'user');
+          this.addRawMessage(
+            t('*** You are now an IRC operator. Quick aliases: /oper /kill /gline /rehash /locops /wallops'),
+            'user'
+          );
         }
         break;
       }
@@ -3243,10 +3363,10 @@ export class IRCService {
       case 335: {
         // RPL_WHOISBOT: :server 335 yournick theirnick :is a bot
         const whoisNick = params[1] || '';
-        const message = params.slice(2).join(' ').replace(/^:/, '') || 'is a bot';
+        const message = params.slice(2).join(' ').replace(/^:/, '') || t('is a bot');
         this.addMessage({
           type: 'raw',
-          text: `*** ${whoisNick} ${message}`,
+          text: t('*** {nick} {message}', { nick: whoisNick, message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3260,7 +3380,7 @@ export class IRCService {
         const hostInfo = params.slice(2).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${whoisNick} ${hostInfo}`,
+          text: t('*** {nick} {message}', { nick: whoisNick, message: hostInfo }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3271,10 +3391,10 @@ export class IRCService {
       case 671: {
         // RPL_WHOISSECURE: :server 671 yournick theirnick :is using a secure connection
         const whoisNick = params[1] || '';
-        const message = params.slice(2).join(' ').replace(/^:/, '') || 'is using a secure connection';
+        const message = params.slice(2).join(' ').replace(/^:/, '') || t('is using a secure connection');
         this.addMessage({
           type: 'raw',
-          text: `*** ${whoisNick} ${message}`,
+          text: t('*** {nick} {message}', { nick: whoisNick, message }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3291,7 +3411,12 @@ export class IRCService {
         const whowasReal = params.slice(5).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${whowasNick} was ${whowasUser}@${whowasHost} * ${whowasReal}`,
+          text: t('*** {nick} was {user}@{host} * {real}', {
+            nick: whowasNick,
+            user: whowasUser,
+            host: whowasHost,
+            real: whowasReal,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3306,7 +3431,11 @@ export class IRCService {
         const serverInfo = params.slice(3).join(' ').replace(/^:/, '') || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${targetNick} using ${serverName} ${serverInfo}`,
+          text: t('*** {nick} using {server} {info}', {
+            nick: targetNick,
+            server: serverName,
+            info: serverInfo,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3320,7 +3449,10 @@ export class IRCService {
         const accountName = params[2] || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${targetNick} is logged in as ${accountName}`,
+          text: t('*** {nick} is logged in as {account}', {
+            nick: targetNick,
+            account: accountName,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'user'
@@ -3334,7 +3466,10 @@ export class IRCService {
         const actualHost = params[2] || '';
         this.addMessage({
           type: 'raw',
-          text: `*** ${targetNick} is actually using host ${actualHost}`,
+          text: t('*** {nick} is actually using host {host}', {
+            nick: targetNick,
+            host: actualHost,
+          }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3347,7 +3482,7 @@ export class IRCService {
         const whowasNick = params[1] || '';
         this.addMessage({
           type: 'raw',
-          text: `*** End of WHOWAS for ${whowasNick}`,
+          text: t('*** End of WHOWAS for {nick}', { nick: whowasNick }),
           timestamp: timestamp,
           isRaw: true,
           rawCategory: 'server'
@@ -3371,11 +3506,11 @@ export class IRCService {
         }
 
         if (!displayText) {
-          displayText = `Server response`;
+          displayText = t('Server response');
         }
 
         // Add numeric code prefix for context
-        const formattedText = `[${numeric}] ${displayText}`;
+        const formattedText = t('[{numeric}] {message}', { numeric, message: displayText });
 
         this.addMessage({
           type: 'raw',
@@ -3704,12 +3839,14 @@ export class IRCService {
     if (!topicInfo || !topicInfo.topic) return; // Wait until we have the topic to show intro
 
     const { total } = this.getChannelUserCounts(channel);
-    const setBy = topicInfo.setBy || 'unknown';
-    const setAtDisplay = topicInfo.setAt ? new Date((topicInfo.setAt || 0) * 1000).toString() : 'unknown';
-    const modesDisplay = topicInfo.modes || 'unknown';
+    const setBy = topicInfo.setBy || t('unknown');
+    const setAtDisplay = topicInfo.setAt
+      ? new Date((topicInfo.setAt || 0) * 1000).toString()
+      : t('unknown');
+    const modesDisplay = topicInfo.modes || t('unknown');
 
     const lines = [
-      `Topic: ${topicInfo.topic}`,
+      t('Topic: {topic}', { topic: topicInfo.topic }),
     ];
 
     this.addMessage({
@@ -3807,7 +3944,7 @@ export class IRCService {
       this.isConnected = false;
       this.registered = false;
       this.emitConnection(false);
-      this.addRawMessage('*** Disconnected from server', 'connection');
+      this.addRawMessage(t('*** Disconnected from server'), 'connection');
     }
     this.channelUsers.clear();
     this.namesBuffer.clear();
@@ -3843,7 +3980,7 @@ export class IRCService {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
       this.reconnectAttempts = 0;
-      this.addRawMessage('*** Auto-reconnect cancelled', 'connection');
+      this.addRawMessage(t('*** Auto-reconnect cancelled'), 'connection');
     }
   }
 
@@ -3870,24 +4007,28 @@ export class IRCService {
     this.reconnectAttempts++;
     const seconds = Math.round(delay / 1000);
     this.addRawMessage(
-      `*** Reconnecting in ${seconds} second${seconds !== 1 ? 's' : ''} (attempt ${this.reconnectAttempts})...`,
+      t('*** Reconnecting in {seconds} second{suffix} (attempt {attempt})...', {
+        seconds,
+        suffix: seconds !== 1 ? 's' : '',
+        attempt: this.reconnectAttempts,
+      }),
       'connection'
     );
 
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
-      this.addRawMessage('*** Attempting to reconnect...', 'connection');
+      this.addRawMessage(t('*** Attempting to reconnect...'), 'connection');
 
       // Attempt to reconnect using the saved config
       this.connect(this.config!)
         .then(() => {
           // Reset reconnect counter on successful connection
           this.reconnectAttempts = 0;
-          this.addRawMessage('*** Reconnected successfully', 'connection');
+          this.addRawMessage(t('*** Reconnected successfully'), 'connection');
         })
         .catch((error: any) => {
           this.addRawMessage(
-            `*** Reconnection failed: ${error?.message || error}`,
+            t('*** Reconnection failed: {message}', { message: error?.message || error }),
             'connection'
           );
           // Will trigger another reconnect attempt via the error handler
@@ -4033,7 +4174,7 @@ export class IRCService {
     });
 
     // Log batch start for debugging
-    this.addRawMessage(`*** BATCH START: ${type} (${refTag})`, 'server');
+    this.addRawMessage(t('*** BATCH START: {type} ({ref})', { type, ref: refTag }), 'server');
   }
 
   /**
@@ -4071,7 +4212,10 @@ export class IRCService {
         const serverNames = params.join(' ');
         this.addMessage({
           type: 'raw',
-          text: `*** Netsplit detected: ${serverNames} (${messages.length} users quit)`,
+          text: t('*** Netsplit detected: {servers} ({count} users quit)', {
+            servers: serverNames,
+            count: messages.length,
+          }),
           timestamp,
           isRaw: true,
           rawCategory: 'server',
@@ -4084,7 +4228,10 @@ export class IRCService {
         const serverNames = params.join(' ');
         this.addMessage({
           type: 'raw',
-          text: `*** Netjoin: ${serverNames} (${messages.length} users rejoined)`,
+          text: t('*** Netjoin: {servers} ({count} users rejoined)', {
+            servers: serverNames,
+            count: messages.length,
+          }),
           timestamp,
           isRaw: true,
           rawCategory: 'server',
@@ -4096,7 +4243,7 @@ export class IRCService {
         // Chat history playback: emit messages in order
         this.addMessage({
           type: 'raw',
-          text: `*** Loading chat history (${messages.length} messages)`,
+          text: t('*** Loading chat history ({count} messages)', { count: messages.length }),
           timestamp,
           isRaw: true,
           rawCategory: 'server',
@@ -4107,13 +4254,23 @@ export class IRCService {
 
       case 'cap-notify': {
         // Capability notification batch
-        this.addRawMessage(`*** Capability changes (${messages.length} updates)`, 'server');
+        this.addRawMessage(
+          t('*** Capability changes ({count} updates)', { count: messages.length }),
+          'server'
+        );
         break;
       }
 
       default: {
         // Unknown batch type: log for debugging
-        this.addRawMessage(`*** BATCH END: ${type} (${refTag}) - ${messages.length} messages`, 'server');
+        this.addRawMessage(
+          t('*** BATCH END: {type} ({ref}) - {count} messages', {
+            type,
+            ref: refTag,
+            count: messages.length,
+          }),
+          'server'
+        );
         break;
       }
     }
@@ -4232,7 +4389,7 @@ export class IRCService {
     } else if (!this.capEnabledSet.has('setname')) {
       this.addMessage({
         type: 'error',
-        text: 'SETNAME command is not supported by this server',
+        text: t('SETNAME command is not supported by this server'),
         timestamp: Date.now(),
       });
     }
@@ -4246,7 +4403,7 @@ export class IRCService {
     } else if (!this.capEnabledSet.has('bot')) {
       this.addMessage({
         type: 'error',
-        text: 'BOT mode is not supported by this server',
+        text: t('BOT mode is not supported by this server'),
         timestamp: Date.now(),
       });
     }
@@ -4262,7 +4419,7 @@ export class IRCService {
     } else if (!this.capEnabledSet.has('draft/chathistory')) {
       this.addMessage({
         type: 'error',
-        text: 'CHATHISTORY is not supported by this server',
+        text: t('CHATHISTORY is not supported by this server'),
         timestamp: Date.now(),
       });
     }
@@ -4289,7 +4446,7 @@ export class IRCService {
     } else if (!this.capEnabledSet.has('draft/message-redaction')) {
       this.addMessage({
         type: 'error',
-        text: 'MESSAGE-REDACTION is not supported by this server',
+        text: t('MESSAGE-REDACTION is not supported by this server'),
         timestamp: Date.now(),
       });
     }
@@ -4423,7 +4580,7 @@ export class IRCService {
             this.sendRaw(`PRIVMSG ${msgTarget} :${msgText}`);
             this.addMessage({ type: 'message', channel: msgTarget, from: this.currentNick, text: msgText, timestamp: Date.now(), status: 'sent' });
           } else {
-            this.addMessage({ type: 'error', text: `Usage: /${command} <nick|channel> <message>`, timestamp: Date.now() });
+            this.addMessage({ type: 'error', text: t('Usage: /{command} <nick|channel> <message>', { command }), timestamp: Date.now() });
           }
           break;
         case 'ME': case 'ACTION':
@@ -4452,21 +4609,21 @@ export class IRCService {
             const keyTarget = args[0];
             encryptedDMService.exportBundle().then(bundle => {
               this.sendRaw(`PRIVMSG ${keyTarget} :!enc-offer ${JSON.stringify(bundle)}`);
-              this.addMessage({ type: 'notice', text: `*** Encryption key offer sent to ${keyTarget}. Waiting for acceptance...`, timestamp: Date.now() });
+              this.addMessage({ type: 'notice', text: t('*** Encryption key offer sent to {nick}. Waiting for acceptance...', { nick: keyTarget }), timestamp: Date.now() });
             }).catch(e => {
-              this.addMessage({ type: 'error', text: `*** Failed to share encryption key: ${e.message}`, timestamp: Date.now() });
+              this.addMessage({ type: 'error', text: t('*** Failed to share encryption key: {message}', { message: e.message }), timestamp: Date.now() });
             });
           } else {
-            this.addMessage({ type: 'error', text: 'Usage: /sharekey <nick>', timestamp: Date.now() });
+            this.addMessage({ type: 'error', text: t('Usage: /sharekey <nick>'), timestamp: Date.now() });
           }
           break;
         case 'REQUESTKEY':
           if (args.length > 0) {
             const reqTarget = args[0];
             this.sendRaw(`PRIVMSG ${reqTarget} :!enc-req`);
-            this.addMessage({ type: 'notice', text: `*** Encryption key requested from ${reqTarget}`, timestamp: Date.now() });
+            this.addMessage({ type: 'notice', text: t('*** Encryption key requested from {nick}', { nick: reqTarget }), timestamp: Date.now() });
           } else {
-            this.addMessage({ type: 'error', text: 'Usage: /requestkey <nick>', timestamp: Date.now() });
+            this.addMessage({ type: 'error', text: t('Usage: /requestkey <nick>'), timestamp: Date.now() });
           }
           break;
         case 'ENCMSG':
@@ -4476,55 +4633,55 @@ export class IRCService {
             const network = this.getNetworkName();
             encryptedDMService.encryptForNetwork(encPlaintext, network, encTarget).then(payload => {
               this.sendRaw(`PRIVMSG ${encTarget} :!enc-msg ${JSON.stringify(payload)}`);
-              this.addMessage({ type: 'message', channel: encTarget, from: this.currentNick, text: `🔒 ${encPlaintext}`, timestamp: Date.now(), status: 'sent' });
+              this.addMessage({ type: 'message', channel: encTarget, from: this.currentNick, text: t('🔒 {message}', { message: encPlaintext }), timestamp: Date.now(), status: 'sent' });
             }).catch(e => {
-              this.addMessage({ type: 'error', text: `*** Encrypted send failed (${e.message}). Use "Request Encryption Key" from the user menu.`, timestamp: Date.now() });
+              this.addMessage({ type: 'error', text: t('*** Encrypted send failed ({message}). Use "Request Encryption Key" from the user menu.', { message: e.message }), timestamp: Date.now() });
             });
           } else {
-            this.addMessage({ type: 'error', text: 'Usage: /encmsg <nick> <message>', timestamp: Date.now() });
+            this.addMessage({ type: 'error', text: t('Usage: /encmsg <nick> <message>'), timestamp: Date.now() });
           }
           break;
         case 'ENC':
         case 'ENCRYPT':
-          this.addMessage({ type: 'notice', text: 'DM encryption:', timestamp: Date.now() });
-          this.addMessage({ type: 'notice', text: '/sharekey <nick>          Offer your DM key', timestamp: Date.now() });
-          this.addMessage({ type: 'notice', text: '/requestkey <nick>        Request DM key', timestamp: Date.now() });
-          this.addMessage({ type: 'notice', text: '/encmsg <nick> <message>  Send encrypted DM', timestamp: Date.now() });
-          this.addMessage({ type: 'notice', text: 'Tips: keys must be exchanged first; use /requestkey if not paired.', timestamp: Date.now() });
+          this.addMessage({ type: 'notice', text: t('DM encryption:'), timestamp: Date.now() });
+          this.addMessage({ type: 'notice', text: t('/sharekey <nick>          Offer your DM key'), timestamp: Date.now() });
+          this.addMessage({ type: 'notice', text: t('/requestkey <nick>        Request DM key'), timestamp: Date.now() });
+          this.addMessage({ type: 'notice', text: t('/encmsg <nick> <message>  Send encrypted DM'), timestamp: Date.now() });
+          this.addMessage({ type: 'notice', text: t('Tips: keys must be exchanged first; use /requestkey if not paired.'), timestamp: Date.now() });
           break;
         case 'CHANKEY':
           if (args.length === 0) {
-            this.addMessage({ type: 'error', text: 'Usage: /chankey <generate|share|request|remove|send|help> [args]', timestamp: Date.now() });
+            this.addMessage({ type: 'error', text: t('Usage: /chankey <generate|share|request|remove|send|help> [args]'), timestamp: Date.now() });
             break;
           }
           const chankeyAction = args[0].toLowerCase();
           switch (chankeyAction) {
             case 'help':
-              this.addMessage({ type: 'notice', text: 'Channel encryption:', timestamp: Date.now() });
-              this.addMessage({ type: 'notice', text: '/chankey generate          Create key for current channel', timestamp: Date.now() });
-              this.addMessage({ type: 'notice', text: '/chankey share <nick>     Send key to a user (in channel)', timestamp: Date.now() });
-              this.addMessage({ type: 'notice', text: '/chankey request <nick>   Ask a user for the channel key', timestamp: Date.now() });
-              this.addMessage({ type: 'notice', text: '/chankey send <msg>       Send encrypted message to channel', timestamp: Date.now() });
-              this.addMessage({ type: 'notice', text: '/chankey remove           Delete stored key for channel', timestamp: Date.now() });
+              this.addMessage({ type: 'notice', text: t('Channel encryption:'), timestamp: Date.now() });
+              this.addMessage({ type: 'notice', text: t('/chankey generate          Create key for current channel'), timestamp: Date.now() });
+              this.addMessage({ type: 'notice', text: t('/chankey share <nick>     Send key to a user (in channel)'), timestamp: Date.now() });
+              this.addMessage({ type: 'notice', text: t('/chankey request <nick>   Ask a user for the channel key'), timestamp: Date.now() });
+              this.addMessage({ type: 'notice', text: t('/chankey send <msg>       Send encrypted message to channel'), timestamp: Date.now() });
+              this.addMessage({ type: 'notice', text: t('/chankey remove           Delete stored key for channel'), timestamp: Date.now() });
               break;
             case 'generate':
               if (!target.startsWith('#') && !target.startsWith('&')) {
-                this.addMessage({ type: 'error', text: '*** Channel key can only be generated in a channel', timestamp: Date.now() });
+                this.addMessage({ type: 'error', text: t('*** Channel key can only be generated in a channel'), timestamp: Date.now() });
                 break;
               }
               channelEncryptionService.generateChannelKey(target, this.getNetworkName()).then(() => {
-                this.addMessage({ type: 'notice', text: `*** Channel encryption key generated for ${target}. Use /chankey share <nick> to share with others.`, timestamp: Date.now() });
+                this.addMessage({ type: 'notice', text: t('*** Channel encryption key generated for {channel}. Use /chankey share <nick> to share with others.', { channel: target }), timestamp: Date.now() });
               }).catch(e => {
-                this.addMessage({ type: 'error', text: `*** Failed to generate channel key: ${e.message}`, timestamp: Date.now() });
+                this.addMessage({ type: 'error', text: t('*** Failed to generate channel key: {message}', { message: e.message }), timestamp: Date.now() });
               });
               break;
             case 'send':
               if (args.length < 2) {
-                this.addMessage({ type: 'error', text: 'Usage: /chankey send <message>', timestamp: Date.now() });
+                this.addMessage({ type: 'error', text: t('Usage: /chankey send <message>'), timestamp: Date.now() });
                 break;
               }
               if (!target.startsWith('#') && !target.startsWith('&')) {
-                this.addMessage({ type: 'error', text: '*** Channel key send must be used from a channel', timestamp: Date.now() });
+                this.addMessage({ type: 'error', text: t('*** Channel key send must be used from a channel'), timestamp: Date.now() });
                 break;
               }
               const encText = args.slice(1).join(' ');
@@ -4536,7 +4693,7 @@ export class IRCService {
                     type: 'message',
                     channel: target,
                     from: this.currentNick,
-                    text: `🔒 ${encText}`,
+                    text: t('🔒 {message}', { message: encText }),
                     timestamp: Date.now(),
                     status: 'sent',
                   });
@@ -4544,54 +4701,58 @@ export class IRCService {
                 .catch(e => {
                   this.addMessage({
                     type: 'error',
-                    text: `*** Channel encryption send failed: ${e.message === 'no channel key' ? 'Missing channel key. Use /chankey generate and share first.' : e.message}`,
+                    text: t('*** Channel encryption send failed: {message}', {
+                      message: e.message === 'no channel key'
+                        ? t('Missing channel key. Use /chankey generate and share first.')
+                        : e.message,
+                    }),
                     timestamp: Date.now(),
                   });
                 });
               break;
             case 'share':
               if (args.length < 2) {
-                this.addMessage({ type: 'error', text: 'Usage: /chankey share <nick>', timestamp: Date.now() });
+                this.addMessage({ type: 'error', text: t('Usage: /chankey share <nick>'), timestamp: Date.now() });
                 break;
               }
               if (!target.startsWith('#') && !target.startsWith('&')) {
-                this.addMessage({ type: 'error', text: '*** Channel key can only be shared from a channel', timestamp: Date.now() });
+                this.addMessage({ type: 'error', text: t('*** Channel key can only be shared from a channel'), timestamp: Date.now() });
                 break;
               }
               const shareTarget = args[1];
               channelEncryptionService.exportChannelKey(target, this.getNetworkName()).then(keyData => {
                 this.sendRaw(`PRIVMSG ${shareTarget} :!chanenc-key ${keyData}`);
-                this.addMessage({ type: 'notice', text: `*** Channel key for ${target} shared with ${shareTarget}`, timestamp: Date.now() });
+                this.addMessage({ type: 'notice', text: t('*** Channel key for {channel} shared with {nick}', { channel: target, nick: shareTarget }), timestamp: Date.now() });
               }).catch(e => {
-                this.addMessage({ type: 'error', text: `*** Failed to share channel key: ${e.message}. Generate a key first with /chankey generate`, timestamp: Date.now() });
+                this.addMessage({ type: 'error', text: t('*** Failed to share channel key: {message}. Generate a key first with /chankey generate', { message: e.message }), timestamp: Date.now() });
               });
               break;
             case 'request':
               if (args.length < 2) {
-                this.addMessage({ type: 'error', text: 'Usage: /chankey request <nick>', timestamp: Date.now() });
+                this.addMessage({ type: 'error', text: t('Usage: /chankey request <nick>'), timestamp: Date.now() });
                 break;
               }
               if (!target.startsWith('#') && !target.startsWith('&')) {
-                this.addMessage({ type: 'error', text: '*** Channel key request must be done from a channel', timestamp: Date.now() });
+                this.addMessage({ type: 'error', text: t('*** Channel key request must be done from a channel'), timestamp: Date.now() });
                 break;
               }
               const requestTarget = args[1];
-              this.sendRaw(`PRIVMSG ${requestTarget} :Please share the channel key for ${target} with /chankey share ${this.currentNick}`);
-              this.addMessage({ type: 'notice', text: `*** Channel key requested from ${requestTarget} for ${target}`, timestamp: Date.now() });
+              this.sendRaw(`PRIVMSG ${requestTarget} :${t('Please share the channel key for {channel} with /chankey share {nick}', { channel: target, nick: this.currentNick })}`);
+              this.addMessage({ type: 'notice', text: t('*** Channel key requested from {nick} for {channel}', { nick: requestTarget, channel: target }), timestamp: Date.now() });
               break;
             case 'remove':
               if (!target.startsWith('#') && !target.startsWith('&')) {
-                this.addMessage({ type: 'error', text: '*** Channel key can only be removed from a channel', timestamp: Date.now() });
+                this.addMessage({ type: 'error', text: t('*** Channel key can only be removed from a channel'), timestamp: Date.now() });
                 break;
               }
               channelEncryptionService.removeChannelKey(target, this.getNetworkName()).then(() => {
-                this.addMessage({ type: 'notice', text: `*** Channel encryption key removed for ${target}`, timestamp: Date.now() });
+                this.addMessage({ type: 'notice', text: t('*** Channel encryption key removed for {channel}', { channel: target }), timestamp: Date.now() });
               }).catch(e => {
-                this.addMessage({ type: 'error', text: `*** Failed to remove channel key: ${e.message}`, timestamp: Date.now() });
+                this.addMessage({ type: 'error', text: t('*** Failed to remove channel key: {message}', { message: e.message }), timestamp: Date.now() });
               });
               break;
             default:
-              this.addMessage({ type: 'error', text: 'Usage: /chankey <generate|share|request|remove|send|help> [args]', timestamp: Date.now() });
+              this.addMessage({ type: 'error', text: t('Usage: /chankey <generate|share|request|remove|send|help> [args]'), timestamp: Date.now() });
           }
           break;
         default: this.sendCommand(commandText); break;
@@ -4670,7 +4831,11 @@ export class IRCService {
 
   private addWireMessage(direction: 'in' | 'out', line: string, timestamp: number = Date.now()): void {
     const arrow = direction === 'in' ? '<--' : '-->';
-    this.addRawMessage(`*** ${arrow} ${line}`, direction === 'in' ? 'trafficIn' : 'trafficOut', timestamp);
+    this.addRawMessage(
+      t('*** {arrow} {line}', { arrow, line }),
+      direction === 'in' ? 'trafficIn' : 'trafficOut',
+      timestamp
+    );
   }
 
   private emitMessage(message: IRCMessage): void {
@@ -4702,10 +4867,11 @@ export class IRCService {
     // Start/stop foreground service for background operation (Android only)
     if (connected) {
       const networkName = this.getNetworkName();
+      const fallbackName = networkName || t('IRC server');
       ircForegroundService.start(
         networkName,
-        'IRC Connected',
-        `Connected to ${networkName || 'IRC server'}`
+        t('IRC Connected'),
+        t('Connected to {networkName}', { networkName: fallbackName })
       ).catch(err => {
         this.logRaw(`IRCService: Failed to start foreground service: ${err.message || err}`);
       });

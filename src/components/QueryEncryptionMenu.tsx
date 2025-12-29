@@ -17,6 +17,7 @@ import NfcManager, { Ndef, NfcTech } from 'react-native-nfc-manager';
 import { ircService } from '../services/IRCService';
 import { connectionManager } from '../services/ConnectionManager';
 import { useTheme } from '../hooks/useTheme';
+import { useT } from '../i18n/transifex';
 import { encryptedDMService } from '../services/EncryptedDMService';
 import { settingsService } from '../services/SettingsService';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -35,6 +36,7 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
   network,
 }) => {
   const { colors } = useTheme();
+  const t = useT();
   const styles = createStyles(colors);
   const [actionMessage, setActionMessage] = useState('');
   const [allowQrVerification, setAllowQrVerification] = useState(true);
@@ -105,9 +107,12 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
       const payload = encryptedDMService.parseExternalPayload(raw);
       if (payload.nick && payload.nick.toLowerCase() !== nick.toLowerCase()) {
         Alert.alert(
-          'Mismatched Nick',
-          `This payload is for ${payload.nick}, but you selected ${nick}.`,
-          [{ text: 'OK', style: 'cancel' }]
+          t('Mismatched Nick'),
+          t('This payload is for {payloadNick}, but you selected {nick}.', {
+            payloadNick: payload.nick,
+            nick,
+          }),
+          [{ text: t('OK'), style: 'cancel' }]
         );
         return;
       }
@@ -116,27 +121,34 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
         const storageNetwork = getNetworkForStorage();
         const currentFp = await encryptedDMService.getBundleFingerprintForNetwork(storageNetwork, nick);
         if (!currentFp) {
-          Alert.alert('No Key', `No DM key stored for ${nick}.`);
+          Alert.alert(
+            t('No Key'),
+            t('No DM key stored for {nick}.', { nick })
+          );
           return;
         }
         const currentDisplay = encryptedDMService.formatFingerprintForDisplay(currentFp);
         const incomingDisplay = encryptedDMService.formatFingerprintForDisplay(payload.fingerprint);
         const matches = currentFp === payload.fingerprint;
         Alert.alert(
-          'Fingerprint Check',
-          `Stored: ${currentDisplay}\nScanned: ${incomingDisplay}\n\n${matches ? 'Match ✅' : 'Mismatch ⚠️'}`,
+          t('Fingerprint Check'),
+          t('Stored: {stored}\nScanned: {scanned}\n\n{result}', {
+            stored: currentDisplay,
+            scanned: incomingDisplay,
+            result: matches ? t('Match ✅') : t('Mismatch ⚠️'),
+          }),
           matches
             ? [
                 {
-                  text: 'Mark Verified',
+                  text: t('Mark Verified'),
                   onPress: async () => {
                     await encryptedDMService.setVerifiedForNetwork(storageNetwork, nick, true);
-                    setActionMessage(`Key verified for ${nick}`);
+                    setActionMessage(t('Key verified for {nick}', { nick }));
                   },
                 },
-                { text: 'Close', style: 'cancel' },
+                { text: t('Close'), style: 'cancel' },
               ]
-            : [{ text: 'Close', style: 'cancel' }]
+            : [{ text: t('Close'), style: 'cancel' }]
         );
         return;
       }
@@ -147,31 +159,44 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
       const newDisplay = encryptedDMService.formatFingerprintForDisplay(payload.fingerprint);
       const oldDisplay = existingFp
         ? encryptedDMService.formatFingerprintForDisplay(existingFp)
-        : 'None';
+        : t('None');
       const isChange = Boolean(existingFp && existingFp !== payload.fingerprint);
       Alert.alert(
-        isChange ? 'Replace DM Key' : 'Import DM Key',
+        isChange ? t('Replace DM Key') : t('Import DM Key'),
         isChange
-          ? `Existing: ${oldDisplay}\nNew: ${newDisplay}\n\nOnly replace if verified out-of-band.`
-          : `Fingerprint: ${newDisplay}\n\nAccept this key for ${nick}?`,
+          ? t('Existing: {old}\nNew: {new}\n\nOnly replace if verified out-of-band.', {
+              old: oldDisplay,
+              new: newDisplay,
+            })
+          : t('Fingerprint: {fp}\n\nAccept this key for {nick}?', {
+              fp: newDisplay,
+              nick,
+            }),
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: t('Cancel'), style: 'cancel' },
           {
-            text: isChange ? 'Replace' : 'Accept',
+            text: isChange ? t('Replace') : t('Accept'),
             onPress: async () => {
               // Always use network-aware storage
               await encryptedDMService.acceptExternalBundleForNetwork(storageNetwork, nick, payload.bundle, isChange);
-              setActionMessage(`Key ${isChange ? 'replaced' : 'imported'} for ${nick}`);
+              setActionMessage(
+                isChange
+                  ? t('Key replaced for {nick}', { nick })
+                  : t('Key imported for {nick}', { nick })
+              );
 
               // Prompt to share key back for bidirectional encryption (offline only)
               setTimeout(() => {
                 Alert.alert(
-                  'Share Your Key?',
-                  `You imported ${nick}'s key offline. For encrypted chat to work both ways, ${nick} also needs your key.\n\n💡 Show your QR code for them to scan (no server messages)`,
+                  t('Share Your Key?'),
+                  t(
+                    "You imported {nick}'s key offline. For encrypted chat to work both ways, {nick} also needs your key.\n\n💡 Show your QR code for them to scan (no server messages)",
+                    { nick }
+                  ),
                   [
-                    { text: 'Later', style: 'cancel' },
+                    { text: t('Later'), style: 'cancel' },
                     {
-                      text: 'Show QR Code',
+                      text: t('Show QR Code'),
                       onPress: async () => {
                         try {
                           const selfNick = activeIrc.getCurrentNick();
@@ -180,7 +205,7 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
                           setQrType('bundle');
                           setShowKeyQr(true);
                         } catch (e) {
-                          setActionMessage('Failed to generate QR');
+                          setActionMessage(t('Failed to generate QR'));
                         }
                       },
                     },
@@ -192,9 +217,9 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
         ]
       );
     } catch (e) {
-      setActionMessage('Invalid key payload');
+      setActionMessage(t('Invalid key payload'));
     }
-  }, [nick, network]);
+  }, [activeIrc, getNetworkForStorage, nick, t]);
 
   const handleAction = async (action: string) => {
     switch (action) {
@@ -202,18 +227,18 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
         try {
           const bundle = await encryptedDMService.exportBundle();
           activeIrc.sendRaw(`PRIVMSG ${nick} :!enc-offer ${JSON.stringify(bundle)}`);
-          setActionMessage(`Enc key offer sent to ${nick}`);
+          setActionMessage(t('Enc key offer sent to {nick}', { nick }));
         } catch (e) {
-          setActionMessage('Failed to share key');
+          setActionMessage(t('Failed to share key'));
         }
         break;
       case 'enc_request':
         activeIrc.sendRaw(`PRIVMSG ${nick} :!enc-req`);
-        setActionMessage(`Requested key from ${nick}`);
+        setActionMessage(t('Requested key from {nick}', { nick }));
         encryptedDMService
           .awaitBundleForNick(nick, 36000)
-          .then(() => setActionMessage(`Key saved for ${nick}`))
-          .catch(() => setActionMessage('Key not received (timeout)'));
+          .then(() => setActionMessage(t('Key saved for {nick}', { nick })))
+          .catch(() => setActionMessage(t('Key not received (timeout)')));
         break;
       case 'enc_qr_show_fingerprint':
         try {
@@ -223,7 +248,7 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
           setQrType('fingerprint');
           setShowKeyQr(true);
         } catch (e) {
-          setActionMessage('Failed to generate QR');
+          setActionMessage(t('Failed to generate QR'));
         }
         break;
       case 'enc_qr_show_bundle':
@@ -234,21 +259,21 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
           setQrType('bundle');
           setShowKeyQr(true);
         } catch (e) {
-          setActionMessage('Failed to generate QR');
+          setActionMessage(t('Failed to generate QR'));
         }
         break;
       case 'enc_qr_scan':
         try {
           const permission = hasCameraPermission || (await requestCameraPermission()) === 'authorized';
           if (!permission) {
-            setActionMessage('Camera permission denied');
+            setActionMessage(t('Camera permission denied'));
             break;
           }
           scanHandledRef.current = false;
           setShowKeyScan(true);
           setScanError('');
         } catch (e) {
-          setActionMessage('Failed to open camera');
+          setActionMessage(t('Failed to open camera'));
         }
         break;
       case 'enc_share_file':
@@ -259,9 +284,9 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
           const path = `${RNFS.DocumentDirectoryPath}/${filename}`;
           await RNFS.writeFile(path, payload, 'utf8');
           await Share.open({ url: `file://${path}`, type: 'application/json' });
-          setActionMessage('Key file shared');
+          setActionMessage(t('Key file shared'));
         } catch (e) {
-          setActionMessage('Failed to share key file');
+          setActionMessage(t('Failed to share key file'));
         }
         break;
       case 'enc_import_file':
@@ -276,7 +301,7 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
           await handleExternalPayload(contents);
         } catch (e: any) {
           if (!DocumentPicker.isCancel(e)) {
-            setActionMessage('Failed to import key file');
+            setActionMessage(t('Failed to import key file'));
           }
         }
         break;
@@ -284,7 +309,7 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
         try {
           const supported = await NfcManager.isSupported();
           if (!supported) {
-            setActionMessage('NFC not supported');
+            setActionMessage(t('NFC not supported'));
             break;
           }
           const selfNick = activeIrc.getCurrentNick();
@@ -295,9 +320,9 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
           if (bytes) {
             await NfcManager.writeNdefMessage(bytes);
           }
-          setActionMessage('NFC key ready, tap devices');
+          setActionMessage(t('NFC key ready, tap devices'));
         } catch (e) {
-          setActionMessage('Failed to share via NFC');
+          setActionMessage(t('Failed to share via NFC'));
         } finally {
           try { await NfcManager.cancelTechnologyRequest(); } catch {}
         }
@@ -306,7 +331,7 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
         try {
           const supported = await NfcManager.isSupported();
           if (!supported) {
-            setActionMessage('NFC not supported');
+            setActionMessage(t('NFC not supported'));
             break;
           }
           await NfcManager.start();
@@ -315,12 +340,12 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
           const ndefMessage = tag?.ndefMessage?.[0];
           const payload = ndefMessage ? Ndef.text.decodePayload(ndefMessage.payload) : null;
           if (!payload) {
-            setActionMessage('No NFC payload');
+            setActionMessage(t('No NFC payload'));
             break;
           }
           await handleExternalPayload(payload);
         } catch (e) {
-          setActionMessage('Failed to read NFC');
+          setActionMessage(t('Failed to read NFC'));
         } finally {
           try { await NfcManager.cancelTechnologyRequest(); } catch {}
         }
@@ -331,15 +356,19 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
             ? await encryptedDMService.getVerificationStatusForNetwork(network, nick)
             : await encryptedDMService.getVerificationStatus(nick);
           if (!status.fingerprint) {
-            setActionMessage(`No DM key for ${nick}`);
+            setActionMessage(t('No DM key for {nick}', { nick }));
             break;
           }
           const selfFp = encryptedDMService.formatFingerprintForDisplay(await encryptedDMService.getSelfFingerprint());
           const peerFp = encryptedDMService.formatFingerprintForDisplay(status.fingerprint);
-          const verifiedLabel = status.verified ? 'Verified' : 'Mark Verified';
+          const verifiedLabel = status.verified ? t('Verified') : t('Mark Verified');
           Alert.alert(
-            'Verify DM Key',
-            `Compare fingerprints out-of-band:\n\nYou: ${selfFp}\n${nick}: ${peerFp}`,
+            t('Verify DM Key'),
+            t('Compare fingerprints out-of-band:\n\nYou: {self}\n{nick}: {peer}', {
+              self: selfFp,
+              nick,
+              peer: peerFp,
+            }),
             [
               {
                 text: verifiedLabel,
@@ -347,22 +376,22 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
                   if (!status.verified) {
                     const storageNetwork = getNetworkForStorage();
                     await encryptedDMService.setVerifiedForNetwork(storageNetwork, nick, true);
-                    setActionMessage(`Key marked verified for ${nick}`);
+                    setActionMessage(t('Key marked verified for {nick}', { nick }));
                   }
                 },
               },
               {
-                text: 'Copy Fingerprints',
+                text: t('Copy Fingerprints'),
                 onPress: () => {
                   Clipboard.setString(`You: ${selfFp}\n${nick}: ${peerFp}`);
-                  setActionMessage('Fingerprints copied');
+                  setActionMessage(t('Fingerprints copied'));
                 },
               },
-              { text: 'Close', style: 'cancel' },
+              { text: t('Close'), style: 'cancel' },
             ]
           );
         } catch (e) {
-          setActionMessage('Failed to load fingerprints');
+          setActionMessage(t('Failed to load fingerprints'));
         }
         break;
       default:
@@ -387,24 +416,24 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
               contentContainerStyle={styles.menuContent}
               showsVerticalScrollIndicator>
               <View style={styles.menuHeader}>
-                <Text style={styles.menuTitle}>E2E Encryption - {nick}</Text>
+                <Text style={styles.menuTitle}>{t('E2E Encryption - {nick}', { nick })}</Text>
               </View>
               <View style={styles.menuDivider} />
 
               <TouchableOpacity
                 style={styles.menuItem}
                 onPress={() => handleAction('enc_share')}>
-                <Text style={styles.menuText}>Share DM Key</Text>
+                <Text style={styles.menuText}>{t('Share DM Key')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.menuItem}
                 onPress={() => handleAction('enc_request')}>
-                <Text style={styles.menuText}>Request DM Key (36s)</Text>
+                <Text style={styles.menuText}>{t('Request DM Key (36s)')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.menuItem}
                 onPress={() => handleAction('enc_verify')}>
-                <Text style={styles.menuText}>Verify DM Key</Text>
+                <Text style={styles.menuText}>{t('Verify DM Key')}</Text>
               </TouchableOpacity>
 
               {allowQrVerification && (
@@ -413,17 +442,17 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
                   <TouchableOpacity
                     style={styles.menuItem}
                     onPress={() => handleAction('enc_qr_show_bundle')}>
-                    <Text style={styles.menuText}>Share Key Bundle QR</Text>
+                    <Text style={styles.menuText}>{t('Share Key Bundle QR')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.menuItem}
                     onPress={() => handleAction('enc_qr_show_fingerprint')}>
-                    <Text style={styles.menuText}>Show Fingerprint QR (Verify)</Text>
+                    <Text style={styles.menuText}>{t('Show Fingerprint QR (Verify)')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.menuItem}
                     onPress={() => handleAction('enc_qr_scan')}>
-                    <Text style={styles.menuText}>Scan QR Code</Text>
+                    <Text style={styles.menuText}>{t('Scan QR Code')}</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -434,12 +463,12 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
                   <TouchableOpacity
                     style={styles.menuItem}
                     onPress={() => handleAction('enc_share_file')}>
-                    <Text style={styles.menuText}>Share Key File</Text>
+                    <Text style={styles.menuText}>{t('Share Key File')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.menuItem}
                     onPress={() => handleAction('enc_import_file')}>
-                    <Text style={styles.menuText}>Import Key File</Text>
+                    <Text style={styles.menuText}>{t('Import Key File')}</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -450,12 +479,12 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
                   <TouchableOpacity
                     style={styles.menuItem}
                     onPress={() => handleAction('enc_share_nfc')}>
-                    <Text style={styles.menuText}>Share via NFC</Text>
+                    <Text style={styles.menuText}>{t('Share via NFC')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.menuItem}
                     onPress={() => handleAction('enc_receive_nfc')}>
-                    <Text style={styles.menuText}>Receive via NFC</Text>
+                    <Text style={styles.menuText}>{t('Receive via NFC')}</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -470,7 +499,7 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
                 style={styles.menuItem}
                 onPress={onClose}>
                 <Text style={[styles.menuText, styles.menuCancel]}>
-                  Close
+                  {t('Close')}
                 </Text>
               </TouchableOpacity>
             </ScrollView>
@@ -490,12 +519,12 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
           <View style={styles.qrModal}>
             <View style={styles.qrModalHeader}>
               <Text style={styles.qrModalTitle}>
-                {qrType === 'bundle' ? 'Share Key Bundle' : 'Fingerprint QR'}
+                {qrType === 'bundle' ? t('Share Key Bundle') : t('Fingerprint QR')}
               </Text>
               <Text style={styles.qrModalSubtitle}>
                 {qrType === 'bundle'
-                  ? 'Scan to import encryption key'
-                  : 'Scan to verify out-of-band'}
+                  ? t('Scan to import encryption key')
+                  : t('Scan to verify out-of-band')}
               </Text>
             </View>
             <View style={styles.qrCodeContainer}>
@@ -513,9 +542,9 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
               style={styles.qrModalButton}
               onPress={() => {
                 if (qrPayload) Clipboard.setString(qrPayload);
-                setActionMessage('QR payload copied');
+                setActionMessage(t('QR payload copied'));
               }}>
-              <Text style={styles.qrModalButtonText}>Copy Payload</Text>
+              <Text style={styles.qrModalButtonText}>{t('Copy Payload')}</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -537,16 +566,16 @@ export const QueryEncryptionMenu: React.FC<QueryEncryptionMenuProps> = ({
           ) : (
             <View style={styles.scanFallback}>
               <Text style={styles.menuText}>
-                {scanError || 'Camera unavailable'}
+                {scanError || t('Camera unavailable')}
               </Text>
             </View>
           )}
           <View style={styles.scanOverlay}>
-            <Text style={styles.scanText}>Scan a fingerprint QR</Text>
+            <Text style={styles.scanText}>{t('Scan a fingerprint QR')}</Text>
             <TouchableOpacity
               style={styles.scanClose}
               onPress={() => setShowKeyScan(false)}>
-              <Text style={styles.menuText}>Close</Text>
+              <Text style={styles.menuText}>{t('Close')}</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -14,6 +14,7 @@ import { channelManagementService, ChannelInfo } from '../services/ChannelManage
 import { ircService } from '../services/IRCService';
 import { channelEncryptionService } from '../services/ChannelEncryptionService';
 import { channelEncryptionSettingsService } from '../services/ChannelEncryptionSettingsService';
+import { useT } from '../i18n/transifex';
 
 interface ChannelSettingsScreenProps {
   channel: string;
@@ -28,6 +29,7 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
   visible,
   onClose,
 }) => {
+  const t = useT();
   const [channelInfo, setChannelInfo] = useState<ChannelInfo | undefined>();
   const [topic, setTopic] = useState('');
   const [key, setKey] = useState('');
@@ -80,18 +82,18 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
   const handleSetTopic = () => {
     if (topic.trim()) {
       channelManagementService.setTopic(channel, topic.trim());
-      Alert.alert('Success', 'Topic updated');
+      Alert.alert(t('Success'), t('Topic updated'));
     }
   };
 
   const handleSetKey = () => {
     if (key.trim()) {
       channelManagementService.setKey(channel, key.trim());
-      Alert.alert('Success', 'Channel key set');
+      Alert.alert(t('Success'), t('Channel key set'));
       setKey('');
     } else {
       channelManagementService.removeKey(channel);
-      Alert.alert('Success', 'Channel key removed');
+      Alert.alert(t('Success'), t('Channel key removed'));
     }
   };
 
@@ -99,19 +101,19 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
     const limitNum = parseInt(limit, 10);
     if (limitNum > 0) {
       channelManagementService.setLimit(channel, limitNum);
-      Alert.alert('Success', `Channel limit set to ${limitNum}`);
+      Alert.alert(t('Success'), t('Channel limit set to {limitNum}').replace('{limitNum}', limitNum.toString()));
     } else if (limit === '') {
       channelManagementService.removeLimit(channel);
-      Alert.alert('Success', 'Channel limit removed');
+      Alert.alert(t('Success'), t('Channel limit removed'));
     } else {
-      Alert.alert('Error', 'Invalid limit value');
+      Alert.alert(t('Error'), t('Invalid limit value'));
     }
   };
 
   const handleAddBan = () => {
     if (banMask.trim()) {
       channelManagementService.addBan(channel, banMask.trim());
-      Alert.alert('Success', 'Ban added');
+      Alert.alert(t('Success'), t('Ban added'));
       setBanMask('');
       // Request updated ban list
       channelManagementService.requestBanList(channel);
@@ -120,14 +122,14 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
 
   const handleRemoveBan = (mask: string) => {
     channelManagementService.removeBan(channel, mask);
-    Alert.alert('Success', 'Ban removed');
+    Alert.alert(t('Success'), t('Ban removed'));
     channelManagementService.requestBanList(channel);
   };
 
   const handleAddException = () => {
     if (exceptionMask.trim()) {
       channelManagementService.addException(channel, exceptionMask.trim());
-      Alert.alert('Success', 'Exception added');
+      Alert.alert(t('Success'), t('Exception added'));
       setExceptionMask('');
       channelManagementService.requestExceptionList(channel);
     }
@@ -135,7 +137,7 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
 
   const handleRemoveException = (mask: string) => {
     channelManagementService.removeException(channel, mask);
-    Alert.alert('Success', 'Exception removed');
+    Alert.alert(t('Success'), t('Exception removed'));
     channelManagementService.requestExceptionList(channel);
   };
 
@@ -178,17 +180,17 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
 
       if (newValue && !hasEncryptionKey) {
         Alert.alert(
-          'No Encryption Key',
-          'Always-encrypt is now enabled, but no encryption key exists. Generate or request a key to enable encryption.',
-          [{ text: 'OK' }]
+          t('No Encryption Key'),
+          t('Always-encrypt is now enabled, but no encryption key exists. Generate or request a key to enable encryption.'),
+          [{ text: t('OK') }]
         );
       } else if (newValue) {
-        Alert.alert('Success', `Always-encrypt enabled for ${channel}`);
+        Alert.alert(t('Success'), t('Always-encrypt enabled for {channel}').replace('{channel}', channel));
       } else {
-        Alert.alert('Success', `Always-encrypt disabled for ${channel}`);
+        Alert.alert(t('Success'), t('Always-encrypt disabled for {channel}').replace('{channel}', channel));
       }
     } catch (error) {
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to toggle always-encrypt');
+      Alert.alert(t('Error'), error instanceof Error ? error.message : t('Failed to toggle always-encrypt'));
     }
   };
 
@@ -200,24 +202,24 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
         const hasKey = await channelEncryptionService.hasChannelKey(channel, network);
         setHasEncryptionKey(hasKey);
       }, 500);
-      Alert.alert('Success', 'Encryption key generated. You can now share it with other users.');
+      Alert.alert(t('Success'), t('Encryption key generated. You can now share it with other users.'));
     } catch (error) {
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to generate key');
+      Alert.alert(t('Error'), error instanceof Error ? error.message : t('Failed to generate key'));
     }
   };
 
   const handleRequestKey = () => {
     Alert.prompt(
-      'Request Key',
-      'Enter the nickname to request the encryption key from:',
+      t('Request Key'),
+      t('Enter the nickname to request the encryption key from:'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'Request',
+          text: t('Request'),
           onPress: (nick) => {
             if (nick && nick.trim()) {
               ircService.sendCommand(`/chankey request ${nick.trim()}`);
-              Alert.alert('Success', `Key request sent to ${nick.trim()}`);
+              Alert.alert(t('Success'), t('Key request sent to {nick}').replace('{nick}', nick.trim()));
             }
           },
         },
@@ -228,16 +230,16 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
 
   const handleShareKey = () => {
     Alert.prompt(
-      'Share Key',
-      'Enter the nickname to share the encryption key with:',
+      t('Share Key'),
+      t('Enter the nickname to share the encryption key with:'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'Share',
+          text: t('Share'),
           onPress: (nick) => {
             if (nick && nick.trim()) {
               ircService.sendCommand(`/chankey share ${nick.trim()}`);
-              Alert.alert('Success', `Key shared with ${nick.trim()}`);
+              Alert.alert(t('Success'), t('Key shared with {nick}').replace('{nick}', nick.trim()));
             }
           },
         },
@@ -248,12 +250,12 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
 
   const handleRemoveKey = () => {
     Alert.alert(
-      'Remove Encryption Key',
-      'Are you sure you want to remove the encryption key? You will not be able to decrypt messages until you get the key again.',
+      t('Remove Encryption Key'),
+      t('Are you sure you want to remove the encryption key? You will not be able to decrypt messages until you get the key again.'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'Remove',
+          text: t('Remove'),
           style: 'destructive',
           onPress: async () => {
             ircService.sendCommand(`/chankey remove`);
@@ -261,7 +263,7 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
               const hasKey = await channelEncryptionService.hasChannelKey(channel, network);
               setHasEncryptionKey(hasKey);
             }, 500);
-            Alert.alert('Success', 'Encryption key removed');
+            Alert.alert(t('Success'), t('Encryption key removed'));
           },
         },
       ]
@@ -280,45 +282,45 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
       onRequestClose={onClose}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Channel Settings</Text>
+          <Text style={styles.headerTitle}>{t('Channel Settings')}</Text>
           <Text style={styles.channelName}>{channel}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Close</Text>
+            <Text style={styles.closeButtonText}>{t('Close')}</Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView style={styles.content}>
           {/* Topic Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Topic</Text>
+            <Text style={styles.sectionTitle}>{t('Topic')}</Text>
             <TextInput
               style={styles.input}
               value={topic}
               onChangeText={setTopic}
-              placeholder="Channel topic"
+              placeholder={t('Channel topic')}
               multiline
             />
             <TouchableOpacity style={styles.button} onPress={handleSetTopic}>
-              <Text style={styles.buttonText}>Set Topic</Text>
+              <Text style={styles.buttonText}>{t('Set Topic')}</Text>
             </TouchableOpacity>
             {channelInfo?.topicSetBy && (
               <Text style={styles.metaText}>
-                Set by {channelInfo.topicSetBy}
-                {channelInfo.topicSetAt && 
-                  ` on ${new Date(channelInfo.topicSetAt).toLocaleString()}`}
+                {t('Set by {topicSetBy}').replace('{topicSetBy}', channelInfo.topicSetBy)}
+                {channelInfo.topicSetAt &&
+                  ` ${t('on {date}').replace('{date}', new Date(channelInfo.topicSetAt).toLocaleString())}`}
               </Text>
             )}
           </View>
 
           {/* Channel Modes */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Channel Modes</Text>
+            <Text style={styles.sectionTitle}>{t('Channel Modes')}</Text>
             <Text style={styles.modeString}>
-              {channelManagementService.getModeString(channel) || 'No modes set'}
+              {channelManagementService.getModeString(channel) || t('No modes set')}
             </Text>
-            
+
             <View style={styles.modeRow}>
-              <Text style={styles.modeLabel}>Invite Only (i)</Text>
+              <Text style={styles.modeLabel}>{t('Invite Only (i)')}</Text>
               <Switch
                 value={modes.inviteOnly || false}
                 onValueChange={() => toggleMode('i')}
@@ -326,7 +328,7 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
             </View>
 
             <View style={styles.modeRow}>
-              <Text style={styles.modeLabel}>Topic Protected (t)</Text>
+              <Text style={styles.modeLabel}>{t('Topic Protected (t)')}</Text>
               <Switch
                 value={modes.topicProtected || false}
                 onValueChange={() => toggleMode('t')}
@@ -334,7 +336,7 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
             </View>
 
             <View style={styles.modeRow}>
-              <Text style={styles.modeLabel}>No External Messages (n)</Text>
+              <Text style={styles.modeLabel}>{t('No External Messages (n)')}</Text>
               <Switch
                 value={modes.noExternalMessages || false}
                 onValueChange={() => toggleMode('n')}
@@ -342,7 +344,7 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
             </View>
 
             <View style={styles.modeRow}>
-              <Text style={styles.modeLabel}>Moderated (m)</Text>
+              <Text style={styles.modeLabel}>{t('Moderated (m)')}</Text>
               <Switch
                 value={modes.moderated || false}
                 onValueChange={() => toggleMode('m')}
@@ -350,7 +352,7 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
             </View>
 
             <View style={styles.modeRow}>
-              <Text style={styles.modeLabel}>Private (p)</Text>
+              <Text style={styles.modeLabel}>{t('Private (p)')}</Text>
               <Switch
                 value={modes.private || false}
                 onValueChange={() => toggleMode('p')}
@@ -358,7 +360,7 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
             </View>
 
             <View style={styles.modeRow}>
-              <Text style={styles.modeLabel}>Secret (s)</Text>
+              <Text style={styles.modeLabel}>{t('Secret (s)')}</Text>
               <Switch
                 value={modes.secret || false}
                 onValueChange={() => toggleMode('s')}
@@ -368,30 +370,30 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
 
           {/* Channel Key */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Channel Key (Password)</Text>
+            <Text style={styles.sectionTitle}>{t('Channel Key (Password)')}</Text>
             <TextInput
               style={styles.input}
               value={key}
               onChangeText={setKey}
-              placeholder="Channel key (leave empty to remove)"
+              placeholder={t('Channel key (leave empty to remove)')}
               secureTextEntry
             />
             <TouchableOpacity style={styles.button} onPress={handleSetKey}>
               <Text style={styles.buttonText}>
-                {key.trim() ? 'Set Key' : 'Remove Key'}
+                {key.trim() ? t('Set Key') : t('Remove Key')}
               </Text>
             </TouchableOpacity>
             {modes.key && (
-              <Text style={styles.metaText}>Key is currently set</Text>
+              <Text style={styles.metaText}>{t('Key is currently set')}</Text>
             )}
           </View>
 
           {/* Encryption Settings */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Encryption Settings</Text>
+            <Text style={styles.sectionTitle}>{t('Encryption Settings')}</Text>
 
             <View style={styles.modeRow}>
-              <Text style={styles.modeLabel}>Always Encrypt Messages</Text>
+              <Text style={styles.modeLabel}>{t('Always Encrypt Messages')}</Text>
               <Switch
                 value={alwaysEncrypt}
                 onValueChange={handleToggleAlwaysEncrypt}
@@ -400,77 +402,77 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
 
             <View style={styles.statusContainer}>
               {hasEncryptionKey ? (
-                <Text style={styles.statusSuccess}>✓ Encryption key exists</Text>
+                <Text style={styles.statusSuccess}>{t('✓ Encryption key exists')}</Text>
               ) : (
-                <Text style={styles.statusWarning}>⚠ No encryption key</Text>
+                <Text style={styles.statusWarning}>{t('⚠ No encryption key')}</Text>
               )}
             </View>
 
             {!hasEncryptionKey ? (
               <View style={styles.buttonRow}>
                 <TouchableOpacity style={styles.button} onPress={handleGenerateKey}>
-                  <Text style={styles.buttonText}>Generate Key</Text>
+                  <Text style={styles.buttonText}>{t('Generate Key')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.button} onPress={handleRequestKey}>
-                  <Text style={styles.buttonText}>Request Key from...</Text>
+                  <Text style={styles.buttonText}>{t('Request Key from...')}</Text>
                 </TouchableOpacity>
               </View>
             ) : (
               <View style={styles.buttonRow}>
                 <TouchableOpacity style={styles.button} onPress={handleShareKey}>
-                  <Text style={styles.buttonText}>Share Key with...</Text>
+                  <Text style={styles.buttonText}>{t('Share Key with...')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.button, styles.buttonDanger]} onPress={handleRemoveKey}>
-                  <Text style={styles.buttonText}>Remove Key</Text>
+                  <Text style={styles.buttonText}>{t('Remove Key')}</Text>
                 </TouchableOpacity>
               </View>
             )}
 
             <Text style={styles.metaText}>
               {alwaysEncrypt
-                ? 'Messages will be encrypted automatically when a key is available.'
-                : 'Enable to automatically encrypt all messages to this channel.'}
+                ? t('Messages will be encrypted automatically when a key is available.')
+                : t('Enable to automatically encrypt all messages to this channel.')}
             </Text>
           </View>
 
           {/* Channel Limit */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>User Limit</Text>
+            <Text style={styles.sectionTitle}>{t('User Limit')}</Text>
             <TextInput
               style={styles.input}
               value={limit}
               onChangeText={setLimit}
-              placeholder="Maximum users (leave empty to remove)"
+              placeholder={t('Maximum users (leave empty to remove)')}
               keyboardType="numeric"
             />
             <TouchableOpacity style={styles.button} onPress={handleSetLimit}>
               <Text style={styles.buttonText}>
-                {limit.trim() ? 'Set Limit' : 'Remove Limit'}
+                {limit.trim() ? t('Set Limit') : t('Remove Limit')}
               </Text>
             </TouchableOpacity>
             {modes.limit && (
-              <Text style={styles.metaText}>Current limit: {modes.limit} users</Text>
+              <Text style={styles.metaText}>{t('Current limit: {limit} users').replace('{limit}', modes.limit.toString())}</Text>
             )}
           </View>
 
           {/* Ban List */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Ban List</Text>
+            <Text style={styles.sectionTitle}>{t('Ban List')}</Text>
             <View style={styles.inputRow}>
               <TextInput
                 style={[styles.input, styles.inputFlex]}
                 value={banMask}
                 onChangeText={setBanMask}
-                placeholder="Ban mask (e.g., *!*@host.com)"
+                placeholder={t('Ban mask (e.g., *!*@host.com)')}
               />
               <TouchableOpacity style={styles.addButton} onPress={handleAddBan}>
-                <Text style={styles.addButtonText}>Add</Text>
+                <Text style={styles.addButtonText}>{t('Add')}</Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity
               style={styles.button}
               onPress={() => channelManagementService.requestBanList(channel)}>
-              <Text style={styles.buttonText}>Refresh Ban List</Text>
+              <Text style={styles.buttonText}>{t('Refresh Ban List')}</Text>
             </TouchableOpacity>
             {modes.banList && modes.banList.length > 0 ? (
               <View style={styles.listContainer}>
@@ -480,34 +482,34 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
                     <TouchableOpacity
                       style={styles.removeButton}
                       onPress={() => handleRemoveBan(mask)}>
-                      <Text style={styles.removeButtonText}>Remove</Text>
+                      <Text style={styles.removeButtonText}>{t('Remove')}</Text>
                     </TouchableOpacity>
                   </View>
                 ))}
               </View>
             ) : (
-              <Text style={styles.emptyText}>No bans</Text>
+              <Text style={styles.emptyText}>{t('No bans')}</Text>
             )}
           </View>
 
           {/* Exception List */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Exception List</Text>
+            <Text style={styles.sectionTitle}>{t('Exception List')}</Text>
             <View style={styles.inputRow}>
               <TextInput
                 style={[styles.input, styles.inputFlex]}
                 value={exceptionMask}
                 onChangeText={setExceptionMask}
-                placeholder="Exception mask"
+                placeholder={t('Exception mask')}
               />
               <TouchableOpacity style={styles.addButton} onPress={handleAddException}>
-                <Text style={styles.addButtonText}>Add</Text>
+                <Text style={styles.addButtonText}>{t('Add')}</Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity
               style={styles.button}
               onPress={() => channelManagementService.requestExceptionList(channel)}>
-              <Text style={styles.buttonText}>Refresh Exception List</Text>
+              <Text style={styles.buttonText}>{t('Refresh Exception List')}</Text>
             </TouchableOpacity>
             {modes.exceptionList && modes.exceptionList.length > 0 ? (
               <View style={styles.listContainer}>
@@ -517,13 +519,13 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
                     <TouchableOpacity
                       style={styles.removeButton}
                       onPress={() => handleRemoveException(mask)}>
-                      <Text style={styles.removeButtonText}>Remove</Text>
+                      <Text style={styles.removeButtonText}>{t('Remove')}</Text>
                     </TouchableOpacity>
                   </View>
                 ))}
               </View>
             ) : (
-              <Text style={styles.emptyText}>No exceptions</Text>
+              <Text style={styles.emptyText}>{t('No exceptions')}</Text>
             )}
           </View>
         </ScrollView>

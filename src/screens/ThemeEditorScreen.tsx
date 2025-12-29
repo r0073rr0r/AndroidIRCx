@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { themeService, Theme, ThemeColors } from '../services/ThemeService';
+import { useT } from '../i18n/transifex';
 
 interface ThemeEditorScreenProps {
   visible: boolean;
@@ -24,6 +25,7 @@ export const ThemeEditorScreen: React.FC<ThemeEditorScreenProps> = ({
   onClose,
   onSave,
 }) => {
+  const t = useT();
   const [themeName, setThemeName] = useState('');
   const [colors, setColors] = useState<ThemeColors>(themeService.getColors());
   const [editingColor, setEditingColor] = useState<keyof ThemeColors | null>(null);
@@ -56,14 +58,14 @@ export const ThemeEditorScreen: React.FC<ThemeEditorScreenProps> = ({
         setEditingColor(null);
         setColorValue('');
       } else {
-        Alert.alert('Invalid Color', 'Please enter a valid hex color (e.g., #FF0000) or rgba value');
+        Alert.alert(t('Invalid Color'), t('Please enter a valid hex color (e.g., #FF0000) or rgba value'));
       }
     }
   };
 
   const handleSave = async () => {
     if (!themeName.trim()) {
-      Alert.alert('Error', 'Please enter a theme name');
+      Alert.alert(t('Error'), t('Please enter a theme name'));
       return;
     }
 
@@ -93,31 +95,31 @@ export const ThemeEditorScreen: React.FC<ThemeEditorScreenProps> = ({
 
   const colorCategories: Array<{ title: string; keys: Array<keyof ThemeColors> }> = [
     {
-      title: 'Background',
+      title: t('Background'),
       keys: ['background', 'surface', 'surfaceVariant'],
     },
     {
-      title: 'Text',
+      title: t('Text'),
       keys: ['text', 'textSecondary', 'textDisabled'],
     },
     {
-      title: 'Primary',
+      title: t('Primary'),
       keys: ['primary', 'primaryDark', 'primaryLight', 'onPrimary'],
     },
     {
-      title: 'Secondary',
+      title: t('Secondary'),
       keys: ['secondary', 'onSecondary'],
     },
     {
-      title: 'Status',
+      title: t('Status'),
       keys: ['success', 'error', 'warning', 'info'],
     },
     {
-      title: 'Borders',
+      title: t('Borders'),
       keys: ['border', 'borderLight', 'divider'],
     },
     {
-      title: 'Messages',
+      title: t('Messages'),
       keys: [
         'messageBackground',
         'messageText',
@@ -132,11 +134,11 @@ export const ThemeEditorScreen: React.FC<ThemeEditorScreenProps> = ({
       ],
     },
     {
-      title: 'Input',
+      title: t('Input'),
       keys: ['inputBackground', 'inputText', 'inputBorder', 'inputPlaceholder'],
     },
     {
-      title: 'Buttons',
+      title: t('Buttons'),
       keys: [
         'buttonPrimary',
         'buttonPrimaryText',
@@ -147,7 +149,7 @@ export const ThemeEditorScreen: React.FC<ThemeEditorScreenProps> = ({
       ],
     },
     {
-      title: 'Tabs',
+      title: t('Tabs'),
       keys: [
         'tabActive',
         'tabInactive',
@@ -157,11 +159,11 @@ export const ThemeEditorScreen: React.FC<ThemeEditorScreenProps> = ({
       ],
     },
     {
-      title: 'Modal',
+      title: t('Modal'),
       keys: ['modalOverlay', 'modalBackground', 'modalText'],
     },
     {
-      title: 'User List',
+      title: t('User List'),
       keys: [
         'userListBackground',
         'userListText',
@@ -184,19 +186,19 @@ export const ThemeEditorScreen: React.FC<ThemeEditorScreenProps> = ({
       <View style={[styles.container, { backgroundColor: currentColors.background }]}>
         <View style={[styles.header, { backgroundColor: currentColors.primary }]}>
           <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
-            <Text style={[styles.cancelText, { color: currentColors.onPrimary }]}>Cancel</Text>
+            <Text style={[styles.cancelText, { color: currentColors.onPrimary }]}>{t('Cancel')}</Text>
           </TouchableOpacity>
           <Text style={[styles.title, { color: currentColors.onPrimary }]}>
-            {theme ? 'Edit Theme' : 'New Theme'}
+            {theme ? t('Edit Theme') : t('New Theme')}
           </Text>
           <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
-            <Text style={[styles.saveText, { color: currentColors.onPrimary }]}>Save</Text>
+            <Text style={[styles.saveText, { color: currentColors.onPrimary }]}>{t('Save')}</Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView style={styles.content}>
           <View style={[styles.section, { borderBottomColor: currentColors.divider }]}>
-            <Text style={[styles.sectionTitle, { color: currentColors.text }]}>Theme Name</Text>
+            <Text style={[styles.sectionTitle, { color: currentColors.text }]}>{t('Theme Name')}</Text>
             <TextInput
               style={[
                 styles.input,
@@ -208,7 +210,7 @@ export const ThemeEditorScreen: React.FC<ThemeEditorScreenProps> = ({
               ]}
               value={themeName}
               onChangeText={setThemeName}
-              placeholder="Enter theme name"
+              placeholder={t('Enter theme name')}
               placeholderTextColor={currentColors.textSecondary}
             />
           </View>
@@ -246,7 +248,7 @@ export const ThemeEditorScreen: React.FC<ThemeEditorScreenProps> = ({
                         ]}
                         value={colorValue}
                         onChangeText={setColorValue}
-                        placeholder="#FFFFFF"
+                        placeholder={t('#FFFFFF')}
                         placeholderTextColor={currentColors.textSecondary}
                         autoCapitalize="none"
                       />

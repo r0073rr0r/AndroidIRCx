@@ -9,6 +9,7 @@
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import notifee, { AndroidImportance, AndroidCategory, EventType } from '@notifee/react-native';
+import { tx } from '../i18n/transifex';
 
 export interface NotificationPreferences {
   enabled: boolean;
@@ -49,6 +50,10 @@ class NotificationService {
    */
   async initialize(): Promise<void> {
     await this.loadPreferences();
+    const t = (key: string, params?: Record<string, unknown>) => {
+      const translator = (tx as any)?.t;
+      return typeof translator === 'function' ? translator(key, params) : key;
+    };
     
     // Initialize Notifee
     try {
@@ -68,7 +73,7 @@ class NotificationService {
       // This is required for Android 8.0 (Oreo) and above
       const channelId = await notifee.createChannel({
         id: 'default',
-        name: 'Default Channel',
+        name: t('Default Channel'),
         importance: AndroidImportance.DEFAULT,
       });
       console.log('NotificationService: Default Android channel created:', channelId);
@@ -264,7 +269,11 @@ class NotificationService {
     currentNick: string,
     network?: string
   ): Promise<void> {
-    const channel = message.channel || 'unknown';
+    const t = (key: string, params?: Record<string, unknown>) => {
+      const translator = (tx as any)?.t;
+      return typeof translator === 'function' ? translator(key, params) : key;
+    };
+    const channel = message.channel || t('Unknown');
     const isChannel = channel.startsWith('#') || 
                      channel.startsWith('&') || 
                      channel.startsWith('+') || 
@@ -275,12 +284,12 @@ class NotificationService {
 
     if (!isChannel) {
       // Private message
-      title = `Message from ${message.from || 'Unknown'}`;
+      title = t('Message from {name}', { name: message.from || t('Unknown') });
       body = message.text || '';
     } else {
       // Channel message
       title = `${channel}`;
-      body = `${message.from || 'Unknown'}: ${message.text || ''}`;
+      body = t('{from}: {text}', { from: message.from || t('Unknown'), text: message.text || '' });
     }
 
     await this.showNotification(title, body, channel, network);

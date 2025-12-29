@@ -10,6 +10,7 @@ import {
   Modal,
 } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
+import { useT } from '../i18n/transifex';
 
 interface AboutScreenProps {
   visible: boolean;
@@ -21,6 +22,7 @@ export const AboutScreen: React.FC<AboutScreenProps> = ({
   onClose,
 }) => {
   const { colors } = useTheme();
+  const t = useT();
   const styles = createStyles(colors);
 
   const handleOpenURL = (url: string) => {
@@ -37,9 +39,9 @@ export const AboutScreen: React.FC<AboutScreenProps> = ({
       onRequestClose={onClose}>
       <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>About</Text>
+        <Text style={styles.headerTitle}>{t('About')}</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <Text style={styles.closeButtonText}>Close</Text>
+          <Text style={styles.closeButtonText}>{t('Close')}</Text>
         </TouchableOpacity>
       </View>
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
@@ -53,42 +55,42 @@ export const AboutScreen: React.FC<AboutScreenProps> = ({
         </View>
         <View style={styles.section}>
           <Text style={styles.appName}>AndroidIRCX</Text>
-          <Text style={styles.version}>Version 1.4.5</Text>
+          <Text style={styles.version}>{t('Version 1.4.6')}</Text>
         </View>
         <View style={styles.section}>
-          <Text style={styles.label}>Made by</Text>
+          <Text style={styles.label}>{t('Made by')}</Text>
           <Text style={styles.value}>Velimir Majstorov</Text>
         </View>
         <View style={styles.section}>
-          <Text style={styles.label}>Network</Text>
+          <Text style={styles.label}>{t('Network')}</Text>
           <Text style={styles.value}>irc.DBase.in.rs - IRC Database Network</Text>
         </View>
         <View style={styles.section}>
-          <Text style={styles.label}>IRC Database</Text>
+          <Text style={styles.label}>{t('IRC Database')}</Text>
           <TouchableOpacity onPress={() => handleOpenURL('https://irc.dbase.in.rs')}>
             <Text style={[styles.value, styles.link]}>https://irc.dbase.in.rs</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.section}>
-          <Text style={styles.label}>IRC Nick</Text>
+          <Text style={styles.label}>{t('IRC Nick')}</Text>
           <Text style={styles.value}>munZe</Text>
         </View>
         <View style={styles.section}>
-          <Text style={styles.label}>Contact</Text>
+          <Text style={styles.label}>{t('Contact')}</Text>
           <TouchableOpacity onPress={() => handleOpenURL('mailto:contact@androidircx.com')}>
             <Text style={[styles.value, styles.link]}>contact@androidircx.com</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.label}>AndroidIRCX Website</Text>
+          <Text style={styles.label}>{t('AndroidIRCX Website')}</Text>
           <TouchableOpacity onPress={() => handleOpenURL('https://androidircx.com')}>
             <Text style={[styles.value, styles.link]}>https://androidircx.com</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.label}>AndroidIRCX Github</Text>
+          <Text style={styles.label}>{t('AndroidIRCX Github')}</Text>
           <TouchableOpacity onPress={() => handleOpenURL('https://github.com/AndroidIRCx/AndroidIRCx')}>
             <Text style={[styles.value, styles.link]}>https://github.com/AndroidIRCx/AndroidIRCx</Text>
           </TouchableOpacity>

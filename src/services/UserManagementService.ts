@@ -7,6 +7,9 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IRCService } from './IRCService';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 export interface WHOISInfo {
   nick: string;
@@ -179,7 +182,7 @@ export class UserManagementService {
     await this.loadFromStorage();
     console.log('UserManagementService: Initialized');
     if (this.ircService) {
-      this.ircService.addRawMessage('*** UserManagementService initialized', 'debug');
+      this.ircService.addRawMessage(t('*** UserManagementService initialized'), 'debug');
     }
   }
 
@@ -255,13 +258,15 @@ export class UserManagementService {
     return new Promise((resolve, reject) => {
       // If a request is already pending for this nick/network, return its promise
       if (this.whoisRequestQueue.has(key)) {
-        this.whoisRequestQueue.get(key)?.reject(new Error('New WHOIS request for same nick, cancelling previous.'));
+        this.whoisRequestQueue.get(key)?.reject(
+          new Error(t('New WHOIS request for same nick, cancelling previous.'))
+        );
         this.whoisRequestQueue.delete(key);
       }
 
       const timeout = setTimeout(() => {
         this.whoisRequestQueue.delete(key);
-        reject(new Error(`WHOIS request for ${nick} timed out.`));
+        reject(new Error(t('WHOIS request for {nick} timed out.', { nick })));
         // Also remove the WHOIS info from cache if it's still incomplete
         const info = this.whoisCache.get(key);
         if (info && !info.realname) { // Simple check for incomplete data
@@ -291,7 +296,7 @@ export class UserManagementService {
       if (finalInfo) {
         pending.resolve(finalInfo);
       } else {
-        pending.reject(new Error(`WHOIS data for ${nick} not found after completion signal.`));
+        pending.reject(new Error(t('WHOIS data for {nick} not found after completion signal.', { nick })));
       }
     }
   }

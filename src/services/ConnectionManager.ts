@@ -10,6 +10,9 @@ import { STSService } from './STSService';
 import { CommandService } from './CommandService';
 import { IRCNetworkConfig } from './SettingsService';
 import { identityProfilesService } from './IdentityProfilesService';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 export interface ConnectionContext {
   networkId: string;
@@ -66,7 +69,7 @@ class ConnectionManager {
     console.log('CommandService:', typeof CommandService, CommandService);
 
     const ircService = new IRCService();
-    ircService.addRawMessage(`*** Creating new connection for ${finalId}`, 'connection');
+    ircService.addRawMessage(t('*** Creating new connection for {networkId}', { networkId: finalId }), 'connection');
     ircService.setNetworkId(finalId);
     const channelManagementService = new ChannelManagementService(ircService);
     const userManagementService = new UserManagementService();
@@ -88,7 +91,9 @@ class ConnectionManager {
     const insecureServers = networkConfig.servers.filter(s => s.rejectUnauthorized === false);
     if (insecureServers.length > 0) {
       ircService.addRawMessage(
-        '*** Warning: TLS certificate verification is disabled for this server. Enable "Reject unauthorized certificates" unless you trust this self-signed/expired cert.',
+        t(
+          '*** Warning: TLS certificate verification is disabled for this server. Enable "Reject unauthorized certificates" unless you trust this self-signed/expired cert.'
+        ),
         'connection'
       );
     }
@@ -130,7 +135,10 @@ class ConnectionManager {
           const commands = (profile.onConnectCommands || []).filter(cmd => !!cmd && cmd.trim().length > 0);
           if (commands.length > 0) {
             commands.forEach(cmd => ircService.sendRaw(cmd));
-            ircService.addRawMessage(`*** Executed ${commands.length} on-connect command(s) from identity profile`, 'connection');
+            ircService.addRawMessage(
+              t('*** Executed {count} on-connect command(s) from identity profile', { count: commands.length }),
+              'connection'
+            );
           }
         } catch (error) {
           console.error(`ConnectionManager: Failed to run identity on-connect commands for ${networkConfig.identityProfileId}:`, error);
@@ -158,7 +166,7 @@ class ConnectionManager {
 
     // Initialize services
     console.log(`ConnectionManager: Initializing services for ${finalId}`);
-    ircService.addRawMessage(`*** Initializing services for ${finalId}`, 'connection');
+    ircService.addRawMessage(t('*** Initializing services for {networkId}', { networkId: finalId }), 'connection');
     userManagementService.initialize();
     channelManagementService.initialize();
     autoRejoinService.initialize();
@@ -171,7 +179,7 @@ class ConnectionManager {
     this.setActiveConnection(finalId);
 
     console.log(`ConnectionManager: Connecting to IRC server for ${finalId}`);
-    ircService.addRawMessage(`*** Connecting to IRC server for ${finalId}`, 'connection');
+    ircService.addRawMessage(t('*** Connecting to IRC server for {networkId}', { networkId: finalId }), 'connection');
     await ircService.connect(connectionConfig);
     return finalId;
   }

@@ -67,6 +67,7 @@ import { performanceService } from './src/services/PerformanceService';
 import { logger } from './src/services/Logger';
 import { scriptingService } from './src/services/ScriptingService';
 import { adRewardService } from './src/services/AdRewardService';
+import { consentService } from './src/services/ConsentService';
 import { NetworksListScreen } from './src/screens/NetworksListScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { IgnoreListScreen } from './src/screens/IgnoreListScreen';
@@ -150,11 +151,27 @@ function App() {
       }
     };
     initAppCheck();
-    // Initialize AdMob
-    console.log('🚀 Starting AdMob initialization...');
-    MobileAds()
-      .initialize()
-      .then(async (adapterStatuses) => {
+
+    // Initialize consent management and AdMob
+    const initAdsWithConsent = async () => {
+      try {
+        // Step 1: Initialize UMP SDK for consent (GDPR/CCPA compliance)
+        console.log('🔐 Initializing consent management...');
+        await consentService.initialize(__DEV__); // Enable debug mode in development
+        console.log('✅ Consent service initialized');
+
+        // Step 2: Show consent form if required (first launch in EEA/UK)
+        // Skip showing consent form on first run - it will be shown in FirstRunSetupScreen
+        const isFirstRun = await settingsService.isFirstRun();
+        if (!isFirstRun) {
+          await consentService.showConsentFormIfRequired();
+        } else {
+          console.log('⏭️ Skipping consent form - will be shown in first run setup');
+        }
+
+        // Step 3: Initialize AdMob after consent is handled
+        console.log('🚀 Starting AdMob initialization...');
+        const adapterStatuses = await MobileAds().initialize();
         console.log('✅ AdMob initialized successfully');
         console.log('Adapter statuses:', JSON.stringify(adapterStatuses, null, 2));
 
@@ -171,15 +188,17 @@ function App() {
           console.log('✅ All ad adapters ready!');
         }
 
-        // Initialize AdRewardService after AdMob is ready
+        // Step 4: Initialize AdRewardService after consent & AdMob are ready
         console.log('🔄 Initializing AdRewardService...');
         await adRewardService.initialize();
         console.log('✅ AdRewardService initialized successfully');
-      })
-      .catch((error) => {
-        console.error('❌ Failed to initialize AdMob:', error);
+      } catch (error) {
+        console.error('❌ Failed to initialize ads with consent:', error);
         console.error('Error details:', JSON.stringify(error, null, 2));
-      });
+      }
+    };
+
+    initAdsWithConsent();
 
     errorReportingService.initialize();
     if (typeof ErrorUtils !== 'undefined') {
@@ -1127,11 +1146,11 @@ function AppContent() {
       if (dccInvite && message.from) {
         const session = dccChatService.handleIncomingInvite(message.from, messageNetwork, dccInvite.host, dccInvite.port);
         safeAlert(
-          'DCC Chat Request',
-          `${message.from} wants to start a DCC chat. Accept?`,
+          t('DCC Chat Request'),
+          t('{from} wants to start a DCC chat. Accept?').replace('{from}', message.from),
           [
-            { text: 'Decline', style: 'cancel', onPress: () => dccChatService.closeSession(session.id) },
-            { text: 'Accept', onPress: () => dccChatService.acceptInvite(session.id, activeIRCService) },
+            { text: t('Decline'), style: 'cancel', onPress: () => dccChatService.closeSession(session.id) },
+            { text: t('Accept'), onPress: () => dccChatService.acceptInvite(session.id, activeIRCService) },
           ]
         );
       }
@@ -1140,12 +1159,15 @@ function AppContent() {
       if (dccSend && message.from) {
         const transfer = dccFileService.handleOffer(message.from, messageNetwork, dccSend);
         safeAlert(
-          'DCC SEND Offer',
-          `${message.from} offers "${dccSend.filename}" (${dccSend.size || '?'} bytes). Accept?`,
+          t('DCC SEND Offer'),
+          t('{from} offers "{filename}" ({size} bytes). Accept?')
+            .replace('{from}', message.from)
+            .replace('{filename}', dccSend.filename)
+            .replace('{size}', (dccSend.size || '?').toString()),
           [
-            { text: 'Decline', style: 'cancel', onPress: () => dccFileService.cancel(transfer.id) },
+            { text: t('Decline'), style: 'cancel', onPress: () => dccFileService.cancel(transfer.id) },
             {
-              text: 'Accept',
+              text: t('Accept'),
               onPress: async () => {
                 // Default download path
                 const RNFS = require('react-native-fs');
@@ -2728,9 +2750,9 @@ safeSetState(() => {
           const newValue = await channelEncryptionSettingsService.toggleAlwaysEncrypt(tab.name, tab.networkId);
           if (newValue && !hasBundle) {
             Alert.alert(
-              'No Encryption Bundle',
-              'Always-encrypt is now enabled, but no encryption bundle exists. Share your key with this user to enable encryption.',
-              [{ text: 'OK' }]
+              t('No Encryption Bundle'),
+              t('Always-encrypt is now enabled, but no encryption bundle exists. Share your key with this user to enable encryption.'),
+              [{ text: t('OK') }]
             );
           }
           setShowTabOptionsModal(false);

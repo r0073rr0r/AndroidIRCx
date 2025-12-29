@@ -12,6 +12,7 @@ import {
   Switch,
 } from 'react-native';
 import { IRCNetworkConfig, settingsService } from '../services/SettingsService';
+import { useT } from '../i18n/transifex';
 
 interface NetworkSettingsScreenProps {
   networkId?: string;
@@ -24,6 +25,7 @@ export const NetworkSettingsScreen: React.FC<NetworkSettingsScreenProps> = ({
   onSave,
   onCancel,
 }) => {
+  const t = useT();
   const [name, setName] = useState('');
   const [nick, setNick] = useState('');
   const [altNick, setAltNick] = useState('');
@@ -91,10 +93,10 @@ export const NetworkSettingsScreen: React.FC<NetworkSettingsScreenProps> = ({
         setProxyUsername(network.proxy?.username || '');
         setProxyPassword(network.proxy?.password || '');
       } else {
-        setError('Network not found');
+        setError(t('Network not found'));
       }
     } catch (err) {
-      setError('Failed to load network');
+      setError(t('Failed to load network'));
       console.error('Error loading network:', err);
     } finally {
       setLoading(false);
@@ -103,7 +105,7 @@ export const NetworkSettingsScreen: React.FC<NetworkSettingsScreenProps> = ({
 
   const handleSave = async () => {
     if (!name.trim() || !nick.trim() || !realname.trim()) {
-      Alert.alert('Error', 'Please fill in all required fields (Name, Nick, Realname)');
+      Alert.alert(t('Error'), t('Please fill in all required fields (Name, Nick, Realname)'));
       return;
     }
 
@@ -149,84 +151,84 @@ export const NetworkSettingsScreen: React.FC<NetworkSettingsScreenProps> = ({
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={onCancel} style={styles.cancelButton}>
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={styles.cancelText}>{t('Cancel')}</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Network Settings</Text>
+          <Text style={styles.title}>{t('Network Settings')}</Text>
           <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
-            <Text style={styles.saveText}>Save</Text>
+            <Text style={styles.saveText}>{t('Save')}</Text>
           </TouchableOpacity>
         </View>
 
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#2196F3" />
-            <Text style={styles.loadingText}>Loading...</Text>
+            <Text style={styles.loadingText}>{t('Loading...')}</Text>
           </View>
         ) : error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity onPress={loadNetwork} style={styles.retryButton}>
-              <Text style={styles.retryText}>Retry</Text>
+              <Text style={styles.retryText}>{t('Retry')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <ScrollView style={styles.content}>
             <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Basic Information</Text>
-          
+          <Text style={styles.sectionTitle}>{t('Basic Information')}</Text>
+
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Network Name *</Text>
+            <Text style={styles.label}>{t('Network Name *')}</Text>
             <TextInput
               style={styles.input}
               value={name}
               onChangeText={setName}
-              placeholder="e.g., dbase.in.rs"
+              placeholder={t('e.g., dbase.in.rs')}
               placeholderTextColor="#9E9E9E"
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nickname *</Text>
+            <Text style={styles.label}>{t('Nickname *')}</Text>
             <TextInput
               style={styles.input}
               value={nick}
               onChangeText={setNick}
-              placeholder="Your IRC nickname"
+              placeholder={t('Your IRC nickname')}
               placeholderTextColor="#9E9E9E"
               autoCapitalize="none"
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Alternative Nickname</Text>
+            <Text style={styles.label}>{t('Alternative Nickname')}</Text>
             <TextInput
               style={styles.input}
               value={altNick}
               onChangeText={setAltNick}
-              placeholder="Fallback if primary nick is taken"
+              placeholder={t('Fallback if primary nick is taken')}
               placeholderTextColor="#9E9E9E"
               autoCapitalize="none"
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Real Name *</Text>
+            <Text style={styles.label}>{t('Real Name *')}</Text>
             <TextInput
               style={styles.input}
               value={realname}
               onChangeText={setRealname}
-              placeholder="Your real name or description"
+              placeholder={t('Your real name or description')}
               placeholderTextColor="#9E9E9E"
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Ident / Username</Text>
+            <Text style={styles.label}>{t('Ident / Username')}</Text>
             <TextInput
               style={styles.input}
               value={ident}
               onChangeText={setIdent}
-              placeholder="Username for ident (optional)"
+              placeholder={t('Username for ident (optional)')}
               placeholderTextColor="#9E9E9E"
               autoCapitalize="none"
             />
@@ -234,14 +236,14 @@ export const NetworkSettingsScreen: React.FC<NetworkSettingsScreenProps> = ({
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Auto-Join Channels</Text>
+          <Text style={styles.sectionTitle}>{t('Auto-Join Channels')}</Text>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Channels (comma-separated)</Text>
+            <Text style={styles.label}>{t('Channels (comma-separated)')}</Text>
             <TextInput
               style={styles.input}
               value={autoJoinChannels}
               onChangeText={setAutoJoinChannels}
-              placeholder="#channel1, #channel2"
+              placeholder={t('#channel1, #channel2')}
               placeholderTextColor="#9E9E9E"
               autoCapitalize="none"
             />
@@ -249,26 +251,26 @@ export const NetworkSettingsScreen: React.FC<NetworkSettingsScreenProps> = ({
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>SASL PLAIN (Optional)</Text>
+          <Text style={styles.sectionTitle}>{t('SASL PLAIN (Optional)')}</Text>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>SASL Account</Text>
+            <Text style={styles.label}>{t('SASL Account')}</Text>
             <TextInput
               style={styles.input}
               value={saslAccount}
               onChangeText={setSaslAccount}
-              placeholder="SASL account name"
+              placeholder={t('SASL account name')}
               placeholderTextColor="#9E9E9E"
               autoCapitalize="none"
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>SASL Password</Text>
+            <Text style={styles.label}>{t('SASL Password')}</Text>
             <TextInput
               style={styles.input}
               value={saslPassword}
               onChangeText={setSaslPassword}
-              placeholder="SASL password"
+              placeholder={t('SASL password')}
               placeholderTextColor="#9E9E9E"
               secureTextEntry
               autoCapitalize="none"
@@ -277,67 +279,67 @@ export const NetworkSettingsScreen: React.FC<NetworkSettingsScreenProps> = ({
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Proxy (Optional, per network)</Text>
+          <Text style={styles.sectionTitle}>{t('Proxy (Optional, per network)')}</Text>
           <View style={styles.switchRow}>
-            <Text style={styles.label}>Enable proxy (Tor/SOCKS5/HTTP)</Text>
+            <Text style={styles.label}>{t('Enable proxy (Tor/SOCKS5/HTTP)')}</Text>
             <Switch value={proxyEnabled} onValueChange={setProxyEnabled} />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Type (socks5, http, tor)</Text>
+            <Text style={styles.label}>{t('Type (socks5, http, tor)')}</Text>
             <TextInput
               style={[styles.input, !proxyEnabled && styles.inputDisabled]}
               value={proxyType}
               editable={proxyEnabled}
               onChangeText={setProxyType}
-              placeholder="tor"
+              placeholder={t('tor')}
               placeholderTextColor="#9E9E9E"
               autoCapitalize="none"
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Host</Text>
+            <Text style={styles.label}>{t('Host')}</Text>
             <TextInput
               style={[styles.input, !proxyEnabled && styles.inputDisabled]}
               value={proxyHost}
               editable={proxyEnabled}
               onChangeText={setProxyHost}
-              placeholder="127.0.0.1 (Tor default)"
+              placeholder={t('127.0.0.1 (Tor default)')}
               placeholderTextColor="#9E9E9E"
               autoCapitalize="none"
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Port</Text>
+            <Text style={styles.label}>{t('Port')}</Text>
             <TextInput
               style={[styles.input, !proxyEnabled && styles.inputDisabled]}
               value={proxyPort}
               editable={proxyEnabled}
               onChangeText={setProxyPort}
-              placeholder="9050 for Tor, 1080 for SOCKS5"
+              placeholder={t('9050 for Tor, 1080 for SOCKS5')}
               placeholderTextColor="#9E9E9E"
               keyboardType="numeric"
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Username</Text>
+            <Text style={styles.label}>{t('Username')}</Text>
             <TextInput
               style={[styles.input, !proxyEnabled && styles.inputDisabled]}
               value={proxyUsername}
               editable={proxyEnabled}
               onChangeText={setProxyUsername}
-              placeholder="optional"
+              placeholder={t('optional')}
               placeholderTextColor="#9E9E9E"
               autoCapitalize="none"
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>{t('Password')}</Text>
             <TextInput
               style={[styles.input, !proxyEnabled && styles.inputDisabled]}
               value={proxyPassword}
               editable={proxyEnabled}
               onChangeText={setProxyPassword}
-              placeholder="optional"
+              placeholder={t('optional')}
               placeholderTextColor="#9E9E9E"
               secureTextEntry
               autoCapitalize="none"
@@ -346,14 +348,14 @@ export const NetworkSettingsScreen: React.FC<NetworkSettingsScreenProps> = ({
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>SASL EXTERNAL (Client Certificate)</Text>
+          <Text style={styles.sectionTitle}>{t('SASL EXTERNAL (Client Certificate)')}</Text>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Client Certificate (PEM)</Text>
+            <Text style={styles.label}>{t('Client Certificate (PEM)')}</Text>
             <TextInput
               style={[styles.input, styles.multilineInput]}
               value={clientCert}
               onChangeText={setClientCert}
-              placeholder="-----BEGIN CERTIFICATE-----..."
+              placeholder={t('-----BEGIN CERTIFICATE-----...')}
               placeholderTextColor="#9E9E9E"
               multiline
               autoCapitalize="none"
@@ -361,12 +363,12 @@ export const NetworkSettingsScreen: React.FC<NetworkSettingsScreenProps> = ({
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Client Private Key (PEM)</Text>
+            <Text style={styles.label}>{t('Client Private Key (PEM)')}</Text>
             <TextInput
               style={[styles.input, styles.multilineInput]}
               value={clientKey}
               onChangeText={setClientKey}
-              placeholder="-----BEGIN PRIVATE KEY-----..."
+              placeholder={t('-----BEGIN PRIVATE KEY-----...')}
               placeholderTextColor="#9E9E9E"
               multiline
               autoCapitalize="none"

@@ -2,6 +2,9 @@ import sodium from 'react-native-libsodium';
 import { x25519 } from '@noble/curves/ed25519.js';
 import { TextEncoder, TextDecoder } from 'text-encoding';
 import { secureStorageService } from './SecureStorageService';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 type Bundle = { v: 1; idPub: string; encPub: string; sig: string };
 type EncPayload = { v: number; from: string; nonce: string; cipher: string };
@@ -153,9 +156,9 @@ class EncryptedDMService {
 
   parseExternalPayload(raw: string): ExternalPayload {
     const payload = JSON.parse(raw) as ExternalPayload;
-    if (!payload || payload.v !== 1) throw new Error('invalid payload');
+    if (!payload || payload.v !== 1) throw new Error(t('Invalid payload'));
     if (payload.type !== 'encdm-bundle' && payload.type !== 'encdm-fingerprint') {
-      throw new Error('invalid payload type');
+      throw new Error(t('Invalid payload type'));
     }
     return payload;
   }
@@ -163,7 +166,7 @@ class EncryptedDMService {
   async acceptExternalBundle(nick: string, bundle: Bundle, allowReplace: boolean): Promise<void> {
     const compare = await this.compareBundle(nick, bundle);
     if (compare.status === 'changed' && !allowReplace) {
-      throw new Error('key changed');
+      throw new Error(t('Key changed'));
     }
     await this.storeBundle(nick, bundle);
   }
@@ -233,12 +236,12 @@ class EncryptedDMService {
   }
 
   verifyBundle(bundle: Bundle): void {
-    if (bundle.v !== 1) throw new Error('version');
+    if (bundle.v !== 1) throw new Error(t('Invalid version'));
     const encPub = this.fromB64(bundle.encPub);
     const sig = this.fromB64(bundle.sig);
     const idPub = this.fromB64(bundle.idPub);
     const ok = sodium.crypto_sign_verify_detached(sig, encPub, idPub);
-    if (!ok) throw new Error('bad signature');
+    if (!ok) throw new Error(t('Bad signature'));
   }
 
   private async storeBundle(nick: string, bundle: Bundle) {
@@ -285,7 +288,7 @@ class EncryptedDMService {
     return new Promise<void>((resolve, reject) => {
       const timer = setTimeout(() => {
         this.waiters.delete(nick.toLowerCase());
-        reject(new Error('timeout'));
+        reject(new Error(t('Timeout')));
       }, timeoutMs);
       this.waiters.set(nick.toLowerCase(), { resolve, reject, timer });
     });
@@ -365,12 +368,12 @@ class EncryptedDMService {
   // Accept a key offer and share our key back
   async acceptKeyOffer(nick: string, allowReplace = false): Promise<Bundle> {
     const pending = await secureStorageService.getSecret(PENDING_PREFIX + nick.toLowerCase());
-    if (!pending) throw new Error('no pending offer');
+    if (!pending) throw new Error(t('No pending offer'));
 
     const request = JSON.parse(pending) as PendingKeyRequest;
     const compare = await this.compareBundle(nick, request.bundle);
     if (compare.status === 'changed' && !allowReplace) {
-      throw new Error('key changed');
+      throw new Error(t('Key changed'));
     }
     // Store their bundle
     await this.storeBundle(nick, request.bundle);
@@ -510,7 +513,7 @@ class EncryptedDMService {
   async acceptExternalBundleForNetwork(network: string, nick: string, bundle: Bundle, allowReplace: boolean): Promise<void> {
     const compare = await this.compareBundleForNetwork(network, nick, bundle);
     if (compare.status === 'changed' && !allowReplace) {
-      throw new Error('key changed');
+      throw new Error(t('Key changed'));
     }
     await this.storeBundleForNetwork(network, nick, bundle);
   }
@@ -597,12 +600,12 @@ class EncryptedDMService {
 
   async acceptKeyOfferForNetwork(network: string, nick: string, allowReplace = false): Promise<Bundle> {
     const pending = await secureStorageService.getSecret(PENDING_PREFIX + network + ':' + nick.toLowerCase());
-    if (!pending) throw new Error('no pending offer');
+    if (!pending) throw new Error(t('No pending offer'));
 
     const request = JSON.parse(pending) as PendingKeyRequest;
     const compare = await this.compareBundleForNetwork(network, nick, request.bundle);
     if (compare.status === 'changed' && !allowReplace) {
-      throw new Error('key changed');
+      throw new Error(t('Key changed'));
     }
     // Store their bundle with network
     await this.storeBundleForNetwork(network, nick, request.bundle);
@@ -664,7 +667,7 @@ class EncryptedDMService {
   async encrypt(plaintext: string, nick: string) {
     await this.ensureReady();
     const bundle = await this.getBundle(nick);
-    if (!bundle) throw new Error('no bundle');
+    if (!bundle) throw new Error(t('No bundle'));
     const key = await this.deriveKey(bundle.encPub);
     const nonce = sodium.randombytes_buf(sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES);
     const cipher = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
@@ -685,10 +688,10 @@ class EncryptedDMService {
 
   async decrypt(msg: EncPayload, fromNick: string): Promise<string> {
     await this.ensureReady();
-    if (msg.v !== 1) throw new Error('version');
+    if (msg.v !== 1) throw new Error(t('Invalid version'));
     const bundle = await this.getBundle(fromNick);
-    if (!bundle) throw new Error('missing bundle');
-    if (bundle.encPub !== msg.from) throw new Error('pubkey mismatch');
+    if (!bundle) throw new Error(t('Missing bundle'));
+    if (bundle.encPub !== msg.from) throw new Error(t('Public key mismatch'));
     const key = await this.deriveKey(bundle.encPub);
     const plain = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
       null,
@@ -704,7 +707,7 @@ class EncryptedDMService {
   async encryptForNetwork(plaintext: string, network: string, nick: string) {
     await this.ensureReady();
     const bundle = await this.getBundleForNetwork(network, nick);
-    if (!bundle) throw new Error('no bundle');
+    if (!bundle) throw new Error(t('No bundle'));
     const key = await this.deriveKey(bundle.encPub);
     const nonce = sodium.randombytes_buf(sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES);
     const cipher = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
@@ -725,10 +728,10 @@ class EncryptedDMService {
 
   async decryptForNetwork(msg: EncPayload, network: string, fromNick: string): Promise<string> {
     await this.ensureReady();
-    if (msg.v !== 1) throw new Error('version');
+    if (msg.v !== 1) throw new Error(t('Invalid version'));
     const bundle = await this.getBundleForNetwork(network, fromNick);
-    if (!bundle) throw new Error('missing bundle');
-    if (bundle.encPub !== msg.from) throw new Error('pubkey mismatch');
+    if (!bundle) throw new Error(t('Missing bundle'));
+    if (bundle.encPub !== msg.from) throw new Error(t('Public key mismatch'));
     const key = await this.deriveKey(bundle.encPub);
     const plain = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
       null,
@@ -811,7 +814,7 @@ class EncryptedDMService {
   async copyBundleToNetwork(fromNetwork: string, toNetwork: string, nick: string): Promise<void> {
     const bundle = await this.getBundleForNetwork(fromNetwork, nick);
     if (!bundle) {
-      throw new Error(`No key found for ${nick} on ${fromNetwork}`);
+      throw new Error(t('No key found for {nick} on {network}', { nick, network: fromNetwork }));
     }
     const trust = await this.getTrustRecordForNetwork(fromNetwork, nick);
 
@@ -959,7 +962,7 @@ class EncryptedDMService {
       const nonceBytes = sodium.crypto_secretbox_NONCEBYTES;
 
       if (combined.length < saltBytes + nonceBytes) {
-        throw new Error('Invalid backup format');
+        throw new Error(t('Invalid backup format'));
       }
 
       const salt = combined.slice(0, saltBytes);
@@ -991,7 +994,7 @@ class EncryptedDMService {
       };
 
       if (backup.version !== 1) {
-        throw new Error('Unsupported backup version');
+        throw new Error(t('Unsupported backup version'));
       }
 
       // Import all keys
@@ -1023,7 +1026,7 @@ class EncryptedDMService {
       return importedCount;
     } catch (e) {
       console.error('Failed to import backup:', e);
-      throw new Error('Failed to decrypt backup. Check your password.');
+      throw new Error(t('Failed to decrypt backup. Check your password.'));
     }
   }
 

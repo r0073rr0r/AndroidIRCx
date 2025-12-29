@@ -8,26 +8,36 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  ActivityIndicator,
+  Linking,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import {useTheme} from '../hooks/useTheme';
+import {useT} from '../i18n/transifex';
 import {settingsService} from '../services/SettingsService';
 import type {IRCNetworkConfig, IRCServerConfig} from '../services/SettingsService';
 import {identityProfilesService} from '../services/IdentityProfilesService';
+import {consentService} from '../services/ConsentService';
 
 interface FirstRunSetupScreenProps {
   onComplete: (networkConfig: IRCNetworkConfig) => void;
   onSkip?: () => void;
 }
 
-type SetupStep = 'welcome' | 'identity' | 'network' | 'complete';
+type SetupStep = 'welcome' | 'privacy' | 'identity' | 'network' | 'complete';
 
 export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
   onComplete,
   onSkip,
 }) => {
+  const t = useT();
   const {colors} = useTheme();
   const styles = createStyles(colors);
   const [step, setStep] = useState<SetupStep>('welcome');
+
+  // Privacy/consent state
+  const [consentLoading, setConsentLoading] = useState(false);
+  const [consentHandled, setConsentHandled] = useState(false);
 
   // Identity fields
   const [nickname, setNickname] = useState('AndroidIRCX');
@@ -43,30 +53,34 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
   const [useSSL, setUseSSL] = useState(true);
 
   const getStepNumber = () => {
-    if (step === 'welcome') return '1/3';
-    if (step === 'identity') return '2/3';
-    if (step === 'network') return '3/3';
+    if (step === 'welcome') return '1/4';
+    if (step === 'privacy') return '2/4';
+    if (step === 'identity') return '3/4';
+    if (step === 'network') return '4/4';
     return '';
   };
 
   const getStepTitle = () => {
-    if (step === 'welcome') return 'Welcome to AndroidIRCX';
-    if (step === 'identity') return 'Set Up Your Identity';
-    if (step === 'network') return 'Choose Your Network';
-    if (step === 'complete') return 'All Set!';
+    if (step === 'welcome') return t('Welcome to AndroidIRCX');
+    if (step === 'privacy') return t('Privacy & Ads');
+    if (step === 'identity') return t('Set Up Your Identity');
+    if (step === 'network') return t('Choose Your Network');
+    if (step === 'complete') return t('All Set!');
     return '';
   };
 
   const handleNext = () => {
     if (step === 'welcome') {
+      setStep('privacy');
+    } else if (step === 'privacy') {
       setStep('identity');
     } else if (step === 'identity') {
       if (!nickname.trim()) {
-        Alert.alert('Required', 'Please enter a nickname');
+        Alert.alert(t('Required'), t('Please enter a nickname'));
         return;
       }
       if (!realname.trim()) {
-        Alert.alert('Required', 'Please enter your real name');
+        Alert.alert(t('Required'), t('Please enter your real name'));
         return;
       }
       setStep('network');
@@ -76,8 +90,10 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
   };
 
   const handleBack = () => {
-    if (step === 'identity') {
+    if (step === 'privacy') {
       setStep('welcome');
+    } else if (step === 'identity') {
+      setStep('privacy');
     } else if (step === 'network') {
       setStep('identity');
     }
@@ -91,7 +107,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
 
       // Create identity profile with user's entered data
       const newProfile = await identityProfilesService.add({
-        name: `${nickname.trim()} Profile`,
+        name: t('{nick} Profile', {nick: nickname.trim()}),
         nick: nickname.trim(),
         altNick: altNick.trim() || `${nickname.trim()}_`,
         realname: realname.trim(),
@@ -132,7 +148,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
       } else {
         // Custom network - create new
         if (!customNetwork.trim() || !customServer.trim()) {
-          Alert.alert('Required', 'Please enter network name and server');
+          Alert.alert(t('Required'), t('Please enter network name and server'));
           return;
         }
 
@@ -175,7 +191,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
       // Show completion step
       setStep('complete');
     } catch (error) {
-      Alert.alert('Error', 'Failed to save network configuration');
+      Alert.alert(t('Error'), t('Failed to save network configuration'));
       console.error('FirstRunSetup save error:', error);
     }
   };
@@ -202,49 +218,195 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
         />
       </View>
 
-      <Text style={styles.appName}>AndroidIRCX</Text>
-      <Text style={styles.subtitle}>Let's get you connected to IRC</Text>
+      <Text style={styles.appName}>{t('AndroidIRCX')}</Text>
+      <Text style={styles.subtitle}>{t("Let's get you connected to IRC")}</Text>
 
       <View style={styles.featureList}>
         <View style={styles.featureItem}>
           <Text style={styles.featureBullet}>•</Text>
-          <Text style={styles.featureText}>Multi-network support</Text>
+          <Text style={styles.featureText}>{t('Multi-network support')}</Text>
         </View>
         <View style={styles.featureItem}>
           <Text style={styles.featureBullet}>•</Text>
-          <Text style={styles.featureText}>Full IRCv3 compliance (18 capabilities)</Text>
+          <Text style={styles.featureText}>{t('Full IRCv3 compliance (18 capabilities)')}</Text>
         </View>
         <View style={styles.featureItem}>
           <Text style={styles.featureBullet}>•</Text>
-          <Text style={styles.featureText}>End-to-end encryption</Text>
+          <Text style={styles.featureText}>{t('End-to-end encryption')}</Text>
         </View>
         <View style={styles.featureItem}>
           <Text style={styles.featureBullet}>•</Text>
-          <Text style={styles.featureText}>Real-time typing indicators</Text>
+          <Text style={styles.featureText}>{t('Real-time typing indicators')}</Text>
         </View>
         <View style={styles.featureItem}>
           <Text style={styles.featureBullet}>•</Text>
-          <Text style={styles.featureText}>Background connections</Text>
+          <Text style={styles.featureText}>{t('Background connections')}</Text>
         </View>
       </View>
     </ScrollView>
   );
 
+  const renderPrivacy = () => {
+    const handleAcceptAndContinue = async () => {
+      try {
+        setConsentLoading(true);
+
+        // Try to show the official consent form (for EU/EEA/UK/California users)
+        const formShown = await consentService.showConsentFormIfRequired();
+
+        if (!formShown) {
+          // If no form was required (user not in regulated region),
+          // show our own explanation and get acceptance
+          Alert.alert(
+            t('Privacy Agreement'),
+            t('By clicking Accept, you agree to:\n\n• Collection of device info, IP address, and location for ads\n• Use of Google Mobile Ads (personalized or non-personalized)\n• Our Privacy Policy and Terms\n\nYou can change these settings anytime in Settings > Privacy & Ads.'),
+            [
+              {
+                text: t('Read Privacy Policy'),
+                onPress: () => {
+                  const url = consentService.getPrivacyPolicyUrl();
+                  Linking.openURL(url).catch(() => {
+                    Alert.alert(t('Error'), t('Failed to open privacy policy.'));
+                  });
+                },
+                style: 'default',
+              },
+              {
+                text: t('Accept & Continue'),
+                onPress: async () => {
+                  try {
+                    await consentService.acceptConsentManually();
+                    setConsentHandled(true);
+                  } catch (error) {
+                    console.error('Failed to save consent:', error);
+                    Alert.alert(t('Error'), t('Failed to save consent. Please try again.'));
+                  }
+                },
+                style: 'default',
+              },
+            ]
+          );
+        } else {
+          // Form was shown and handled by Google UMP
+          setConsentHandled(true);
+        }
+      } catch (error) {
+        console.error('Consent error:', error);
+        // Even if there's an error, allow user to continue
+        setConsentHandled(true);
+      } finally {
+        setConsentLoading(false);
+      }
+    };
+
+    const handleOpenPrivacyPolicy = () => {
+      const url = consentService.getPrivacyPolicyUrl();
+      Linking.openURL(url).catch(() => {
+        Alert.alert(t('Error'), t('Failed to open privacy policy.'));
+      });
+    };
+
+    return (
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        <Text style={styles.description}>
+          {t('AndroidIRCX is free to use, supported by ads')}
+        </Text>
+
+        <View style={styles.privacyCard}>
+          <Text style={styles.privacyTitle}>{t('What We Collect')}</Text>
+          <Text style={styles.privacyText}>
+            {t('To provide free features, we use Google Mobile Ads which may collect:')}
+          </Text>
+          <Text style={styles.privacyBullet}>• {t('Device information')}</Text>
+          <Text style={styles.privacyBullet}>• {t('IP address and location')}</Text>
+          <Text style={styles.privacyBullet}>• {t('Ad interaction data')}</Text>
+        </View>
+
+        <View style={styles.privacyCard}>
+          <Text style={styles.privacyTitle}>{t('Your Choices')}</Text>
+          <Text style={styles.privacyText}>
+            {t('You can choose personalized ads (better rewards) or non-personalized ads (more privacy).')}
+          </Text>
+          <Text style={[styles.privacyText, {marginTop: 8}]}>
+            {t('You can change this anytime in Settings.')}
+          </Text>
+        </View>
+
+        {!consentHandled ? (
+          <View style={styles.privacyInfoBox}>
+            <View style={styles.privacyInfoTitleRow}>
+              <Icon name="clipboard-list" size={16} color={colors.warning} solid style={styles.privacyInfoIcon} />
+              <Text style={styles.privacyInfoTitle}>{t('Important')}</Text>
+            </View>
+            <Text style={styles.privacyInfoText}>
+              {t('You must accept our privacy terms to use this app. Click the button below to review and accept.')}
+            </Text>
+          </View>
+        ) : (
+          <View style={[styles.privacyInfoBox, {backgroundColor: colors.primary + '20', borderColor: colors.primary}]}>
+            <View style={styles.privacyInfoTitleRow}>
+              <Icon name="check-circle" size={16} color={colors.primary} solid style={styles.privacyInfoIcon} />
+              <Text style={styles.privacyInfoTitle}>{t('Accepted')}</Text>
+            </View>
+            <Text style={styles.privacyInfoText}>
+              {t('You have accepted the privacy terms. You can change settings anytime in Settings.')}
+            </Text>
+          </View>
+        )}
+
+        <TouchableOpacity
+          style={[styles.consentButton, consentHandled && styles.consentButtonAccepted]}
+          onPress={handleAcceptAndContinue}
+          disabled={consentLoading || consentHandled}>
+          {consentLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <View style={styles.consentButtonContent}>
+              <View style={styles.consentButtonTextRow}>
+                {consentHandled && <Icon name="check" size={16} color="#fff" solid style={styles.consentButtonIcon} />}
+                <Text style={styles.consentButtonText}>
+                  {consentHandled ? t('Privacy Terms Accepted') : t('Accept Privacy Terms & Continue')}
+                </Text>
+              </View>
+              <Text style={styles.consentButtonSubtext}>
+                {consentHandled
+                  ? t('You can review or change in Settings')
+                  : t('Tap to review and accept (required to continue)')}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.privacyLink}
+          onPress={handleOpenPrivacyPolicy}>
+          <Text style={styles.privacyLinkText}>{t('📄 Read Full Privacy Policy')}</Text>
+        </TouchableOpacity>
+
+        <View style={styles.complianceNote}>
+          <Text style={styles.complianceText}>
+            {t('We comply with GDPR, CCPA, and other privacy laws. Your data is protected.')}
+          </Text>
+        </View>
+      </ScrollView>
+    );
+  };
+
   const renderIdentity = () => (
     <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
       <Text style={styles.description}>
-        This is how you'll appear to other users on IRC
+        {t("This is how you'll appear to other users on IRC")}
       </Text>
 
       <View style={styles.formGroup}>
         <Text style={styles.label}>
-          Nickname <Text style={styles.required}>*</Text>
+          {t('Nickname')} <Text style={styles.required}>*</Text>
         </Text>
         <TextInput
           style={styles.input}
           value={nickname}
           onChangeText={setNickname}
-          placeholder="AndroidIRCX"
+          placeholder={t('AndroidIRCX')}
           placeholderTextColor={colors.textSecondary}
           autoCapitalize="none"
           autoCorrect={false}
@@ -252,39 +414,39 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
       </View>
 
       <View style={styles.formGroup}>
-        <Text style={styles.label}>Alternative Nickname</Text>
+        <Text style={styles.label}>{t('Alternative Nickname')}</Text>
         <TextInput
           style={styles.input}
           value={altNick}
           onChangeText={setAltNick}
-          placeholder="AndroidIRCX_"
+          placeholder={t('AndroidIRCX_')}
           placeholderTextColor={colors.textSecondary}
           autoCapitalize="none"
           autoCorrect={false}
         />
-        <Text style={styles.hint}>Used if primary nickname is taken</Text>
+        <Text style={styles.hint}>{t('Used if primary nickname is taken')}</Text>
       </View>
 
       <View style={styles.formGroup}>
         <Text style={styles.label}>
-          Real Name <Text style={styles.required}>*</Text>
+          {t('Real Name')} <Text style={styles.required}>*</Text>
         </Text>
         <TextInput
           style={styles.input}
           value={realname}
           onChangeText={setRealname}
-          placeholder="Your Name"
+          placeholder={t('Your Name')}
           placeholderTextColor={colors.textSecondary}
         />
       </View>
 
       <View style={styles.formGroup}>
-        <Text style={styles.label}>Username/Ident</Text>
+        <Text style={styles.label}>{t('Username/Ident')}</Text>
         <TextInput
           style={styles.input}
           value={username}
           onChangeText={setUsername}
-          placeholder="androidircx"
+          placeholder={t('androidircx')}
           placeholderTextColor={colors.textSecondary}
           autoCapitalize="none"
           autoCorrect={false}
@@ -296,7 +458,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
   const renderNetwork = () => (
     <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
       <Text style={styles.description}>
-        Connect to an IRC server to start chatting
+        {t('Connect to an IRC server to start chatting')}
       </Text>
 
       <TouchableOpacity
@@ -310,10 +472,10 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
             {useRecommended && <View style={styles.radioInner} />}
           </View>
           <View style={styles.optionContent}>
-            <Text style={styles.optionTitle}>Recommended Server</Text>
-            <Text style={styles.optionValue}>irc.dbase.in.rs (Port 6697, SSL)</Text>
+            <Text style={styles.optionTitle}>{t('Recommended Server')}</Text>
+            <Text style={styles.optionValue}>{t('irc.dbase.in.rs (Port 6697, SSL)')}</Text>
             <Text style={styles.optionDescription}>
-              Official AndroidIRCX server with full IRCv3 support
+              {t('Official AndroidIRCX server with full IRCv3 support')}
             </Text>
           </View>
         </View>
@@ -330,9 +492,9 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
             {!useRecommended && <View style={styles.radioInner} />}
           </View>
           <View style={styles.optionContent}>
-            <Text style={styles.optionTitle}>Custom Server</Text>
+            <Text style={styles.optionTitle}>{t('Custom Server')}</Text>
             <Text style={styles.optionDescription}>
-              Connect to a different IRC network
+              {t('Connect to a different IRC network')}
             </Text>
           </View>
         </View>
@@ -342,13 +504,13 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
         <View style={styles.customServerForm}>
           <View style={styles.formGroup}>
             <Text style={styles.label}>
-              Network Name <Text style={styles.required}>*</Text>
+              {t('Network Name')} <Text style={styles.required}>*</Text>
             </Text>
             <TextInput
               style={styles.input}
               value={customNetwork}
               onChangeText={setCustomNetwork}
-              placeholder="libera"
+              placeholder={t('libera')}
               placeholderTextColor={colors.textSecondary}
               autoCapitalize="none"
               autoCorrect={false}
@@ -357,13 +519,13 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>
-              Server Hostname <Text style={styles.required}>*</Text>
+              {t('Server Hostname')} <Text style={styles.required}>*</Text>
             </Text>
             <TextInput
               style={styles.input}
               value={customServer}
               onChangeText={setCustomServer}
-              placeholder="irc.libera.chat"
+              placeholder={t('irc.libera.chat')}
               placeholderTextColor={colors.textSecondary}
               autoCapitalize="none"
               autoCorrect={false}
@@ -371,12 +533,12 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Port</Text>
+            <Text style={styles.label}>{t('Port')}</Text>
             <TextInput
               style={styles.input}
               value={customPort}
               onChangeText={setCustomPort}
-              placeholder="6697"
+              placeholder={t('6697')}
               placeholderTextColor={colors.textSecondary}
               keyboardType="numeric"
             />
@@ -388,7 +550,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
             <View style={[styles.checkbox, useSSL && styles.checkboxSelected]}>
               {useSSL && <Text style={styles.checkboxCheck}>✓</Text>}
             </View>
-            <Text style={styles.checkboxLabel}>Use SSL/TLS (Recommended)</Text>
+            <Text style={styles.checkboxLabel}>{t('Use SSL/TLS (Recommended)')}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -398,22 +560,24 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
   const renderComplete = () => (
     <View style={[styles.content, styles.completeContainer]}>
       <Text style={styles.successIcon}>✓</Text>
-      <Text style={styles.successTitle}>You're all set!</Text>
+      <Text style={styles.successTitle}>{t("You're all set!")}</Text>
       <Text style={styles.successMessage}>
-        Ready to connect to {useRecommended ? 'irc.dbase.in.rs' : customServer} as{' '}
-        {nickname}
+        {t('Ready to connect to {server} as {nick}', {
+          server: useRecommended ? 'irc.dbase.in.rs' : customServer,
+          nick: nickname,
+        })}
       </Text>
 
       <View style={styles.completeButtons}>
         <TouchableOpacity
           style={[styles.primaryButton, styles.completeButton]}
           onPress={handleConnectNow}>
-          <Text style={styles.primaryButtonText}>Connect Now</Text>
+          <Text style={styles.primaryButtonText}>{t('Connect Now')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.secondaryButton, styles.completeButton]}
           onPress={handleConnectLater}>
-          <Text style={styles.secondaryButtonText}>Connect Later</Text>
+          <Text style={styles.secondaryButtonText}>{t('Connect Later')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -423,6 +587,8 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
     switch (step) {
       case 'welcome':
         return renderWelcome();
+      case 'privacy':
+        return renderPrivacy();
       case 'identity':
         return renderIdentity();
       case 'network':
@@ -450,7 +616,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
         <Text style={styles.headerTitle}>{getStepTitle()}</Text>
         {onSkip && step === 'welcome' && (
           <TouchableOpacity onPress={onSkip} style={styles.skipButton}>
-            <Text style={styles.skipButtonText}>Skip</Text>
+            <Text style={styles.skipButtonText}>{t('Skip')}</Text>
           </TouchableOpacity>
         )}
         {step !== 'welcome' && <View style={styles.skipButton} />}
@@ -463,7 +629,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
       <View style={styles.footer}>
         {step !== 'welcome' && (
           <TouchableOpacity style={styles.secondaryButton} onPress={handleBack}>
-            <Text style={styles.secondaryButtonText}>Back</Text>
+            <Text style={styles.secondaryButtonText}>{t('Back')}</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity
@@ -473,7 +639,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
           ]}
           onPress={handleNext}>
           <Text style={styles.primaryButtonText}>
-            {step === 'network' ? 'Complete Setup' : 'Next'}
+            {step === 'network' ? t('Complete Setup') : t('Next')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -760,5 +926,116 @@ const createStyles = (colors: any) =>
     },
     completeButton: {
       width: '100%',
+    },
+    privacyCard: {
+      backgroundColor: colors.surface || '#1E1E1E',
+      borderWidth: 1,
+      borderColor: colors.border || '#333333',
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 16,
+    },
+    privacyTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.text || '#FFFFFF',
+      marginBottom: 8,
+    },
+    privacyText: {
+      fontSize: 14,
+      color: colors.textSecondary || '#B0B0B0',
+      lineHeight: 20,
+      marginBottom: 4,
+    },
+    privacyBullet: {
+      fontSize: 14,
+      color: colors.textSecondary || '#B0B0B0',
+      lineHeight: 22,
+      marginLeft: 8,
+    },
+    consentButton: {
+      backgroundColor: colors.buttonPrimary || colors.primary || '#2196F3',
+      borderRadius: 12,
+      padding: 16,
+      marginTop: 8,
+      marginBottom: 16,
+      alignItems: 'center',
+      minHeight: 70,
+      justifyContent: 'center',
+    },
+    consentButtonContent: {
+      alignItems: 'center',
+    },
+    consentButtonTextRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    consentButtonIcon: {
+      marginRight: 8,
+    },
+    consentButtonText: {
+      color: colors.buttonPrimaryText || '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    consentButtonSubtext: {
+      color: 'rgba(255, 255, 255, 0.8)',
+      fontSize: 12,
+      textAlign: 'center',
+    },
+    consentButtonAccepted: {
+      backgroundColor: colors.success || '#4CAF50',
+      opacity: 0.7,
+    },
+    privacyInfoBox: {
+      backgroundColor: colors.warning || '#FF9800' + '20',
+      borderWidth: 1,
+      borderColor: colors.warning || '#FF9800',
+      borderRadius: 12,
+      padding: 16,
+      marginTop: 8,
+      marginBottom: 16,
+    },
+    privacyInfoTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    privacyInfoIcon: {
+      marginRight: 8,
+    },
+    privacyInfoTitle: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.text || '#FFFFFF',
+    },
+    privacyInfoText: {
+      fontSize: 13,
+      color: colors.text || '#FFFFFF',
+      lineHeight: 20,
+    },
+    privacyLink: {
+      padding: 12,
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    privacyLinkText: {
+      color: colors.primary || '#2196F3',
+      fontSize: 14,
+      textDecorationLine: 'underline',
+    },
+    complianceNote: {
+      backgroundColor: colors.surface || '#1E1E1E',
+      borderRadius: 8,
+      padding: 12,
+      borderLeftWidth: 3,
+      borderLeftColor: colors.primary || '#2196F3',
+    },
+    complianceText: {
+      fontSize: 12,
+      color: colors.textSecondary || '#B0B0B0',
+      lineHeight: 18,
+      fontStyle: 'italic',
     },
   });

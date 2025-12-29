@@ -1,5 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IRCNetworkConfig, IRCServerConfig } from './SettingsService';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 export interface ConnectionProfile {
   id: string;
@@ -135,6 +138,18 @@ class ConnectionProfilesService {
     }
   }
 
+  private localizeTemplate(template: ProfileTemplate): ProfileTemplate {
+    return {
+      ...template,
+      description: t(template.description),
+      network: {
+        ...template.network,
+        nick: template.network.nick ? t(template.network.nick) : template.network.nick,
+        realname: template.network.realname ? t(template.network.realname) : template.network.realname,
+      },
+    };
+  }
+
   private async save(): Promise<void> {
     try {
       await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.profiles));
@@ -254,14 +269,14 @@ class ConnectionProfilesService {
    * Get templates
    */
   getTemplates(): ProfileTemplate[] {
-    return [...this.TEMPLATES];
+    return this.TEMPLATES.map(template => this.localizeTemplate(template));
   }
 
   /**
    * Get templates by category
    */
   getTemplatesByCategory(category: string): ProfileTemplate[] {
-    return this.TEMPLATES.filter(t => t.category === category);
+    return this.TEMPLATES.filter(t => t.category === category).map(template => this.localizeTemplate(template));
   }
 
   /**

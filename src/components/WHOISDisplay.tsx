@@ -14,6 +14,7 @@ import { ircService } from '../services/IRCService';
 import { connectionManager } from '../services/ConnectionManager';
 import { userActivityService, UserActivity } from '../services/UserActivityService';
 import { formatIRCTextAsComponent } from '../utils/IRCFormatter';
+import { useT } from '../i18n/transifex';
 
 interface WHOISDisplayProps {
   visible: boolean;
@@ -28,6 +29,7 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
   network,
   onClose,
 }) => {
+  const t = useT();
   const [whoisInfo, setWhoisInfo] = useState<WHOISInfo | undefined>();
   const [loading, setLoading] = useState(false);
   const [showNoteInput, setShowNoteInput] = useState(false);
@@ -63,7 +65,7 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
       ? connectionManager.getConnection(network)?.ircService
       : connectionManager.getActiveConnection()?.ircService) || ircService;
     if (!irc.getConnectionStatus() || !irc.isRegistered()) {
-      Alert.alert('WHOIS Error', 'Not connected or not registered yet.');
+      Alert.alert(t('WHOIS Error'), t('Not connected or not registered yet.'));
       return;
     }
     setLoading(true);
@@ -123,11 +125,11 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
   const handleSaveNote = async () => {
     if (noteText.trim()) {
       await userService.addUserNote(nick, noteText.trim(), network);
-      Alert.alert('Success', 'Note saved');
+      Alert.alert(t('Success'), t('Note saved'));
       setShowNoteInput(false);
     } else {
       await userService.removeUserNote(nick, network);
-      Alert.alert('Success', 'Note removed');
+      Alert.alert(t('Success'), t('Note removed'));
       setShowNoteInput(false);
     }
   };
@@ -135,27 +137,27 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
   const handleSaveAlias = async () => {
     if (aliasText.trim()) {
       await userService.addUserAlias(nick, aliasText.trim(), network);
-      Alert.alert('Success', 'Alias saved');
+      Alert.alert(t('Success'), t('Alias saved'));
       setShowAliasInput(false);
     } else {
       await userService.removeUserAlias(nick, network);
-      Alert.alert('Success', 'Alias removed');
+      Alert.alert(t('Success'), t('Alias removed'));
       setShowAliasInput(false);
     }
   };
 
   const handleIgnore = async () => {
     Alert.alert(
-      'Ignore User',
-      `Ignore ${nick}?`,
+      t('Ignore User'),
+      t('Ignore {nick}?', { nick }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'Ignore',
+          text: t('Ignore'),
           style: 'destructive',
           onPress: async () => {
             await userService.ignoreUser(nick, undefined, network);
-            Alert.alert('Success', `${nick} has been ignored`);
+            Alert.alert(t('Success'), t('{nick} has been ignored', { nick }));
             onClose();
           },
         },
@@ -165,7 +167,7 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
 
   const handleUnignore = async () => {
     await userService.unignoreUser(nick, network);
-    Alert.alert('Success', `${nick} is no longer ignored`);
+    Alert.alert(t('Success'), t('{nick} is no longer ignored', { nick }));
   };
 
   const isIgnored = userService.isUserIgnored(nick, undefined, undefined, network);
@@ -180,26 +182,26 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
       onRequestClose={onClose}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>WHOIS: {nick}</Text>
+          <Text style={styles.headerTitle}>{t('WHOIS: {nick}', { nick })}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Close</Text>
+            <Text style={styles.closeButtonText}>{t('Close')}</Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView style={styles.content}>
           {loading && !whoisInfo && (
             <View style={styles.loadingContainer}>
-              <Text style={styles.loadingText}>Loading WHOIS information...</Text>
+              <Text style={styles.loadingText}>{t('Loading WHOIS information...')}</Text>
             </View>
           )}
 
           {whoisInfo && (
             <>
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>User Information</Text>
+                <Text style={styles.sectionTitle}>{t('User Information')}</Text>
                 {whoisInfo.realname && (
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Real Name:</Text>
+                    <Text style={styles.infoLabel}>{t('Real Name:')}</Text>
                     <Text style={styles.infoValue}>
                       {formatIRCTextAsComponent(whoisInfo.realname, styles.infoValue)}
                     </Text>
@@ -207,7 +209,7 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
                 )}
                 {whoisInfo.username && whoisInfo.hostname && (
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Host:</Text>
+                    <Text style={styles.infoLabel}>{t('Host:')}</Text>
                     <Text style={styles.infoValue}>
                       {whoisInfo.username}@{whoisInfo.hostname}
                     </Text>
@@ -215,7 +217,7 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
                 )}
                 {whoisInfo.account && (
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Account:</Text>
+                    <Text style={styles.infoLabel}>{t('Account:')}</Text>
                     <Text style={styles.infoValue}>{whoisInfo.account}</Text>
                   </View>
                 )}
@@ -223,9 +225,9 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
 
               {whoisInfo.server && (
                 <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Server</Text>
+                  <Text style={styles.sectionTitle}>{t('Server')}</Text>
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Server:</Text>
+                    <Text style={styles.infoLabel}>{t('Server:')}</Text>
                     <Text style={styles.infoValue}>{whoisInfo.server}</Text>
                   </View>
                   {whoisInfo.serverInfo && (
@@ -238,13 +240,13 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
 
               {whoisInfo.away && (
                 <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Status</Text>
+                  <Text style={styles.sectionTitle}>{t('Status')}</Text>
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Away:</Text>
+                    <Text style={styles.infoLabel}>{t('Away:')}</Text>
                     <Text style={styles.infoValue}>
                       {whoisInfo.awayMessage
                         ? formatIRCTextAsComponent(whoisInfo.awayMessage, styles.infoValue)
-                        : 'User is away'
+                        : t('User is away')
                       }
                     </Text>
                   </View>
@@ -253,16 +255,16 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
 
               {whoisInfo.idle !== undefined && (
                 <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Activity</Text>
+                  <Text style={styles.sectionTitle}>{t('Activity')}</Text>
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Idle:</Text>
+                    <Text style={styles.infoLabel}>{t('Idle:')}</Text>
                     <Text style={styles.infoValue}>
-                      {Math.floor(whoisInfo.idle / 60)} minutes
+                      {t('{minutes} minutes', { minutes: Math.floor(whoisInfo.idle / 60) })}
                     </Text>
                   </View>
                   {whoisInfo.signon && (
                     <View style={styles.infoRow}>
-                      <Text style={styles.infoLabel}>Signed on:</Text>
+                      <Text style={styles.infoLabel}>{t('Signed on:')}</Text>
                       <Text style={styles.infoValue}>
                         {new Date(whoisInfo.signon).toLocaleString()}
                       </Text>
@@ -273,7 +275,7 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
 
               {whoisInfo.channels && whoisInfo.channels.length > 0 && (
                 <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Channels</Text>
+                  <Text style={styles.sectionTitle}>{t('Channels')}</Text>
                   <Text style={styles.infoValue}>
                     {whoisInfo.channels.join(', ')}
                   </Text>
@@ -284,28 +286,28 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
 
           {!whoisInfo && !loading && (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No WHOIS information available</Text>
+              <Text style={styles.emptyText}>{t('No WHOIS information available')}</Text>
               <TouchableOpacity style={styles.button} onPress={loadWHOIS}>
-                <Text style={styles.buttonText}>Request WHOIS</Text>
+                <Text style={styles.buttonText}>{t('Request WHOIS')}</Text>
               </TouchableOpacity>
             </View>
           )}
 
           {/* User Notes */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>User Note</Text>
+            <Text style={styles.sectionTitle}>{t('User Note')}</Text>
             {!showNoteInput ? (
               <>
                 {noteText ? (
                   <Text style={styles.noteText}>{noteText}</Text>
                 ) : (
-                  <Text style={styles.emptyText}>No note</Text>
+                  <Text style={styles.emptyText}>{t('No note')}</Text>
                 )}
                 <TouchableOpacity
                   style={styles.button}
                   onPress={() => setShowNoteInput(true)}>
                   <Text style={styles.buttonText}>
-                    {noteText ? 'Edit Note' : 'Add Note'}
+                    {noteText ? t('Edit Note') : t('Add Note')}
                   </Text>
                 </TouchableOpacity>
               </>
@@ -315,7 +317,7 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
                   style={styles.input}
                   value={noteText}
                   onChangeText={setNoteText}
-                  placeholder="Enter note about this user"
+                  placeholder={t('Enter note about this user')}
                   multiline
                 />
                 <View style={styles.buttonRow}>
@@ -325,10 +327,10 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
                       setShowNoteInput(false);
                       loadUserData();
                     }}>
-                    <Text style={styles.buttonText}>Cancel</Text>
+                    <Text style={styles.buttonText}>{t('Cancel')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.button} onPress={handleSaveNote}>
-                    <Text style={styles.buttonText}>Save</Text>
+                    <Text style={styles.buttonText}>{t('Save')}</Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -337,42 +339,45 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
 
           {/* Activity */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Activity</Text>
+            <Text style={styles.sectionTitle}>{t('Activity')}</Text>
             {activity ? (
               <>
                 <Text style={styles.listItemText}>
-                  {`Last action: ${activity.lastAction}${activity.channel ? ` (${activity.channel})` : ''}`}
+                  {t('Last action: {action}{channel}', {
+                    action: activity.lastAction,
+                    channel: activity.channel ? ` (${activity.channel})` : '',
+                  })}
                 </Text>
                 <Text style={styles.listItemText}>
-                  {`Last seen: ${new Date(activity.lastSeenAt).toLocaleString()}`}
+                  {t('Last seen: {time}', { time: new Date(activity.lastSeenAt).toLocaleString() })}
                 </Text>
                 {activity.text ? (
                   <Text style={styles.listItemText} numberOfLines={2}>
-                    {'Context: '}
+                    {t('Context: ')}
                     {formatIRCTextAsComponent(activity.text, styles.listItemText)}
                   </Text>
                 ) : null}
               </>
             ) : (
-              <Text style={styles.emptyText}>No recent activity tracked</Text>
+              <Text style={styles.emptyText}>{t('No recent activity tracked')}</Text>
             )}
           </View>
 
           {/* User Alias */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>User Alias</Text>
+            <Text style={styles.sectionTitle}>{t('User Alias')}</Text>
             {!showAliasInput ? (
               <>
                 {aliasText ? (
                   <Text style={styles.aliasText}>{aliasText}</Text>
                 ) : (
-                  <Text style={styles.emptyText}>No alias</Text>
+                  <Text style={styles.emptyText}>{t('No alias')}</Text>
                 )}
                 <TouchableOpacity
                   style={styles.button}
                   onPress={() => setShowAliasInput(true)}>
                   <Text style={styles.buttonText}>
-                    {aliasText ? 'Edit Alias' : 'Add Alias'}
+                    {aliasText ? t('Edit Alias') : t('Add Alias')}
                   </Text>
                 </TouchableOpacity>
               </>
@@ -382,7 +387,7 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
                   style={styles.input}
                   value={aliasText}
                   onChangeText={setAliasText}
-                  placeholder="Enter alias for this user"
+                  placeholder={t('Enter alias for this user')}
                 />
                 <View style={styles.buttonRow}>
                   <TouchableOpacity
@@ -391,10 +396,10 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
                       setShowAliasInput(false);
                       loadUserData();
                     }}>
-                    <Text style={styles.buttonText}>Cancel</Text>
+                    <Text style={styles.buttonText}>{t('Cancel')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.button} onPress={handleSaveAlias}>
-                    <Text style={styles.buttonText}>Save</Text>
+                    <Text style={styles.buttonText}>{t('Save')}</Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -403,24 +408,24 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
 
           {/* Actions */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Actions</Text>
+            <Text style={styles.sectionTitle}>{t('Actions')}</Text>
             {isIgnored ? (
               <TouchableOpacity style={styles.button} onPress={handleUnignore}>
-                <Text style={styles.buttonText}>Unignore User</Text>
+                <Text style={styles.buttonText}>{t('Unignore User')}</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
                 style={[styles.button, styles.buttonDanger]}
                 onPress={handleIgnore}>
                 <Text style={[styles.buttonText, styles.buttonTextWhite]}>
-                  Ignore User
+                  {t('Ignore User')}
                 </Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity
               style={styles.button}
               onPress={() => userService.requestWHOWAS(nick, network)}>
-              <Text style={styles.buttonText}>WHOWAS (History)</Text>
+              <Text style={styles.buttonText}>{t('WHOWAS (History)')}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

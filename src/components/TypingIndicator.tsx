@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
+import { useT } from '../i18n/transifex';
 
 interface TypingIndicatorProps {
   typingUsers: Map<string, { status: 'active' | 'paused' | 'done'; timestamp: number }>;
@@ -8,6 +9,7 @@ interface TypingIndicatorProps {
 
 export const TypingIndicator: React.FC<TypingIndicatorProps> = ({ typingUsers }) => {
   const { colors } = useTheme();
+  const t = useT();
   const [fadeAnim] = useState(new Animated.Value(0));
 
   // Get list of users who are actively typing
@@ -40,13 +42,24 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({ typingUsers })
   // Format the typing message
   let typingText = '';
   if (activeTypers.length === 1) {
-    typingText = `${activeTypers[0]} is typing...`;
+    typingText = t('{user} is typing...', { user: activeTypers[0] });
   } else if (activeTypers.length === 2) {
-    typingText = `${activeTypers[0]} and ${activeTypers[1]} are typing...`;
+    typingText = t('{userA} and {userB} are typing...', {
+      userA: activeTypers[0],
+      userB: activeTypers[1],
+    });
   } else if (activeTypers.length === 3) {
-    typingText = `${activeTypers[0]}, ${activeTypers[1]}, and ${activeTypers[2]} are typing...`;
+    typingText = t('{userA}, {userB}, and {userC} are typing...', {
+      userA: activeTypers[0],
+      userB: activeTypers[1],
+      userC: activeTypers[2],
+    });
   } else {
-    typingText = `${activeTypers[0]}, ${activeTypers[1]}, and ${activeTypers.length - 2} others are typing...`;
+    typingText = t('{userA}, {userB}, and {count} others are typing...', {
+      userA: activeTypers[0],
+      userB: activeTypers[1],
+      count: activeTypers.length - 2,
+    });
   }
 
   return (

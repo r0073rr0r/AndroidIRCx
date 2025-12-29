@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
+import { useT } from '../i18n/transifex';
 import { channelListService as singletonChannelListService, ChannelListItem, ChannelListFilter } from '../services/ChannelListService';
 import { channelFavoritesService } from '../services/ChannelFavoritesService';
 import { ircService } from '../services/IRCService';
@@ -30,6 +31,7 @@ export const ChannelListScreen: React.FC<ChannelListScreenProps> = ({
   onJoinChannel,
 }) => {
   const { colors } = useTheme();
+  const t = useT();
   const styles = createStyles(colors);
   const [channels, setChannels] = useState<ChannelListItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -162,7 +164,7 @@ export const ChannelListScreen: React.FC<ChannelListScreenProps> = ({
             <Text style={styles.channelName}>{item.name}</Text>
             {isFavorite && <Text style={styles.favoriteIcon}>★</Text>}
             {item.userCount !== undefined && (
-              <Text style={styles.userCount}>{item.userCount} users</Text>
+              <Text style={styles.userCount}>{t('{count} users').replace('{count}', item.userCount.toString())}</Text>
             )}
           </View>
           {item.topic && (
@@ -173,7 +175,7 @@ export const ChannelListScreen: React.FC<ChannelListScreenProps> = ({
         </View>
       </TouchableOpacity>
     );
-  }, [network, styles]);
+  }, [network, styles, t]);
 
   // Optimize FlatList rendering with getItemLayout for fixed-height items
   const getItemLayout = useCallback((data: ChannelListItem[] | null | undefined, index: number) => ({
@@ -191,18 +193,18 @@ export const ChannelListScreen: React.FC<ChannelListScreenProps> = ({
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.header, { backgroundColor: colors.primary }]}>
           <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
-            <Text style={[styles.cancelText, { color: colors.onPrimary }]}>Close</Text>
+            <Text style={[styles.cancelText, { color: colors.onPrimary }]}>{t('Close')}</Text>
           </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.onPrimary }]}>Channel List</Text>
+          <Text style={[styles.title, { color: colors.onPrimary }]}>{t('Channel List')}</Text>
           <TouchableOpacity onPress={loadChannelList} style={styles.refreshButton}>
-            <Text style={[styles.refreshText, { color: colors.onPrimary }]}>Refresh</Text>
+            <Text style={[styles.refreshText, { color: colors.onPrimary }]}>{t('Refresh')}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={[styles.searchContainer, { backgroundColor: colors.surface }]}>
           <TextInput
             style={[styles.searchInput, { backgroundColor: colors.surfaceVariant, color: colors.text }]}
-            placeholder="Search channels..."
+            placeholder={t('Search channels...')}
             placeholderTextColor={colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -210,7 +212,7 @@ export const ChannelListScreen: React.FC<ChannelListScreenProps> = ({
           <TouchableOpacity
             style={[styles.filterButton, { backgroundColor: colors.surfaceVariant }]}
             onPress={() => setShowFilters(!showFilters)}>
-            <Text style={[styles.filterButtonText, { color: colors.text }]}>Filters</Text>
+            <Text style={[styles.filterButtonText, { color: colors.text }]}>{t('Filters')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -218,7 +220,7 @@ export const ChannelListScreen: React.FC<ChannelListScreenProps> = ({
           <View style={[styles.filtersContainer, { backgroundColor: colors.surface }]}>
             <TextInput
               style={[styles.filterInput, { backgroundColor: colors.surfaceVariant, color: colors.text }]}
-              placeholder="Min users"
+              placeholder={t('Min users')}
               placeholderTextColor={colors.textSecondary}
               keyboardType="numeric"
               value={filter.minUsers?.toString() || ''}
@@ -226,7 +228,7 @@ export const ChannelListScreen: React.FC<ChannelListScreenProps> = ({
             />
             <TextInput
               style={[styles.filterInput, { backgroundColor: colors.surfaceVariant, color: colors.text }]}
-              placeholder="Max users"
+              placeholder={t('Max users')}
               placeholderTextColor={colors.textSecondary}
               keyboardType="numeric"
               value={filter.maxUsers?.toString() || ''}
@@ -234,7 +236,7 @@ export const ChannelListScreen: React.FC<ChannelListScreenProps> = ({
             />
             <TextInput
               style={[styles.filterInput, { backgroundColor: colors.surfaceVariant, color: colors.text }]}
-              placeholder="Name pattern"
+              placeholder={t('Name pattern')}
               placeholderTextColor={colors.textSecondary}
               value={filter.namePattern || ''}
               onChangeText={(text) => setFilter({ ...filter, namePattern: text || undefined })}
@@ -254,7 +256,7 @@ export const ChannelListScreen: React.FC<ChannelListScreenProps> = ({
               }
             }}>
             <Text style={[styles.sortButtonText, { color: sortBy === 'users' ? colors.primary : colors.text }]}>
-              Users {sortBy === 'users' && (ascending ? '↑' : '↓')}
+              {t('Users')} {sortBy === 'users' && (ascending ? '↑' : '↓')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -268,7 +270,7 @@ export const ChannelListScreen: React.FC<ChannelListScreenProps> = ({
               }
             }}>
             <Text style={[styles.sortButtonText, { color: sortBy === 'name' ? colors.primary : colors.text }]}>
-              Name {sortBy === 'name' && (ascending ? '↑' : '↓')}
+              {t('Name')} {sortBy === 'name' && (ascending ? '↑' : '↓')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -277,7 +279,7 @@ export const ChannelListScreen: React.FC<ChannelListScreenProps> = ({
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.primary} />
             <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-              Loading channel list...
+              {t('Loading channel list...')}
             </Text>
           </View>
         ) : (
@@ -296,7 +298,7 @@ export const ChannelListScreen: React.FC<ChannelListScreenProps> = ({
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                  No channels found
+                  {t('No channels found')}
                 </Text>
               </View>
             }

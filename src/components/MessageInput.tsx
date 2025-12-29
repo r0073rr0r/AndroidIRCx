@@ -8,6 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
+import { useT } from '../i18n/transifex';
 import { commandService } from '../services/CommandService';
 import { layoutService } from '../services/LayoutService';
 import { connectionManager } from '../services/ConnectionManager';
@@ -24,7 +25,7 @@ interface MessageInputProps {
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
-  placeholder = 'Enter a message',
+  placeholder,
   onSubmit,
   disabled = false,
   prefilledMessage,
@@ -33,6 +34,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   tabType = 'server',
   tabName,
 }) => {
+  const t = useT();
   const { colors } = useTheme();
   const layoutConfig = layoutService.getConfig();
   const totalBottomInset = bottomInset + layoutConfig.navigationBarOffset;
@@ -145,27 +147,27 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     // Built-in IRC commands
     const builtInCommands = [
-      { cmd: 'join', desc: 'Join a channel' },
-      { cmd: 'part', desc: 'Leave a channel' },
-      { cmd: 'quit', desc: 'Disconnect from server' },
-      { cmd: 'nick', desc: 'Change nickname' },
-      { cmd: 'msg', desc: 'Send private message' },
-      { cmd: 'query', desc: 'Open private chat' },
-      { cmd: 'whois', desc: 'User information' },
-      { cmd: 'whowas', desc: 'Past user information' },
-      { cmd: 'mode', desc: 'Change channel/user modes' },
-      { cmd: 'topic', desc: 'View/set channel topic' },
-      { cmd: 'kick', desc: 'Kick user from channel' },
-      { cmd: 'me', desc: 'Send action message' },
-      { cmd: 'action', desc: 'Send action message' },
-      { cmd: 'setname', desc: 'Change real name' },
-      { cmd: 'bot', desc: 'Toggle bot mode' },
-      { cmd: 'sharekey', desc: 'Share DM encryption key' },
-      { cmd: 'requestkey', desc: 'Request DM encryption key' },
-      { cmd: 'encmsg', desc: 'Send encrypted DM' },
-      { cmd: 'enc', desc: 'DM encryption help' },
-      { cmd: 'chankey', desc: 'Channel encryption commands' },
-      { cmd: 'quote', desc: 'Send raw IRC command' },
+      { cmd: 'join', desc: t('Join a channel') },
+      { cmd: 'part', desc: t('Leave a channel') },
+      { cmd: 'quit', desc: t('Disconnect from server') },
+      { cmd: 'nick', desc: t('Change nickname') },
+      { cmd: 'msg', desc: t('Send private message') },
+      { cmd: 'query', desc: t('Open private chat') },
+      { cmd: 'whois', desc: t('User information') },
+      { cmd: 'whowas', desc: t('Past user information') },
+      { cmd: 'mode', desc: t('Change channel/user modes') },
+      { cmd: 'topic', desc: t('View/set channel topic') },
+      { cmd: 'kick', desc: t('Kick user from channel') },
+      { cmd: 'me', desc: t('Send action message') },
+      { cmd: 'action', desc: t('Send action message') },
+      { cmd: 'setname', desc: t('Change real name') },
+      { cmd: 'bot', desc: t('Toggle bot mode') },
+      { cmd: 'sharekey', desc: t('Share DM encryption key') },
+      { cmd: 'requestkey', desc: t('Request DM encryption key') },
+      { cmd: 'encmsg', desc: t('Send encrypted DM') },
+      { cmd: 'enc', desc: t('DM encryption help') },
+      { cmd: 'chankey', desc: t('Channel encryption commands') },
+      { cmd: 'quote', desc: t('Send raw IRC command') },
     ];
 
     const commandMatches = builtInCommands
@@ -230,7 +232,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           style={styles.input}
           value={message}
           onChangeText={handleChangeText}
-          placeholder={placeholder}
+          placeholder={placeholder || t('Enter a message')}
           placeholderTextColor={colors.inputPlaceholder}
           onSubmitEditing={handleSubmit}
           editable={!disabled}
@@ -251,8 +253,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               <Text style={[styles.suggestionText, { color: colors.text }]}>
                 {suggestion.text}
                 {suggestion.description ? ` — ${suggestion.description}` : ''}
-                {!suggestion.description && suggestion.source === 'alias' ? ' — alias' : ''}
-                {!suggestion.description && suggestion.source === 'history' ? ' — recent' : ''}
+                {!suggestion.description && suggestion.source === 'alias' ? ` — ${t('alias')}` : ''}
+                {!suggestion.description && suggestion.source === 'history' ? ` — ${t('recent')}` : ''}
               </Text>
             </TouchableOpacity>
           ))}

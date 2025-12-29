@@ -1,4 +1,7 @@
 import { NativeModules, Platform } from 'react-native';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 interface IRCForegroundServiceInterface {
   startService(networkName: string, title: string, text: string): Promise<boolean>;
@@ -47,8 +50,8 @@ class IRCForegroundService {
     }
 
     try {
-      const notificationTitle = title || 'IRC Connected';
-      const notificationText = text || `Maintaining connection to ${networkName}`;
+      const notificationTitle = title || t('IRC Connected');
+      const notificationText = text || t('Maintaining connection to {networkName}', { networkName });
 
       await IRCForegroundServiceNative.startService(networkName, notificationTitle, notificationText);
       this.isRunning = true;

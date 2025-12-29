@@ -21,6 +21,7 @@ import { IRCService, IRCMessage, ircService } from './IRCService';
 import { notificationService } from './NotificationService';
 import { RequestDisableOptimization, BatteryOptEnabled, OpenOptimizationSettings } from "react-native-battery-optimization-check";
 import { connectionManager } from './ConnectionManager';
+import { tx } from '../i18n/transifex';
 
 // Keep for backward compatibility, but use NotificationService internally
 export interface BackgroundNotificationConfig {
@@ -264,13 +265,21 @@ class BackgroundService {
    * Process queued notifications (called periodically or when app comes to foreground)
    */
   async processNotificationQueue(): Promise<void> {
+    const t = (key: string, params?: Record<string, unknown>) => {
+      const translator = (tx as any)?.t;
+      return typeof translator === 'function' ? translator(key, params) : key;
+    };
     for (const [channelKey, messages] of this.notificationQueue.entries()) {
       if (messages.length === 0) continue;
       const count = messages.length;
       const lastMessage = messages[messages.length - 1];
-      const channelName = lastMessage.channel || 'unknown';
+      const channelName = lastMessage.channel || t('Unknown');
       const networkName = lastMessage.network || 'unknown';
-      const title = `${channelName} (${count} new message${count > 1 ? 's' : ''})`;
+      const title = t('{channel} ({count} new message{suffix})', {
+        channel: channelName,
+        count,
+        suffix: count > 1 ? 's' : '',
+      });
       const body = lastMessage.text || '';
 
       await notificationService.showNotification(title, body, channelName, networkName);

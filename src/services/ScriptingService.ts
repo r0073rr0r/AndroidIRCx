@@ -3,8 +3,11 @@ import { IRCMessage } from './IRCService';
 import { connectionManager } from './ConnectionManager';
 import { logger } from './Logger';
 import { adRewardService } from './AdRewardService';
+import { tx } from '../i18n/transifex';
 
 type HookResult = void | string | { command?: string; cancel?: boolean };
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 export interface ScriptConfig {
   id: string;
@@ -74,7 +77,7 @@ class ScriptingService {
       const parsed: ScriptConfig[] = JSON.parse(raw);
       this.scripts = parsed.map(s => this.compile(s)).filter(Boolean) as CompiledScript[];
     } catch (error) {
-      logger.error('scripting', `Failed to load scripts: ${String(error)}`);
+      logger.error('scripting', t('Failed to load scripts: {error}', { error: String(error) }));
     }
   }
 
@@ -152,7 +155,7 @@ class ScriptingService {
         ${code}
         return module.exports || exports;
       `);
-      return { ok: true, message: 'No syntax errors detected.' };
+      return { ok: true, message: t('No syntax errors detected.') };
     } catch (error: any) {
       return { ok: false, message: String(error?.message || error) };
     }
@@ -181,7 +184,9 @@ class ScriptingService {
   async setEnabled(id: string, enabled: boolean) {
     // Check if user has available time when enabling a script
     if (enabled && !adRewardService.hasAvailableTime()) {
-      const msg = 'Cannot enable script: No scripting time available. Please watch an ad to gain 1 hour of scripting time.';
+      const msg = t(
+        'Cannot enable script: No scripting time available. Please watch an ad to gain 1 hour of scripting time.'
+      );
       logger.warn('scripting', msg);
       this.addLog({ level: 'warn', message: msg, scriptId: id });
       throw new Error(msg);
@@ -211,9 +216,9 @@ class ScriptingService {
     return [
       {
         id: 'builtin-autoop',
-        name: 'Auto-Op',
+        name: t('Auto-Op'),
         enabled: false,
-        description: 'Ops everyone who joins the channel.',
+        description: t('Ops everyone who joins the channel.'),
         builtIn: true,
         code: `
           module.exports = {
@@ -228,9 +233,9 @@ class ScriptingService {
       },
       {
         id: 'builtin-welcome',
-        name: 'Welcome Message',
+        name: t('Welcome Message'),
         enabled: false,
-        description: 'Greets users when they join.',
+        description: t('Greets users when they join.'),
         builtIn: true,
         code: `
           module.exports = {
@@ -244,9 +249,9 @@ class ScriptingService {
       },
       {
         id: 'builtin-logger',
-        name: 'Channel Logger',
+        name: t('Channel Logger'),
         enabled: false,
-        description: 'Logs messages to scripting log buffer.',
+        description: t('Logs messages to scripting log buffer.'),
         builtIn: true,
         code: `
           module.exports = {
@@ -260,9 +265,9 @@ class ScriptingService {
       },
       {
         id: 'builtin-alias',
-        name: 'Custom Command Alias',
+        name: t('Custom Command Alias'),
         enabled: false,
-        description: 'Adds /hello alias as example.',
+        description: t('Adds /hello alias as example.'),
         builtIn: true,
         code: `
           module.exports = {
@@ -293,7 +298,10 @@ class ScriptingService {
       const hooks = factory(api) as Partial<ScriptHooks>;
       safeScript.hooks = hooks;
     } catch (error) {
-      const msg = `Script ${script.name} failed to compile: ${String(error)}`;
+      const msg = t('Script {name} failed to compile: {error}', {
+        name: script.name,
+        error: String(error),
+      });
       logger.error('scripting', msg);
       this.addLog({ level: 'error', message: msg, scriptId: script.id });
     }
@@ -363,7 +371,7 @@ class ScriptingService {
       if (!adRewardService.hasAvailableTime() && hasEnabledScripts) {
         this.scripts = this.scripts.map(s => ({ ...s, enabled: false }));
         this.save();
-        const msg = 'All scripts disabled: Scripting time expired. Watch an ad to continue.';
+        const msg = t('All scripts disabled: Scripting time expired. Watch an ad to continue.');
         logger.warn('scripting', msg);
         this.addLog({ level: 'warn', message: msg });
       }
@@ -382,7 +390,11 @@ class ScriptingService {
       try {
         runner(script.hooks);
       } catch (error) {
-        const msg = `Error in script ${script.name} hook ${hook}: ${String(error)}`;
+        const msg = t('Error in script {name} hook {hook}: {error}', {
+          name: script.name,
+          hook,
+          error: String(error),
+        });
         logger.error('scripting', msg);
         this.addLog({ level: 'error', message: msg, scriptId: script.id });
       }
@@ -417,9 +429,17 @@ class ScriptingService {
         default:
           break;
       }
-      this.addLog({ level: 'info', message: `Test hook ${hook} executed`, scriptId: script.id });
+      this.addLog({
+        level: 'info',
+        message: t('Test hook {hook} executed', { hook }),
+        scriptId: script.id,
+      });
     } catch (error) {
-      const msg = `Test hook ${hook} failed for ${script.name}: ${String(error)}`;
+      const msg = t('Test hook {hook} failed for {name}: {error}', {
+        hook,
+        name: script.name,
+        error: String(error),
+      });
       this.addLog({ level: 'error', message: msg, scriptId: script.id });
       logger.error('scripting', msg);
     }

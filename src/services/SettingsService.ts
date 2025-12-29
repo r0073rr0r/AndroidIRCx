@@ -1,6 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DEFAULT_PROFILE_ID, identityProfilesService } from './IdentityProfilesService';
 import { secureStorageService } from './SecureStorageService';
+import { tx } from '../i18n/transifex';
+
+const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
 export interface IRCServerConfig {
   id: string;
@@ -67,8 +70,8 @@ const DEFAULT_IDENTITY = {
   ident: 'androidircx',
 };
 
-export const DEFAULT_PART_MESSAGE = 'AndroidIRCX - Download from https://androidircx.com';
-export const DEFAULT_QUIT_MESSAGE = 'Goodbye from AndroidIRCX - download it from https://androidircx.com';
+export const DEFAULT_PART_MESSAGE = t('AndroidIRCX - Download from https://androidircx.com');
+export const DEFAULT_QUIT_MESSAGE = t('Goodbye from AndroidIRCX - download it from https://androidircx.com');
 
 class SettingsService {
   private networks: IRCNetworkConfig[] = [];

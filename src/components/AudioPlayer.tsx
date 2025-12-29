@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Video from 'react-native-video';
 import { useTheme } from '../hooks/useTheme';
+import { useT } from '../i18n/transifex';
 
 interface AudioPlayerProps {
   url: string;
 }
 
 export const AudioPlayer: React.FC<AudioPlayerProps> = ({ url }) => {
+  const t = useT();
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ url }) => {
         </View>
       )}
       {error ? (
-        <Text style={styles.error}>Audio error: {error}</Text>
+        <Text style={styles.error}>{t('Audio error: {error}', { error })}</Text>
       ) : (
         <Video
           source={{ uri: url }}
@@ -32,13 +34,13 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ url }) => {
           onLoad={() => setLoading(false)}
           onError={(e) => {
             setLoading(false);
-            setError(e?.error?.errorString || 'Failed to load audio');
+            setError(e?.error?.errorString || t('Failed to load audio'));
           }}
           style={styles.audioDummy}
         />
       )}
       <TouchableOpacity style={styles.pauseButton} onPress={() => setPaused((p) => !p)}>
-        <Text style={styles.pauseText}>{paused ? 'Play' : 'Pause'}</Text>
+        <Text style={styles.pauseText}>{paused ? t('Play') : t('Pause')}</Text>
       </TouchableOpacity>
     </View>
   );

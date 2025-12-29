@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IRCService, type IRCMessage } from './IRCService';
+import { tx } from '../i18n/transifex';
 
 export interface BouncerConfig {
   enabled: boolean;
@@ -139,11 +140,18 @@ export class BouncerService {
 
       if (this.bouncerInfo.type !== 'unknown') {
         console.log('BouncerService: Detected bouncer type:', this.bouncerInfo.type);
+        const t = (key: string, params?: Record<string, unknown>) => {
+          const translator = (tx as any)?.t;
+          return typeof translator === 'function' ? translator(key, params) : key;
+        };
         const hint = this.bouncerInfo.type === 'znc'
-          ? 'Quick aliases: /zncver, /zncm, /zncplay #chan, /zncclear #chan'
+          ? t('Quick aliases: /zncver, /zncm, /zncplay #chan, /zncclear #chan')
           : undefined;
         this.ircService.addRawMessage(
-          `*** Detected bouncer type: ${this.bouncerInfo.type}${hint ? ` (${hint})` : ''}`,
+          t('*** Detected bouncer type: {type}{hint}', {
+            type: this.bouncerInfo.type,
+            hint: hint ? ` (${hint})` : '',
+          }),
           'connection'
         );
       }

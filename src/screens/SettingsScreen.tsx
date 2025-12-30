@@ -46,6 +46,7 @@ import { connectionManager } from '../services/ConnectionManager';
 import { ScriptingScreen } from './ScriptingScreen';
 import { ScriptingHelpScreen } from './ScriptingHelpScreen';
 import { BackupScreen } from './BackupScreen';
+import { inAppPurchaseService } from '../services/InAppPurchaseService';
 import { KeyManagementScreen } from './KeyManagementScreen';
 import { FirstRunSetupScreen } from './FirstRunSetupScreen';
 import { PrivacyAdsScreen } from './PrivacyAdsScreen';
@@ -121,6 +122,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     []
   );
   const aboutTitle = t('About', { _tags: tags });
+  const premiumTitle = t('💎 Premium', { _tags: tags });
+  const connectionTitle = t('Connection & Network', { _tags: tags });
   const languageLabels = useMemo(
     () => ({
       en: 'English',
@@ -222,6 +225,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [appLockOnLaunch, setAppLockOnLaunch] = useState(true);
   const [appLockOnBackground, setAppLockOnBackground] = useState(true);
   const [appPinModalVisible, setAppPinModalVisible] = useState(false);
+  const [isSupporter, setIsSupporter] = useState(false);
   const [appPinModalMode, setAppPinModalMode] = useState<'setup' | 'confirm'>('setup');
   const [appPinEntry, setAppPinEntry] = useState('');
   const [appPinSetupValue, setAppPinSetupValue] = useState('');
@@ -350,6 +354,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       setCurrentTheme(theme);
       setAvailableThemes(themeService.getAvailableThemes());
     });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const updateSupporterStatus = () => {
+      setIsSupporter(inAppPurchaseService.isSupporter());
+    };
+    updateSupporterStatus();
+    const unsubscribe = inAppPurchaseService.addListener(updateSupporterStatus);
     return unsubscribe;
   }, []);
 
@@ -1019,8 +1032,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   }, [searchTerm, filteredSections]);
 
   // Icon mapping for section headers and items
-  const getSectionIcon = (title: string): { name: string; solid?: boolean } => {
-    const iconMap: Record<string, { name: string; solid?: boolean }> = {
+  const getSectionIcon = (title: string): { name: string; solid?: boolean } | null => {
+    const iconMap: Record<string, { name: string; solid?: boolean } | null> = {
       'Appearance': { name: 'palette', solid: true },
       'Display & UI': { name: 'desktop', solid: false },
       'Notifications': { name: 'bell', solid: true },
@@ -1044,14 +1057,18 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       'Scripting': { name: 'code', solid: false },
       'User Management': { name: 'users', solid: false },
       'Advanced': { name: 'cogs', solid: false },
+      [premiumTitle]: null,
       [aboutTitle]: { name: 'info-circle', solid: true },
     };
-    return iconMap[title] || { name: 'cog', solid: false };
+    if (Object.prototype.hasOwnProperty.call(iconMap, title)) {
+      return iconMap[title];
+    }
+    return { name: 'cog', solid: false };
   };
 
   const sections = [
     {
-      title: t('💎 Premium', { _tags: tags }),
+      title: premiumTitle,
       data: [
         {
           id: 'premium-upgrade',
@@ -1773,7 +1790,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       ],
     },
     {
-      title: t('Connection & Network', { _tags: tags }),
+      title: connectionTitle,
       data: [
         {
           id: 'setup-wizard',
@@ -3466,9 +3483,23 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   ];
 
   const orderedSections = (() => {
-    const connectionSection = sections.find(section => section.title === 'Connection & Network');
-    if (!connectionSection) return sections;
-    return [connectionSection, ...sections.filter(section => section.title !== 'Connection & Network')];
+    const premiumSection = sections.find(section => section.title === premiumTitle);
+    const connectionSection = sections.find(section => section.title === connectionTitle);
+    const remaining = sections.filter(
+      section => section.title !== premiumTitle && section.title !== connectionTitle
+    );
+    if (isSupporter) {
+      return [
+        ...(connectionSection ? [connectionSection] : []),
+        ...remaining,
+        ...(premiumSection ? [premiumSection] : []),
+      ];
+    }
+    return [
+      ...(premiumSection ? [premiumSection] : []),
+      ...(connectionSection ? [connectionSection] : []),
+      ...remaining,
+    ];
   })();
 
   const matches = useCallback((text: string | undefined, term: string) =>
@@ -3723,13 +3754,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 disabled={title === aboutTitle}
               >
                 <View style={styles.sectionTitleContainer}>
-                  <Icon
-                    name={iconInfo.name}
-                    size={18}
-                    color={colors.primary}
-                    solid={iconInfo.solid}
-                    style={styles.sectionIcon}
-                  />
+                  {iconInfo && (
+                    <Icon
+                      name={iconInfo.name}
+                      size={18}
+                      color={colors.primary}
+                      solid={iconInfo.solid}
+                      style={styles.sectionIcon}
+                    />
+                  )}
                   <Text style={styles.sectionTitle}>{title}</Text>
                 </View>
                 {title !== aboutTitle && (

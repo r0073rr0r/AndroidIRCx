@@ -1,7 +1,7 @@
 # Android IRC Client - Project Documentation
 
-**Last Updated:** 2025-12-28
-**Version:** 1.4.4
+**Last Updated:** 2025-12-30
+**Version:** 1.4.8
 **Status:** Active Development
 
 ---
@@ -588,6 +588,27 @@ The fix includes multiple layers of defense:
 
 ## Recent Changes
 
+### v1.4.8 (2025-12-30)
+
+- **IAP stability fixes:**
+    - Guarded Android pending purchase flush when the API is missing
+    - Accept purchaseToken as proof on Android when transactionReceipt is absent
+    - Added timeout and error handling for finishTransaction to avoid stuck UI
+    - Added "Restore purchases" button with feedback
+- **Settings quality-of-life:**
+    - Premium section moves to bottom for Supporter Pro users
+
+### v1.4.7 (2025-12-30)
+
+- **Monetization & Premium Features:**
+    - In-App Purchases: 3-tier model (Remove Ads, Pro Unlimited, Supporter Pro)
+    - BannerAdService: ad rotation with 30s show / 2min hide cycle; respects scripting/ad-free time
+    - Dual rewards: Rewarded ads grant scripting time + ad-free time (60 min each)
+    - InAppPurchaseService: Google Play Billing integration with purchase restoration
+    - PurchaseScreen: Premium upgrade UI with real-time pricing
+    - Premium UI: Settings integration, upgrade prompts, supporter badge
+    - Unlimited scripting (∞) for Pro/Supporter tiers with automatic time tracking
+
 ### v1.4.4 (2025-12-28)
 
 - **IRCv3 Full Compliance** - Implemented all 18 IRCv3 capabilities:
@@ -930,4 +951,3 @@ This section is the agents-style briefing for any AI working on this repo.
 
 *This document is maintained as a living reference. Update it whenever significant changes are made
 to the project.*
-

@@ -39,6 +39,28 @@ export const PurchaseScreen: React.FC<PurchaseScreenProps> = ({ visible, onClose
   const [purchasing, setPurchasing] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [restoring, setRestoring] = useState(false);
+
+  const withTimeout = async <T,>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    label: string
+  ): Promise<T> => {
+    let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+    const timeout = new Promise<never>((_, reject) => {
+      timeoutHandle = setTimeout(() => {
+        reject(new Error(`${label} timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+    });
+
+    try {
+      return await Promise.race([promise, timeout]);
+    } finally {
+      if (timeoutHandle) {
+        clearTimeout(timeoutHandle);
+      }
+    }
+  };
 
   // Initialize IAP and fetch products
   useEffect(() => {
@@ -49,10 +71,16 @@ export const PurchaseScreen: React.FC<PurchaseScreenProps> = ({ visible, onClose
       try {
         // Initialize connection to Google Play
         await RNIap.initConnection();
+        if (Platform.OS === 'android') {
+          const flushPending = (RNIap as any).flushFailedPurchasesCachedAsPendingAndroid;
+          if (typeof flushPending === 'function') {
+            await flushPending();
+          }
+        }
         console.log('IAP connection initialized');
 
         // Get products from Google Play
-        const availableProducts = await RNIap.getProducts({ skus: skuList });
+        const availableProducts = await RNIap.fetchProducts({ skus: skuList, type: 'in-app' });
         console.log('Available products:', availableProducts);
         setProducts(availableProducts);
         setLoading(false);
@@ -65,16 +93,24 @@ export const PurchaseScreen: React.FC<PurchaseScreenProps> = ({ visible, onClose
           async (purchase: ProductPurchase) => {
             console.log('Purchase updated:', purchase);
             const receipt = purchase.transactionReceipt;
+            const token = purchase.purchaseToken || '';
+            const hasProof =
+              Platform.OS === 'android' ? Boolean(token || receipt) : Boolean(receipt);
 
-            if (receipt) {
+            if (hasProof) {
+              setPurchasing(null);
               try {
                 // Acknowledge the purchase
-                await RNIap.finishTransaction({ purchase, isConsumable: false });
+                await withTimeout(
+                  RNIap.finishTransaction({ purchase, isConsumable: false }),
+                  10000,
+                  'finishTransaction'
+                );
 
                 // Process the purchase in our service
                 await inAppPurchaseService.processPurchase(
                   purchase.productId,
-                  purchase.transactionReceipt || purchase.purchaseToken || ''
+                  receipt || token
                 );
 
                 setPurchasing(null);
@@ -86,7 +122,14 @@ export const PurchaseScreen: React.FC<PurchaseScreenProps> = ({ visible, onClose
               } catch (error) {
                 console.error('Error finishing transaction:', error);
                 setPurchasing(null);
+                Alert.alert(
+                  t('Purchase Failed'),
+                  t('Please try again later.')
+                );
               }
+            } else {
+              console.warn('Purchase missing receipt/token, skipping processing');
+              setPurchasing(null);
             }
           }
         );
@@ -126,6 +169,7 @@ export const PurchaseScreen: React.FC<PurchaseScreenProps> = ({ visible, onClose
       if (purchaseErrorSubscription) {
         purchaseErrorSubscription.remove();
       }
+      RNIap.endConnection().catch(() => null);
     };
   }, [visible, t]);
 
@@ -142,8 +186,9 @@ export const PurchaseScreen: React.FC<PurchaseScreenProps> = ({ visible, onClose
     return unsubscribe;
   }, []);
 
-  const restorePurchases = async () => {
+  const restorePurchases = async (showFeedback: boolean = false) => {
     try {
+      setRestoring(true);
       console.log('Restoring purchases...');
       const purchases = await RNIap.getAvailablePurchases();
       console.log('Available purchases:', purchases);
@@ -156,8 +201,23 @@ export const PurchaseScreen: React.FC<PurchaseScreenProps> = ({ visible, onClose
           );
         }
       }
+
+      if (showFeedback) {
+        Alert.alert(
+          t('Restore complete'),
+          t('Your purchases have been restored.')
+        );
+      }
     } catch (error) {
       console.error('Error restoring purchases:', error);
+      if (showFeedback) {
+        Alert.alert(
+          t('Restore failed'),
+          t('Please try again later.')
+        );
+      }
+    } finally {
+      setRestoring(false);
     }
   };
 
@@ -166,7 +226,39 @@ export const PurchaseScreen: React.FC<PurchaseScreenProps> = ({ visible, onClose
 
     try {
       // Trigger Google Play Billing
-      await RNIap.requestPurchase({ sku: productId });
+      const request = Platform.select({
+        ios: {
+          request: {
+            apple: {
+              sku: productId,
+              andDangerouslyFinishTransactionAutomatically: false,
+            },
+          },
+          type: 'in-app' as const,
+        },
+        android: {
+          request: {
+            google: {
+              skus: [productId],
+            },
+          },
+          type: 'in-app' as const,
+        },
+        default: {
+          request: {
+            google: {
+              skus: [productId],
+            },
+          },
+          type: 'in-app' as const,
+        },
+      });
+
+      if (!request) {
+        throw new Error('Unsupported platform for purchases.');
+      }
+
+      await RNIap.requestPurchase(request);
       // The purchase will be handled by purchaseUpdatedListener
     } catch (error: any) {
       console.error('Purchase error:', error);
@@ -183,8 +275,17 @@ export const PurchaseScreen: React.FC<PurchaseScreenProps> = ({ visible, onClose
   };
 
   const getProductPrice = (productId: string): string => {
-    const product = products.find(p => p.productId === productId);
-    return product?.localizedPrice || '€?.??';
+    const product = products.find(p => p.id === productId);
+    if (!product) {
+      return '€?.??';
+    }
+    if (product.displayPrice) {
+      return product.displayPrice;
+    }
+    if (product.price !== null && product.price !== undefined) {
+      return String(product.price);
+    }
+    return '€?.??';
   };
 
   const renderProductCard = (
@@ -273,6 +374,18 @@ export const PurchaseScreen: React.FC<PurchaseScreenProps> = ({ visible, onClose
               {renderProductCard(PRODUCT_SUPPORTER_PRO, hasSupporterPro)}
             </>
           )}
+
+          <TouchableOpacity
+            style={[styles.restoreButton, (restoring || loading) && styles.restoreButtonDisabled]}
+            onPress={() => restorePurchases(true)}
+            disabled={restoring || loading}
+          >
+            {restoring ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.restoreButtonText}>{t('Restore purchases')}</Text>
+            )}
+          </TouchableOpacity>
 
           <View style={styles.infoSection}>
             <Text style={styles.infoTitle}>Why Premium?</Text>
@@ -422,6 +535,24 @@ const createStyles = (colors: any) => StyleSheet.create({
   purchaseButtonText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  restoreButton: {
+    backgroundColor: colors.buttonPrimary,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+    marginBottom: 8,
+    minHeight: 44,
+  },
+  restoreButtonDisabled: {
+    opacity: 0.7,
+  },
+  restoreButtonText: {
+    color: '#fff',
+    fontSize: 14,
     fontWeight: '600',
   },
   infoSection: {

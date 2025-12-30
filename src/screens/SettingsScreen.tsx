@@ -66,6 +66,7 @@ interface SettingsScreenProps {
   showEncryptionIndicators?: boolean;
   onShowEncryptionIndicatorsChange?: (value: boolean) => void;
   onShowIgnoreList?: () => void;
+  onShowPurchaseScreen?: () => void;
 }
 
 interface SettingItem {
@@ -95,6 +96,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   showEncryptionIndicators = true,
   onShowEncryptionIndicatorsChange,
   onShowIgnoreList,
+  onShowPurchaseScreen,
 }) => {
   const t = useT();
   const { theme, colors } = useTheme();
@@ -1048,6 +1050,19 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   };
 
   const sections = [
+    {
+      title: t('💎 Premium', { _tags: tags }),
+      data: [
+        {
+          id: 'premium-upgrade',
+          title: t('Upgrade to Premium', { _tags: tags }),
+          description: t('Remove ads, unlimited scripting, and more', { _tags: tags }),
+          type: 'button' as const,
+          icon: { name: 'crown', solid: true },
+          onPress: () => onShowPurchaseScreen?.(),
+        },
+      ],
+    },
     {
       title: t('Appearance', { _tags: tags }),
       data: [
@@ -4080,6 +4095,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <ScriptingScreen
           visible={showScripting}
           onClose={() => setShowScripting(false)}
+          onShowPurchaseScreen={() => {
+            setShowScripting(false);
+            onShowPurchaseScreen?.();
+          }}
         />
       )}
       {showScriptingHelp && (

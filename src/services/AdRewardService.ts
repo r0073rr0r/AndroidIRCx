@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AdEventType, RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mobile-ads';
 import { logger } from './Logger';
 import { consentService } from './ConsentService';
+import { bannerAdService } from './BannerAdService';
+import { inAppPurchaseService } from './InAppPurchaseService';
 
 // Pull app version from app.json so bonuses track real builds
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -178,13 +180,19 @@ class AdRewardService {
         this.notifyListeners();
       });
 
-      this.rewardedAd.addAdEventListener(RewardedAdEventType.EARNED_REWARD, (reward) => {
+      this.rewardedAd.addAdEventListener(RewardedAdEventType.EARNED_REWARD, async (reward) => {
         logger.info('ad-reward', `User earned reward: ${reward.amount} ${reward.type}`);
         console.log(`🎁 Reward earned: ${reward.amount} ${reward.type}`);
         // Use the reward amount from AdMob (configured as 60 = 60 minutes)
         const rewardMinutes = reward.amount || 60;
         const rewardMs = rewardMinutes * 60 * 1000; // Convert minutes to milliseconds
-        this.addTime(rewardMs);
+
+        // Grant both scripting time AND ad-free time
+        this.addTime(rewardMs); // Scripting time
+        await bannerAdService.addAdFreeTime(rewardMs); // Ad-free time
+
+        logger.info('ad-reward', `Granted ${rewardMinutes}m of scripting time and ad-free time`);
+        console.log(`✅ Granted ${rewardMinutes}m of scripting time and ad-free time`);
 
         // Ad will be consumed after showing, prepare next one
         this.adLoaded = false;
@@ -438,14 +446,26 @@ class AdRewardService {
   }
 
   getRemainingTime(): number {
+    // If user has unlimited scripting, return a very large number (999 hours)
+    if (inAppPurchaseService.hasUnlimitedScripting()) {
+      return 999 * HOUR_IN_MS;
+    }
     return this.remainingMs;
   }
 
   getRemainingTimeFormatted(): string {
+    // If user has unlimited scripting, return "Unlimited"
+    if (inAppPurchaseService.hasUnlimitedScripting()) {
+      return '∞ Unlimited';
+    }
     return this.formatTime(this.remainingMs);
   }
 
   hasAvailableTime(): boolean {
+    // Always true if user has unlimited scripting
+    if (inAppPurchaseService.hasUnlimitedScripting()) {
+      return true;
+    }
     return this.remainingMs > 0;
   }
 
@@ -474,10 +494,22 @@ class AdRewardService {
   startUsageTracking() {
     if (this.usageInterval) return; // Already tracking
 
+    // If user has unlimited scripting, don't track usage
+    if (inAppPurchaseService.hasUnlimitedScripting()) {
+      logger.info('ad-reward', 'User has unlimited scripting, skipping usage tracking');
+      return;
+    }
+
     // Reset the reference point so we only count active usage time going forward
     this.lastUpdated = Date.now();
 
     this.usageInterval = setInterval(() => {
+      // Check again if user purchased unlimited scripting during tracking
+      if (inAppPurchaseService.hasUnlimitedScripting()) {
+        this.stopUsageTracking();
+        return;
+      }
+
       if (this.remainingMs <= 0) {
         this.stopUsageTracking();
         return;

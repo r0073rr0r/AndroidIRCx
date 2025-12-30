@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
 import { useT } from '../i18n/transifex';
+import { inAppPurchaseService } from '../services/InAppPurchaseService';
 
 interface HeaderBarProps {
 
@@ -72,8 +73,19 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 }) => {
   const t = useT();
   const { colors } = useTheme();
+  const [isSupporter, setIsSupporter] = useState(false);
 
   const styles = createStyles(colors);
+
+  useEffect(() => {
+    const updateSupporterStatus = () => {
+      setIsSupporter(inAppPurchaseService.isSupporter());
+    };
+
+    updateSupporterStatus();
+    const unsubscribe = inAppPurchaseService.addListener(updateSupporterStatus);
+    return unsubscribe;
+  }, []);
 
   return (
 
@@ -87,7 +99,12 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 
           disabled={isConnected || !onConnectPress}>
 
-          <Text style={styles.networkName}>{networkName}</Text>
+          <View style={styles.networkNameContainer}>
+            <Text style={styles.networkName}>{networkName}</Text>
+            {isSupporter && (
+              <Text style={styles.supporterBadge}>❤️</Text>
+            )}
+          </View>
 
         </TouchableOpacity>
 
@@ -186,10 +203,19 @@ const createStyles = (colors: any) => StyleSheet.create({
   leftSection: {
     flex: 1,
   },
+  networkNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   networkName: {
     color: colors.onPrimary,
     fontSize: 16,
     fontWeight: '600',
+  },
+  supporterBadge: {
+    fontSize: 14,
+    lineHeight: 16,
   },
   ping: {
     color: colors.onPrimary,

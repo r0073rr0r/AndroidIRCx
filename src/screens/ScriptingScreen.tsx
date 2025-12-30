@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Switch, TextInput, Modal, ScrollView, Alert, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { scriptingService, ScriptConfig, ScriptLogEntry } from '../services/ScriptingService';
 import { adRewardService } from '../services/AdRewardService';
+import { inAppPurchaseService } from '../services/InAppPurchaseService';
 import { useTheme } from '../hooks/useTheme';
 import { useT } from '../i18n/transifex';
 import Prism from 'prismjs';
@@ -11,9 +12,10 @@ import 'prismjs/components/prism-javascript';
 interface Props {
   visible: boolean;
   onClose: () => void;
+  onShowPurchaseScreen?: () => void;
 }
 
-export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
+export const ScriptingScreen: React.FC<Props> = ({ visible, onClose, onShowPurchaseScreen }) => {
   const { colors } = useTheme();
   const t = useT();
   const styles = createStyles(colors);
@@ -27,6 +29,7 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
   const [showHighlight, setShowHighlight] = useState(false);
   const [remainingTime, setRemainingTime] = useState<string>('0s');
   const [hasTime, setHasTime] = useState<boolean>(false);
+  const [hasUnlimitedScripting, setHasUnlimitedScripting] = useState<boolean>(false);
   const [adReady, setAdReady] = useState<boolean>(false);
   const [adLoading, setAdLoading] = useState<boolean>(false);
   const [adCooldown, setAdCooldown] = useState<boolean>(false);
@@ -45,6 +48,7 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
     setRepo(scriptingService.listRepository());
     setRemainingTime(adRewardService.getRemainingTimeFormatted());
     setHasTime(adRewardService.hasAvailableTime());
+    setHasUnlimitedScripting(inAppPurchaseService.hasUnlimitedScripting());
 
     const adStatus = adRewardService.getAdStatus();
     setAdReady(adStatus.ready);
@@ -329,27 +333,42 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose }) => {
               {t('Using fallback ad unit')}
             </Text>
           )}
-          <TouchableOpacity
-            style={[styles.watchAdButton, (showingAd) && styles.watchAdButtonDisabled]}
-            onPress={handleWatchAd}
-            disabled={showingAd}
-          >
-            {showingAd ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.watchAdButtonText}>
-                {adReady
-                  ? t('Watch Ad (+60 min)')
-                  : adCooldown
-                    ? t('Cooldown ({cooldownSeconds}s)').replace('{cooldownSeconds}', cooldownSeconds.toString())
-                    : adLoading
-                      ? t('Loading Ad...')
-                      : t('Request Ad')}
+          {!hasUnlimitedScripting && (
+            <TouchableOpacity
+              style={[styles.watchAdButton, (showingAd) && styles.watchAdButtonDisabled]}
+              onPress={handleWatchAd}
+              disabled={showingAd}
+            >
+              {showingAd ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.watchAdButtonText}>
+                  {adReady
+                    ? t('Watch Ad (+60 min)')
+                    : adCooldown
+                      ? t('Cooldown ({cooldownSeconds}s)').replace('{cooldownSeconds}', cooldownSeconds.toString())
+                      : adLoading
+                        ? t('Loading Ad...')
+                        : t('Request Ad')}
+                </Text>
+              )}
+            </TouchableOpacity>
+          )}
+          {!hasUnlimitedScripting && onShowPurchaseScreen && (
+            <TouchableOpacity
+              style={[styles.upgradeButton]}
+              onPress={() => {
+                onClose();
+                onShowPurchaseScreen();
+              }}
+            >
+              <Text style={styles.upgradeButtonText}>
+                💎 {t('Upgrade to Unlimited')}
               </Text>
-            )}
-          </TouchableOpacity>
+            </TouchableOpacity>
+          )}
         </View>
-        {!hasTime && (
+        {!hasTime && !hasUnlimitedScripting && (
           <View style={styles.warningBox}>
             <Text style={styles.warningText}>
               {t('No scripting time available. Watch an ad to gain scripting access. Scripts will be automatically disabled when time runs out.')}
@@ -521,9 +540,11 @@ const createStyles = (colors: any) => StyleSheet.create({
   timeLabel: { color: colors.text, fontSize: 14, fontWeight: '600' },
   timeValue: { color: colors.primary, fontSize: 18, fontWeight: '700' },
   timeExpired: { color: colors.error },
-  watchAdButton: { backgroundColor: '#4CAF50', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 8, alignItems: 'center' },
+  watchAdButton: { backgroundColor: '#4CAF50', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 8, alignItems: 'center', marginBottom: 8 },
   watchAdButtonDisabled: { backgroundColor: colors.border, opacity: 0.6 },
   watchAdButtonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  upgradeButton: { backgroundColor: '#FFB300', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 8, alignItems: 'center', borderWidth: 2, borderColor: '#FF8F00' },
+  upgradeButtonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   warningBox: { backgroundColor: colors.error + '20', padding: 12, borderRadius: 8, marginBottom: 8, borderLeftWidth: 4, borderLeftColor: colors.error },
   warningText: { color: colors.error, fontSize: 13, fontWeight: '600' },
   list: { paddingBottom: 12 },

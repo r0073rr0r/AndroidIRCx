@@ -29,7 +29,7 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import MobileAds from 'react-native-google-mobile-ads';
+import MobileAds, { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 import { HeaderBar } from './src/components/HeaderBar';
 import { keyboardShortcutService } from './src/services/KeyboardShortcutService';
 
@@ -67,11 +67,14 @@ import { performanceService } from './src/services/PerformanceService';
 import { logger } from './src/services/Logger';
 import { scriptingService } from './src/services/ScriptingService';
 import { adRewardService } from './src/services/AdRewardService';
+import { bannerAdService } from './src/services/BannerAdService';
+import { inAppPurchaseService } from './src/services/InAppPurchaseService';
 import { consentService } from './src/services/ConsentService';
 import { NetworksListScreen } from './src/screens/NetworksListScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { IgnoreListScreen } from './src/screens/IgnoreListScreen';
 import { FirstRunSetupScreen } from './src/screens/FirstRunSetupScreen';
+import { PurchaseScreen } from './src/screens/PurchaseScreen';
 import { WHOISDisplay } from './src/components/WHOISDisplay';
 import { encryptedDMService } from './src/services/EncryptedDMService';
 import { channelEncryptionService } from './src/services/ChannelEncryptionService';
@@ -192,6 +195,16 @@ function App() {
         console.log('🔄 Initializing AdRewardService...');
         await adRewardService.initialize();
         console.log('✅ AdRewardService initialized successfully');
+
+        // Step 5: Initialize InAppPurchaseService
+        console.log('🔄 Initializing InAppPurchaseService...');
+        await inAppPurchaseService.initialize();
+        console.log('✅ InAppPurchaseService initialized successfully');
+
+        // Step 6: Initialize BannerAdService
+        console.log('🔄 Initializing BannerAdService...');
+        await bannerAdService.initialize();
+        console.log('✅ BannerAdService initialized successfully');
       } catch (error) {
         console.error('❌ Failed to initialize ads with consent:', error);
         console.error('Error details:', JSON.stringify(error, null, 2));
@@ -268,6 +281,11 @@ function AppContent() {
   const [appPinError, setAppPinError] = useState('');
   const APP_PIN_STORAGE_KEY = '@AndroidIRCX:app-lock-pin';
   const appStateRef = useRef(AppState.currentState);
+
+  // Banner ad state
+  const [bannerVisible, setBannerVisible] = useState(false);
+  const [scriptingTimeMs, setScriptingTimeMs] = useState(0);
+  const [adFreeTimeMs, setAdFreeTimeMs] = useState(0);
 
   // Fabric crash protection: track if component is mounted
   const isMountedRef = useRef(true);
@@ -394,6 +412,52 @@ function AppContent() {
       setAppUnlockModalVisible(true);
     }
   }, [appLockEnabled, appLockOnLaunch]);
+
+  // Banner ad listeners - listen to AdRewardService and BannerAdService for time changes
+  useEffect(() => {
+    // Initialize scripting time and ad-free time
+    setScriptingTimeMs(adRewardService.getRemainingTime());
+    setAdFreeTimeMs(bannerAdService.getAdFreeTime());
+
+    // Listen to AdRewardService for scripting time changes
+    const unsubscribeScripting = adRewardService.addListener((remainingMs) => {
+      setScriptingTimeMs(remainingMs);
+    });
+
+    // Listen to BannerAdService for banner visibility and ad-free time changes
+    const unsubscribeBanner = bannerAdService.addListener((visible, adFreeMs) => {
+      setBannerVisible(visible);
+      setAdFreeTimeMs(adFreeMs);
+    });
+
+    return () => {
+      unsubscribeScripting();
+      unsubscribeBanner();
+    };
+  }, []);
+
+  // Banner ad show/hide cycle control based on scripting time and ad-free time
+  useEffect(() => {
+    const shouldShowAds = bannerAdService.shouldShowAds(scriptingTimeMs);
+
+    if (shouldShowAds) {
+      // Start the show/hide cycle and start tracking ad-free time
+      bannerAdService.startShowHideCycle();
+
+      // If ad-free time tracking isn't running, start it
+      if (!bannerAdService.isTrackingAdFreeTime() && adFreeTimeMs > 0) {
+        bannerAdService.startAdFreeTimeTracking();
+      }
+    } else {
+      // Stop the show/hide cycle
+      bannerAdService.stopShowHideCycle();
+
+      // Stop ad-free time tracking if it's running
+      if (bannerAdService.isTrackingAdFreeTime()) {
+        bannerAdService.stopAdFreeTimeTracking();
+      }
+    }
+  }, [scriptingTimeMs, adFreeTimeMs]);
 
   // Reconcile tab encryption flags with stored keys and "always encrypt" settings
   useEffect(() => {
@@ -638,6 +702,7 @@ function AppContent() {
   const [channelName, setChannelName] = useState('');
   const [showNetworksList, setShowNetworksList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showPurchaseScreen, setShowPurchaseScreen] = useState(false);
   const [showIgnoreList, setShowIgnoreList] = useState(false);
   const [showWHOIS, setShowWHOIS] = useState(false);
   const [whoisNick, setWhoisNick] = useState<string>('');
@@ -3236,6 +3301,20 @@ safeSetState(() => {
       {activeTab && typingUsers.has(activeTab.name) && (
         <TypingIndicator typingUsers={typingUsers.get(activeTab.name)!} />
       )}
+      {bannerVisible && (
+        <View style={styles.bannerAdContainer}>
+          <BannerAd
+            unitId={bannerAdService.getBannerAdUnitId()}
+            size={BannerAdSize.BANNER}
+            requestOptions={{
+              requestNonPersonalizedAdsOnly: !bannerAdService.canShowPersonalizedAds(),
+            }}
+            onAdFailedToLoad={(error) => {
+              console.error('Banner ad failed to load:', error);
+            }}
+          />
+        </View>
+      )}
       <MessageInput
         placeholder="Enter a message"
         onSubmit={handleSendMessage}
@@ -3406,6 +3485,13 @@ safeSetState(() => {
           showEncryptionIndicators={showEncryptionIndicators}
           onShowEncryptionIndicatorsChange={persistentSetShowEncryptionIndicators}
           onShowIgnoreList={() => setShowIgnoreList(true)}
+          onShowPurchaseScreen={() => setShowPurchaseScreen(true)}
+        />
+      )}
+      {showPurchaseScreen && (
+        <PurchaseScreen
+          visible={showPurchaseScreen}
+          onClose={() => setShowPurchaseScreen(false)}
         />
       )}
       {showIgnoreList && (
@@ -3870,6 +3956,13 @@ safeSetState(() => {
   },
   destructiveOption: {
     color: colors.error,
+  },
+  bannerAdContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
 });
 

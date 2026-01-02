@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DEFAULT_PROFILE_ID, identityProfilesService } from './IdentityProfilesService';
 import { secureStorageService } from './SecureStorageService';
+import { storageCache } from './StorageCache';
 import { tx } from '../i18n/transifex';
 
 const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
@@ -83,6 +83,15 @@ class SettingsService {
 
   private buildDefaultNetwork(identityProfileId: string = DEFAULT_PROFILE_ID): IRCNetworkConfig {
     const defaultServer = this.buildDefaultServer();
+    const androidircxServer: IRCServerConfig = {
+      id: 'androidircx-default',
+      hostname: 'irc.androidircx.com',
+      port: 6697,
+      ssl: true,
+      rejectUnauthorized: true,
+      name: 'irc.androidircx.com',
+      favorite: true,
+    };
     return {
       id: 'DBase',
       name: 'DBase',
@@ -90,7 +99,7 @@ class SettingsService {
       altNick: DEFAULT_IDENTITY.altNick,
       realname: DEFAULT_IDENTITY.realname,
       ident: DEFAULT_IDENTITY.ident,
-      servers: [defaultServer],
+      servers: [defaultServer, androidircxServer],
       defaultServerId: defaultServer.id,
       identityProfileId,
       autoJoinChannels: ['#AndroidIRCX', '#DBase'],
@@ -108,7 +117,32 @@ class SettingsService {
     }
 
     result = result.map(net => {
-      const servers = net.servers && net.servers.length > 0 ? net.servers : [this.buildDefaultServer()];
+      let servers = net.servers && net.servers.length > 0 ? net.servers : [this.buildDefaultServer()];
+
+      // For DBase network, ensure both default servers are present
+      if (net.name === 'DBase') {
+        const hasDbServer = servers.some(s => s.hostname === 'irc.dbase.in.rs');
+        const hasAndroidircxServer = servers.some(s => s.hostname === 'irc.androidircx.com');
+
+        if (!hasDbServer) {
+          servers = [...servers, this.buildDefaultServer()];
+          updated = true;
+        }
+        if (!hasAndroidircxServer) {
+          const androidircxServer: IRCServerConfig = {
+            id: 'androidircx-default',
+            hostname: 'irc.androidircx.com',
+            port: 6697,
+            ssl: true,
+            rejectUnauthorized: true,
+            name: 'irc.androidircx.com',
+            favorite: true,
+          };
+          servers = [...servers, androidircxServer];
+          updated = true;
+        }
+      }
+
       const patched: IRCNetworkConfig = {
         ...net,
         servers: servers.map(s => ({
@@ -142,9 +176,11 @@ class SettingsService {
 
   async loadNetworks(): Promise<IRCNetworkConfig[]> {
     try {
-      const data = await AsyncStorage.getItem(STORAGE_KEY);
-      if (data) {
-        const loaded = JSON.parse(data);
+      // Use StorageCache for in-memory caching and faster access
+      const loaded = await storageCache.getItem<IRCNetworkConfig[]>(STORAGE_KEY, {
+        ttl: 5 * 60 * 1000, // Cache for 5 minutes
+      });
+      if (loaded) {
         const ensured = await this.ensureDefaults(loaded);
         const withSecrets = await this.applySecrets(ensured.networks);
         this.networks = withSecrets;
@@ -170,7 +206,8 @@ class SettingsService {
     try {
       const sanitized = await this.persistAndSanitizeNetworks(networks);
       this.networks = sanitized;
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+      // Use StorageCache for automatic write batching (2s debounce)
+      await storageCache.setItem(STORAGE_KEY, sanitized);
     } catch (error) {
       console.error('Error saving networks:', error);
       throw error;
@@ -310,9 +347,12 @@ class SettingsService {
   // Generic settings methods
   async getSetting<T>(key: string, defaultValue: T): Promise<T> {
     try {
-      const data = await AsyncStorage.getItem(`${STORAGE_KEY_SETTINGS}:${key}`);
+      // Use StorageCache for in-memory caching and faster access
+      const data = await storageCache.getItem<T>(`${STORAGE_KEY_SETTINGS}:${key}`, {
+        ttl: 10 * 60 * 1000, // Cache for 10 minutes
+      });
       if (data !== null) {
-        return JSON.parse(data) as T;
+        return data;
       }
     } catch (error) {
       console.error(`Error getting setting ${key}:`, error);
@@ -322,7 +362,8 @@ class SettingsService {
 
   async setSetting<T>(key: string, value: T): Promise<void> {
     try {
-      await AsyncStorage.setItem(`${STORAGE_KEY_SETTINGS}:${key}`, JSON.stringify(value));
+      // Use StorageCache for automatic write batching (2s debounce)
+      await storageCache.setItem(`${STORAGE_KEY_SETTINGS}:${key}`, value);
       this.notifyListeners(key, value);
     } catch (error) {
       console.error(`Error setting setting ${key}:`, error);
@@ -453,7 +494,10 @@ class SettingsService {
   // First run setup tracking
   async isFirstRun(): Promise<boolean> {
     try {
-      const value = await AsyncStorage.getItem('FIRST_RUN_COMPLETED');
+      // Use StorageCache for in-memory caching (this value never changes once set)
+      const value = await storageCache.getItem<string>('FIRST_RUN_COMPLETED', {
+        ttl: 60 * 60 * 1000, // Cache for 1 hour
+      });
       return value !== 'true';
     } catch (error) {
       console.error('Error checking first run status:', error);
@@ -463,7 +507,8 @@ class SettingsService {
 
   async setFirstRunCompleted(completed: boolean): Promise<void> {
     try {
-      await AsyncStorage.setItem('FIRST_RUN_COMPLETED', completed ? 'true' : 'false');
+      // Use StorageCache for automatic write batching (2s debounce)
+      await storageCache.setItem('FIRST_RUN_COMPLETED', completed ? 'true' : 'false');
     } catch (error) {
       console.error('Error setting first run status:', error);
     }

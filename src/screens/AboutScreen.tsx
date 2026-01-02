@@ -55,7 +55,7 @@ export const AboutScreen: React.FC<AboutScreenProps> = ({
         </View>
         <View style={styles.section}>
           <Text style={styles.appName}>AndroidIRCX</Text>
-          <Text style={styles.version}>{t('Version 1.4.8')}</Text>
+          <Text style={styles.version}>{t('Version 1.5.0')}</Text>
         </View>
         <View style={styles.section}>
           <Text style={styles.label}>{t('Made by')}</Text>

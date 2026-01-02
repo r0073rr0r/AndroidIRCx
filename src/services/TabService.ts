@@ -1,5 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ChannelTab } from '../types';
+import { storageCache } from './StorageCache';
 
 const TABS_STORAGE_KEY_PREFIX = 'TABS_';
 
@@ -13,18 +13,21 @@ class TabService {
 
     try {
       const key = `${TABS_STORAGE_KEY_PREFIX}${network}`;
-      const storedTabs = await AsyncStorage.getItem(key);
+      // Use StorageCache for in-memory caching and faster access
+      const storedTabs = await storageCache.getItem<Omit<ChannelTab, 'messages'>[]>(key, {
+        ttl: 10 * 60 * 1000, // Cache for 10 minutes
+      });
+
       if (storedTabs) {
         // Ensure messages are not loaded, only tab structure
-        const tabs: ChannelTab[] = JSON.parse(storedTabs);
         // Filter out any "Not connected" tabs
-        return tabs
+        return storedTabs
           .filter(tab => tab.name !== 'Not connected' && tab.networkId !== 'Not connected')
           .map(tab => ({
             ...tab,
             networkId: tab.networkId || network,
             id: tab.id.includes('::') ? tab.id : (tab.type === 'server' ? `server::${network}` : tab.id),
-            messages: [],
+            messages: [], // Messages loaded separately via MessageHistoryService
           }));
       }
     } catch (error) {
@@ -49,7 +52,9 @@ class TabService {
       const tabsToSave = tabs
         .filter(tab => tab.name !== 'Not connected' && tab.networkId !== 'Not connected')
         .map(({ messages, ...rest }) => rest);
-      await AsyncStorage.setItem(key, JSON.stringify(tabsToSave));
+
+      // Use StorageCache for automatic write batching (2s debounce)
+      await storageCache.setItem(key, tabsToSave);
     } catch (error) {
       console.error('Failed to save tabs to storage:', error);
     }

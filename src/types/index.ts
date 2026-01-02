@@ -3,7 +3,7 @@ import { IRCMessage } from '../services/IRCService';
 export interface ChannelTab {
   id: string;
   name: string;
-  type: 'server' | 'channel' | 'query' | 'dcc';
+  type: 'server' | 'channel' | 'query' | 'notice' | 'dcc';
   networkId: string;
   messages: IRCMessage[];
   dccSessionId?: string;

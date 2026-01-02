@@ -153,14 +153,14 @@ class BannerAdService {
   /**
    * Check if the banner should be showing based on scripting time, ad-free time, and purchases
    */
-  shouldShowAds(scriptingTimeMs: number): boolean {
+  shouldShowAds(scriptingTimeMs: number, adFreeTimeMs?: number): boolean {
     // Never show ads if user has purchased ad removal
     if (inAppPurchaseService.hasNoAds()) {
       return false;
     }
 
     const hasScriptingTime = scriptingTimeMs > 0;
-    const hasAdFreeTime = this.adFreeMs > 0;
+    const hasAdFreeTime = (adFreeTimeMs !== undefined ? adFreeTimeMs : this.adFreeMs) > 0;
 
     // Show ads only if both scripting time and ad-free time are 0
     return !hasScriptingTime && !hasAdFreeTime;

@@ -7,10 +7,16 @@ import { Buffer } from 'buffer';
 import notifee, { EventType } from '@notifee/react-native';
 import App from './App';
 import { name as appName } from './app.json';
+import consoleManager from './src/utils/consoleManager';
 
 // Ensure Buffer is available globally for proxy/DCC code paths (Hermes doesn't polyfill it by default)
 if (!global.Buffer) {
   global.Buffer = Buffer;
+}
+
+// Initialize console manager for dev builds
+if (__DEV__) {
+  consoleManager.initialize();
 }
 
 // Register Notifee background handler at the entry point so it is available for headless events

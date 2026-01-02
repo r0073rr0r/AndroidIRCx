@@ -1,0 +1,312 @@
+/**
+ * uiStore.ts
+ *
+ * Zustand store for UI state management.
+ * Handles modals, app lock, banners, first run, etc.
+ */
+
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { RawMessageCategory } from '../services/IRCService';
+import { ChannelLogEntry } from '../services/ChannelNotesService';
+
+export interface UIState {
+  // First run setup
+  showFirstRunSetup: boolean;
+  isCheckingFirstRun: boolean;
+
+  // App lock
+  appLockEnabled: boolean;
+  appLockUseBiometric: boolean;
+  appLockUsePin: boolean;
+  appLockOnLaunch: boolean;
+  appLockOnBackground: boolean;
+  appLocked: boolean;
+  appUnlockModalVisible: boolean;
+  appPinEntry: string;
+  appPinError: string;
+
+  // Banners & Ads
+  bannerVisible: boolean;
+  scriptingTimeMs: number;
+  adFreeTimeMs: number;
+
+  // Message display settings
+  showRawCommands: boolean;
+  rawCategoryVisibility: Record<RawMessageCategory, boolean>;
+  hideJoinMessages: boolean;
+  hidePartMessages: boolean;
+  hideQuitMessages: boolean;
+  hideIrcServiceListenerMessages: boolean;
+
+  // Modals & Screens
+  showChannelModal: boolean;
+  channelName: string;
+  showNetworksList: boolean;
+  showSettings: boolean;
+  showPurchaseScreen: boolean;
+  showIgnoreList: boolean;
+  showWHOIS: boolean;
+  whoisNick: string;
+  showQueryEncryptionMenu: boolean;
+  showChannelList: boolean;
+  showUserList: boolean;
+  showChannelSettings: boolean;
+  channelSettingsTarget: string | null;
+  channelSettingsNetwork: string | null;
+  showOptionsMenu: boolean;
+  showRenameModal: boolean;
+  renameTargetTabId: string | null;
+  renameValue: string;
+  showTabOptionsModal: boolean;
+  tabOptionsTitle: string;
+  tabOptions: Array<{ text: string; onPress: () => void; style?: 'destructive' | 'cancel' }>;
+  showChannelNoteModal: boolean;
+  channelNoteTarget: { networkId: string; channel: string } | null;
+  channelNoteValue: string;
+  showChannelLogModal: boolean;
+  channelLogEntries: ChannelLogEntry[];
+  prefillMessage: string | null;
+  showDccTransfers: boolean;
+  showDccSendModal: boolean;
+  dccSendTarget: { nick: string; networkId: string } | null;
+  dccSendPath: string;
+
+  // Actions - First Run
+  setShowFirstRunSetup: (show: boolean) => void;
+  setIsCheckingFirstRun: (checking: boolean) => void;
+
+  // Actions - App Lock
+  setAppLockEnabled: (enabled: boolean) => void;
+  setAppLockUseBiometric: (use: boolean) => void;
+  setAppLockUsePin: (use: boolean) => void;
+  setAppLockOnLaunch: (lock: boolean) => void;
+  setAppLockOnBackground: (lock: boolean) => void;
+  setAppLocked: (locked: boolean) => void;
+  setAppUnlockModalVisible: (visible: boolean) => void;
+  setAppPinEntry: (pin: string) => void;
+  setAppPinError: (error: string) => void;
+
+  // Actions - Banners
+  setBannerVisible: (visible: boolean) => void;
+  setScriptingTimeMs: (time: number) => void;
+  setAdFreeTimeMs: (time: number) => void;
+  incrementScriptingTime: (ms: number) => void;
+  incrementAdFreeTime: (ms: number) => void;
+  decrementScriptingTime: (ms: number) => void;
+  decrementAdFreeTime: (ms: number) => void;
+
+  // Actions - Message Display
+  setShowRawCommands: (show: boolean) => void;
+  setRawCategoryVisibility: (visibility: Record<RawMessageCategory, boolean>) => void;
+  toggleRawCategory: (category: RawMessageCategory) => void;
+  setHideJoinMessages: (hide: boolean) => void;
+  setHidePartMessages: (hide: boolean) => void;
+  setHideQuitMessages: (hide: boolean) => void;
+  setHideIrcServiceListenerMessages: (hide: boolean) => void;
+
+  // Actions - Modals & Screens
+  setShowChannelModal: (show: boolean) => void;
+  setChannelName: (name: string) => void;
+  setShowNetworksList: (show: boolean) => void;
+  setShowSettings: (show: boolean) => void;
+  setShowPurchaseScreen: (show: boolean) => void;
+  setShowIgnoreList: (show: boolean) => void;
+  setShowWHOIS: (show: boolean) => void;
+  setWhoisNick: (nick: string) => void;
+  setShowQueryEncryptionMenu: (show: boolean) => void;
+  setShowChannelList: (show: boolean) => void;
+  setShowUserList: (show: boolean) => void;
+  setShowChannelSettings: (show: boolean) => void;
+  setChannelSettingsTarget: (target: string | null) => void;
+  setChannelSettingsNetwork: (network: string | null) => void;
+  setShowOptionsMenu: (show: boolean) => void;
+  setShowRenameModal: (show: boolean) => void;
+  setRenameTargetTabId: (tabId: string | null) => void;
+  setRenameValue: (value: string) => void;
+  setShowTabOptionsModal: (show: boolean) => void;
+  setTabOptionsTitle: (title: string) => void;
+  setTabOptions: (options: Array<{ text: string; onPress: () => void; style?: 'destructive' | 'cancel' }>) => void;
+  setShowChannelNoteModal: (show: boolean) => void;
+  setChannelNoteTarget: (target: { networkId: string; channel: string } | null) => void;
+  setChannelNoteValue: (value: string) => void;
+  setShowChannelLogModal: (show: boolean) => void;
+  setChannelLogEntries: (entries: ChannelLogEntry[]) => void;
+  setPrefillMessage: (message: string | null) => void;
+  setShowDccTransfers: (show: boolean) => void;
+  setShowDccSendModal: (show: boolean) => void;
+  setDccSendTarget: (target: { nick: string; networkId: string } | null) => void;
+  setDccSendPath: (path: string) => void;
+
+  // Bulk updates
+  updateUIState: (updates: Partial<UIState>) => void;
+
+  // Reset
+  reset: () => void;
+}
+
+const initialState = {
+  showFirstRunSetup: false,
+  isCheckingFirstRun: true,
+  appLockEnabled: false,
+  appLockUseBiometric: false,
+  appLockUsePin: false,
+  appLockOnLaunch: true,
+  appLockOnBackground: true,
+  appLocked: false,
+  appUnlockModalVisible: false,
+  appPinEntry: '',
+  appPinError: '',
+  bannerVisible: false,
+  scriptingTimeMs: 0,
+  adFreeTimeMs: 0,
+  showRawCommands: true,
+  rawCategoryVisibility: {} as Record<RawMessageCategory, boolean>,
+  hideJoinMessages: false,
+  hidePartMessages: false,
+  hideQuitMessages: false,
+  hideIrcServiceListenerMessages: true,
+  showChannelModal: false,
+  channelName: '',
+  showNetworksList: false,
+  showSettings: false,
+  showPurchaseScreen: false,
+  showIgnoreList: false,
+  showWHOIS: false,
+  whoisNick: '',
+  showQueryEncryptionMenu: false,
+  showChannelList: false,
+  showUserList: false,
+  showChannelSettings: false,
+  channelSettingsTarget: null,
+  channelSettingsNetwork: null,
+  showOptionsMenu: false,
+  showRenameModal: false,
+  renameTargetTabId: null,
+  renameValue: '',
+  showTabOptionsModal: false,
+  tabOptionsTitle: '',
+  tabOptions: [],
+  showChannelNoteModal: false,
+  channelNoteTarget: null,
+  channelNoteValue: '',
+  showChannelLogModal: false,
+  channelLogEntries: [],
+  prefillMessage: null,
+  showDccTransfers: false,
+  showDccSendModal: false,
+  dccSendTarget: null,
+  dccSendPath: '',
+};
+
+export const useUIStore = create<UIState>()(
+  persist(
+    (set, get) => ({
+      ...initialState,
+
+      // First Run
+      setShowFirstRunSetup: (show) => set({ showFirstRunSetup: show }),
+      setIsCheckingFirstRun: (checking) => set({ isCheckingFirstRun: checking }),
+
+      // App Lock
+      setAppLockEnabled: (enabled) => set({ appLockEnabled: enabled }),
+      setAppLockUseBiometric: (use) => set({ appLockUseBiometric: use }),
+      setAppLockUsePin: (use) => set({ appLockUsePin: use }),
+      setAppLockOnLaunch: (lock) => set({ appLockOnLaunch: lock }),
+      setAppLockOnBackground: (lock) => set({ appLockOnBackground: lock }),
+      setAppLocked: (locked) => set({ appLocked: locked }),
+      setAppUnlockModalVisible: (visible) => set({ appUnlockModalVisible: visible }),
+      setAppPinEntry: (pin) => set({ appPinEntry: pin }),
+      setAppPinError: (error) => set({ appPinError: error }),
+
+      // Banners
+      setBannerVisible: (visible) => set({ bannerVisible: visible }),
+      setScriptingTimeMs: (time) => set({ scriptingTimeMs: time }),
+      setAdFreeTimeMs: (time) => set({ adFreeTimeMs: time }),
+      incrementScriptingTime: (ms) =>
+        set((state) => ({ scriptingTimeMs: state.scriptingTimeMs + ms })),
+      incrementAdFreeTime: (ms) =>
+        set((state) => ({ adFreeTimeMs: state.adFreeTimeMs + ms })),
+      decrementScriptingTime: (ms) =>
+        set((state) => ({ scriptingTimeMs: Math.max(0, state.scriptingTimeMs - ms) })),
+      decrementAdFreeTime: (ms) =>
+        set((state) => ({ adFreeTimeMs: Math.max(0, state.adFreeTimeMs - ms) })),
+
+      // Message Display
+      setShowRawCommands: (show) => set({ showRawCommands: show }),
+      setRawCategoryVisibility: (visibility) => set({ rawCategoryVisibility: visibility }),
+      toggleRawCategory: (category) =>
+        set((state) => ({
+          rawCategoryVisibility: {
+            ...state.rawCategoryVisibility,
+            [category]: !state.rawCategoryVisibility[category],
+          },
+        })),
+      setHideJoinMessages: (hide) => set({ hideJoinMessages: hide }),
+      setHidePartMessages: (hide) => set({ hidePartMessages: hide }),
+      setHideQuitMessages: (hide) => set({ hideQuitMessages: hide }),
+      setHideIrcServiceListenerMessages: (hide) =>
+        set({ hideIrcServiceListenerMessages: hide }),
+
+      // Modals & Screens
+      setShowChannelModal: (show) => set({ showChannelModal: show }),
+      setChannelName: (name) => set({ channelName: name }),
+      setShowNetworksList: (show) => set({ showNetworksList: show }),
+      setShowSettings: (show) => set({ showSettings: show }),
+      setShowPurchaseScreen: (show) => set({ showPurchaseScreen: show }),
+      setShowIgnoreList: (show) => set({ showIgnoreList: show }),
+      setShowWHOIS: (show) => set({ showWHOIS: show }),
+      setWhoisNick: (nick) => set({ whoisNick: nick }),
+      setShowQueryEncryptionMenu: (show) => set({ showQueryEncryptionMenu: show }),
+      setShowChannelList: (show) => set({ showChannelList: show }),
+      setShowUserList: (show) => set({ showUserList: show }),
+      setShowChannelSettings: (show) => set({ showChannelSettings: show }),
+      setChannelSettingsTarget: (target) => set({ channelSettingsTarget: target }),
+      setChannelSettingsNetwork: (network) => set({ channelSettingsNetwork: network }),
+      setShowOptionsMenu: (show) => set({ showOptionsMenu: show }),
+      setShowRenameModal: (show) => set({ showRenameModal: show }),
+      setRenameTargetTabId: (tabId) => set({ renameTargetTabId: tabId }),
+      setRenameValue: (value) => set({ renameValue: value }),
+      setShowTabOptionsModal: (show) => set({ showTabOptionsModal: show }),
+      setTabOptionsTitle: (title) => set({ tabOptionsTitle: title }),
+      setTabOptions: (options) => set({ tabOptions: options }),
+      setShowChannelNoteModal: (show) => set({ showChannelNoteModal: show }),
+      setChannelNoteTarget: (target) => set({ channelNoteTarget: target }),
+      setChannelNoteValue: (value) => set({ channelNoteValue: value }),
+      setShowChannelLogModal: (show) => set({ showChannelLogModal: show }),
+      setChannelLogEntries: (entries) => set({ channelLogEntries: entries }),
+      setPrefillMessage: (message) => set({ prefillMessage: message }),
+      setShowDccTransfers: (show) => set({ showDccTransfers: show }),
+      setShowDccSendModal: (show) => set({ showDccSendModal: show }),
+      setDccSendTarget: (target) => set({ dccSendTarget: target }),
+      setDccSendPath: (path) => set({ dccSendPath: path }),
+
+      // Bulk updates
+      updateUIState: (updates) => set((state) => ({ ...state, ...updates })),
+
+      // Reset
+      reset: () => set(initialState),
+    }),
+    {
+      name: 'ui-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+      // Persist important UI settings
+      partialize: (state) => ({
+        appLockEnabled: state.appLockEnabled,
+        appLockUseBiometric: state.appLockUseBiometric,
+        appLockUsePin: state.appLockUsePin,
+        appLockOnLaunch: state.appLockOnLaunch,
+        appLockOnBackground: state.appLockOnBackground,
+        scriptingTimeMs: state.scriptingTimeMs,
+        adFreeTimeMs: state.adFreeTimeMs,
+        showRawCommands: state.showRawCommands,
+        rawCategoryVisibility: state.rawCategoryVisibility,
+        hideJoinMessages: state.hideJoinMessages,
+        hidePartMessages: state.hidePartMessages,
+        hideQuitMessages: state.hideQuitMessages,
+        hideIrcServiceListenerMessages: state.hideIrcServiceListenerMessages,
+      }),
+    }
+  )
+);

@@ -32,6 +32,14 @@ Upload AAB to Closed testing v1.3.x
 
 Upload AAB to Alpha track
 
+### android production
+
+```sh
+[bundle exec] fastlane android production
+```
+
+Upload AAB to Production (100%)
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [

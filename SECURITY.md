@@ -13,5 +13,5 @@ We support security fixes for the latest minor release only.
 
 | Version | Supported |
 |---------|-----------|
-| 1.3.x   | Yes       |
-| < 1.3   | No        |
+| 1.5.x   | Yes       |
+| < 1.4   | No        |

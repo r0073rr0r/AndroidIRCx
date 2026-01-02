@@ -55,6 +55,7 @@ import { userManagementService, UserNote, UserAlias } from '../services/UserMana
 import { RawMessageCategory, RAW_MESSAGE_CATEGORIES, getDefaultRawCategoryVisibility } from '../services/IRCService';
 import { applyTransifexLocale, useT } from '../i18n/transifex';
 import { SUPPORTED_LOCALES } from '../i18n/config';
+import consoleManager from '../utils/consoleManager';
 
 interface SettingsScreenProps {
   visible: boolean;
@@ -232,6 +233,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [appPinError, setAppPinError] = useState('');
   const appPinResolveRef = useRef<((ok: boolean) => void) | null>(null);
   const APP_PIN_STORAGE_KEY = '@AndroidIRCX:app-lock-pin';
+  const [consoleEnabled, setConsoleEnabled] = useState(__DEV__ ? consoleManager.getEnabled() : false);
 
   const refreshFavorites = useCallback(() => {
     const favoritesMap = channelFavoritesService.getAllFavorites();
@@ -1057,6 +1059,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       'Scripting': { name: 'code', solid: false },
       'User Management': { name: 'users', solid: false },
       'Advanced': { name: 'cogs', solid: false },
+      'Development': { name: 'bug', solid: true },
       [premiumTitle]: null,
       [aboutTitle]: { name: 'info-circle', solid: true },
     };
@@ -3468,6 +3471,26 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         },
       ],
     },
+    ...(__DEV__
+      ? [
+          {
+            title: t('Development', { _tags: tags }),
+            data: [
+              {
+                id: 'console-logging',
+                title: t('Enable Console Logging', { _tags: tags }),
+                description: t('Toggle console.log output in development', { _tags: tags }),
+                type: 'switch' as const,
+                value: consoleEnabled,
+                onValueChange: async (value: boolean) => {
+                  setConsoleEnabled(value);
+                  await consoleManager.setEnabled(value);
+                },
+              },
+            ],
+          },
+        ]
+      : []),
     {
       title: aboutTitle,
       data: [

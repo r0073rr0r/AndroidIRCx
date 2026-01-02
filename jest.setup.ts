@@ -13,6 +13,16 @@ jest.mock('@react-native-async-storage/async-storage', () => {
     clear: jest.fn(async () => {
       asyncStore.clear();
     }),
+    multiGet: jest.fn(async (keys: string[]) => {
+      return keys.map(key => [key, asyncStore.has(key) ? asyncStore.get(key)! : null]);
+    }),
+    multiSet: jest.fn(async (pairs: [string, string][]) => {
+      pairs.forEach(([key, value]) => asyncStore.set(key, value));
+    }),
+    multiRemove: jest.fn(async (keys: string[]) => {
+      keys.forEach(key => asyncStore.delete(key));
+    }),
+    getAllKeys: jest.fn(async () => Array.from(asyncStore.keys())),
     __STORE: asyncStore,
     __reset: () => {
       asyncStore.clear();
@@ -20,6 +30,10 @@ jest.mock('@react-native-async-storage/async-storage', () => {
       mock.setItem.mockClear();
       mock.removeItem.mockClear();
       mock.clear.mockClear();
+      mock.multiGet.mockClear();
+      mock.multiSet.mockClear();
+      mock.multiRemove.mockClear();
+      mock.getAllKeys.mockClear();
     },
   };
   return mock;
@@ -49,7 +63,23 @@ jest.mock('react-native-google-mobile-ads', () => {
     __esModule: true,
     default: mobileAdsFn,
     MobileAds: mobileAdsFn,
-    AdsConsent: {},
+    AdsConsent: {
+      requestInfoUpdate: jest.fn().mockResolvedValue({ status: 3 }),
+      showForm: jest.fn().mockResolvedValue({ status: 3 }),
+      loadAndShowConsentFormIfRequired: jest.fn().mockResolvedValue({ status: 3 }),
+      reset: jest.fn().mockResolvedValue(undefined),
+    },
+    AdsConsentStatus: {
+      UNKNOWN: 0,
+      REQUIRED: 1,
+      NOT_REQUIRED: 2,
+      OBTAINED: 3,
+    },
+    AdsConsentDebugGeography: {
+      DISABLED: 0,
+      EEA: 1,
+      NOT_EEA: 2,
+    },
     AdapterStatus: { READY: 'READY' },
     AdEventType: { CLOSED: 'CLOSED', OPENED: 'OPENED', ERROR: 'ERROR' },
     RewardedAdEventType: { LOADED: 'LOADED', EARNED_REWARD: 'EARNED_REWARD' },
@@ -364,5 +394,30 @@ jest.mock('react-native-document-picker', () => ({
     pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     xls: 'application/vnd.ms-excel',
     xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  },
+}));
+
+jest.mock('react-native-vector-icons/FontAwesome5', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: jest.fn(() => React.createElement('Text', null, 'Icon')),
+  };
+});
+
+jest.mock('react-native-iap', () => ({
+  initConnection: jest.fn().mockResolvedValue(true),
+  endConnection: jest.fn().mockResolvedValue(undefined),
+  getProducts: jest.fn().mockResolvedValue([]),
+  getPurchaseHistory: jest.fn().mockResolvedValue([]),
+  getAvailablePurchases: jest.fn().mockResolvedValue([]),
+  requestPurchase: jest.fn().mockResolvedValue({}),
+  finishTransaction: jest.fn().mockResolvedValue(undefined),
+  flushFailedPurchasesCachedAsPendingAndroid: jest.fn().mockResolvedValue(undefined),
+  purchaseUpdatedListener: jest.fn(() => ({ remove: jest.fn() })),
+  purchaseErrorListener: jest.fn(() => ({ remove: jest.fn() })),
+  ProductType: {
+    inapp: 'inapp',
+    subs: 'subs',
   },
 }));

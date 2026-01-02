@@ -85,6 +85,7 @@ class InAppPurchaseService {
 
     // Load purchases from storage
     await this.loadPurchases();
+    this.notifyListeners();
 
     this.initialized = true;
     logger.info('iap', 'InAppPurchaseService initialized');

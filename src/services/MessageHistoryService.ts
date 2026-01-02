@@ -1,12 +1,13 @@
 /**
  * MessageHistoryService
- * 
+ *
  * Manages persistent message history storage, search, filtering, and export.
  * Messages are stored per network and channel/query for efficient retrieval.
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IRCMessage } from './IRCService';
+import { storageCache } from './StorageCache';
 import { tx } from '../i18n/transifex';
 
 const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
@@ -49,22 +50,22 @@ class MessageHistoryService {
     try {
       const key = this.getStorageKey(network, message.channel || 'server');
       const messages = await this.loadMessages(key);
-      
+
       // Add new message
       messages.push(message);
-      
+
       // Limit message count per channel
       if (messages.length > this.MAX_MESSAGES_PER_CHANNEL) {
         // Remove oldest messages
         messages.splice(0, messages.length - this.MAX_MESSAGES_PER_CHANNEL);
       }
-      
-      // Save back to storage
-      await AsyncStorage.setItem(key, JSON.stringify(messages));
-      
+
+      // Use StorageCache for automatic write batching (2s debounce)
+      await storageCache.setItem(key, messages);
+
       // Periodic cleanup if needed
       if (messages.length > this.CLEANUP_THRESHOLD) {
-        this.cleanupOldMessages(key).catch(err => 
+        this.cleanupOldMessages(key).catch(err =>
           console.error('MessageHistoryService: Cleanup error:', err)
         );
       }
@@ -79,7 +80,7 @@ class MessageHistoryService {
   async saveMessages(messages: IRCMessage[], network: string): Promise<void> {
     // Group messages by channel
     const messagesByChannel = new Map<string, IRCMessage[]>();
-    
+
     messages.forEach(msg => {
       const channel = msg.channel || 'server';
       if (!messagesByChannel.has(channel)) {
@@ -87,8 +88,8 @@ class MessageHistoryService {
       }
       messagesByChannel.get(channel)!.push(msg);
     });
-    
-    // Save each channel's messages
+
+    // Save each channel's messages using StorageCache for automatic batching
     const promises = Array.from(messagesByChannel.entries()).map(([channel, msgs]) => {
       const key = this.getStorageKey(network, channel);
       return this.loadMessages(key).then(existing => {
@@ -97,10 +98,10 @@ class MessageHistoryService {
         const sorted = combined
           .sort((a, b) => a.timestamp - b.timestamp)
           .slice(-this.MAX_MESSAGES_PER_CHANNEL);
-        return AsyncStorage.setItem(key, JSON.stringify(sorted));
+        return storageCache.setItem(key, sorted);
       });
     });
-    
+
     await Promise.all(promises);
   }
 
@@ -442,7 +443,8 @@ class MessageHistoryService {
   async deleteMessages(network: string, channel?: string): Promise<void> {
     try {
       const key = this.getStorageKey(network, channel || 'server');
-      await AsyncStorage.removeItem(key);
+      // Use StorageCache to remove from both memory and storage
+      await storageCache.removeItem(key);
     } catch (error) {
       console.error('MessageHistoryService: Error deleting messages:', error);
       throw error;
@@ -455,11 +457,12 @@ class MessageHistoryService {
   async deleteNetworkMessages(network: string): Promise<void> {
     try {
       const keys = await AsyncStorage.getAllKeys();
-      const networkKeys = keys.filter(key => 
+      const networkKeys = keys.filter(key =>
         key.startsWith(`${this.STORAGE_PREFIX}${network}:`)
       );
-      
-      await AsyncStorage.multiRemove(networkKeys);
+
+      // Use StorageCache to remove from both memory and storage
+      await Promise.all(networkKeys.map(key => storageCache.removeItem(key)));
     } catch (error) {
       console.error('MessageHistoryService: Error deleting network messages:', error);
       throw error;
@@ -471,15 +474,13 @@ class MessageHistoryService {
    */
   private async cleanupOldMessages(key: string): Promise<void> {
     try {
-      const data = await AsyncStorage.getItem(key);
-      if (data) {
-        const messages: IRCMessage[] = JSON.parse(data);
-        if (messages.length > this.MAX_MESSAGES_PER_CHANNEL) {
-          // Keep only the most recent messages
-          const sorted = messages.sort((a, b) => b.timestamp - a.timestamp);
-          const kept = sorted.slice(0, this.MAX_MESSAGES_PER_CHANNEL);
-          await AsyncStorage.setItem(key, JSON.stringify(kept));
-        }
+      const messages = await this.loadMessages(key);
+      if (messages.length > this.MAX_MESSAGES_PER_CHANNEL) {
+        // Keep only the most recent messages
+        const sorted = messages.sort((a, b) => b.timestamp - a.timestamp);
+        const kept = sorted.slice(0, this.MAX_MESSAGES_PER_CHANNEL);
+        // Use StorageCache for automatic write batching (2s debounce)
+        await storageCache.setItem(key, kept);
       }
     } catch (error) {
       console.error('MessageHistoryService: Error in cleanup:', error);
@@ -500,9 +501,12 @@ class MessageHistoryService {
    */
   private async loadMessages(key: string): Promise<IRCMessage[]> {
     try {
-      const data = await AsyncStorage.getItem(key);
+      // Use StorageCache for in-memory caching and faster access
+      const data = await storageCache.getItem<IRCMessage[]>(key, {
+        ttl: 5 * 60 * 1000, // Cache for 5 minutes
+      });
       if (data) {
-        return JSON.parse(data);
+        return data;
       }
       return [];
     } catch (error) {

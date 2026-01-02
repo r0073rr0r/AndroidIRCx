@@ -20,7 +20,7 @@ interface MessageInputProps {
   prefilledMessage?: string;
   onPrefillUsed?: () => void;
   bottomInset?: number;
-  tabType?: 'channel' | 'query' | 'server' | 'notice';
+  tabType?: 'channel' | 'query' | 'server' | 'notice' | 'dcc';
   tabName?: string;
 }
 

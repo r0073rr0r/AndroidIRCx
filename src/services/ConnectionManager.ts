@@ -69,8 +69,8 @@ class ConnectionManager {
     console.log('CommandService:', typeof CommandService, CommandService);
 
     const ircService = new IRCService();
+    ircService.setNetworkId(finalId);  // Set networkId FIRST so all messages have correct network!
     ircService.addRawMessage(t('*** Creating new connection for {networkId}', { networkId: finalId }), 'connection');
-    ircService.setNetworkId(finalId);
     const channelManagementService = new ChannelManagementService(ircService);
     const userManagementService = new UserManagementService();
     userManagementService.setIRCService(ircService);

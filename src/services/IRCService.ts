@@ -253,7 +253,9 @@ export class IRCService {
         }
       })
       .join(' ');
-    console.log(...args);
+    if (__DEV__) {
+      console.log(...args);
+    }
     if (this.isLoggingRaw) return;
     this.isLoggingRaw = true;
     try {
@@ -4811,7 +4813,7 @@ export class IRCService {
     return () => this.connectionListeners = this.connectionListeners.filter(cb => cb !== callback);
   }
 
-  private addMessage(message: Omit<IRCMessage, 'id' | 'network'> & { status?: 'pending' | 'sent' }, batchTag?: string): void {
+  addMessage(message: Omit<IRCMessage, 'id' | 'network'> & { status?: 'pending' | 'sent' }, batchTag?: string): void {
     const fullMessage: IRCMessage = { ...message, id: `${Date.now()}-${Math.random()}`, network: this.getNetworkName() };
     if (this.verboseLogging) {
       this.logRaw(`IRCService: Adding message - Type: ${fullMessage.type}, Channel: ${fullMessage.channel || 'N/A'}, Text: ${fullMessage.text?.substring(0, 50) || 'N/A'}`);

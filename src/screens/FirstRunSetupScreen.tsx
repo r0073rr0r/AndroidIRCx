@@ -119,6 +119,11 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
         const existingNetwork = await settingsService.getNetwork('DBase');
 
         if (existingNetwork) {
+          const defaultAutoJoin = ['#DBase', '#AndroidIRCX'];
+          const autoJoinChannels =
+            existingNetwork.autoJoinChannels && existingNetwork.autoJoinChannels.length > 0
+              ? existingNetwork.autoJoinChannels
+              : defaultAutoJoin;
           // Update existing DBase network with user's identity profile
           await settingsService.updateNetwork('DBase', {
             nick: nickname.trim(),
@@ -127,6 +132,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
             ident: username.trim() || 'androidircx',
             identityProfileId: newProfile.id,
             connectOnStartup: true,
+            autoJoinChannels,
           });
 
           // Get the updated network
@@ -142,6 +148,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
             ident: username.trim() || 'androidircx',
             identityProfileId: newProfile.id,
             connectOnStartup: true,
+            autoJoinChannels: ['#DBase', '#AndroidIRCX'],
           });
           finalNetwork = (await settingsService.getNetwork('DBase'))!;
         }

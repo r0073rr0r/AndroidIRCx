@@ -20,6 +20,8 @@ const APP_PIN_STORAGE_KEY = '@AndroidIRCX:app-lock-pin';
 export function useAppLock() {
   const appStateRef = useRef(AppState.currentState);
   const isMountedRef = useRef(true);
+  const biometricAttemptInProgressRef = useRef(false);
+  const autoTriggeredRef = useRef(false);
 
   // Zustand selectors - only subscribe to what we need
   const appLockEnabled = useUIStore(state => state.appLockEnabled);
@@ -66,11 +68,17 @@ export function useAppLock() {
   /**
    * Attempt biometric authentication to unlock app
    */
-  const attemptBiometricUnlock = useCallback(async () => {
+  const attemptBiometricUnlock = useCallback(async (isManualRetry = false) => {
     const store = useUIStore.getState();
     if (!store.appLockUseBiometric) {
       // If biometric is not enabled, show PIN modal instead
       store.setAppUnlockModalVisible(true);
+      return false;
+    }
+
+    // Prevent multiple simultaneous attempts
+    if (biometricAttemptInProgressRef.current) {
+      console.log('[useAppLock] Biometric attempt already in progress, skipping');
       return false;
     }
 
@@ -82,14 +90,34 @@ export function useAppLock() {
       return false;
     }
 
+    // If this is a manual retry after a failure, add a delay to allow the native API to reset
+    // Native biometric prompts need time to fully dismiss before a new one can be shown
+    if (isManualRetry) {
+      console.log('[useAppLock] Manual retry - waiting for native API to reset...');
+      await new Promise(resolve => setTimeout(resolve, 800));
+    }
+
+    biometricAttemptInProgressRef.current = true;
+    
+    // Clear any previous errors before attempting
+    if (isMountedRef.current) {
+      store.setAppPinError('');
+    }
+
     try {
+      console.log('[useAppLock] Attempting biometric authentication...');
       const result = await biometricAuthService.authenticate(
         'Unlock AndroidIRCX',
         'Authenticate to unlock the app',
         'app'
       );
 
+      // Always reset the in-progress flag, regardless of success/failure
+      biometricAttemptInProgressRef.current = false;
+
       if (result.success && isMountedRef.current) {
+        console.log('[useAppLock] Biometric authentication successful');
+        autoTriggeredRef.current = false; // Reset auto-trigger flag on success
         store.setAppLocked(false);
         store.setAppUnlockModalVisible(false);
         store.setAppPinEntry('');
@@ -97,6 +125,7 @@ export function useAppLock() {
         return true;
       } else {
         // Authentication failed or was cancelled
+        console.log('[useAppLock] Biometric authentication failed or cancelled:', result.errorKey);
         // Don't hide the modal - allow user to retry
         if (isMountedRef.current) {
           // Show user-friendly error message
@@ -104,6 +133,7 @@ export function useAppLock() {
             store.setAppPinError(result.errorMessage);
           } else if (result.errorKey === 'Authentication cancelled or credentials not found') {
             // User cancelled - don't show error, just allow retry
+            // The prompt will appear again when they press the button
             store.setAppPinError('');
           } else {
             store.setAppPinError('Biometric authentication failed. Please try again.');
@@ -112,6 +142,8 @@ export function useAppLock() {
         return false;
       }
     } catch (error) {
+      // Always reset the in-progress flag, even on exception
+      biometricAttemptInProgressRef.current = false;
       // Handle unexpected errors
       console.error('[useAppLock] Biometric unlock error:', error);
       if (isMountedRef.current) {
@@ -218,15 +250,21 @@ export function useAppLock() {
 
   // Effect: Auto-trigger biometric unlock when locked (only once when app becomes locked)
   useEffect(() => {
-    if (!appLocked) return;
+    if (!appLocked) {
+      // Reset flags when app is unlocked
+      autoTriggeredRef.current = false;
+      biometricAttemptInProgressRef.current = false;
+      return;
+    }
     if (!appLockUseBiometric) return;
     
-    // Only auto-trigger if modal is visible (user hasn't manually interacted yet)
+    // Only auto-trigger if modal is visible and we haven't auto-triggered yet
     const store = useUIStore.getState();
-    if (store.appUnlockModalVisible) {
+    if (store.appUnlockModalVisible && !autoTriggeredRef.current) {
+      autoTriggeredRef.current = true;
       // Small delay to ensure modal is rendered before triggering biometric prompt
       const timeoutId = setTimeout(() => {
-        attemptBiometricUnlock();
+        attemptBiometricUnlock(false);
       }, 300);
       
       return () => clearTimeout(timeoutId);

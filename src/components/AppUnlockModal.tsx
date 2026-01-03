@@ -10,7 +10,7 @@ interface AppUnlockModalProps {
   pinError: string;
   onChangePinEntry: (pin: string) => void;
   onClearPinError: () => void;
-  onBiometricUnlock: () => void;
+  onBiometricUnlock: (isManualRetry?: boolean) => void;
   onPinUnlock: () => void;
   onKillSwitch?: () => void;
   colors: any;
@@ -46,7 +46,10 @@ export const AppUnlockModal: React.FC<AppUnlockModalProps> = ({
     if (pinError) {
       onClearPinError();
     }
-    onBiometricUnlock();
+    // Pass true to indicate this is a manual retry (user pressed the button)
+    // This allows the hook to add a delay before retrying to ensure the native API is ready
+    // The delay ensures the previous biometric prompt (if any) has fully dismissed
+    onBiometricUnlock(true);
   };
 
   const handleKillSwitchPress = () => {

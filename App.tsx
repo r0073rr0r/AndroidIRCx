@@ -282,8 +282,9 @@ function AppContent() {
     let verified = false;
     
     // If biometric is enabled, try biometric first
+    // This is a manual action (kill switch), so pass true for manual retry
     if (store.appLockUseBiometric) {
-      const bioResult = await attemptBiometricUnlock();
+      const bioResult = await attemptBiometricUnlock(true);
       if (bioResult) {
         verified = true;
       }

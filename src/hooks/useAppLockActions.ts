@@ -4,7 +4,7 @@ interface UseAppLockActionsParams {
   appLockEnabled: boolean;
   appLockUseBiometric: boolean;
   appLocked: boolean;
-  attemptBiometricUnlock: () => void;
+  attemptBiometricUnlock: (isManualRetry?: boolean) => void;
   safeAlert: (title: string, message?: string, buttons?: any) => void;
   t: (key: string, options?: any) => string;
   setAppLocked: (value: boolean) => void;
@@ -33,7 +33,8 @@ export const useAppLockActions = (params: UseAppLockActionsParams) => {
     }
     if (appLocked) {
       if (appLockUseBiometric) {
-        attemptBiometricUnlock();
+        // User manually pressed lock button while locked - treat as manual retry
+        attemptBiometricUnlock(true);
       } else {
         setAppUnlockModalVisible(true);
       }

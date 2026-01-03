@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { BackHandler, Platform } from 'react-native';
 import { backgroundService } from '../services/BackgroundService';
 import { settingsService, DEFAULT_QUIT_MESSAGE } from '../services/SettingsService';
+import { messageHistoryBatching } from '../services/MessageHistoryBatching';
 
 interface UseAppExitParams {
   isConnected: boolean;
@@ -34,6 +35,10 @@ export const useAppExit = (params: UseAppExitParams) => {
                 // Wait a bit for disconnect to complete
                 await new Promise<void>(resolve => setTimeout(resolve, 500));
               }
+              // Flush any pending message history writes
+              await messageHistoryBatching.flushSync().catch(err => {
+                console.error('Error flushing message history on exit:', err);
+              });
               // Cleanup services
               backgroundService.cleanup();
               // Exit the app

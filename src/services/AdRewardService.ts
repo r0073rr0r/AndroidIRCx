@@ -8,12 +8,12 @@ import { inAppPurchaseService } from './InAppPurchaseService';
 // Pull app version from app.json so bonuses track real builds
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const appConfig = require('../../app.json');
-const APP_VERSION: string = appConfig?.version || '1.2.7';
+const APP_VERSION: string = appConfig?.version || '1.5.0';
 
 const STORAGE_KEY = '@AndroidIRCX:scriptingTime';
 const INITIAL_BONUS_KEY = '@AndroidIRCX:initialBonusGranted';
 const VERSION_BONUS_KEY = '@AndroidIRCX:versionBonusApplied';
-const VERSION_BONUS_MINUTES = 30; // 30 minutes per new app version
+const VERSION_BONUS_MINUTES = 60; // 30 minutes per new app version
 const HOUR_IN_MS = 60 * 60 * 1000; // 1 hour in milliseconds
 
 // Production mode - using real ad units
@@ -52,6 +52,7 @@ class AdRewardService {
   private consecutiveFailures: number = 0; // Track total failures
   private adsDisabled: boolean = false; // Disable ads after too many failures
   private appVersion: string = APP_VERSION; // Automatically pulled from app.json
+  private lastError: { code: string; message: string } | null = null; // Track last error for special handling
 
   async initialize() {
     if (this.initialized) {
@@ -187,12 +188,11 @@ class AdRewardService {
         const rewardMinutes = reward.amount || 60;
         const rewardMs = rewardMinutes * 60 * 1000; // Convert minutes to milliseconds
 
-        // Grant both scripting time AND ad-free time
-        this.addTime(rewardMs); // Scripting time
-        await bannerAdService.addAdFreeTime(rewardMs); // Ad-free time
+        // Grant scripting time only (banner ads controlled by scripting time tracking, not ad-free time)
+        this.addTime(rewardMs);
 
-        logger.info('ad-reward', `Granted ${rewardMinutes}m of scripting time and ad-free time`);
-        console.log(`✅ Granted ${rewardMinutes}m of scripting time and ad-free time`);
+        logger.info('ad-reward', `Granted ${rewardMinutes}m of scripting time`);
+        console.log(`✅ Granted ${rewardMinutes}m of scripting time`);
 
         // Ad will be consumed after showing, prepare next one
         this.adLoaded = false;
@@ -217,14 +217,21 @@ class AdRewardService {
         this.adLoaded = false;
         const code = (error as any)?.code ?? 'unknown';
         const message = (error as any)?.message ?? String(error);
+        
+        // Store error for handleLoadError to check
+        this.lastError = { code, message };
+        
         logger.error('ad-reward', `Rewarded ad error (${adType}): ${code} - ${message}`);
         console.error(`Rewarded ad error (${adType}): ${code} - ${message}`);
         this.handleLoadError();
       });
 
-      // Load the first ad
-      console.log('🔄 Attempting to load first ad...');
-      this.loadAd();
+      // Delay ad loading until Activity is ready (fixes null-activity error)
+      // Wait for app to be fully mounted and Activity to be available
+      setTimeout(() => {
+        console.log('🔄 Attempting to load first ad (after Activity ready)...');
+        this.loadAd();
+      }, 2000); // 2 second delay to ensure Activity is ready
     } catch (error) {
       logger.error('ad-reward', `Failed to setup rewarded ad: ${String(error)}`);
       console.error('❌ SETUP ERROR:', error);
@@ -279,11 +286,23 @@ class AdRewardService {
   }
 
   private handleLoadError() {
+    // Don't retry if error is null-activity (Activity not ready yet)
+    const lastError = this.lastError;
+    if (lastError?.code === 'googleMobileAds/null-activity') {
+      console.log('⏸️ Ad loading paused - Activity not ready yet. Will retry when Activity is available.');
+      // Don't increment retry count for null-activity errors
+      // Just wait and retry later when Activity is ready
+      setTimeout(() => {
+        console.log('🔄 Retrying ad load after Activity ready delay...');
+        this.loadAd();
+      }, 5000); // Wait 5 seconds before retrying
+      return;
+    }
+    
     console.log(`❌ handleLoadError() called. Retry count: ${this.retryCount + 1}/${this.maxRetries}`);
     this.retryCount++;
     this.consecutiveFailures++;
 
-    // After 10 consecutive failures across all retries/units, disable ads temporarily
     if (this.consecutiveFailures >= 10) {
       this.adsDisabled = true;
       this.adLoading = false;
@@ -301,22 +320,23 @@ class AdRewardService {
         // Switch to fallback ad unit
         this.currentAdUnitIndex++;
         this.retryCount = 0; // Reset retry count for new ad unit
-        logger.warn('ad-reward', `⚠️ Primary ad failed. Switching to fallback ad unit...`);
-        console.warn(`⚠️ Primary ad failed after ${this.maxRetries} attempts. Switching to fallback ad unit...`);
+        logger.info('ad-reward', `⚠️ Primary ad failed. Switching to fallback ad unit...`);
+        console.log(`⚠️ Primary ad failed after ${this.maxRetries} attempts. Switching to fallback ad unit...`);
 
         // Recreate rewarded ad with fallback unit
         this.setupRewardedAd();
       } else {
         // All ad units failed - enter cooldown and reset to primary
         this.cooldownEndTime = Date.now() + 60000; // 60 seconds cooldown
-        logger.warn('ad-reward', `⏸️ All ad units failed. Cooldown for 60 seconds.`);
-        console.warn(`⏸️ All ad units failed. Cooling down for 60 seconds...`);
+        logger.info('ad-reward', `⏸️ All ad units failed. Cooldown for 60 seconds.`);
+        console.log(`⏸️ All ad units failed. Cooling down for 60 seconds...`);
         this.notifyListeners();
 
         // Auto-retry after cooldown with primary ad unit
         setTimeout(() => {
           if (this.consecutiveFailures >= 10) {
-            logger.warn('ad-reward', '🛑 Too many failures, not retrying ads');
+            logger.info('ad-reward', '🛑 Too many failures, not retrying ads');
+            console.log('🛑 Too many failures, not retrying ads');
             return; // Don't retry if too many failures
           }
 
@@ -383,7 +403,8 @@ class AdRewardService {
 
   async showRewardedAd(): Promise<boolean> {
     if (!this.rewardedAd || !this.adLoaded) {
-      logger.warn('ad-reward', 'Rewarded ad not ready yet');
+      logger.info('ad-reward', 'Rewarded ad not ready yet');
+      console.log('⚠️ Rewarded ad not ready yet');
       return false;
     }
 

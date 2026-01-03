@@ -25,6 +25,7 @@ interface LinkMetadata {
   image?: string;
   siteName?: string;
   displayUrl?: string;
+  favicon?: string;
 }
 
 const YOUTUBE_HOSTS = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'];
@@ -74,13 +75,16 @@ const getYouTubeThumbnail = (videoId: string): string =>
 const resolveImageUrl = (rawUrl: string, pageUrl: string): string => {
   if (!rawUrl) return rawUrl;
   if (/^https?:\/\//i.test(rawUrl)) return rawUrl;
+
   if (rawUrl.startsWith('//')) {
     const base = safeParseUrl(pageUrl);
     const protocol = base?.protocol || 'https:';
     return `${protocol}${rawUrl}`;
   }
+
   const base = safeParseUrl(pageUrl);
   if (!base) return rawUrl;
+
   const prefix = base.origin;
   const path = rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`;
   return `${prefix}${path}`;
@@ -101,34 +105,79 @@ const formatDisplayParts = (rawUrl: string): { title: string; siteName: string; 
   const displayUrl = decodeURIComponent(`${siteName}${path}${parsed.search || ''}`);
   return { title, siteName, displayUrl };
 };
-
 const fetchPageMetadata = async (targetUrl: string, signal?: AbortSignal): Promise<LinkMetadata | undefined> => {
-  try {
-    const response = await fetch(targetUrl, { signal });
-    const html = await response.text();
+  return new Promise((resolve) => {
+    try {
+      const xhr = new XMLHttpRequest();
 
-    // Prefer Open Graph
-    const ogTitle = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["'][^>]*>/i) ||
-      html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:title["'][^>]*>/i);
-    const ogDesc = html.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["'][^>]*>/i) ||
-      html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:description["'][^>]*>/i);
-    const ogImage = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["'][^>]*>/i) ||
-      html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["'][^>]*>/i);
-    const ogSite = html.match(/<meta[^>]*property=["']og:site_name["'][^>]*content=["']([^"']+)["'][^>]*>/i) ||
-      html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:site_name["'][^>]*>/i);
-    const twitterImage = html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["'][^>]*>/i);
+      xhr.timeout = 4000; // 4 second timeout
 
-    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-    const title = ogTitle?.[1]?.trim() || titleMatch?.[1]?.trim();
-    const description = ogDesc?.[1]?.trim();
-    const image = ogImage?.[1]?.trim() || twitterImage?.[1]?.trim();
-    const siteName = ogSite?.[1]?.trim();
+      xhr.onload = () => {
+        try {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const html = xhr.responseText;
+            console.log(`[LinkPreview] Fetched HTML for ${targetUrl}, length: ${html.length}`);
 
-    return { title, description, image, siteName };
-  } catch (err) {
-    // Ignore fetch errors for metadata
-  }
-  return undefined;
+            // Prefer Open Graph
+            const ogTitle = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["'][^>]*>/i) ||
+              html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:title["'][^>]*>/i);
+            const ogDesc = html.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["'][^>]*>/i) ||
+              html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:description["'][^>]*>/i);
+            const ogImage = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["'][^>]*>/i) ||
+              html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["'][^>]*>/i);
+            const ogSite = html.match(/<meta[^>]*property=["']og:site_name["'][^>]*content=["']([^"']+)["'][^>]*>/i) ||
+              html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:site_name["'][^>]*>/i);
+            const twitterImage = html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["'][^>]*>/i);
+
+            // Parse favicon from HTML (supports .ico, .png, .svg, etc.)
+            const faviconLink = html.match(/<link[^>]*rel=["'](?:icon|shortcut icon)["'][^>]*href=["']([^"']+)["'][^>]*>/i) ||
+              html.match(/<link[^>]*href=["']([^"']+)["'][^>]*rel=["'](?:icon|shortcut icon)["'][^>]*>/i);
+
+            const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+            const title = ogTitle?.[1]?.trim() || titleMatch?.[1]?.trim();
+            const description = ogDesc?.[1]?.trim();
+            const image = ogImage?.[1]?.trim() || twitterImage?.[1]?.trim();
+            const siteName = ogSite?.[1]?.trim();
+            const favicon = faviconLink?.[1]?.trim();
+
+            console.log(`[LinkPreview] Parsed metadata:`, { title, description, image, siteName, favicon });
+
+            resolve({ title, description, image, siteName, favicon });
+          } else {
+            console.log(`[LinkPreview] Fetch failed for ${targetUrl}: ${xhr.status}`);
+            resolve(undefined);
+          }
+        } catch (parseErr) {
+          console.error(`[LinkPreview] Error parsing metadata for ${targetUrl}:`, parseErr);
+          resolve(undefined);
+        }
+      };
+
+      xhr.onerror = () => {
+        console.error(`[LinkPreview] Network error fetching ${targetUrl}`);
+        resolve(undefined);
+      };
+
+      xhr.ontimeout = () => {
+        console.error(`[LinkPreview] Timeout fetching ${targetUrl}`);
+        resolve(undefined);
+      };
+
+      // Handle abort signal
+      if (signal) {
+        signal.addEventListener('abort', () => {
+          xhr.abort();
+          resolve(undefined);
+        });
+      }
+
+      xhr.open('GET', targetUrl, true);
+      xhr.send();
+    } catch (err) {
+      console.error(`[LinkPreview] Error setting up fetch for ${targetUrl}:`, err);
+      resolve(undefined);
+    }
+  });
 };
 
 export const LinkPreview: React.FC<LinkPreviewProps> = ({
@@ -143,11 +192,13 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
   const [metadata, setMetadata] = useState<LinkMetadata | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
 
   useEffect(() => {
     let isMounted = true;
+    setImageError(false); // Reset image error when URL changes
     const { title, siteName, displayUrl } = formatDisplayParts(url);
     const defaultMetadata: LinkMetadata = {
       title,
@@ -168,30 +219,75 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
         return;
       }
 
-      try {
-        setLoading(true);
-        const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
-        const response = await fetch(oembedUrl);
-        if (!response.ok) {
-          throw new Error(`Status ${response.status}`);
-        }
-        const data = await response.json();
+      setLoading(true);
+
+      // Use XMLHttpRequest for better React Native compatibility
+      const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+
+      const xhr = new XMLHttpRequest();
+      xhr.timeout = 4000;
+
+      xhr.onload = () => {
         if (!isMounted) return;
+        try {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const data = JSON.parse(xhr.responseText);
+            console.log('[LinkPreview] YouTube oembed data:', data);
+            setMetadata({
+              title: data?.title || `YouTube Video ${videoId}`,
+              description: defaultMetadata.description,
+              image: data?.thumbnail_url || getYouTubeThumbnail(videoId),
+              siteName: 'YouTube',
+            });
+          } else {
+            // Fallback with video ID as title
+            console.log(`[LinkPreview] YouTube oembed failed: ${xhr.status}`);
+            setMetadata({
+              ...defaultMetadata,
+              title: `YouTube Video ${videoId}`,
+              image: getYouTubeThumbnail(videoId),
+              siteName: 'YouTube',
+            });
+          }
+        } catch (parseErr) {
+          console.error('[LinkPreview] Error parsing YouTube data:', parseErr);
+          setMetadata({
+            ...defaultMetadata,
+            title: `YouTube Video ${videoId}`,
+            image: getYouTubeThumbnail(videoId),
+            siteName: 'YouTube',
+          });
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      xhr.onerror = () => {
+        if (!isMounted) return;
+        console.error('[LinkPreview] YouTube oembed network error');
         setMetadata({
-          title: data?.title || defaultMetadata.title,
-          description: defaultMetadata.description,
-          image: data?.thumbnail_url || getYouTubeThumbnail(videoId),
-          siteName: 'YouTube',
-        });
-      } catch (e) {
-        if (isMounted) setMetadata({
           ...defaultMetadata,
+          title: `YouTube Video ${videoId}`,
           image: getYouTubeThumbnail(videoId),
           siteName: 'YouTube',
         });
-      } finally {
-        if (isMounted) setLoading(false);
-      }
+        setLoading(false);
+      };
+
+      xhr.ontimeout = () => {
+        if (!isMounted) return;
+        console.error('[LinkPreview] YouTube oembed timeout');
+        setMetadata({
+          ...defaultMetadata,
+          title: `YouTube Video ${videoId}`,
+          image: getYouTubeThumbnail(videoId),
+          siteName: 'YouTube',
+        });
+        setLoading(false);
+      };
+
+      xhr.open('GET', oembedUrl, true);
+      xhr.send();
     };
 
     const fetchMetadata = async () => {
@@ -200,7 +296,7 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
         return;
       }
 
-      // Try to fetch page metadata (title, og:image) for non-YouTube links
+      // Try to fetch page metadata (og:image, title, etc.)
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 4000);
       let pageMetadata: LinkMetadata | undefined;
@@ -210,11 +306,28 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
         clearTimeout(timer);
       }
 
+      // Use og:image if available, otherwise use parsed favicon, fallback to /favicon.ico
+      const parsed = safeParseUrl(url);
+      const fallbackFaviconUrl = parsed ? `${parsed.origin}/favicon.ico` : undefined;
+
+      // Determine the image to use: og:image > parsed favicon > fallback favicon
+      let imageUrl: string | undefined;
+      if (pageMetadata?.image) {
+        imageUrl = resolveImageUrl(pageMetadata.image, url);
+        console.log(`[LinkPreview] Using og:image: ${imageUrl}`);
+      } else if (pageMetadata?.favicon) {
+        imageUrl = resolveImageUrl(pageMetadata.favicon, url);
+        console.log(`[LinkPreview] Using parsed favicon: ${imageUrl}`);
+      } else {
+        imageUrl = fallbackFaviconUrl;
+        console.log(`[LinkPreview] Using fallback favicon: ${imageUrl}`);
+      }
+
       const merged: LinkMetadata = {
         ...defaultMetadata,
         title: pageMetadata?.title || defaultMetadata.title || defaultMetadata.displayUrl,
         description: pageMetadata?.description,
-        image: pageMetadata?.image ? resolveImageUrl(pageMetadata.image, url) : defaultMetadata.image,
+        image: imageUrl,
         siteName: pageMetadata?.siteName || defaultMetadata.siteName,
       };
       if (isMounted) setMetadata(merged);
@@ -280,11 +393,12 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({
       style={styles.container}
       onPress={handlePress}
       activeOpacity={0.7}>
-      {metadata?.image && (
+      {metadata?.image && !imageError && (
         <Image
           source={{ uri: metadata.image }}
           style={styles.image}
           resizeMode="cover"
+          onError={() => setImageError(true)}
         />
       )}
       <View style={styles.content}>

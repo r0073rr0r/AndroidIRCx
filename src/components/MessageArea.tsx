@@ -53,6 +53,7 @@ interface MessageItemProps {
   onLongPressMessage?: (message: IRCMessage) => void;
   isSelected?: boolean;
   selectionMode?: boolean;
+  showImages?: boolean;
 }
 
 // Memoized message item component for performance
@@ -69,6 +70,7 @@ const MessageItem = React.memo<MessageItemProps>(({
   onLongPressMessage,
   isSelected = false,
   selectionMode = false,
+  showImages = true,
 }) => {
   const formatTimestamp = useCallback((timestamp: number): string => {
     const date = new Date(timestamp);
@@ -104,6 +106,8 @@ const MessageItem = React.memo<MessageItemProps>(({
         return colors.monitorMessage;
       case 'topic':
         return colors.topicMessage;
+      case 'mode':
+        return colors.modeMessage || '#5DADE2'; // Light blue color for mode messages
       case 'raw':
         return colors.textSecondary;
       default:
@@ -235,19 +239,19 @@ const MessageItem = React.memo<MessageItemProps>(({
                     StyleSheet.flatten([styles.messageText, { fontStyle: 'italic', color: colors.actionMessage }])
                   )}
                 </View>
-                {parsed.imageUrls.map((url, index) => (
+                {showImages && parsed.imageUrls.map((url, index) => (
                   <ImagePreview key={`img-${message.id}-${index}`} url={url} thumbnail />
                 ))}
-                {parsed.videoUrls.map((url, index) => (
+                {showImages && parsed.videoUrls.map((url, index) => (
                   url ? <VideoPlayer key={`video-${message.id}-${index}`} url={url} /> : null
                 ))}
-                {parsed.audioUrls.map((url, index) => (
+                {showImages && parsed.audioUrls.map((url, index) => (
                   url ? <AudioPlayer key={`audio-${message.id}-${index}`} url={url} /> : null
                 ))}
-                {parsed.fileUrls.map((url, index) => (
+                {showImages && parsed.fileUrls.map((url, index) => (
                   url ? <LinkPreview key={`file-${message.id}-${index}`} url={url} showDownloadButton /> : null
                 ))}
-                {parsed.linkUrls.map((url, index) => (
+                {showImages && parsed.linkUrls.map((url, index) => (
                   url ? <LinkPreview key={`link-${message.id}-${index}`} url={url} showDownloadButton={false} /> : null
                 ))}
                 <MessageReactionsComponent
@@ -272,19 +276,19 @@ const MessageItem = React.memo<MessageItemProps>(({
                     styles.messageText,
                   )}
                 </View>
-                {parsed.imageUrls.map((url, index) => (
+                {showImages && parsed.imageUrls.map((url, index) => (
                   <ImagePreview key={`img-${message.id}-${index}`} url={url} thumbnail />
                 ))}
-                {parsed.videoUrls.map((url, index) => (
+                {showImages && parsed.videoUrls.map((url, index) => (
                   url ? <VideoPlayer key={`video-${message.id}-${index}`} url={url} /> : null
                 ))}
-                {parsed.audioUrls.map((url, index) => (
+                {showImages && parsed.audioUrls.map((url, index) => (
                   url ? <AudioPlayer key={`audio-${message.id}-${index}`} url={url} /> : null
                 ))}
-                {parsed.fileUrls.map((url, index) => (
+                {showImages && parsed.fileUrls.map((url, index) => (
                   url ? <LinkPreview key={`file-${message.id}-${index}`} url={url} showDownloadButton /> : null
                 ))}
-                {parsed.linkUrls.map((url, index) => (
+                {showImages && parsed.linkUrls.map((url, index) => (
                   url ? <LinkPreview key={`link-${message.id}-${index}`} url={url} showDownloadButton={false} /> : null
                 ))}
                 <MessageReactionsComponent
@@ -318,7 +322,8 @@ const MessageItem = React.memo<MessageItemProps>(({
     prevProps.timestampFormat === nextProps.timestampFormat &&
     prevProps.currentNick === nextProps.currentNick &&
     prevProps.isSelected === nextProps.isSelected &&
-    prevProps.selectionMode === nextProps.selectionMode
+    prevProps.selectionMode === nextProps.selectionMode &&
+    prevProps.showImages === nextProps.showImages
   );
 });
 
@@ -394,8 +399,15 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
     setShowContextMenu(false);
   }, [contextNick, connection, network]);
 
-  const perfConfig = performanceService.getConfig();
-  
+  // Listen for performance config changes
+  const [perfConfig, setPerfConfig] = useState(performanceService.getConfig());
+  useEffect(() => {
+    const unsubscribe = performanceService.onConfigChange((config) => {
+      setPerfConfig(config);
+    });
+    return unsubscribe;
+  }, []);
+
   // Listen for layout changes
   const [layoutState, setLayoutState] = useState(layoutConfig);
   useEffect(() => {
@@ -615,9 +627,10 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
         onPressMessage={handleMessagePress}
         isSelected={selectedMessageIds.has(item.id)}
         selectionMode={selectionMode}
+        showImages={perfConfig.imageLazyLoad !== false}
       />
     );
-  }, [layoutState.timestampDisplay, layoutState.timestampFormat, colors, styles, currentNick, handleMessageLongPress, handleMessagePress, selectedMessageIds, selectionMode]);
+  }, [layoutState.timestampDisplay, layoutState.timestampFormat, colors, styles, currentNick, handleMessageLongPress, handleMessagePress, selectedMessageIds, selectionMode, perfConfig.imageLazyLoad]);
 
   // Get item key
   const getItemKey = useCallback((item: IRCMessage) => item.id, []);

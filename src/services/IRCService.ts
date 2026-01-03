@@ -1404,16 +1404,62 @@ export class IRCService {
           }
         }
         
-        const isUserModeChange = !modeChannel || 
-          (!modeChannel.startsWith('#') && !modeChannel.startsWith('&') && 
+        const isUserModeChange = !modeChannel ||
+          (!modeChannel.startsWith('#') && !modeChannel.startsWith('&') &&
            !modeChannel.startsWith('+') && !modeChannel.startsWith('!') &&
            (modeChannel === this.currentNick || !modeChannel));
-        
+
+        const modeNick = this.extractNick(prefix);
+
+        // Colorize mode flags with IRC color codes
+        const colorizeMode = (modeStr: string): string => {
+          let result = '';
+          let adding = true;
+
+          for (let i = 0; i < modeStr.length; i++) {
+            const char = modeStr[i];
+
+            if (char === '+') {
+              result += '\x0303+\x0F'; // Green +
+              adding = true;
+            } else if (char === '-') {
+              result += '\x0314-\x0F'; // Grey -
+              adding = false;
+            } else if (adding) {
+              // Colorize different modes when adding
+              switch (char) {
+                case 'o': result += '\x0304o\x0F'; break; // Red (op)
+                case 'v': result += '\x0309v\x0F'; break; // Light green (voice)
+                case 'h': result += '\x0308h\x0F'; break; // Yellow (halfop)
+                case 'q': result += '\x0306q\x0F'; break; // Purple (owner)
+                case 'a': result += '\x0307a\x0F'; break; // Orange (admin)
+                case 'b': result += '\x0304b\x0F'; break; // Red (ban)
+                case 'e': result += '\x0307e\x0F'; break; // Orange (ban exempt)
+                case 'I': result += '\x0303I\x0F'; break; // Green (invite exempt)
+                default: result += char;
+              }
+            } else {
+              // Colorize different modes when removing
+              result += '\x0314' + char + '\x0F'; // Grey for removed modes
+            }
+          }
+
+          return result;
+        };
+
+        const colorizedModes = modeParams.map((param, idx) =>
+          idx === 0 ? colorizeMode(param) : param
+        ).join(' ');
+
+        const modeText = isUserModeChange
+          ? t('Mode {channel} {modes}', { channel: modeChannel, modes: colorizedModes })
+          : t('{nick} sets mode {modes}', { nick: modeNick || 'Server', modes: colorizedModes });
+
         this.addMessage({
           type: isUserModeChange ? 'raw' : 'mode',
           channel: isUserModeChange ? undefined : modeChannel,
-          from: this.extractNick(prefix),
-          text: t('Mode {channel} {modes}', { channel: modeChannel, modes: modeParams.join(' ') }),
+          from: modeNick,
+          text: modeText,
           timestamp: messageTimestamp,
           isRaw: isUserModeChange,
           rawCategory: isUserModeChange ? 'server' : undefined,

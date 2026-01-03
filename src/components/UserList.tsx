@@ -26,6 +26,7 @@ import { encryptedDMService } from '../services/EncryptedDMService';
 import { channelEncryptionService } from '../services/ChannelEncryptionService';
 import { settingsService } from '../services/SettingsService';
 import Clipboard from '@react-native-clipboard/clipboard';
+import { getUserModeDescription } from '../utils/modeDescriptions';
 
 // Note: This function cannot use useT() as it's exported outside the component
 // The translation will be handled where it's called
@@ -71,6 +72,7 @@ export const UserList: React.FC<UserListProps> = ({
   const [qrType, setQrType] = useState<'bundle' | 'fingerprint'>('bundle');
   const [showKeyScan, setShowKeyScan] = useState(false);
   const [scanError, setScanError] = useState('');
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const device = useCameraDevice('back');
   const { hasPermission: hasCameraPermission, requestPermission: requestCameraPermission } = useCameraPermission();
   const scanHandledRef = useRef(false);
@@ -141,40 +143,79 @@ const getModeColor = (modes?: string[], colors?: any): string => {
     return colors?.text || '#212121'; // regular user
   };
 
-  // Sort users: by mode priority, then alphabetically
-  const sortedUsers = useMemo(() => {
+  // Group users by their highest mode
+  const groupedUsers = useMemo(() => {
     const modePriority: { [key: string]: number } = {
       'q': 0, 'a': 1, 'o': 2, 'h': 3, 'v': 4
     };
     
-    return [...users].sort((a, b) => {
-      // First sort by highest mode priority
-      const aHighestMode = a.modes.length > 0 
-        ? Math.min(...a.modes.map(m => modePriority[m] ?? 99))
-        : 99;
-      const bHighestMode = b.modes.length > 0
-        ? Math.min(...b.modes.map(m => modePriority[m] ?? 99))
-        : 99;
-      
-      if (aHighestMode !== bHighestMode) {
-        return aHighestMode - bHighestMode;
+    const groups: { [key: string]: ChannelUser[] } = {
+      'q': [],
+      'a': [],
+      'o': [],
+      'h': [],
+      'v': [],
+      'none': [],
+    };
+    
+    users.forEach(user => {
+      if (user.modes.length === 0) {
+        groups.none.push(user);
+        return;
       }
       
-      // Then sort alphabetically (case-insensitive)
-      return a.nick.toLowerCase().localeCompare(b.nick.toLowerCase());
+      // Find highest priority mode
+      const highestMode = user.modes.reduce((prev, current) => {
+        const prevPriority = modePriority[prev] ?? 99;
+        const currentPriority = modePriority[current] ?? 99;
+        return currentPriority < prevPriority ? current : prev;
+      });
+      
+      if (highestMode && groups[highestMode]) {
+        groups[highestMode].push(user);
+      } else {
+        groups.none.push(user);
+      }
     });
+    
+    // Sort each group alphabetically
+    Object.keys(groups).forEach(key => {
+      groups[key].sort((a, b) => 
+        a.nick.toLowerCase().localeCompare(b.nick.toLowerCase())
+      );
+    });
+    
+    return groups;
   }, [users]);
 
   // Filter users based on search query
-  const filteredUsers = useMemo(() => {
-    if (!searchQuery.trim()) return sortedUsers;
+  const filteredGroupedUsers = useMemo(() => {
+    if (!searchQuery.trim()) return groupedUsers;
     
     const query = searchQuery.toLowerCase();
-    return sortedUsers.filter(user => 
-      user.nick.toLowerCase().includes(query) ||
-      (user.account && user.account.toLowerCase().includes(query))
-    );
-  }, [sortedUsers, searchQuery]);
+    const filtered: { [key: string]: ChannelUser[] } = {
+      'q': [],
+      'a': [],
+      'o': [],
+      'h': [],
+      'v': [],
+      'none': [],
+    };
+    
+    Object.keys(groupedUsers).forEach(key => {
+      filtered[key] = groupedUsers[key].filter(user => 
+        user.nick.toLowerCase().includes(query) ||
+        (user.account && user.account.toLowerCase().includes(query))
+      );
+    });
+    
+    return filtered;
+  }, [groupedUsers, searchQuery]);
+  
+  // Check if there are any users after filtering
+  const hasFilteredUsers = useMemo(() => {
+    return Object.values(filteredGroupedUsers).some(group => group.length > 0);
+  }, [filteredGroupedUsers]);
 
   const activeIrc = (network ? connectionManager.getConnection(network)?.ircService : null) || ircService;
 
@@ -314,6 +355,19 @@ const getModeColor = (modes?: string[], colors?: any): string => {
     if (!currentUser) return false;
     // Check if user has halfop or higher status
     return currentUser.modes.some(m => ['h', 'o', 'a', 'q'].includes(m));
+  };
+
+  // Toggle group collapse/expand
+  const toggleGroup = (groupKey: string) => {
+    setCollapsedGroups(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(groupKey)) {
+        newSet.delete(groupKey);
+      } else {
+        newSet.add(groupKey);
+      }
+      return newSet;
+    });
   };
 
   const handleUserLongPress = (user: ChannelUser) => {
@@ -696,37 +750,236 @@ const getModeColor = (modes?: string[], colors?: any): string => {
       <ScrollView 
         style={styles.scrollView}
         keyboardShouldPersistTaps="handled">
-        {filteredUsers.length === 0 ? (
+        {!hasFilteredUsers ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>
               {searchQuery ? t('No users found') : t('No users')}
             </Text>
           </View>
         ) : (
-          filteredUsers.map((user, index) => {
-            const prefix = getNickPrefix(user.modes);
-            const color = getModeColor(user.modes, colors);
+          <>
+            {/* Owner */}
+            {filteredGroupedUsers.q.length > 0 && (
+              <View>
+                <TouchableOpacity
+                  style={styles.modeGroupHeader}
+                  onPress={() => toggleGroup('q')}
+                  activeOpacity={0.7}>
+                  <Text style={[styles.modeGroupTitle, { color: getModeColor(['q'], colors) }]}>
+                    {collapsedGroups.has('q') ? '▶' : '▼'} {getUserModeDescription('q')?.name || 'Owner'} ({filteredGroupedUsers.q.length})
+                  </Text>
+                </TouchableOpacity>
+                {!collapsedGroups.has('q') && filteredGroupedUsers.q.map((user, index) => {
+                  const prefix = getNickPrefix(user.modes);
+                  const color = getModeColor(user.modes, colors);
+                  return (
+                    <TouchableOpacity
+                      key={`q-${user.nick}-${index}`}
+                      style={styles.userItem}
+                      onLongPress={() => handleUserLongPress(user)}
+                      onPress={() => {
+                        if (onUserPress) {
+                          onUserPress(user);
+                        }
+                      }}
+                      activeOpacity={0.7}>
+                      <Text style={[styles.userNick, { color }]}>
+                        {prefix}{user.nick}
+                      </Text>
+                      {user.account && user.account !== '*' && (
+                        <Text style={styles.userAccount}> ({user.account})</Text>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
             
-            return (
-              <TouchableOpacity
-                key={`${user.nick}-${index}`}
-                style={styles.userItem}
-                onLongPress={() => handleUserLongPress(user)}
-                onPress={() => {
-                  if (onUserPress) {
-                    onUserPress(user);
-                  }
-                }}
-                activeOpacity={0.7}>
-                <Text style={[styles.userNick, { color }]}>
-                  {prefix}{user.nick}
-                </Text>
-                {user.account && user.account !== '*' && (
-                  <Text style={styles.userAccount}> ({user.account})</Text>
-                )}
-              </TouchableOpacity>
-            );
-          })
+            {/* Admin */}
+            {filteredGroupedUsers.a.length > 0 && (
+              <View>
+                <TouchableOpacity
+                  style={styles.modeGroupHeader}
+                  onPress={() => toggleGroup('a')}
+                  activeOpacity={0.7}>
+                  <Text style={[styles.modeGroupTitle, { color: getModeColor(['a'], colors) }]}>
+                    {collapsedGroups.has('a') ? '▶' : '▼'} {getUserModeDescription('a')?.name || 'Admin'} ({filteredGroupedUsers.a.length})
+                  </Text>
+                </TouchableOpacity>
+                {!collapsedGroups.has('a') && filteredGroupedUsers.a.map((user, index) => {
+                  const prefix = getNickPrefix(user.modes);
+                  const color = getModeColor(user.modes, colors);
+                  return (
+                    <TouchableOpacity
+                      key={`a-${user.nick}-${index}`}
+                      style={styles.userItem}
+                      onLongPress={() => handleUserLongPress(user)}
+                      onPress={() => {
+                        if (onUserPress) {
+                          onUserPress(user);
+                        }
+                      }}
+                      activeOpacity={0.7}>
+                      <Text style={[styles.userNick, { color }]}>
+                        {prefix}{user.nick}
+                      </Text>
+                      {user.account && user.account !== '*' && (
+                        <Text style={styles.userAccount}> ({user.account})</Text>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
+            
+            {/* Operator */}
+            {filteredGroupedUsers.o.length > 0 && (
+              <View>
+                <TouchableOpacity
+                  style={styles.modeGroupHeader}
+                  onPress={() => toggleGroup('o')}
+                  activeOpacity={0.7}>
+                  <Text style={[styles.modeGroupTitle, { color: getModeColor(['o'], colors) }]}>
+                    {collapsedGroups.has('o') ? '▶' : '▼'} {getUserModeDescription('o')?.name || 'Operator'} ({filteredGroupedUsers.o.length})
+                  </Text>
+                </TouchableOpacity>
+                {!collapsedGroups.has('o') && filteredGroupedUsers.o.map((user, index) => {
+                  const prefix = getNickPrefix(user.modes);
+                  const color = getModeColor(user.modes, colors);
+                  return (
+                    <TouchableOpacity
+                      key={`o-${user.nick}-${index}`}
+                      style={styles.userItem}
+                      onLongPress={() => handleUserLongPress(user)}
+                      onPress={() => {
+                        if (onUserPress) {
+                          onUserPress(user);
+                        }
+                      }}
+                      activeOpacity={0.7}>
+                      <Text style={[styles.userNick, { color }]}>
+                        {prefix}{user.nick}
+                      </Text>
+                      {user.account && user.account !== '*' && (
+                        <Text style={styles.userAccount}> ({user.account})</Text>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
+            
+            {/* Half-Operator */}
+            {filteredGroupedUsers.h.length > 0 && (
+              <View>
+                <TouchableOpacity
+                  style={styles.modeGroupHeader}
+                  onPress={() => toggleGroup('h')}
+                  activeOpacity={0.7}>
+                  <Text style={[styles.modeGroupTitle, { color: getModeColor(['h'], colors) }]}>
+                    {collapsedGroups.has('h') ? '▶' : '▼'} {getUserModeDescription('h')?.name || 'Half-Operator'} ({filteredGroupedUsers.h.length})
+                  </Text>
+                </TouchableOpacity>
+                {!collapsedGroups.has('h') && filteredGroupedUsers.h.map((user, index) => {
+                  const prefix = getNickPrefix(user.modes);
+                  const color = getModeColor(user.modes, colors);
+                  return (
+                    <TouchableOpacity
+                      key={`h-${user.nick}-${index}`}
+                      style={styles.userItem}
+                      onLongPress={() => handleUserLongPress(user)}
+                      onPress={() => {
+                        if (onUserPress) {
+                          onUserPress(user);
+                        }
+                      }}
+                      activeOpacity={0.7}>
+                      <Text style={[styles.userNick, { color }]}>
+                        {prefix}{user.nick}
+                      </Text>
+                      {user.account && user.account !== '*' && (
+                        <Text style={styles.userAccount}> ({user.account})</Text>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
+            
+            {/* Voice */}
+            {filteredGroupedUsers.v.length > 0 && (
+              <View>
+                <TouchableOpacity
+                  style={styles.modeGroupHeader}
+                  onPress={() => toggleGroup('v')}
+                  activeOpacity={0.7}>
+                  <Text style={[styles.modeGroupTitle, { color: getModeColor(['v'], colors) }]}>
+                    {collapsedGroups.has('v') ? '▶' : '▼'} {getUserModeDescription('v')?.name || 'Voice'} ({filteredGroupedUsers.v.length})
+                  </Text>
+                </TouchableOpacity>
+                {!collapsedGroups.has('v') && filteredGroupedUsers.v.map((user, index) => {
+                  const prefix = getNickPrefix(user.modes);
+                  const color = getModeColor(user.modes, colors);
+                  return (
+                    <TouchableOpacity
+                      key={`v-${user.nick}-${index}`}
+                      style={styles.userItem}
+                      onLongPress={() => handleUserLongPress(user)}
+                      onPress={() => {
+                        if (onUserPress) {
+                          onUserPress(user);
+                        }
+                      }}
+                      activeOpacity={0.7}>
+                      <Text style={[styles.userNick, { color }]}>
+                        {prefix}{user.nick}
+                      </Text>
+                      {user.account && user.account !== '*' && (
+                        <Text style={styles.userAccount}> ({user.account})</Text>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
+            
+            {/* Regular Users (no mode) */}
+            {filteredGroupedUsers.none.length > 0 && (
+              <View>
+                <TouchableOpacity
+                  style={styles.modeGroupHeader}
+                  onPress={() => toggleGroup('none')}
+                  activeOpacity={0.7}>
+                  <Text style={styles.modeGroupTitle}>
+                    {collapsedGroups.has('none') ? '▶' : '▼'} {t('Users')} ({filteredGroupedUsers.none.length})
+                  </Text>
+                </TouchableOpacity>
+                {!collapsedGroups.has('none') && filteredGroupedUsers.none.map((user, index) => {
+                  const prefix = getNickPrefix(user.modes);
+                  const color = getModeColor(user.modes, colors);
+                  return (
+                    <TouchableOpacity
+                      key={`none-${user.nick}-${index}`}
+                      style={styles.userItem}
+                      onLongPress={() => handleUserLongPress(user)}
+                      onPress={() => {
+                        if (onUserPress) {
+                          onUserPress(user);
+                        }
+                      }}
+                      activeOpacity={0.7}>
+                      <Text style={[styles.userNick, { color }]}>
+                        {prefix}{user.nick}
+                      </Text>
+                      {user.account && user.account !== '*' && (
+                        <Text style={styles.userAccount}> ({user.account})</Text>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
+          </>
         )}
       </ScrollView>
 
@@ -1230,6 +1483,22 @@ const createStyles = (colors: any = {}) => StyleSheet.create({
   emptyText: {
     fontSize: 12,
     color: colors.textSecondary || '#9E9E9E',
+  },
+  modeGroupHeader: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: colors.surfaceVariant || '#F5F5F5',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border || '#E0E0E0',
+    borderTopWidth: 1,
+    borderTopColor: colors.border || '#E0E0E0',
+  },
+  modeGroupTitle: {
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    color: colors.textSecondary || '#757575',
   },
   modalOverlay: {
     flex: 1,

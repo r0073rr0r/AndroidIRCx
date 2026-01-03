@@ -8,6 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Text,
+  Dimensions,
 } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
 import { useT } from '../i18n/transifex';
@@ -24,9 +25,11 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ url, thumbnail = tru
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [modalImageLoading, setModalImageLoading] = useState(true);
 
   const handlePress = () => {
     setModalVisible(true);
+    setModalImageLoading(true);
   };
 
   const handleImageLoad = () => {
@@ -36,6 +39,14 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ url, thumbnail = tru
   const handleImageError = () => {
     setLoading(false);
     setError(true);
+  };
+
+  const handleModalImageLoad = () => {
+    setModalImageLoading(false);
+  };
+
+  const handleModalImageError = () => {
+    setModalImageLoading(false);
   };
 
   if (error) {
@@ -77,14 +88,23 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ url, thumbnail = tru
             onPress={() => setModalVisible(false)}>
             <Text style={styles.modalCloseText}>{t('Close')}</Text>
           </TouchableOpacity>
+          {modalImageLoading && (
+            <View style={styles.modalLoadingContainer}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={styles.modalLoadingText}>{t('Loading image...')}</Text>
+            </View>
+          )}
           <ScrollView
             contentContainerStyle={styles.modalContent}
             maximumZoomScale={3}
-            minimumZoomScale={1}>
+            minimumZoomScale={1}
+            centerContent>
             <Image
               source={{ uri: url }}
               style={styles.modalImage}
               resizeMode="contain"
+              onLoad={handleModalImageLoad}
+              onError={handleModalImageError}
             />
           </ScrollView>
         </View>
@@ -93,70 +113,92 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ url, thumbnail = tru
   );
 };
 
-const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    marginVertical: 4,
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: colors.surfaceVariant,
-  },
-  thumbnail: {
-    width: 200,
-    height: 150,
-    borderRadius: 8,
-  },
-  fullImage: {
-    width: '100%',
-    minHeight: 200,
-    borderRadius: 8,
-  },
-  loadingContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceVariant,
-  },
-  errorContainer: {
-    padding: 8,
-    backgroundColor: colors.surfaceVariant,
-    borderRadius: 8,
-  },
-  errorText: {
-    color: colors.error,
-    fontSize: 12,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalClose: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    zIndex: 1,
-    padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 20,
-  },
-  modalCloseText: {
-    color: '#FFFFFF',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  modalContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalImage: {
-    width: '100%',
-    height: '100%',
-  },
-});
+const createStyles = (colors: any) => {
+  const screenWidth = Dimensions.get('window').width;
+  const screenHeight = Dimensions.get('window').height;
+
+  return StyleSheet.create({
+    container: {
+      marginVertical: 4,
+      borderRadius: 8,
+      overflow: 'hidden',
+      backgroundColor: colors.surfaceVariant,
+    },
+    thumbnail: {
+      width: 200,
+      height: 150,
+      borderRadius: 8,
+    },
+    fullImage: {
+      width: '100%',
+      minHeight: 200,
+      borderRadius: 8,
+    },
+    loadingContainer: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.surfaceVariant,
+    },
+    errorContainer: {
+      padding: 8,
+      backgroundColor: colors.surfaceVariant,
+      borderRadius: 8,
+    },
+    errorText: {
+      color: colors.error,
+      fontSize: 12,
+    },
+    modalContainer: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalClose: {
+      position: 'absolute',
+      top: 40,
+      right: 20,
+      zIndex: 10,
+      padding: 10,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      borderRadius: 20,
+    },
+    modalCloseText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    modalLoadingContainer: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 5,
+    },
+    modalLoadingText: {
+      color: '#FFFFFF',
+      fontSize: 14,
+      marginTop: 12,
+    },
+    modalContent: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: screenWidth,
+      minHeight: screenHeight,
+    },
+    modalImage: {
+      width: screenWidth,
+      height: screenHeight,
+    },
+  });
+};
 

@@ -15,6 +15,7 @@ import { ircService } from '../services/IRCService';
 import { channelEncryptionService } from '../services/ChannelEncryptionService';
 import { channelEncryptionSettingsService } from '../services/ChannelEncryptionSettingsService';
 import { useT } from '../i18n/transifex';
+import { getChannelModeDescription } from '../utils/modeDescriptions';
 
 interface ChannelSettingsScreenProps {
   channel: string;
@@ -320,7 +321,14 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
             </Text>
 
             <View style={styles.modeRow}>
-              <Text style={styles.modeLabel}>{t('Invite Only (i)')}</Text>
+              <View style={styles.modeLabelContainer}>
+                <Text style={styles.modeLabel}>{t('Invite Only (i)')}</Text>
+                {getChannelModeDescription('i') && (
+                  <Text style={styles.modeDescription}>
+                    {getChannelModeDescription('i')?.description}
+                  </Text>
+                )}
+              </View>
               <Switch
                 value={modes.inviteOnly || false}
                 onValueChange={() => toggleMode('i')}
@@ -328,7 +336,14 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
             </View>
 
             <View style={styles.modeRow}>
-              <Text style={styles.modeLabel}>{t('Topic Protected (t)')}</Text>
+              <View style={styles.modeLabelContainer}>
+                <Text style={styles.modeLabel}>{t('Topic Protected (t)')}</Text>
+                {getChannelModeDescription('t') && (
+                  <Text style={styles.modeDescription}>
+                    {getChannelModeDescription('t')?.description}
+                  </Text>
+                )}
+              </View>
               <Switch
                 value={modes.topicProtected || false}
                 onValueChange={() => toggleMode('t')}
@@ -336,7 +351,14 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
             </View>
 
             <View style={styles.modeRow}>
-              <Text style={styles.modeLabel}>{t('No External Messages (n)')}</Text>
+              <View style={styles.modeLabelContainer}>
+                <Text style={styles.modeLabel}>{t('No External Messages (n)')}</Text>
+                {getChannelModeDescription('n') && (
+                  <Text style={styles.modeDescription}>
+                    {getChannelModeDescription('n')?.description}
+                  </Text>
+                )}
+              </View>
               <Switch
                 value={modes.noExternalMessages || false}
                 onValueChange={() => toggleMode('n')}
@@ -344,7 +366,14 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
             </View>
 
             <View style={styles.modeRow}>
-              <Text style={styles.modeLabel}>{t('Moderated (m)')}</Text>
+              <View style={styles.modeLabelContainer}>
+                <Text style={styles.modeLabel}>{t('Moderated (m)')}</Text>
+                {getChannelModeDescription('m') && (
+                  <Text style={styles.modeDescription}>
+                    {getChannelModeDescription('m')?.description}
+                  </Text>
+                )}
+              </View>
               <Switch
                 value={modes.moderated || false}
                 onValueChange={() => toggleMode('m')}
@@ -352,7 +381,14 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
             </View>
 
             <View style={styles.modeRow}>
-              <Text style={styles.modeLabel}>{t('Private (p)')}</Text>
+              <View style={styles.modeLabelContainer}>
+                <Text style={styles.modeLabel}>{t('Private (p)')}</Text>
+                {getChannelModeDescription('p') && (
+                  <Text style={styles.modeDescription}>
+                    {getChannelModeDescription('p')?.description}
+                  </Text>
+                )}
+              </View>
               <Switch
                 value={modes.private || false}
                 onValueChange={() => toggleMode('p')}
@@ -360,7 +396,14 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
             </View>
 
             <View style={styles.modeRow}>
-              <Text style={styles.modeLabel}>{t('Secret (s)')}</Text>
+              <View style={styles.modeLabelContainer}>
+                <Text style={styles.modeLabel}>{t('Secret (s)')}</Text>
+                {getChannelModeDescription('s') && (
+                  <Text style={styles.modeDescription}>
+                    {getChannelModeDescription('s')?.description}
+                  </Text>
+                )}
+              </View>
               <Switch
                 value={modes.secret || false}
                 onValueChange={() => toggleMode('s')}
@@ -370,7 +413,14 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
 
           {/* Channel Key */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('Channel Key (Password)')}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('Channel Key (Password)')}</Text>
+              {getChannelModeDescription('k') && (
+                <Text style={styles.sectionDescription}>
+                  {getChannelModeDescription('k')?.description}
+                </Text>
+              )}
+            </View>
             <TextInput
               style={styles.input}
               value={key}
@@ -437,7 +487,14 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
 
           {/* Channel Limit */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('User Limit')}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('User Limit')}</Text>
+              {getChannelModeDescription('l') && (
+                <Text style={styles.sectionDescription}>
+                  {getChannelModeDescription('l')?.description}
+                </Text>
+              )}
+            </View>
             <TextInput
               style={styles.input}
               value={limit}
@@ -457,7 +514,14 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
 
           {/* Ban List */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('Ban List')}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('Ban List')}</Text>
+              {getChannelModeDescription('b') && (
+                <Text style={styles.sectionDescription}>
+                  {getChannelModeDescription('b')?.description}
+                </Text>
+              )}
+            </View>
             <View style={styles.inputRow}>
               <TextInput
                 style={[styles.input, styles.inputFlex]}
@@ -494,7 +558,14 @@ export const ChannelSettingsScreen: React.FC<ChannelSettingsScreenProps> = ({
 
           {/* Exception List */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('Exception List')}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('Exception List')}</Text>
+              {getChannelModeDescription('e') && (
+                <Text style={styles.sectionDescription}>
+                  {getChannelModeDescription('e')?.description}
+                </Text>
+              )}
+            </View>
             <View style={styles.inputRow}>
               <TextInput
                 style={[styles.input, styles.inputFlex]}
@@ -578,7 +649,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#212121',
+    marginBottom: 4,
+  },
+  sectionHeader: {
     marginBottom: 12,
+  },
+  sectionDescription: {
+    fontSize: 12,
+    color: '#757575',
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
+  modeLabelContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
+  modeDescription: {
+    fontSize: 11,
+    color: '#9E9E9E',
+    fontStyle: 'italic',
+    marginTop: 2,
   },
   input: {
     borderWidth: 1,

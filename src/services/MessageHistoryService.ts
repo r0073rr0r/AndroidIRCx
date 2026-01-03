@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IRCMessage } from './IRCService';
 import { storageCache } from './StorageCache';
 import { tx } from '../i18n/transifex';
+import { messageHistoryBatching } from './MessageHistoryBatching';
 
 const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
@@ -44,34 +45,20 @@ class MessageHistoryService {
   private readonly CLEANUP_THRESHOLD = 12000; // Cleanup when exceeding this
 
   /**
-   * Save a message to history
+   * Save a message to history (uses batching for better performance)
+   * Messages are queued and saved in batches of 10 or after 2 seconds
    */
   async saveMessage(message: IRCMessage, network: string): Promise<void> {
-    try {
-      const key = this.getStorageKey(network, message.channel || 'server');
-      const messages = await this.loadMessages(key);
-
-      // Add new message
-      messages.push(message);
-
-      // Limit message count per channel
-      if (messages.length > this.MAX_MESSAGES_PER_CHANNEL) {
-        // Remove oldest messages
-        messages.splice(0, messages.length - this.MAX_MESSAGES_PER_CHANNEL);
-      }
-
-      // Use StorageCache for automatic write batching (2s debounce)
-      await storageCache.setItem(key, messages);
-
-      // Periodic cleanup if needed
-      if (messages.length > this.CLEANUP_THRESHOLD) {
-        this.cleanupOldMessages(key).catch(err =>
-          console.error('MessageHistoryService: Cleanup error:', err)
-        );
-      }
-    } catch (error) {
-      console.error('MessageHistoryService: Error saving message:', error);
+    // Don't queue if network is invalid
+    if (!network || network === 'Not connected') {
+      return;
     }
+
+    // Queue message for batched saving
+    messageHistoryBatching.queueMessage(message, network);
+    
+    // Note: Actual save happens asynchronously in batches
+    // For immediate save, use saveMessages() directly
   }
 
   /**

@@ -82,18 +82,29 @@ export const useNetworkInitialization = (params: UseNetworkInitializationParams)
           }));
         const ensuredServer = tabsNormalized.some(t => t.type === 'server') ? tabsNormalized : [makeServerTab(initialNetworkName), ...tabsNormalized];
 
-        // Load message history for each tab
-        const tabsWithHistory = await Promise.all(
-          ensuredServer.map(async (tab) => {
-            // Use 'server' for server tabs, tab.name for channels/queries
-            const channelKey = tab.type === 'server' ? 'server' : tab.name;
-            const history = await messageHistoryService.loadMessages(tab.networkId, channelKey);
-            return { ...tab, messages: history };
-          })
-        );
+        // Progressive loading: Set tabs without history first (fast startup)
+        // Message history will be lazy-loaded when tabs are switched to
+        const tabsWithoutHistory = ensuredServer.map(tab => ({
+          ...tab,
+          messages: [], // Start with empty messages - will be loaded on demand
+        }));
 
-        setTabs(tabsWithHistory);
+        setTabs(tabsWithoutHistory);
+        
+        // Load history only for the initial active tab (server tab) in background
+        // This provides immediate content while keeping startup fast
         const initialServerId = serverTabId(initialNetworkName);
+        const initialTab = tabsWithoutHistory.find(t => t.id === initialServerId);
+        if (initialTab) {
+          // Load history for initial tab asynchronously (non-blocking)
+          messageHistoryService.loadMessages(initialTab.networkId, 'server')
+            .then(history => {
+              setTabs(prev => prev.map(t =>
+                t.id === initialServerId ? { ...t, messages: history } : t
+              ));
+            })
+            .catch(err => console.error('Error loading initial tab history:', err));
+        }
         setActiveTabId(initialServerId);
 
       } catch (error) {

@@ -3,6 +3,7 @@ import { Alert, AppState } from 'react-native';
 import type { MutableRefObject } from 'react';
 import { tabService } from '../services/TabService';
 import { useTabStore } from '../stores/tabStore';
+import { messageHistoryBatching } from '../services/MessageHistoryBatching';
 import type { ChannelTab } from '../types';
 
 interface PendingAlertPayload {
@@ -37,6 +38,13 @@ export const useAppStateEffects = (params: UseAppStateEffectsParams) => {
         const { title, message, buttons } = pendingAlertRef.current;
         pendingAlertRef.current = null;
         Alert.alert(title, message, buttons);
+      }
+
+      // Flush message history when going to background to prevent data loss
+      if (nextState === 'background' || nextState === 'inactive') {
+        messageHistoryBatching.flushSync().catch(err => {
+          console.error('Error flushing message history on background:', err);
+        });
       }
 
       // Reload tabs from storage when app becomes active (in case state was lost)

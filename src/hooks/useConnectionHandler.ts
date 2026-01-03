@@ -239,19 +239,32 @@ export const useConnectionHandler = (params: UseConnectionHandlerParams) => {
         id: tab.id.includes('::') ? tab.id : (tab.type === 'server' ? serverTabId(finalId) : tab.id),
       }));
       const withServerTab = normalizedTabs.some(t => t.type === 'server') ? normalizedTabs : [makeServerTab(finalId), ...normalizedTabs];
-      const tabsWithHistory = await Promise.all(
-        withServerTab.map(async (tab) => {
-          // Use 'server' for server tabs, tab.name for channels/queries
-          const channelKey = tab.type === 'server' ? 'server' : tab.name;
-          const history = await messageHistoryService.loadMessages(tab.networkId, channelKey);
-          return { ...tab, messages: history };
-        })
-      );
+      // Progressive loading: Set tabs without history first (fast connection)
+      // Message history will be lazy-loaded when tabs are switched to
+      const tabsWithoutHistory = withServerTab.map(tab => ({
+        ...tab,
+        messages: [], // Start with empty messages - will be loaded on demand
+      }));
       setTabs(prev => sortTabsGrouped([
         ...prev.filter(t => t.networkId !== finalId),
-        ...tabsWithHistory,
+        ...tabsWithoutHistory,
       ], false));
-      setActiveTabId(serverTabId(finalId));
+      const initialServerTabId = serverTabId(finalId);
+      setActiveTabId(initialServerTabId);
+      
+      // Load history only for the initial active tab (server tab) in background
+      // This provides immediate content while keeping connection fast
+      const initialTab = tabsWithoutHistory.find(t => t.id === initialServerTabId);
+      if (initialTab) {
+        // Load history for initial tab asynchronously (non-blocking)
+        messageHistoryService.loadMessages(initialTab.networkId, 'server')
+          .then(history => {
+            setTabs(prev => prev.map(t =>
+              t.id === initialServerTabId ? { ...t, messages: history } : t
+            ));
+          })
+          .catch(err => console.error('Error loading initial tab history on connect:', err));
+      }
 
       // Save connection state for auto-reconnect
       if (networkToUse.name) {

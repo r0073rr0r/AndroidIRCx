@@ -36,6 +36,7 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose, onShowPurch
   const [cooldownSeconds, setCooldownSeconds] = useState<number>(0);
   const [showingAd, setShowingAd] = useState<boolean>(false);
   const [adUnitType, setAdUnitType] = useState<string>('Primary');
+  const [scriptingTimeActive, setScriptingTimeActive] = useState<boolean>(false);
   const highlightScrollRef = useRef<ScrollView | null>(null);
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
@@ -49,6 +50,7 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose, onShowPurch
     setRemainingTime(adRewardService.getRemainingTimeFormatted());
     setHasTime(adRewardService.hasAvailableTime());
     setHasUnlimitedScripting(inAppPurchaseService.hasUnlimitedScripting());
+    setScriptingTimeActive(adRewardService.isTracking());
 
     const adStatus = adRewardService.getAdStatus();
     setAdReady(adStatus.ready);
@@ -86,7 +88,7 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose, onShowPurch
       }
     });
 
-    // Update ad status periodically (every second for countdown)
+    // Update ad status and tracking status periodically (every second for countdown)
     const interval = setInterval(() => {
       const adStatus = adRewardService.getAdStatus();
       setAdReady(adStatus.ready);
@@ -94,6 +96,7 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose, onShowPurch
       setAdCooldown(adStatus.cooldown);
       setCooldownSeconds(adStatus.cooldownSeconds);
       setAdUnitType(adStatus.adUnitType);
+      setScriptingTimeActive(adRewardService.isTracking());
     }, 1000);
 
     return () => {
@@ -101,6 +104,17 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose, onShowPurch
       clearInterval(interval);
     };
   }, [visible]);
+
+  const toggleScriptingTimeActive = useCallback((value: boolean) => {
+    if (value) {
+      // Start scripting time tracking (also enables no-ads mode)
+      adRewardService.startUsageTracking();
+    } else {
+      // Stop scripting time tracking (also disables no-ads mode)
+      adRewardService.stopUsageTracking();
+    }
+    setScriptingTimeActive(value);
+  }, []);
 
   const toggleScript = async (id: string, enabled: boolean) => {
     try {
@@ -325,8 +339,25 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose, onShowPurch
         {/* Scripting Time & Ad Reward Section */}
         <View style={styles.adRewardSection}>
           <View style={styles.timeDisplay}>
-            <Text style={styles.timeLabel}>{t('Scripting Time Remaining:')}</Text>
+            <Text style={styles.timeLabel}>{t('Scripting Time & No-Ads Remaining:')}</Text>
             <Text style={[styles.timeValue, !hasTime && styles.timeExpired]}>{remainingTime}</Text>
+          </View>
+
+          {/* Master Toggle for Scripting Time / No-Ads Mode */}
+          <View style={[styles.switchRow, { marginBottom: 12, paddingVertical: 8, backgroundColor: scriptingTimeActive ? colors.primary + '10' : colors.surface, borderRadius: 8, paddingHorizontal: 12 }]}>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.timeLabel, { marginBottom: 4 }]}>
+                {scriptingTimeActive ? '✅ ' : ''}{t('Scripting Time & No-Ads Active')}
+              </Text>
+              <Text style={[styles.subtitle, { fontSize: 12 }]}>
+                {t('When ON: Time counts down, scripts can run, no banner ads')}
+              </Text>
+            </View>
+            <Switch
+              value={scriptingTimeActive}
+              onValueChange={toggleScriptingTimeActive}
+              disabled={!hasTime && !hasUnlimitedScripting}
+            />
           </View>
           {adUnitType === 'Fallback' && (
             <Text style={[styles.subtitle, { marginBottom: 8, fontStyle: 'italic' }]}>
@@ -344,7 +375,7 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose, onShowPurch
               ) : (
                 <Text style={styles.watchAdButtonText}>
                   {adReady
-                    ? t('Watch Ad (+60 min)')
+                    ? t('Watch Ad (+60 min Scripting & No-Ads)')
                     : adCooldown
                       ? t('Cooldown ({cooldownSeconds}s)').replace('{cooldownSeconds}', cooldownSeconds.toString())
                       : adLoading
@@ -363,7 +394,7 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose, onShowPurch
               }}
             >
               <Text style={styles.upgradeButtonText}>
-                💎 {t('Upgrade to Unlimited')}
+                💎 {t('Upgrade to Unlimited Scripting & No-Ads')}
               </Text>
             </TouchableOpacity>
           )}
@@ -371,7 +402,7 @@ export const ScriptingScreen: React.FC<Props> = ({ visible, onClose, onShowPurch
         {!hasTime && !hasUnlimitedScripting && (
           <View style={styles.warningBox}>
             <Text style={styles.warningText}>
-              {t('No scripting time available. Watch an ad to gain scripting access. Scripts will be automatically disabled when time runs out.')}
+              {t('No scripting time available. Watch an ad to gain 60 minutes of scripting time and no-ads. Scripts will be automatically disabled when time runs out.')}
             </Text>
           </View>
         )}

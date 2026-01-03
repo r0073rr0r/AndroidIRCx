@@ -25,6 +25,7 @@ class PerformanceService {
     imageLazyLoad: true,
   };
 
+  private listeners: Array<(config: PerformanceConfig) => void> = [];
   private readonly STORAGE_KEY = '@AndroidIRCX:performanceConfig';
 
   /**
@@ -55,6 +56,7 @@ class PerformanceService {
   async setConfig(updates: Partial<PerformanceConfig>): Promise<void> {
     this.config = { ...this.config, ...updates };
     await this.saveConfig();
+    this.notifyListeners();
   }
 
   /**
@@ -118,6 +120,30 @@ class PerformanceService {
    */
   getCleanupThreshold(): number {
     return this.config.cleanupThreshold;
+  }
+
+  /**
+   * Listen for config changes
+   */
+  onConfigChange(callback: (config: PerformanceConfig) => void): () => void {
+    this.listeners.push(callback);
+    return () => {
+      this.listeners = this.listeners.filter(cb => cb !== callback);
+    };
+  }
+
+  /**
+   * Notify listeners
+   */
+  private notifyListeners(): void {
+    const config = this.getConfig();
+    this.listeners.forEach(callback => {
+      try {
+        callback(config);
+      } catch (error) {
+        console.error('Error in performance config listener:', error);
+      }
+    });
   }
 
   /**

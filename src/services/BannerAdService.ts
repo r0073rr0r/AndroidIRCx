@@ -16,15 +16,15 @@ const BANNER_AD_UNIT_ID = USE_TEST_ADS
   : 'ca-app-pub-5116758828202889/6365382117';
 
 // Timing constants
-const BANNER_SHOW_DURATION = 30 * 1000; // Show banner for 30 seconds
-const BANNER_HIDE_DURATION = 2 * 60 * 1000; // Hide for 2 minutes
+const BANNER_SHOW_DURATION = 2 * 60 * 1000; // Show banner for 2 minutes
+const BANNER_HIDE_DURATION = 1 * 60 * 1000; // Hide for 1 minute
 
 interface AdFreeTimeData {
   remainingMs: number;
   lastUpdated: number;
 }
 
-type BannerStateListener = (visible: boolean, adFreeTime: number) => void;
+type BannerStateListener = (visible: boolean) => void;
 
 class BannerAdService {
   private adFreeMs: number = 0;
@@ -99,7 +99,7 @@ class BannerAdService {
 
   /**
    * Start the show/hide cycle for the banner ad
-   * This should be called when ads should be showing (scripting time = 0 and ad-free time = 0)
+   * This should be called when ads should be showing (scripting time is OFF/not tracking)
    */
   startShowHideCycle() {
     if (this.showHideInterval) {
@@ -107,63 +107,70 @@ class BannerAdService {
       return;
     }
 
-    logger.info('banner-ad', 'Starting banner ad show/hide cycle');
+    logger.info('banner-ad', 'Starting banner ad show/hide cycle (show 2min, hide 1min)');
+
+    // Mark the cycle as running
+    this.showHideInterval = {} as NodeJS.Timeout; // Placeholder to indicate cycle is active
 
     // Show the banner immediately
     this.bannerVisible = true;
     this.notifyListeners();
 
-    // Hide it after BANNER_SHOW_DURATION
-    this.hideTimer = setTimeout(() => {
-      this.bannerVisible = false;
-      this.notifyListeners();
-      logger.info('banner-ad', 'Banner hidden');
-      this.hideTimer = null;
-    }, BANNER_SHOW_DURATION);
+    // Schedule the first hide after BANNER_SHOW_DURATION
+    this.scheduleNextToggle(BANNER_SHOW_DURATION, false);
+  }
 
-    // Start the cycle: toggle every (BANNER_SHOW_DURATION + BANNER_HIDE_DURATION)
-    this.showHideInterval = setInterval(() => {
-      this.bannerVisible = !this.bannerVisible;
+  /**
+   * Schedule the next banner toggle (show or hide)
+   */
+  private scheduleNextToggle(delay: number, showNext: boolean) {
+    this.hideTimer = setTimeout(() => {
+      this.bannerVisible = showNext;
       this.notifyListeners();
       logger.info('banner-ad', this.bannerVisible ? 'Banner shown' : 'Banner hidden');
-    }, BANNER_SHOW_DURATION + BANNER_HIDE_DURATION);
+
+      // Schedule the opposite action
+      const nextDelay = showNext ? BANNER_SHOW_DURATION : BANNER_HIDE_DURATION;
+      this.scheduleNextToggle(nextDelay, !showNext);
+    }, delay);
   }
 
   /**
    * Stop the show/hide cycle and hide the banner
    */
   stopShowHideCycle() {
-    if (this.showHideInterval) {
-      clearInterval(this.showHideInterval);
-      this.showHideInterval = null;
-      logger.info('banner-ad', 'Stopped banner ad show/hide cycle');
-    }
-
+    // Clear any pending toggle timer
     if (this.hideTimer) {
       clearTimeout(this.hideTimer);
       this.hideTimer = null;
     }
 
+    // Reset the interval flag
+    this.showHideInterval = null;
+
+    // Hide the banner if it's visible
     if (this.bannerVisible) {
       this.bannerVisible = false;
       this.notifyListeners();
+      logger.info('banner-ad', 'Stopped banner ad show/hide cycle and hid banner');
+    } else {
+      logger.info('banner-ad', 'Stopped banner ad show/hide cycle');
     }
   }
 
   /**
-   * Check if the banner should be showing based on scripting time, ad-free time, and purchases
+   * Check if the banner should be showing based ONLY on scripting time tracking status
+   * @param isScriptingTimeTracking - Whether scripting time is actively counting down (ON/tracking)
    */
-  shouldShowAds(scriptingTimeMs: number, adFreeTimeMs?: number): boolean {
+  shouldShowAds(isScriptingTimeTracking: boolean): boolean {
     // Never show ads if user has purchased ad removal
     if (inAppPurchaseService.hasNoAds()) {
       return false;
     }
 
-    const hasScriptingTime = scriptingTimeMs > 0;
-    const hasAdFreeTime = (adFreeTimeMs !== undefined ? adFreeTimeMs : this.adFreeMs) > 0;
-
-    // Show ads only if both scripting time and ad-free time are 0
-    return !hasScriptingTime && !hasAdFreeTime;
+    // Show ads when scripting time is NOT actively tracking (OFF)
+    // Hide ads when scripting time IS actively tracking (ON)
+    return !isScriptingTimeTracking;
   }
 
   /**
@@ -171,6 +178,17 @@ class BannerAdService {
    */
   isBannerVisible(): boolean {
     return this.bannerVisible;
+  }
+
+  /**
+   * Manually set the banner visibility state
+   */
+  setBannerVisible(visible: boolean) {
+    if (this.bannerVisible !== visible) {
+      this.bannerVisible = visible;
+      this.notifyListeners();
+      logger.info('banner-ad', `Banner ${visible ? 'shown' : 'hidden'} manually`);
+    }
   }
 
   /**
@@ -285,7 +303,7 @@ class BannerAdService {
   private notifyListeners() {
     this.listeners.forEach(listener => {
       try {
-        listener(this.bannerVisible, this.adFreeMs);
+        listener(this.bannerVisible);
       } catch (error) {
         logger.error('banner-ad', `Listener error: ${String(error)}`);
       }

@@ -3,16 +3,22 @@ import { useUIStore } from '../stores/uiStore';
 
 export const useHeaderActions = () => {
   const handleDropdownPress = useCallback(() => {
-    useUIStore.getState().setShowOptionsMenu(true);
+    console.log('🔽 Dropdown menu pressed');
+    const setShowOptionsMenu = useUIStore.getState().setShowOptionsMenu;
+    setShowOptionsMenu(true);
+    console.log('✅ Options menu state set to true');
   }, []);
 
   const handleMenuPress = useCallback(() => {
+    console.log('☰ Hamburger menu pressed');
     useUIStore.getState().setShowSettings(true);
+    console.log('✅ Settings state set to true, current state:', useUIStore.getState().showSettings);
   }, []);
 
   const handleToggleUserList = useCallback(() => {
     const currentValue = useUIStore.getState().showUserList;
-    useUIStore.getState().setShowUserList(!currentValue);
+    const setShowUserList = useUIStore.getState().setShowUserList;
+    setShowUserList(!currentValue);
   }, []);
 
   return {

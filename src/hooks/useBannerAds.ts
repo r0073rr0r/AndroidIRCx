@@ -7,33 +7,43 @@
  * - Handles ad-free time tracking
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useUIStore } from '../stores/uiStore';
 import { adRewardService } from '../services/AdRewardService';
 import { bannerAdService } from '../services/BannerAdService';
 
 export function useBannerAds() {
   const scriptingTimeMs = useUIStore(state => state.scriptingTimeMs);
-  const adFreeTimeMs = useUIStore(state => state.adFreeTimeMs);
+  const [isScriptingTracking, setIsScriptingTracking] = useState(false);
+
+  // Effect: Poll for scripting time tracking status changes
+  useEffect(() => {
+    // Check immediately
+    setIsScriptingTracking(adRewardService.isTracking());
+
+    // Poll every second to detect tracking status changes
+    const interval = setInterval(() => {
+      setIsScriptingTracking(adRewardService.isTracking());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Effect: Initialize and listen to ad service changes
   useEffect(() => {
     const store = useUIStore.getState();
 
-    // Initialize scripting time and ad-free time from services
+    // Initialize scripting time from service
     store.setScriptingTimeMs(adRewardService.getRemainingTime());
-    store.setAdFreeTimeMs(bannerAdService.getAdFreeTime());
 
     // Listen to AdRewardService for scripting time changes
     const unsubscribeScripting = adRewardService.addListener((remainingMs) => {
       useUIStore.getState().setScriptingTimeMs(remainingMs);
     });
 
-    // Listen to BannerAdService for banner visibility and ad-free time changes
-    const unsubscribeBanner = bannerAdService.addListener((visible, adFreeMs) => {
-      const currentStore = useUIStore.getState();
-      currentStore.setBannerVisible(visible);
-      currentStore.setAdFreeTimeMs(adFreeMs);
+    // Listen to BannerAdService for banner visibility changes
+    const unsubscribeBanner = bannerAdService.addListener((visible) => {
+      useUIStore.getState().setBannerVisible(visible);
     });
 
     return () => {
@@ -42,26 +52,18 @@ export function useBannerAds() {
     };
   }, []);
 
-  // Effect: Control banner ad show/hide cycle based on scripting and ad-free time
+  // Effect: Control banner ad visibility based ONLY on scripting time tracking status
   useEffect(() => {
-    const shouldShowAds = bannerAdService.shouldShowAds(scriptingTimeMs, adFreeTimeMs);
-
-    if (shouldShowAds) {
-      // Start the show/hide cycle
-      bannerAdService.startShowHideCycle();
-
-      // Start ad-free time tracking if we have ad-free time remaining
-      if (!bannerAdService.isTrackingAdFreeTime() && adFreeTimeMs > 0) {
-        bannerAdService.startAdFreeTimeTracking();
-      }
-    } else {
-      // Stop the show/hide cycle (user has premium or enough time)
+    // Banner ads ALWAYS show when scripting time is NOT actively tracking
+    // Banner ads hide when scripting time IS actively tracking (ON)
+    if (isScriptingTracking) {
+      // Scripting time is ON (tracking) - hide banner ads
       bannerAdService.stopShowHideCycle();
-
-      // Stop ad-free time tracking
-      if (bannerAdService.isTrackingAdFreeTime()) {
-        bannerAdService.stopAdFreeTimeTracking();
-      }
+      bannerAdService.setBannerVisible(false);
+    } else {
+      // Scripting time is OFF (not tracking) - show banner ads ALWAYS (no cycling)
+      bannerAdService.stopShowHideCycle(); // Stop any cycling
+      bannerAdService.setBannerVisible(true); // Show always
     }
-  }, [scriptingTimeMs, adFreeTimeMs]);
+  }, [isScriptingTracking]); // Depend ONLY on tracking status
 }

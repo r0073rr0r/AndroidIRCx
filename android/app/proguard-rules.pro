@@ -82,8 +82,143 @@
 # React Native / Hermes safety
 ########################################
 
+# Keep all React Native core classes
 -keep class com.facebook.react.** { *; }
 -dontwarn com.facebook.react.**
+
+# Keep React Native PackageList and autolinking classes
+-keep class com.facebook.react.PackageList { *; }
+-keep class com.facebook.react.ReactPackage { *; }
+-keep class com.facebook.react.ReactHost { *; }
+-keep class com.facebook.react.ReactNativeHost { *; }
+-keep class com.facebook.react.ReactApplication { *; }
+-keep class com.facebook.react.bridge.** { *; }
+-keep class com.facebook.react.uimanager.** { *; }
+-keep class com.facebook.react.modules.** { *; }
+
+# Keep React Native Application Entry Point
+-keep class com.facebook.react.ReactNativeApplicationEntryPoint { *; }
+-keep class com.facebook.react.defaults.** { *; }
+
+# Keep all native modules from React Native packages
+-keep class * implements com.facebook.react.ReactPackage { *; }
+-keep class * extends com.facebook.react.bridge.NativeModule { *; }
+-keep class * extends com.facebook.react.uimanager.ViewManager { *; }
+
+########################################
+# React Native Native Modules - Keep All
+########################################
+
+# Notifee
+-keep class com.notifee.** { *; }
+-dontwarn com.notifee.**
+
+# AsyncStorage
+-keep class com.reactnativecommunity.asyncstorage.** { *; }
+-dontwarn com.reactnativecommunity.asyncstorage.**
+
+# Clipboard
+-keep class com.reactnativecommunity.clipboard.** { *; }
+-dontwarn com.reactnativecommunity.clipboard.**
+
+# React Native Firebase
+-keep class io.invertase.firebase.** { *; }
+-dontwarn io.invertase.firebase.**
+
+# Battery Optimization Check
+-keep class com.batteryoptimizationcheck.** { *; }
+-dontwarn com.batteryoptimizationcheck.**
+
+# Bootsplash
+-keep class com.zoontek.rnbootsplash.** { *; }
+-dontwarn com.zoontek.rnbootsplash.**
+
+# React Native Config
+-keep class com.lugg.ReactNativeConfig.** { *; }
+-dontwarn com.lugg.ReactNativeConfig.**
+
+# Document Picker
+-keep class com.reactnativedocumentpicker.** { *; }
+-dontwarn com.reactnativedocumentpicker.**
+
+# React Native FS
+-keep class com.rnfs.** { *; }
+-dontwarn com.rnfs.**
+
+# Google Mobile Ads
+-keep class com.reactnativegooglemobileads.** { *; }
+-dontwarn com.reactnativegooglemobileads.**
+
+# In-App Purchase
+-keep class com.dooboolab.iap.** { *; }
+-dontwarn com.dooboolab.iap.**
+
+# Keychain
+-keep class com.oblador.keychain.** { *; }
+-dontwarn com.oblador.keychain.**
+
+# Libsodium
+-keep class com.reactnativelibsodium.** { *; }
+-dontwarn com.reactnativelibsodium.**
+
+# Localize
+-keep class com.reactcommunity.rnlocalize.** { *; }
+-dontwarn com.reactcommunity.rnlocalize.**
+
+# NFC Manager
+-keep class com.vicentcar.** { *; }
+-dontwarn com.vicentcar.**
+
+# Nitro Modules
+-keep class com.nitromodules.** { *; }
+-dontwarn com.nitromodules.**
+
+# QR Code SVG
+-keep class com.reactnativeqrcodesvg.** { *; }
+-dontwarn com.reactnativeqrcodesvg.**
+
+# Safe Area Context
+-keep class com.th3rdwave.safeareacontext.** { *; }
+-dontwarn com.th3rdwave.safeareacontext.**
+
+# Share
+-keep class cl.json.** { *; }
+-dontwarn cl.json.**
+
+# SVG
+-keep class com.horcrux.svg.** { *; }
+-dontwarn com.horcrux.svg.**
+
+# TCP Socket
+-keep class com.asterinet.react.tcpsocket.** { *; }
+-dontwarn com.asterinet.react.tcpsocket.**
+
+# Vector Icons
+-keep class com.oblador.vectoricons.** { *; }
+-dontwarn com.oblador.vectoricons.**
+
+# Video
+-keep class com.brentvatne.react.** { *; }
+-keep class com.yqritc.scalablevideoview.** { *; }
+-dontwarn com.brentvatne.react.**
+-dontwarn com.yqritc.scalablevideoview.**
+
+# Vision Camera
+-keep class com.mrousavy.camera.** { *; }
+-dontwarn com.mrousavy.camera.**
+
+# Transifex
+-keep class com.transifex.** { *; }
+-dontwarn com.transifex.**
+
+# Custom IRC Foreground Service Package
+-keep class com.androidircx.** { *; }
+-keep class com.androidircx.IRCForegroundServicePackage { *; }
+-keep class com.androidircx.IRCForegroundServiceModule { *; }
+-keep class com.androidircx.IRCForegroundService { *; }
+-keep class com.androidircx.MainApplication { *; }
+-keep class com.androidircx.MainActivity { *; }
+-dontwarn com.androidircx.**
 
 ########################################
 # OkHttp (used by Firebase)
@@ -112,4 +247,50 @@
 # Keep R class and its inner classes
 -keepclassmembers class **.R$* {
     public static <fields>;
+}
+
+########################################
+# Critical: Prevent NoClassDefFoundError
+########################################
+
+# Keep all classes that might be loaded dynamically
+-keepattributes Exceptions, InnerClasses, Signature, *Annotation*, EnclosingMethod
+
+# Keep all classes with native methods
+-keepclasseswithmembernames,includedescriptorclasses class * {
+    native <methods>;
+}
+
+# Keep all classes referenced in AndroidManifest
+-keep class * extends android.app.Activity
+-keep class * extends android.app.Service
+-keep class * extends android.content.BroadcastReceiver
+-keep class * extends android.content.ContentProvider
+
+# Keep Application class and its methods
+-keep class * extends android.app.Application {
+    <init>();
+    void onCreate();
+}
+
+# Prevent obfuscation of classes that might be instantiated via reflection
+-keepclassmembers class * {
+    <init>();
+}
+
+# Keep all enum classes (often loaded dynamically)
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+# Keep classes used in serialization/deserialization
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    !static !transient <fields>;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
 }

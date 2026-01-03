@@ -16,22 +16,6 @@ _fastlane_](https://docs.fastlane.tools/#installing-fastlane)
 
 ## Android
 
-### android closed_v13
-
-```sh
-[bundle exec] fastlane android closed_v13
-```
-
-Upload AAB to Closed testing v1.3.x
-
-### android alpha
-
-```sh
-[bundle exec] fastlane android alpha
-```
-
-Upload AAB to Alpha track
-
 ### android production
 
 ```sh

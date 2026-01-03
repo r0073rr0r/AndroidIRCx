@@ -284,7 +284,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [closePrivateMessageText, setClosePrivateMessageText] = useState('Closing window');
   const [ircServices, setIrcServices] = useState<string[]>([]);
   const [newIrcService, setNewIrcService] = useState('');
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['About']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['About', 'Scripting & Ads']));
   const [lagCheckMethod, setLagCheckMethod] = useState<'ctcp' | 'server'>('server');
   const sectionListRef = useRef<SectionList>(null);
   const dccSubmenuItems = useMemo<SettingItem[]>(() => ([
@@ -1057,6 +1057,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       'Encrypted Direct Messages': { name: 'lock', solid: true },
       'Privacy & Legal': { name: 'user-shield', solid: true },
       'Scripting': { name: 'code', solid: false },
+      'Scripting & Ads': { name: 'code', solid: false },
       'User Management': { name: 'users', solid: false },
       'Advanced': { name: 'cogs', solid: false },
       'Development': { name: 'bug', solid: true },
@@ -3427,12 +3428,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       ],
     },
     {
-      title: t('Advanced', { _tags: tags }),
+      title: t('Scripting & Ads', { _tags: tags }),
       data: [
         {
           id: 'advanced-scripts',
-          title: t('Scripts', { _tags: tags }),
-          description: t('Manage IRC scripts and automation', { _tags: tags }),
+          title: t('Scripts (Scripting Time & No-Ads)', { _tags: tags }),
+          description: t('Manage IRC scripts and automation. Scripting time is also ad-free time.', { _tags: tags }),
           type: 'button' as const,
           onPress: () => setShowScripting(true),
         },
@@ -3443,6 +3444,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           type: 'button' as const,
           onPress: () => setShowScriptingHelp(true),
         },
+      ],
+    },
+    {
+      title: t('Advanced', { _tags: tags }),
+      data: [
         {
           id: 'advanced-dcc',
           title: t('DCC Settings', { _tags: tags }),
@@ -3688,8 +3694,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   };
 
   const toggleSection = (sectionTitle: string) => {
-    // Keep "About" section always expanded
-    if (sectionTitle === 'About') {
+    // Keep "About" and "Scripting & Ads" sections always expanded
+    if (sectionTitle === 'About' || sectionTitle === 'Scripting & Ads') {
       return;
     }
     const newExpandedSections = new Set(expandedSections);

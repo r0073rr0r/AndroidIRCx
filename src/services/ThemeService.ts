@@ -53,6 +53,7 @@ export interface ThemeColors {
   inviteMessage: string;
   monitorMessage: string;
   topicMessage: string;
+  modeMessage: string;
   actionMessage: string;
   
   // Input colors
@@ -143,6 +144,7 @@ const DARK_THEME: Theme = {
     inviteMessage: '#2196F3',
     monitorMessage: '#2196F3',
     topicMessage: '#9C27B0',
+    modeMessage: '#5DADE2',
     actionMessage: '#9E9E9E',
     
     inputBackground: '#2C2C2C',
@@ -222,6 +224,7 @@ const LIGHT_THEME: Theme = {
     inviteMessage: '#2196F3',
     monitorMessage: '#2196F3',
     topicMessage: '#9C27B0',
+    modeMessage: '#5DADE2',
     actionMessage: '#9E9E9E',
     
     inputBackground: '#F5F5F5',

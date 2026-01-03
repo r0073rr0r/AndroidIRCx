@@ -1,0 +1,5 @@
+v1.5.1 User List:
+- Grouped users by privilege (Owner, Admin, Operator, Half-Op, Voice)
+- Collapsible groups with clickable headers
+- Mode descriptions in channel settings
+- Improved user list organization

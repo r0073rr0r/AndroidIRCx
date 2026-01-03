@@ -1,0 +1,365 @@
+/**
+ * AppModals.tsx
+ *
+ * Component that renders all modals and screens for the app.
+ * Extracted from App.tsx to reduce complexity.
+ */
+
+import React, { useEffect } from 'react';
+import { Modal } from 'react-native';
+import { useUIStore } from '../stores/uiStore';
+import { useStoreSetters } from '../hooks/useStoreSetters';
+import { useUIState } from '../hooks/useUIState';
+import { FirstRunSetupScreen } from '../screens/FirstRunSetupScreen';
+import { OptionsMenu } from './OptionsMenu';
+import { JoinChannelModal } from './JoinChannelModal';
+import { NetworksListScreen } from '../screens/NetworksListScreen';
+import { SettingsScreen } from '../screens/SettingsScreen';
+import { PurchaseScreen } from '../screens/PurchaseScreen';
+import { IgnoreListScreen } from '../screens/IgnoreListScreen';
+import { WHOISDisplay } from './WHOISDisplay';
+import { QueryEncryptionMenu } from './QueryEncryptionMenu';
+import { ChannelListScreen } from '../screens/ChannelListScreen';
+import { ChannelNoteModal } from './ChannelNoteModal';
+import { ChannelLogModal } from './ChannelLogModal';
+import { RenameModal } from './RenameModal';
+import { TabOptionsModal } from './TabOptionsModal';
+import { ChannelSettingsScreen } from '../screens/ChannelSettingsScreen';
+import { DccTransfersModal } from './DccTransfersModal';
+import { DccSendModal } from './DccSendModal';
+import { AppUnlockModal } from './AppUnlockModal';
+import { channelNotesService } from '../services/ChannelNotesService';
+import { dccFileService } from '../services/DCCFileService';
+import { ChannelTab } from '../types';
+import { useT } from '../i18n/transifex';
+
+interface AppModalsProps {
+  activeTab: ChannelTab | null;
+  isConnected: boolean;
+  networkName: string;
+  focusedNetworkId: string | undefined;
+  showRawCommands: boolean;
+  rawCategoryVisibility: Record<string, boolean>;
+  showEncryptionIndicators: boolean;
+  tabSortAlphabetical: boolean;
+  dccTransfers: any[];
+  channelName: string;
+  handleConnect: (network?: any, serverId?: string) => void;
+  handleJoinChannel: (channel: string) => void;
+  handleExit: () => void;
+  handleFirstRunSetupComplete: () => void;
+  persistentSetShowRawCommands: (value: boolean) => void;
+  persistentSetRawCategoryVisibility: (visibility: Record<string, boolean>) => void;
+  persistentSetShowEncryptionIndicators: (value: boolean) => void;
+  setActiveConnectionId: (id: string | null) => void;
+  setTabs: (updater: ChannelTab[] | ((prev: ChannelTab[]) => ChannelTab[])) => void;
+  getActiveIRCService: () => any;
+  safeAlert: (title: string, message?: string) => void;
+  attemptBiometricUnlock: () => void;
+  handleAppPinUnlock: (pin: string) => void;
+  styles: any;
+  colors: any;
+}
+
+export function AppModals({
+  activeTab,
+  isConnected,
+  networkName,
+  focusedNetworkId,
+  showRawCommands,
+  rawCategoryVisibility,
+  showEncryptionIndicators,
+  tabSortAlphabetical,
+  dccTransfers,
+  channelName,
+  handleConnect,
+  handleJoinChannel,
+  handleExit,
+  handleFirstRunSetupComplete,
+  persistentSetShowRawCommands,
+  persistentSetRawCategoryVisibility,
+  persistentSetShowEncryptionIndicators,
+  setActiveConnectionId,
+  setTabs,
+  getActiveIRCService,
+  safeAlert,
+  attemptBiometricUnlock,
+  handleAppPinUnlock,
+  styles,
+  colors,
+}: AppModalsProps) {
+  const t = useT();
+  const uiState = useUIState();
+  const setters = useStoreSetters();
+  
+  // Subscribe directly to these critical modal states to ensure re-renders
+  // This ensures the component re-renders when these states change
+  const showOptionsMenu = useUIStore(state => state.showOptionsMenu);
+  const showSettings = useUIStore(state => state.showSettings);
+  
+  const {
+    showFirstRunSetup,
+    showChannelModal,
+    showNetworksList,
+    showPurchaseScreen,
+    showIgnoreList,
+    showWHOIS,
+    whoisNick,
+    showQueryEncryptionMenu,
+    showChannelList,
+    showChannelNoteModal,
+    channelNoteTarget,
+    channelNoteValue,
+    showChannelLogModal,
+    channelLogEntries,
+    showRenameModal,
+    renameTargetTabId,
+    renameValue,
+    showTabOptionsModal,
+    tabOptionsTitle,
+    tabOptions,
+    showChannelSettings,
+    channelSettingsTarget,
+    channelSettingsNetwork,
+    showDccTransfers,
+    showDccSendModal,
+    dccSendTarget,
+    dccSendPath,
+    appUnlockModalVisible,
+    appLockEnabled,
+    appLockUseBiometric,
+    appLockUsePin,
+    appPinEntry,
+    appPinError,
+  } = uiState;
+
+  const {
+    setShowFirstRunSetup,
+    setChannelName,
+    setChannelNoteValue,
+    setRenameValue,
+    setDccSendPath,
+    setAppPinEntry,
+    setAppPinError,
+    setShowOptionsMenu,
+    setShowSettings,
+  } = setters;
+
+  // Debug logging for modal visibility
+  useEffect(() => {
+    console.log('🔍 AppModals render: showOptionsMenu =', showOptionsMenu, 'showSettings =', showSettings);
+  }, [showOptionsMenu, showSettings]);
+
+  return (
+    <>
+      {/* First Run Setup Modal */}
+      {showFirstRunSetup && (
+        <Modal
+          visible={showFirstRunSetup}
+          animationType="slide"
+          onRequestClose={() => {
+            setShowFirstRunSetup(false);
+          }}>
+          <FirstRunSetupScreen
+            onComplete={handleFirstRunSetupComplete}
+            onSkip={() => {
+              setShowFirstRunSetup(false);
+            }}
+          />
+        </Modal>
+      )}
+
+      {/* Always render OptionsMenu, control visibility with visible prop */}
+      <OptionsMenu
+        visible={showOptionsMenu}
+        onClose={() => {
+          console.log('🔍 OptionsMenu onClose called');
+          setShowOptionsMenu(false);
+        }}
+        isConnected={isConnected}
+        networkName={networkName}
+        focusedNetworkId={focusedNetworkId}
+        showRawCommands={showRawCommands}
+        setTabs={setTabs}
+        tabSortAlphabetical={tabSortAlphabetical}
+        handleConnect={handleConnect}
+        handleExit={handleExit}
+        persistentSetShowRawCommands={persistentSetShowRawCommands}
+        setActiveConnectionId={setActiveConnectionId}
+        styles={styles}
+      />
+      <JoinChannelModal
+        visible={showChannelModal}
+        onClose={() => useUIStore.getState().setShowChannelModal(false)}
+        channelName={channelName}
+        onChangeChannelName={setChannelName}
+        onJoin={handleJoinChannel}
+        onCancel={() => {
+          useUIStore.getState().setShowChannelModal(false);
+          useUIStore.getState().setChannelName('');
+        }}
+        styles={styles}
+      />
+      {showNetworksList && (
+        <NetworksListScreen
+          onSelectNetwork={(network, serverId) => handleConnect(network, serverId)}
+          onClose={() => useUIStore.getState().setShowNetworksList(false)}
+        />
+      )}
+      {/* Always render SettingsScreen, control visibility with visible prop */}
+      <SettingsScreen
+        visible={showSettings}
+        onClose={() => {
+          console.log('🔍 SettingsScreen onClose called');
+          setShowSettings(false);
+        }}
+        currentNetwork={activeTab?.networkId}
+        showRawCommands={showRawCommands}
+        onShowRawCommandsChange={persistentSetShowRawCommands}
+        rawCategoryVisibility={rawCategoryVisibility}
+        onRawCategoryVisibilityChange={persistentSetRawCategoryVisibility}
+        showEncryptionIndicators={showEncryptionIndicators}
+        onShowEncryptionIndicatorsChange={persistentSetShowEncryptionIndicators}
+        onShowIgnoreList={() => useUIStore.getState().setShowIgnoreList(true)}
+        onShowPurchaseScreen={() => useUIStore.getState().setShowPurchaseScreen(true)}
+      />
+      {showPurchaseScreen && (
+        <PurchaseScreen
+          visible={showPurchaseScreen}
+          onClose={() => useUIStore.getState().setShowPurchaseScreen(false)}
+        />
+      )}
+      {showIgnoreList && (
+        <IgnoreListScreen
+          visible={showIgnoreList}
+          network={activeTab?.networkId}
+          onClose={() => useUIStore.getState().setShowIgnoreList(false)}
+        />
+      )}
+      {showWHOIS && (
+        <WHOISDisplay
+          visible={showWHOIS}
+          nick={whoisNick}
+          network={activeTab?.networkId}
+          onClose={() => {
+            useUIStore.getState().setShowWHOIS(false);
+            useUIStore.getState().setWhoisNick('');
+          }}
+        />
+      )}
+      {showQueryEncryptionMenu && activeTab && activeTab.type === 'query' && (
+        <QueryEncryptionMenu
+          visible={showQueryEncryptionMenu}
+          onClose={() => useUIStore.getState().setShowQueryEncryptionMenu(false)}
+          nick={activeTab.name}
+          network={activeTab.networkId}
+        />
+      )}
+      {showChannelList && (
+        <ChannelListScreen
+          visible={showChannelList}
+          network={activeTab?.networkId}
+          onClose={() => useUIStore.getState().setShowChannelList(false)}
+          onJoinChannel={handleJoinChannel}
+        />
+      )}
+      {showChannelNoteModal && channelNoteTarget && (
+        <ChannelNoteModal
+          visible={showChannelNoteModal}
+          onClose={() => useUIStore.getState().setShowChannelNoteModal(false)}
+          channelName={channelNoteTarget.channel}
+          value={channelNoteValue}
+          onChangeValue={setChannelNoteValue}
+          onSave={async () => await channelNotesService.setNote(channelNoteTarget.networkId, channelNoteTarget.channel, channelNoteValue)}
+          styles={styles}
+        />
+      )}
+      {showChannelLogModal && (
+        <ChannelLogModal
+          visible={showChannelLogModal}
+          onClose={() => useUIStore.getState().setShowChannelLogModal(false)}
+          logEntries={channelLogEntries}
+          onClearLog={async () => {
+            if (channelNoteTarget) {
+              await channelNotesService.clearLog(channelNoteTarget.networkId, channelNoteTarget.channel);
+              useUIStore.getState().setChannelLogEntries([]);
+            }
+          }}
+          styles={styles}
+        />
+      )}
+      {showRenameModal && renameTargetTabId && (
+        <RenameModal
+          visible={showRenameModal}
+          onClose={() => useUIStore.getState().setShowRenameModal(false)}
+          value={renameValue}
+          onChangeValue={setRenameValue}
+          onRename={() => setTabs(prev => prev.map(t => t.id === renameTargetTabId ? { ...t, name: renameValue || t.name } : t))}
+          styles={styles}
+        />
+      )}
+      <TabOptionsModal
+        visible={showTabOptionsModal}
+        onClose={() => useUIStore.getState().setShowTabOptionsModal(false)}
+        title={tabOptionsTitle || 'Options'}
+        options={tabOptions}
+        styles={styles}
+      />
+      {showChannelSettings && channelSettingsTarget && channelSettingsNetwork && (
+        <ChannelSettingsScreen
+          visible={showChannelSettings}
+          channel={channelSettingsTarget}
+          network={channelSettingsNetwork}
+          onClose={() => useUIStore.getState().setShowChannelSettings(false)}
+        />
+      )}
+      {showDccTransfers && (
+        <DccTransfersModal
+          visible={showDccTransfers}
+          onClose={() => useUIStore.getState().setShowDccTransfers(false)}
+          transfers={dccTransfers}
+          onAccept={(transferId, filePath) => dccFileService.accept(transferId, getActiveIRCService(), filePath)}
+          onCancel={(transferId) => dccFileService.cancel(transferId)}
+          styles={styles}
+        />
+      )}
+      {showDccSendModal && dccSendTarget && (
+        <DccSendModal
+          visible={showDccSendModal}
+          onClose={() => useUIStore.getState().setShowDccSendModal(false)}
+          targetNick={dccSendTarget.nick}
+          filePath={dccSendPath}
+          onChangeFilePath={setDccSendPath}
+          onSend={async () => {
+            try {
+              await dccFileService.sendFile(getActiveIRCService(), dccSendTarget.nick, dccSendTarget.networkId, dccSendPath);
+              useUIStore.getState().setShowDccSendModal(false);
+              useUIStore.getState().setDccSendPath('');
+            } catch (e) {
+              safeAlert(
+                t('DCC Send Error', { _tags: 'screen:app,file:App.tsx,feature:dcc' }),
+                e instanceof Error
+                  ? e.message
+                  : t('Failed to send file', { _tags: 'screen:app,file:App.tsx,feature:dcc' })
+              );
+            }
+          }}
+          styles={styles}
+        />
+      )}
+      <AppUnlockModal
+        visible={appUnlockModalVisible && appLockEnabled}
+        useBiometric={appLockUseBiometric}
+        usePin={appLockUsePin}
+        pinEntry={appPinEntry}
+        pinError={appPinError}
+        onChangePinEntry={setAppPinEntry}
+        onClearPinError={() => setAppPinError('')}
+        onBiometricUnlock={attemptBiometricUnlock}
+        onPinUnlock={handleAppPinUnlock}
+        colors={colors}
+        styles={styles}
+      />
+    </>
+  );
+}

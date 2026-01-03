@@ -264,7 +264,7 @@ export const useTabContextMenu = (params: UseTabContextMenuParams) => {
             setActiveTabId(serverTabId(tab.networkId)); // Switch to server tab if active tab is closed
           }
 
-          const closePrivateMessage = await settingsService.getSetting('closePrivateMessage', true);
+          const closePrivateMessage = await settingsService.getSetting('closePrivateMessage', false);
           if (closePrivateMessage) {
             const ircServices = await settingsService.getSetting('ircServices', ['nickserv', 'chanserv', 'memoserv', 'operserv', 'hostserv', 'botserv']);
             if (!ircServices.includes(tab.name.toLowerCase())) {

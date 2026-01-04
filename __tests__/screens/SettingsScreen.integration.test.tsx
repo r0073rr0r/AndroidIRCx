@@ -9,11 +9,53 @@ import { SettingsScreen } from '../../../src/screens/SettingsScreen';
 import * as settingsHelpers from '../../../src/utils/settingsHelpers';
 
 // Mock all the hooks and services
-jest.mock('../../../src/hooks/useSettingsPremium');
-jest.mock('../../../src/hooks/useSettingsSecurity');
-jest.mock('../../../src/hooks/useSettingsAppearance');
-jest.mock('../../../src/hooks/useSettingsNotifications');
-jest.mock('../../../src/hooks/useSettingsConnection');
+jest.mock('../../../src/hooks/useSettingsPremium', () => ({
+  useSettingsPremium: jest.fn(() => ({
+    hasNoAds: false,
+    hasScriptingPro: false,
+    isSupporter: false,
+    adReady: false,
+    adLoading: false,
+    adCooldown: false,
+    cooldownSeconds: 0,
+    adUnitType: 'Primary',
+    showingAd: false,
+    watchAdButtonEnabledForPremium: false,
+    showWatchAdButton: true,
+    setWatchAdButtonEnabledForPremium: jest.fn().mockResolvedValue(undefined),
+    handleWatchAd: jest.fn().mockResolvedValue(undefined),
+  })),
+}));
+
+jest.mock('../../../src/hooks/useSettingsSecurity', () => ({
+  useSettingsSecurity: jest.fn(() => ({
+    appLockEnabled: false,
+    appLockMethod: 'none',
+    setAppLockEnabled: jest.fn(),
+    setAppLockMethod: jest.fn(),
+  })),
+}));
+
+jest.mock('../../../src/hooks/useSettingsAppearance', () => ({
+  useSettingsAppearance: jest.fn(() => ({
+    theme: 'light',
+    setTheme: jest.fn(),
+  })),
+}));
+
+jest.mock('../../../src/hooks/useSettingsNotifications', () => ({
+  useSettingsNotifications: jest.fn(() => ({
+    notificationEnabled: true,
+    setNotificationEnabled: jest.fn(),
+  })),
+}));
+
+jest.mock('../../../src/hooks/useSettingsConnection', () => ({
+  useSettingsConnection: jest.fn(() => ({
+    autoConnect: false,
+    setAutoConnect: jest.fn(),
+  })),
+}));
 jest.mock('../../../src/utils/settingsHelpers');
 jest.mock('../../../src/services/SettingsService');
 jest.mock('../../../src/services/NotificationService');

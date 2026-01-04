@@ -84,6 +84,15 @@ class MainApplication : Application(), ReactApplication {
               // Don't fail completely if custom package fails
           }
 
+          // Add our custom package for Play Integrity API
+          try {
+              packages.add(PlayIntegrityPackage())
+              Log.d(TAG, "Added PlayIntegrityPackage")
+          } catch (e: Exception) {
+              Log.e(TAG, "Failed to add PlayIntegrityPackage: ${e.message}", e)
+              // Don't fail completely if custom package fails
+          }
+
           Log.d(TAG, "Creating ReactHost with ${packages.size} packages...")
           val host = getDefaultReactHost(
               context = applicationContext,

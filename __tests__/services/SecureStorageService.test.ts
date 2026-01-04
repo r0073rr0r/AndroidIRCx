@@ -5,6 +5,9 @@
  * Keychain is optional and may not be available in test environment
  */
 
+// Mock react-native-keychain to be unavailable (force AsyncStorage fallback)
+jest.mock('react-native-keychain', () => null);
+
 import { secureStorageService } from '../../src/services/SecureStorageService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -76,11 +79,6 @@ describe('SecureStorageService', () => {
       const specialValue = 'value with "quotes" and \'apostrophes\' & symbols <>';
       await secureStorageService.setSecret('test-key', specialValue);
 
-      mockKeychain.getInternetCredentials.mockResolvedValueOnce({
-        username: 'androidircx',
-        password: specialValue,
-      });
-
       const result = await secureStorageService.getSecret('test-key');
       expect(result).toBe(specialValue);
     });
@@ -89,11 +87,6 @@ describe('SecureStorageService', () => {
       const longValue = 'a'.repeat(10000);
       await secureStorageService.setSecret('test-key', longValue);
 
-      mockKeychain.getInternetCredentials.mockResolvedValueOnce({
-        username: 'androidircx',
-        password: longValue,
-      });
-
       const result = await secureStorageService.getSecret('test-key');
       expect(result).toBe(longValue);
     });
@@ -101,11 +94,6 @@ describe('SecureStorageService', () => {
     it('should handle Unicode characters', async () => {
       const unicodeValue = '测试 🔒 パスワード';
       await secureStorageService.setSecret('test-key', unicodeValue);
-
-      mockKeychain.getInternetCredentials.mockResolvedValueOnce({
-        username: 'androidircx',
-        password: unicodeValue,
-      });
 
       const result = await secureStorageService.getSecret('test-key');
       expect(result).toBe(unicodeValue);
@@ -125,11 +113,6 @@ describe('SecureStorageService', () => {
 
     it('should handle setting then immediately getting', async () => {
       await secureStorageService.setSecret('test-key', 'test-value');
-
-      mockKeychain.getInternetCredentials.mockResolvedValueOnce({
-        username: 'androidircx',
-        password: 'test-value',
-      });
 
       const result = await secureStorageService.getSecret('test-key');
       expect(result).toBe('test-value');

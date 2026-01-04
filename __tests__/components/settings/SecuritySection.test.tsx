@@ -15,13 +15,25 @@ jest.mock('../../../src/services/SettingsService');
 jest.mock('../../../src/services/BiometricAuthService');
 jest.mock('../../../src/services/SecureStorageService');
 jest.mock('react-native', () => {
-  const RN = jest.requireActual('react-native');
+  const React = require('react');
   return {
-    ...RN,
     Alert: {
       alert: jest.fn(),
     },
-    Modal: RN.Modal,
+    Platform: {
+      OS: 'android',
+    },
+    View: ({ children, ...props }: any) => React.createElement('View', props, children),
+    Text: ({ children, ...props }: any) => React.createElement('Text', props, children),
+    TextInput: (props: any) => React.createElement('TextInput', props),
+    TouchableOpacity: ({ children, ...props }: any) => React.createElement('TouchableOpacity', props, children),
+    Modal: ({ children, ...props }: any) => React.createElement('Modal', props, children),
+    ScrollView: ({ children, ...props }: any) => React.createElement('ScrollView', props, children),
+    FlatList: (props: any) => React.createElement('FlatList', props),
+    StyleSheet: {
+      create: (styles: any) => styles,
+      flatten: (style: any) => style,
+    },
   };
 });
 

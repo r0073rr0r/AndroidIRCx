@@ -172,6 +172,16 @@ class IdentityProfilesService {
       secureStorageService.removeSecret(key('operPassword')),
     ]);
   }
+
+  /**
+   * Re-initialize the service by clearing the cache and reloading from storage.
+   * This is useful after restoring from backup.
+   */
+  async reload(): Promise<void> {
+    this.initialized = false;
+    this.profiles = [];
+    await this.ensureLoaded();
+  }
 }
 
 export const identityProfilesService = new IdentityProfilesService();

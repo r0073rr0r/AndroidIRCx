@@ -300,11 +300,26 @@ const MessageItem = React.memo<MessageItemProps>(({
           </>
         ) : (
           <View style={styles.messageContent}>
-            {formatIRCTextAsComponent(
-              message.type === 'join' || message.type === 'part' || message.type === 'quit'
-                ? `*** ${message.text}`
-                : message.text,
-              StyleSheet.flatten([styles.messageText, { color: getMessageColor(message.type) }])
+            {message.type === 'notice' && message.from ? (
+              <View style={styles.messageWrapper}>
+                <Text
+                  style={[styles.nick, { color: getMessageColor(message.type) }]}
+                  onLongPress={() => onNickLongPress && message.from && onNickLongPress(message.from)}
+                >
+                  {message.from}
+                </Text>
+                {formatIRCTextAsComponent(
+                  message.text,
+                  StyleSheet.flatten([styles.messageText, { color: getMessageColor(message.type) }])
+                )}
+              </View>
+            ) : (
+              formatIRCTextAsComponent(
+                message.type === 'join' || message.type === 'part' || message.type === 'quit'
+                  ? `*** ${message.text}`
+                  : message.text,
+                StyleSheet.flatten([styles.messageText, { color: getMessageColor(message.type) }])
+              )
             )}
           </View>
         )}

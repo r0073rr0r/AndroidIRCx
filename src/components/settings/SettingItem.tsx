@@ -105,7 +105,15 @@ export const SettingItem: React.FC<SettingItemProps> = ({
         colors={colors}
         styles={styles}
         onPress={() => {
-          item.onPress?.();
+          // Call item.onPress if it exists, but don't let it prevent submenu from opening
+          if (item.onPress) {
+            try {
+              item.onPress();
+            } catch (e) {
+              console.error('Error in item.onPress:', e);
+            }
+          }
+          // Always call onPress to open submenu modal
           onPress?.(item.id);
         }}
       />

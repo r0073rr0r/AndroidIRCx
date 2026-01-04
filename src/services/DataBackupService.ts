@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { tx } from '../i18n/transifex';
+import { identityProfilesService } from './IdentityProfilesService';
+import { settingsService } from './SettingsService';
 
 const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
@@ -71,6 +73,17 @@ class DataBackupService {
     }
     const pairs = Object.entries(parsed.data).map(([key, value]) => [key, value] as [string, string | null]);
     await AsyncStorage.multiSet(pairs);
+    
+    // Re-initialize services to reload restored data
+    try {
+      await Promise.all([
+        identityProfilesService.reload(),
+        settingsService.reloadNetworks(),
+      ]);
+    } catch (error) {
+      console.error('Error reloading services after restore:', error);
+      // Don't throw - data is restored, services will reload on next access
+    }
   }
 
   /**

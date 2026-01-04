@@ -295,7 +295,7 @@ export const BackupScreen: React.FC<BackupScreenProps> = ({ visible, onClose }) 
   const enabledCount = backupOptions.filter((opt) => opt.enabled).length;
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -372,60 +372,62 @@ export const BackupScreen: React.FC<BackupScreenProps> = ({ visible, onClose }) 
         {/* Preview/Restore Modal */}
         <Modal
           visible={showPreviewModal}
-          transparent
-          animationType="fade"
+          animationType="slide"
+          presentationStyle="fullScreen"
           onRequestClose={() => setShowPreviewModal(false)}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>
-                  {backupData
-                    ? t('Backup Data', { _tags: tags })
-                    : t('Restore from Backup', { _tags: tags })}
-                </Text>
-                <TouchableOpacity onPress={() => setShowPreviewModal(false)}>
-                  <Text style={styles.closeButtonText}>{t('Close', { _tags: tags })}</Text>
-                </TouchableOpacity>
-              </View>
+          <View style={styles.modalFullScreenContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {backupData
+                  ? t('Backup Data', { _tags: tags })
+                  : t('Restore from Backup', { _tags: tags })}
+              </Text>
+              <TouchableOpacity onPress={() => setShowPreviewModal(false)} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>{t('Close', { _tags: tags })}</Text>
+              </TouchableOpacity>
+            </View>
 
-              <ScrollView style={styles.modalContent}>
-                <Text style={styles.modalDescription}>
-                  {backupData
-                    ? t('Copy this JSON to save your backup, or save it to a file.', { _tags: tags })
-                    : t('Paste your backup JSON here to restore your data.', { _tags: tags })}
-                </Text>
-                <TextInput
-                  style={styles.backupInput}
-                  multiline
-                  value={backupData}
-                  onChangeText={setBackupData}
-                  placeholder={t('Backup JSON appears here...', { _tags: tags })}
-                  placeholderTextColor={colors.textSecondary}
-                />
-              </ScrollView>
+            <ScrollView style={styles.modalContent} contentContainerStyle={styles.modalContentContainer}>
+              <Text style={styles.modalDescription}>
+                {backupData
+                  ? t('Copy this JSON to save your backup, or save it to a file.', { _tags: tags })
+                  : t('Paste your backup JSON here to restore your data.', { _tags: tags })}
+              </Text>
+              <TextInput
+                style={styles.backupInput}
+                multiline
+                value={backupData}
+                onChangeText={setBackupData}
+                placeholder={t('Backup JSON appears here...', { _tags: tags })}
+                placeholderTextColor={colors.textSecondary}
+              />
+            </ScrollView>
 
-              <View style={styles.modalFooter}>
-                <TouchableOpacity onPress={() => setShowPreviewModal(false)}>
-                  <Text style={styles.footerButtonText}>{t('Cancel', { _tags: tags })}</Text>
-                </TouchableOpacity>
-                {backupData && (
-                  <>
-                    <TouchableOpacity onPress={handleCopyToClipboard}>
-                      <Text style={[styles.footerButtonText, styles.primaryText]}>
-                        {t('Copy to Clipboard', { _tags: tags })}
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleSaveToFile}>
-                      <Text style={[styles.footerButtonText, styles.primaryText]}>
-                        {t('Save to File', { _tags: tags })}
-                      </Text>
-                    </TouchableOpacity>
-                  </>
-                )}
-                <TouchableOpacity onPress={handleRestore}>
-                  <Text style={styles.footerButtonText}>{t('Restore', { _tags: tags })}</Text>
-                </TouchableOpacity>
-              </View>
+            <View style={styles.modalFooter}>
+              <TouchableOpacity 
+                style={styles.footerButton} 
+                onPress={() => setShowPreviewModal(false)}>
+                <Text style={styles.footerButtonText}>{t('Cancel', { _tags: tags })}</Text>
+              </TouchableOpacity>
+              {backupData && (
+                <>
+                  <TouchableOpacity style={styles.footerButton} onPress={handleCopyToClipboard}>
+                    <Text style={[styles.footerButtonText, styles.primaryText]}>
+                      {t('Copy to Clipboard', { _tags: tags })}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.footerButton} onPress={handleSaveToFile}>
+                    <Text style={[styles.footerButtonText, styles.primaryText]}>
+                      {t('Save to File', { _tags: tags })}
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              )}
+              <TouchableOpacity style={[styles.footerButton, styles.restoreButton]} onPress={handleRestore}>
+                <Text style={[styles.footerButtonText, styles.restoreButtonText]}>
+                  {t('Restore', { _tags: tags })}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -561,67 +563,85 @@ const createStyles = (colors: any) =>
       fontSize: 16,
       fontWeight: '500',
     },
-    modalOverlay: {
+    modalFullScreenContainer: {
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 20,
-    },
-    modalContainer: {
-      width: '100%',
-      maxHeight: '80%',
-      backgroundColor: colors.surface,
-      borderRadius: 12,
-      overflow: 'hidden',
+      backgroundColor: colors.background,
     },
     modalHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: 16,
+      paddingTop: Platform.OS === 'android' ? 16 : 50,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
+      backgroundColor: colors.surface,
     },
     modalTitle: {
-      fontSize: 18,
+      fontSize: 20,
       fontWeight: '600',
       color: colors.text,
+      flex: 1,
     },
     modalContent: {
       flex: 1,
+    },
+    modalContentContainer: {
       padding: 16,
+      paddingBottom: 20,
     },
     modalDescription: {
-      fontSize: 14,
+      fontSize: 15,
       color: colors.textSecondary,
-      marginBottom: 12,
+      marginBottom: 16,
+      lineHeight: 22,
     },
     backupInput: {
-      minHeight: 200,
+      flex: 1,
+      minHeight: 400,
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: 8,
-      padding: 12,
-      fontSize: 12,
+      padding: 16,
+      fontSize: 13,
       fontFamily: 'monospace',
       color: colors.text,
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       textAlignVertical: 'top',
     },
     modalFooter: {
       flexDirection: 'row',
       justifyContent: 'flex-end',
-      gap: 16,
+      alignItems: 'center',
+      gap: 12,
       padding: 16,
+      paddingBottom: Platform.OS === 'android' ? 16 : 30,
       borderTopWidth: 1,
       borderTopColor: colors.border,
+      backgroundColor: colors.surface,
       flexWrap: 'wrap',
     },
+    footerButton: {
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     footerButtonText: {
-      fontSize: 15,
+      fontSize: 16,
       color: colors.text,
       fontWeight: '500',
+    },
+    restoreButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      paddingVertical: 12,
+      paddingHorizontal: 24,
+    },
+    restoreButtonText: {
+      color: '#FFFFFF',
+      fontWeight: '600',
     },
     primaryText: {
       color: colors.primary,

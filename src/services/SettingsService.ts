@@ -202,6 +202,17 @@ class SettingsService {
     }
   }
 
+  /**
+   * Re-initialize the service by clearing the cache and reloading from storage.
+   * This is useful after restoring from backup.
+   */
+  async reloadNetworks(): Promise<void> {
+    // Clear cache to force reload from storage
+    await storageCache.removeItem(STORAGE_KEY);
+    this.networks = [];
+    await this.loadNetworks();
+  }
+
   async saveNetworks(networks: IRCNetworkConfig[]): Promise<void> {
     try {
       const sanitized = await this.persistAndSanitizeNetworks(networks);

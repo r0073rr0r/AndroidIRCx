@@ -176,11 +176,7 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
         );
         return;
       }
-      if (appLockUsePin) {
-        await secureStorageService.removeSecret(APP_PIN_STORAGE_KEY);
-        await settingsService.setSetting('appLockUsePin', false);
-        setAppLockUsePin(false);
-      }
+      // Allow biometric and PIN to be enabled together - don't disable PIN
       // CRITICAL FIX: Pass 'app' scope to match authenticate() scope in useAppLock.ts
       // Without this, credentials are stored in wrong keychain service causing infinite error loop
       const enabled = await biometricAuthService.enableLock('app');
@@ -201,6 +197,7 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
     await biometricAuthService.disableLock('app');
     await settingsService.setSetting('appLockUseBiometric', false);
     setAppLockUseBiometric(false);
+    // Only disable app lock if PIN is also disabled
     if (!appLockUsePin) {
       await settingsService.setSetting('appLockEnabled', false);
       setAppLockEnabled(false);
@@ -209,18 +206,18 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
 
   const handleAppLockPinToggle = async (value: boolean) => {
     if (value) {
-      if (appLockUseBiometric) {
-        // Pass 'app' scope to match enableLock
-        await biometricAuthService.disableLock('app');
-        await settingsService.setSetting('appLockUseBiometric', false);
-        setAppLockUseBiometric(false);
+      // Allow PIN and biometric to be enabled together - don't disable biometric
+      const setupSuccess = await requestAppPinSetup();
+      if (setupSuccess) {
+        await settingsService.setSetting('appLockEnabled', true);
+        setAppLockEnabled(true);
       }
-      await requestAppPinSetup();
       return;
     }
     await secureStorageService.removeSecret(APP_PIN_STORAGE_KEY);
     await settingsService.setSetting('appLockUsePin', false);
     setAppLockUsePin(false);
+    // Only disable app lock if biometric is also disabled
     if (!appLockUseBiometric) {
       await settingsService.setSetting('appLockEnabled', false);
       setAppLockEnabled(false);
@@ -290,7 +287,11 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
       {
         id: 'security-app-lock-biometric',
         title: t('App Lock with Biometrics', { _tags: tags }),
-        description: appLockUseBiometric ? 'Biometric unlock enabled' : 'Use fingerprint/biometric to unlock',
+        description: appLockUseBiometric 
+          ? (appLockUsePin 
+              ? 'Biometric unlock enabled (fallback to PIN if biometric fails)' 
+              : 'Biometric unlock enabled')
+          : 'Use fingerprint/biometric to unlock (can be used with PIN)',
         type: 'switch',
         value: appLockUseBiometric,
         disabled: !biometricAvailable,
@@ -300,8 +301,10 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
         id: 'security-app-lock-pin',
         title: t('App Lock with PIN', { _tags: tags }),
         description: appLockUsePin
-          ? t('PIN unlock enabled', { _tags: tags })
-          : t('Use a PIN to unlock', { _tags: tags }),
+          ? (appLockUseBiometric 
+              ? t('PIN unlock enabled (fallback if biometric fails)', { _tags: tags })
+              : t('PIN unlock enabled', { _tags: tags }))
+          : t('Use a PIN to unlock (can be used with biometric)', { _tags: tags }),
         type: 'switch',
         value: appLockUsePin,
         onValueChange: handleAppLockPinToggle,

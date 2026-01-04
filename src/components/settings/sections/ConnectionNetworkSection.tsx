@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { Alert, Modal, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import { Alert, Modal, View, Text, TextInput, TouchableOpacity, AppState, ScrollView, Switch } from 'react-native';
 import { SettingItem } from '../SettingItem';
 import { useSettingsConnection } from '../../../hooks/useSettingsConnection';
 import { useT } from '../../../i18n/transifex';
@@ -35,6 +35,16 @@ interface ConnectionNetworkSectionProps {
     chevron: any;
     input?: any;
     disabledInput?: any;
+    submenuOverlay?: any;
+    submenuContainer?: any;
+    submenuHeader?: any;
+    submenuTitle?: any;
+    submenuItem?: any;
+    submenuItemContent?: any;
+    submenuItemText?: any;
+    submenuItemDescription?: any;
+    submenuInput?: any;
+    closeButtonText?: any;
   };
   settingIcons: Record<string, SettingIcon | undefined>;
   currentNetwork?: string;
@@ -80,7 +90,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
   const [dccMinPort, setDccMinPort] = useState(5000);
   const [dccMaxPort, setDccMaxPort] = useState(6000);
   const [lagCheckMethod, setLagCheckMethod] = useState<'ctcp' | 'server'>('server');
-  const [globalProxyType, setGlobalProxyType] = useState('socks5');
+  const [globalProxyType, setGlobalProxyType] = useState<'socks5' | 'socks4' | 'http' | 'tor'>('socks5');
   const [globalProxyHost, setGlobalProxyHost] = useState('');
   const [globalProxyPort, setGlobalProxyPort] = useState('');
   const [globalProxyUsername, setGlobalProxyUsername] = useState('');
@@ -98,6 +108,12 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
   const [pinSetupValue, setPinSetupValue] = useState('');
   const [pinError, setPinError] = useState('');
   const pinResolveRef = React.useRef<((ok: boolean) => void) | null>(null);
+  
+  // Submenu state for ConnectionNetworkSection items
+  const [showSubmenu, setShowSubmenu] = useState<string | null>(null);
+  const [submenuRefreshKey, setSubmenuRefreshKey] = useState(0);
+  const [showProxyTypeModal, setShowProxyTypeModal] = useState(false);
+  const [nestedSubmenuStack, setNestedSubmenuStack] = useState<string[]>([]);
 
   // Load initial state
   useEffect(() => {
@@ -135,9 +151,29 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
       const available = await biometricAuthService.isAvailable();
       setBiometricAvailable(available);
       
+      // Re-initialize biometric lock if it was enabled (in case app was restarted)
+      if (biometricLock && available) {
+        try {
+          const reEnabled = await biometricAuthService.enableLock();
+          if (!reEnabled) {
+            console.warn('Failed to re-enable biometric lock after app restart');
+            // Don't disable it in settings, but log the warning
+            // PIN fallback will handle it if enabled
+          }
+        } catch (error) {
+          console.error('Error re-enabling biometric lock:', error);
+          // PIN fallback will handle it if enabled
+        }
+      }
+      
       // Load network-specific settings
       if (currentNetwork) {
         const reconnectEnabled = autoReconnectService.isEnabled(currentNetwork);
+        const reconnectConfig = autoReconnectService.getConfig(currentNetwork);
+        if (reconnectConfig) {
+          // Update the hook's config state for this network
+          updateAutoReconnectConfig(reconnectConfig);
+        }
         setAutoRejoinEnabled(autoRejoinService.isEnabled(currentNetwork));
         const voiceConfig = autoVoiceService.getConfig(currentNetwork);
         setAutoVoiceConfig(voiceConfig || null);
@@ -150,7 +186,51 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
       identityProfilesService.list().then(setIdentityProfiles).catch(() => {});
     };
     loadSettings();
-  }, [currentNetwork]);
+  }, [currentNetwork, refreshFavorites]);
+
+  // Track app state for biometric re-initialization
+  const appStateRef = useRef(AppState.currentState);
+
+  // Re-initialize biometric lock when app returns to foreground
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', async (nextAppState) => {
+      const prevAppState = appStateRef.current;
+      appStateRef.current = nextAppState;
+
+      // When app returns to foreground (active), re-initialize biometric lock if enabled
+      if (prevAppState !== 'active' && nextAppState === 'active') {
+        const biometricLock = await settingsService.getSetting('biometricPasswordLock', false);
+        const pinLock = await settingsService.getSetting('pinPasswordLock', false);
+        const available = await biometricAuthService.isAvailable();
+        
+        // Lock passwords again when returning to foreground if lock is active
+        if ((biometricLock || pinLock) && passwordsUnlocked) {
+          setPasswordsUnlocked(false);
+        }
+        
+        // Re-initialize biometric lock if enabled
+        if (biometricLock && available) {
+          try {
+            console.log('[ConnectionNetworkSection] App returned to foreground, re-initializing biometric lock');
+            const reEnabled = await biometricAuthService.enableLock();
+            if (!reEnabled) {
+              console.warn('[ConnectionNetworkSection] Failed to re-enable biometric lock after returning to foreground');
+              // PIN fallback will handle it if enabled
+            } else {
+              console.log('[ConnectionNetworkSection] Biometric lock re-initialized successfully');
+            }
+          } catch (error) {
+            console.error('[ConnectionNetworkSection] Error re-enabling biometric lock after foreground:', error);
+            // PIN fallback will handle it if enabled
+          }
+        }
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [passwordsUnlocked]);
 
   // Refresh favorites
   const refreshFavorites = useCallback(() => {
@@ -185,7 +265,9 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
 
   // Password lock handlers
   const passwordLockActive = biometricLockEnabled || pinLockEnabled;
-  const passwordUnlockDescription = biometricLockEnabled
+  const passwordUnlockDescription = biometricLockEnabled && pinLockEnabled
+    ? t('Use fingerprint/biometric or PIN to unlock', { _tags: tags })
+    : biometricLockEnabled
     ? t('Use fingerprint/biometric to unlock', { _tags: tags })
     : t('Enter PIN to unlock', { _tags: tags });
 
@@ -261,6 +343,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
     await secureStorageService.setSecret(PIN_STORAGE_KEY, trimmed);
     await settingsService.setSetting('pinPasswordLock', true);
     setPinLockEnabled(true);
+    // Lock passwords (biometric will also keep them locked if enabled)
     setPasswordsUnlocked(false);
     closePinModal(true);
   }, [closePinModal, pinEntry, pinModalMode, pinSetupValue, t, tags]);
@@ -270,14 +353,9 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
       setPasswordsUnlocked(true);
       return true;
     }
-    if (biometricLockEnabled) {
-      if (!biometricAvailable) {
-        Alert.alert(
-          t('Biometrics unavailable', { _tags: tags }),
-          t('Enable a fingerprint/biometric on your device first.', { _tags: tags })
-        );
-        return false;
-      }
+    
+    // Try biometric first if enabled
+    if (biometricLockEnabled && biometricAvailable) {
       const result = await biometricAuthService.authenticate(
         t('Unlock passwords', { _tags: tags }),
         t('Authenticate to view passwords', { _tags: tags })
@@ -286,17 +364,35 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
         setPasswordsUnlocked(true);
         return true;
       }
-      const errorMessage = result.errorMessage
-        || (result.errorKey ? t(result.errorKey, { _tags: tags }) : t('Unable to unlock passwords.', { _tags: tags }));
-      Alert.alert(
-        t('Authentication failed', { _tags: tags }),
-        errorMessage
-      );
-      return false;
+      // If biometric fails and PIN is also enabled, fall back to PIN
+      if (pinLockEnabled) {
+        // Don't show error alert, just fall through to PIN
+      } else {
+        // Only show error if PIN is not available as fallback
+        const errorMessage = result.errorMessage
+          || (result.errorKey ? t(result.errorKey, { _tags: tags }) : t('Unable to unlock passwords.', { _tags: tags }));
+        Alert.alert(
+          t('Authentication failed', { _tags: tags }),
+          errorMessage
+        );
+        return false;
+      }
     }
+    
+    // Try PIN if enabled (either as primary or fallback)
     if (pinLockEnabled) {
       return await requestPinUnlock();
     }
+    
+    // If biometric was enabled but unavailable, show error
+    if (biometricLockEnabled && !biometricAvailable) {
+      Alert.alert(
+        t('Biometrics unavailable', { _tags: tags }),
+        t('Enable a fingerprint/biometric on your device first.', { _tags: tags })
+      );
+      return false;
+    }
+    
     setPasswordsUnlocked(true);
     return true;
   }, [biometricAvailable, biometricLockEnabled, passwordLockActive, pinLockEnabled, requestPinUnlock, t, tags]);
@@ -310,11 +406,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
         );
         return;
       }
-      if (pinLockEnabled) {
-        await secureStorageService.removeSecret(PIN_STORAGE_KEY);
-        await settingsService.setSetting('pinPasswordLock', false);
-        setPinLockEnabled(false);
-      }
+      // Allow biometric and PIN to be enabled together - don't disable PIN
       const enabled = await biometricAuthService.enableLock();
       if (!enabled) {
         Alert.alert(
@@ -325,29 +417,36 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
       }
       await settingsService.setSetting('biometricPasswordLock', true);
       setBiometricLockEnabled(true);
+      // Lock passwords (both biometric and PIN can be active)
       setPasswordsUnlocked(false);
       return;
     }
     await biometricAuthService.disableLock();
     await settingsService.setSetting('biometricPasswordLock', false);
     setBiometricLockEnabled(false);
-    setPasswordsUnlocked(true);
+    // Only unlock if PIN is also disabled
+    if (!pinLockEnabled) {
+      setPasswordsUnlocked(true);
+    }
   };
 
   const handlePinLockToggle = async (value: boolean) => {
     if (value) {
-      if (biometricLockEnabled) {
-        await biometricAuthService.disableLock();
-        await settingsService.setSetting('biometricPasswordLock', false);
-        setBiometricLockEnabled(false);
+      // Allow PIN and biometric to be enabled together - don't disable biometric
+      const setupSuccess = await requestPinSetup();
+      if (setupSuccess) {
+        // Passwords are now locked by PIN (both biometric and PIN can be active)
+        setPasswordsUnlocked(false);
       }
-      await requestPinSetup();
       return;
     }
     await secureStorageService.removeSecret(PIN_STORAGE_KEY);
     await settingsService.setSetting('pinPasswordLock', false);
     setPinLockEnabled(false);
-    setPasswordsUnlocked(true);
+    // Only unlock if biometric is also disabled
+    if (!biometricLockEnabled) {
+      setPasswordsUnlocked(true);
+    }
   };
 
   // DCC submenu items
@@ -402,6 +501,14 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
     forAll: false,
   }), []);
 
+  // Get current network's auto-reconnect config
+  const currentAutoReconnectConfig = useMemo(() => {
+    if (currentNetwork) {
+      return autoReconnectService.getConfig(currentNetwork) || getDefaultAutoReconnectConfig();
+    }
+    return getDefaultAutoReconnectConfig();
+  }, [currentNetwork, autoReconnectConfig]);
+
   const sectionData: SettingItemType[] = useMemo(() => {
     const items: SettingItemType[] = [
       {
@@ -426,10 +533,10 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
       {
         id: 'connection-auto-reconnect',
         title: t('Auto-Reconnect', { _tags: tags }),
-        description: autoReconnectConfig?.enabled
+        description: currentAutoReconnectConfig?.enabled
           ? t('{attempts} attempts, {mode}', {
-              attempts: autoReconnectConfig.maxAttempts || '8',
-              mode: autoReconnectConfig.rejoinChannels
+              attempts: currentAutoReconnectConfig.maxAttempts || '8',
+              mode: currentAutoReconnectConfig.rejoinChannels
                 ? t('rejoin channels', { _tags: tags })
                 : t('no rejoin', { _tags: tags }),
               _tags: tags,
@@ -441,13 +548,18 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
             id: 'auto-reconnect-enabled',
             title: t('Enable Auto-Reconnect', { _tags: tags }),
             type: 'switch',
-            value: autoReconnectConfig?.enabled || false,
+            value: currentAutoReconnectConfig?.enabled || false,
             onValueChange: async (value: string | boolean) => {
               if (currentNetwork) {
                 const config = autoReconnectService.getConfig(currentNetwork) || getDefaultAutoReconnectConfig();
                 config.enabled = value as boolean;
                 autoReconnectService.setConfig(currentNetwork, config);
-                await updateAutoReconnectConfig({});
+                // Refresh config from service to update UI
+                const updatedConfig = autoReconnectService.getConfig(currentNetwork);
+                if (updatedConfig) {
+                  await updateAutoReconnectConfig(updatedConfig);
+                }
+                setSubmenuRefreshKey(prev => prev + 1);
               }
             },
           },
@@ -456,14 +568,19 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
             title: t('Rejoin Channels After Reconnect', { _tags: tags }),
             description: t('Automatically rejoin channels you were in', { _tags: tags }),
             type: 'switch',
-            value: autoReconnectConfig?.rejoinChannels || false,
-            disabled: !autoReconnectConfig?.enabled,
+            value: currentAutoReconnectConfig?.rejoinChannels || false,
+            disabled: !currentAutoReconnectConfig?.enabled,
             onValueChange: async (value: string | boolean) => {
               if (currentNetwork) {
                 const config = autoReconnectService.getConfig(currentNetwork) || getDefaultAutoReconnectConfig();
                 config.rejoinChannels = value as boolean;
                 autoReconnectService.setConfig(currentNetwork, config);
-                await updateAutoReconnectConfig({});
+                // Refresh config from service to update UI
+                const updatedConfig = autoReconnectService.getConfig(currentNetwork);
+                if (updatedConfig) {
+                  await updateAutoReconnectConfig(updatedConfig);
+                }
+                setSubmenuRefreshKey(prev => prev + 1);
               }
             },
           },
@@ -472,70 +589,90 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
             title: t('Smart Reconnection', { _tags: tags }),
             description: t('Avoid flood by spacing reconnection attempts', { _tags: tags }),
             type: 'switch',
-            value: autoReconnectConfig?.smartReconnect || false,
-            disabled: !autoReconnectConfig?.enabled,
+            value: currentAutoReconnectConfig?.smartReconnect || false,
+            disabled: !currentAutoReconnectConfig?.enabled,
             onValueChange: async (value: string | boolean) => {
               if (currentNetwork) {
                 const config = autoReconnectService.getConfig(currentNetwork) || getDefaultAutoReconnectConfig();
                 config.smartReconnect = value as boolean;
                 autoReconnectService.setConfig(currentNetwork, config);
-                await updateAutoReconnectConfig({});
+                // Refresh config from service to update UI
+                const updatedConfig = autoReconnectService.getConfig(currentNetwork);
+                if (updatedConfig) {
+                  await updateAutoReconnectConfig(updatedConfig);
+                }
+                setSubmenuRefreshKey(prev => prev + 1);
               }
             },
           },
           {
             id: 'auto-reconnect-max-attempts',
             title: t('Max Reconnection Attempts', { _tags: tags }),
-            description: autoReconnectConfig?.maxAttempts
-              ? `${autoReconnectConfig.maxAttempts} attempts (0 = unlimited)`
+            description: currentAutoReconnectConfig?.maxAttempts
+              ? `${currentAutoReconnectConfig.maxAttempts} attempts (0 = unlimited)`
               : 'Maximum reconnection attempts (0 = unlimited)',
             type: 'input',
-            value: autoReconnectConfig?.maxAttempts?.toString() || '10',
+            value: currentAutoReconnectConfig?.maxAttempts?.toString() || '10',
             keyboardType: 'numeric',
-            disabled: !autoReconnectConfig?.enabled,
+            disabled: !currentAutoReconnectConfig?.enabled,
             onValueChange: async (value: string | boolean) => {
               if (currentNetwork) {
                 const config = autoReconnectService.getConfig(currentNetwork) || getDefaultAutoReconnectConfig();
                 const attempts = parseInt(value as string, 10);
                 config.maxAttempts = isNaN(attempts) ? 0 : attempts;
                 autoReconnectService.setConfig(currentNetwork, config);
-                await updateAutoReconnectConfig({});
+                // Refresh config from service to update UI
+                const updatedConfig = autoReconnectService.getConfig(currentNetwork);
+                if (updatedConfig) {
+                  await updateAutoReconnectConfig(updatedConfig);
+                }
+                setSubmenuRefreshKey(prev => prev + 1);
               }
             },
           },
           {
             id: 'auto-reconnect-initial-delay',
             title: t('Initial Delay (ms)', { _tags: tags }),
-            description: `First reconnection delay: ${autoReconnectConfig?.initialDelay || 1000}ms`,
+            description: `First reconnection delay: ${currentAutoReconnectConfig?.initialDelay || 1000}ms`,
             type: 'input',
-            value: autoReconnectConfig?.initialDelay?.toString() || '1000',
+            value: currentAutoReconnectConfig?.initialDelay?.toString() || '1000',
             keyboardType: 'numeric',
-            disabled: !autoReconnectConfig?.enabled,
+            disabled: !currentAutoReconnectConfig?.enabled,
             onValueChange: async (value: string | boolean) => {
               if (currentNetwork) {
                 const config = autoReconnectService.getConfig(currentNetwork) || getDefaultAutoReconnectConfig();
                 const delay = parseInt(value as string, 10);
                 config.initialDelay = isNaN(delay) ? 1000 : delay;
                 autoReconnectService.setConfig(currentNetwork, config);
-                await updateAutoReconnectConfig({});
+                // Refresh config from service to update UI
+                const updatedConfig = autoReconnectService.getConfig(currentNetwork);
+                if (updatedConfig) {
+                  await updateAutoReconnectConfig(updatedConfig);
+                }
+                setSubmenuRefreshKey(prev => prev + 1);
               }
             },
           },
           {
             id: 'auto-reconnect-max-delay',
             title: t('Max Delay (ms)', { _tags: tags }),
-            description: `Maximum delay between attempts: ${autoReconnectConfig?.maxDelay || 60000}ms`,
+            description: `Maximum delay between attempts: ${currentAutoReconnectConfig?.maxDelay || 60000}ms`,
             type: 'input',
-            value: autoReconnectConfig?.maxDelay?.toString() || '60000',
+            value: currentAutoReconnectConfig?.maxDelay?.toString() || '60000',
             keyboardType: 'numeric',
-            disabled: !autoReconnectConfig?.enabled,
+            disabled: !currentAutoReconnectConfig?.enabled,
             onValueChange: async (value: string | boolean) => {
               if (currentNetwork) {
                 const config = autoReconnectService.getConfig(currentNetwork) || getDefaultAutoReconnectConfig();
                 const delay = parseInt(value as string, 10);
                 config.maxDelay = isNaN(delay) ? 60000 : delay;
                 autoReconnectService.setConfig(currentNetwork, config);
-                await updateAutoReconnectConfig({});
+                // Refresh config from service to update UI
+                const updatedConfig = autoReconnectService.getConfig(currentNetwork);
+                if (updatedConfig) {
+                  await updateAutoReconnectConfig(updatedConfig);
+                }
+                setSubmenuRefreshKey(prev => prev + 1);
               }
             },
           },
@@ -564,6 +701,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
                 value: rateLimitConfig?.enabled || false,
                 onValueChange: async (value: string | boolean) => {
                   await updateRateLimitConfig({ enabled: value as boolean });
+                  setSubmenuRefreshKey(prev => prev + 1);
                 },
               },
               {
@@ -578,6 +716,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
                   const msgPerSec = parseInt(value as string, 10);
                   if (!isNaN(msgPerSec) && msgPerSec > 0) {
                     await updateRateLimitConfig({ messagesPerSecond: msgPerSec });
+                    setSubmenuRefreshKey(prev => prev + 1);
                   }
                 },
               },
@@ -593,6 +732,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
                   const burst = parseInt(value as string, 10);
                   if (!isNaN(burst) && burst > 0) {
                     await updateRateLimitConfig({ burstLimit: burst });
+                    setSubmenuRefreshKey(prev => prev + 1);
                   }
                 },
               },
@@ -613,6 +753,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
                 value: floodProtectionConfig?.enabled || false,
                 onValueChange: async (value: string | boolean) => {
                   await updateFloodProtectionConfig({ enabled: value as boolean });
+                  setSubmenuRefreshKey(prev => prev + 1);
                 },
               },
               {
@@ -627,6 +768,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
                   const maxMsgs = parseInt(value as string, 10);
                   if (!isNaN(maxMsgs) && maxMsgs > 0) {
                     await updateFloodProtectionConfig({ maxMessagesPerWindow: maxMsgs });
+                    setSubmenuRefreshKey(prev => prev + 1);
                   }
                 },
               },
@@ -642,6 +784,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
                   const window = parseInt(value as string, 10);
                   if (!isNaN(window) && window > 0) {
                     await updateFloodProtectionConfig({ windowSize: window });
+                    setSubmenuRefreshKey(prev => prev + 1);
                   }
                 },
               },
@@ -662,6 +805,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
                 value: lagMonitoringConfig?.enabled || false,
                 onValueChange: async (value: string | boolean) => {
                   await updateLagMonitoringConfig({ enabled: value as boolean });
+                  setSubmenuRefreshKey(prev => prev + 1);
                 },
               },
               {
@@ -705,6 +849,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
                   const interval = parseInt(value as string, 10);
                   if (!isNaN(interval) && interval > 0) {
                     await updateLagMonitoringConfig({ pingInterval: interval });
+                    setSubmenuRefreshKey(prev => prev + 1);
                   }
                 },
               },
@@ -720,6 +865,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
                   const threshold = parseInt(value as string, 10);
                   if (!isNaN(threshold) && threshold > 0) {
                     await updateLagMonitoringConfig({ warningThreshold: threshold });
+                    setSubmenuRefreshKey(prev => prev + 1);
                   }
                 },
               },
@@ -764,7 +910,9 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
       {
         id: 'connection-global-proxy',
         title: t('Global Proxy', { _tags: tags }),
-        description: globalProxyEnabled ? `${globalProxyType.toUpperCase()} - ${globalProxyHost}:${globalProxyPort}` : 'Configure proxy for all connections',
+        description: globalProxyEnabled 
+          ? `${globalProxyType === 'tor' ? 'TOR' : globalProxyType.toUpperCase()} - ${globalProxyHost}:${globalProxyPort}` 
+          : 'Configure proxy for all connections',
         type: 'submenu',
         submenuItems: [
           {
@@ -789,58 +937,12 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
           {
             id: 'proxy-type',
             title: t('Proxy Type', { _tags: tags }),
-            description: t('Select proxy protocol', { _tags: tags }),
+            description: globalProxyType === 'tor' 
+              ? 'TOR' 
+              : globalProxyType.toUpperCase(),
             type: 'button',
             onPress: () => {
-              Alert.alert(
-                t('Proxy Type', { _tags: tags }),
-                t('Select proxy protocol:', { _tags: tags }),
-                [
-                  { text: t('Cancel', { _tags: tags }), style: 'cancel' },
-                  {
-                    text: 'SOCKS5',
-                    onPress: async () => {
-                      setGlobalProxyType('socks5');
-                      await settingsService.setSetting('globalProxy', {
-                        enabled: globalProxyEnabled,
-                        type: 'socks5',
-                        host: globalProxyHost,
-                        port: globalProxyPort ? parseInt(globalProxyPort) : 0,
-                        username: globalProxyUsername,
-                        password: globalProxyPassword,
-                      });
-                    },
-                  },
-                  {
-                    text: 'SOCKS4',
-                    onPress: async () => {
-                      setGlobalProxyType('socks4');
-                      await settingsService.setSetting('globalProxy', {
-                        enabled: globalProxyEnabled,
-                        type: 'socks4',
-                        host: globalProxyHost,
-                        port: globalProxyPort ? parseInt(globalProxyPort) : 0,
-                        username: globalProxyUsername,
-                        password: globalProxyPassword,
-                      });
-                    },
-                  },
-                  {
-                    text: 'HTTP',
-                    onPress: async () => {
-                      setGlobalProxyType('http');
-                      await settingsService.setSetting('globalProxy', {
-                        enabled: globalProxyEnabled,
-                        type: 'http',
-                        host: globalProxyHost,
-                        port: globalProxyPort ? parseInt(globalProxyPort) : 0,
-                        username: globalProxyUsername,
-                        password: globalProxyPassword,
-                      });
-                    },
-                  },
-                ]
-              );
+              setShowProxyTypeModal(true);
             },
           },
           {
@@ -931,7 +1033,11 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
         id: 'connection-biometric-lock',
         title: t('Biometric Lock for Passwords', { _tags: tags }),
         description: biometricAvailable
-          ? (biometricLockEnabled ? 'Fingerprint required before showing/editing passwords' : 'Require fingerprint before showing/editing passwords')
+          ? (biometricLockEnabled 
+              ? (pinLockEnabled 
+                  ? 'Fingerprint or PIN required (fallback to PIN if biometric fails)' 
+                  : 'Fingerprint required before showing/editing passwords')
+              : 'Require fingerprint before showing/editing passwords (can be used with PIN)')
           : 'Biometrics unavailable on this device',
         type: 'switch',
         value: biometricLockEnabled,
@@ -942,8 +1048,10 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
         id: 'connection-pin-lock',
         title: t('PIN Lock for Passwords', { _tags: tags }),
         description: pinLockEnabled
-          ? 'PIN required before showing/editing passwords'
-          : 'Require a PIN before showing/editing passwords',
+          ? (biometricLockEnabled 
+              ? 'PIN required (fallback if biometric fails)' 
+              : 'PIN required before showing/editing passwords')
+          : 'Require a PIN before showing/editing passwords (can be used with biometric)',
         type: 'switch',
         value: pinLockEnabled,
         onValueChange: handlePinLockToggle,
@@ -1141,6 +1249,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
     return items;
   }, [
     autoConnectFavoriteServer,
+    currentAutoReconnectConfig,
     autoReconnectConfig,
     rateLimitConfig,
     floodProtectionConfig,
@@ -1196,9 +1305,241 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
             icon={itemIcon}
             colors={colors}
             styles={styles}
+            onPress={(itemId) => {
+              if (item.type === 'submenu') {
+                setShowSubmenu(itemId);
+                setNestedSubmenuStack([]); // Reset nested stack when opening new submenu
+              }
+            }}
           />
         );
       })}
+      
+      {/* Submenu Modal */}
+      <Modal
+        visible={showSubmenu !== null}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowSubmenu(null)}>
+        <View style={styles.submenuOverlay}>
+          <View style={styles.submenuContainer}>
+            <View style={styles.submenuHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                {nestedSubmenuStack.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setNestedSubmenuStack(prev => prev.slice(0, -1));
+                    }}
+                    style={{ marginRight: 12, padding: 4 }}>
+                    <Text style={[styles.closeButtonText, { fontSize: 18 }]}>←</Text>
+                  </TouchableOpacity>
+                )}
+                <Text style={styles.submenuTitle}>
+                  {(() => {
+                    if (nestedSubmenuStack.length > 0) {
+                      const nestedItem = sectionData
+                        .find((item) => item.id === showSubmenu)
+                        ?.submenuItems?.find((subItem) => subItem.id === nestedSubmenuStack[nestedSubmenuStack.length - 1]);
+                      return nestedItem?.title || t('Options', { _tags: tags });
+                    }
+                    return sectionData.find((item) => item.id === showSubmenu)?.title || t('Options', { _tags: tags });
+                  })()}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => {
+                setShowSubmenu(null);
+                setNestedSubmenuStack([]);
+              }}>
+                <Text style={styles.closeButtonText}>{t('Close', { _tags: tags })}</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView key={`submenu-${showSubmenu}-${submenuRefreshKey}`}>
+              {(() => {
+                // Handle nested submenu navigation
+                let itemsToShow: SettingItemType[] | undefined;
+                if (nestedSubmenuStack.length > 0) {
+                  // We're in a nested submenu
+                  const parentItem = sectionData
+                    .find((item) => item.id === showSubmenu)
+                    ?.submenuItems?.find((subItem) => subItem.id === nestedSubmenuStack[nestedSubmenuStack.length - 1]);
+                  itemsToShow = parentItem?.submenuItems;
+                } else {
+                  // We're in the main submenu
+                  itemsToShow = sectionData.find((item) => item.id === showSubmenu)?.submenuItems;
+                }
+                
+                return itemsToShow?.map((subItem, index) => {
+                  if (subItem.type === 'switch') {
+                    return (
+                      <View key={subItem.id} style={styles.submenuItem}>
+                        <View style={styles.submenuItemContent}>
+                          <Text style={styles.submenuItemText}>{subItem.title}</Text>
+                          {subItem.description && (
+                            <Text style={styles.submenuItemDescription}>{subItem.description}</Text>
+                          )}
+                        </View>
+                        <Switch
+                          key={`${subItem.id}-${submenuRefreshKey}`}
+                          value={subItem.value as boolean}
+                          onValueChange={async (value) => {
+                            try {
+                              await subItem.onValueChange?.(value);
+                              // Force re-render by updating refresh key
+                              setSubmenuRefreshKey(prev => prev + 1);
+                            } catch (error) {
+                              console.error('Error updating setting:', error);
+                            }
+                          }}
+                          disabled={subItem.disabled}
+                        />
+                      </View>
+                    );
+                  }
+                  if (subItem.type === 'input') {
+                    return (
+                      <View key={subItem.id} style={styles.submenuItem}>
+                        <View style={styles.submenuItemContent}>
+                          <Text style={styles.submenuItemText}>{subItem.title}</Text>
+                          {subItem.description && (
+                            <Text style={styles.submenuItemDescription}>{subItem.description}</Text>
+                          )}
+                          <TextInput
+                            key={`${subItem.id}-${submenuRefreshKey}`}
+                            style={[
+                              styles.submenuInput,
+                              subItem.disabled && styles.disabledInput,
+                              { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border },
+                            ]}
+                            value={subItem.value as string}
+                            onChangeText={async (text) => {
+                              try {
+                                await subItem.onValueChange?.(text);
+                                // Force re-render by updating refresh key
+                                setSubmenuRefreshKey(prev => prev + 1);
+                              } catch (error) {
+                                console.error('Error updating setting:', error);
+                              }
+                            }}
+                            placeholder={subItem.placeholder}
+                            placeholderTextColor={colors.textSecondary}
+                            keyboardType={subItem.keyboardType || 'default'}
+                            secureTextEntry={subItem.secureTextEntry}
+                            editable={!subItem.disabled}
+                          />
+                        </View>
+                      </View>
+                    );
+                  }
+                  if (subItem.type === 'submenu') {
+                    // Nested submenu - navigate into it
+                    return (
+                      <TouchableOpacity
+                        key={subItem.id}
+                        style={styles.submenuItem}
+                        onPress={() => {
+                          subItem.onPress?.();
+                          // Navigate into nested submenu
+                          setNestedSubmenuStack(prev => [...prev, subItem.id]);
+                        }}
+                        disabled={subItem.disabled}>
+                        <View style={styles.submenuItemContent}>
+                          <Text style={[styles.submenuItemText, subItem.disabled && styles.disabledText]}>
+                            {subItem.title}
+                          </Text>
+                          {subItem.description && (
+                            <Text style={[styles.submenuItemDescription, subItem.disabled && styles.disabledText]}>
+                              {subItem.description}
+                            </Text>
+                          )}
+                        </View>
+                        <Text style={styles.chevron}>›</Text>
+                      </TouchableOpacity>
+                    );
+                  }
+                  return (
+                    <TouchableOpacity
+                      key={subItem.id}
+                      style={styles.submenuItem}
+                      onPress={() => {
+                        subItem.onPress?.();
+                        if (subItem.type !== 'switch' && subItem.type !== 'input' && subItem.type !== 'submenu') {
+                          setShowSubmenu(null);
+                          setNestedSubmenuStack([]);
+                        }
+                      }}
+                      disabled={subItem.disabled}>
+                      <View style={styles.submenuItemContent}>
+                        <Text style={[styles.submenuItemText, subItem.disabled && styles.disabledText]}>
+                          {subItem.title}
+                        </Text>
+                        {subItem.description && (
+                          <Text style={[styles.submenuItemDescription, subItem.disabled && styles.disabledText]}>
+                            {subItem.description}
+                          </Text>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                });
+              })()}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+      
+      {/* Proxy Type Modal */}
+      <Modal
+        visible={showProxyTypeModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowProxyTypeModal(false)}>
+        <View style={[styles.submenuOverlay, { justifyContent: 'center', alignItems: 'center' }]}>
+          <View style={[styles.submenuContainer, { width: '80%', maxWidth: 400 }]}>
+            <View style={styles.submenuHeader}>
+              <Text style={styles.submenuTitle}>{t('Proxy Type', { _tags: tags })}</Text>
+              <TouchableOpacity onPress={() => setShowProxyTypeModal(false)}>
+                <Text style={styles.closeButtonText}>{t('Close', { _tags: tags })}</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView>
+              {(['socks5', 'socks4', 'http', 'tor'] as const).map((proxyType) => (
+                <TouchableOpacity
+                  key={proxyType}
+                  style={styles.submenuItem}
+                  onPress={async () => {
+                    setGlobalProxyType(proxyType);
+                    await settingsService.setSetting('globalProxy', {
+                      enabled: globalProxyEnabled,
+                      type: proxyType,
+                      host: globalProxyHost,
+                      port: globalProxyPort ? parseInt(globalProxyPort) : 0,
+                      username: globalProxyUsername,
+                      password: globalProxyPassword,
+                    });
+                    setShowProxyTypeModal(false);
+                  }}>
+                  <View style={styles.submenuItemContent}>
+                    <Text style={[
+                      styles.submenuItemText,
+                      globalProxyType === proxyType && { fontWeight: 'bold', color: colors.primary }
+                    ]}>
+                      {proxyType === 'tor' ? 'TOR' : proxyType.toUpperCase()}
+                    </Text>
+                    {globalProxyType === proxyType && (
+                      <Text style={[styles.submenuItemDescription, { color: colors.primary }]}>
+                        {t('Selected', { _tags: tags })}
+                      </Text>
+                    )}
+                  </View>
+                  {globalProxyType === proxyType && (
+                    <Text style={{ color: colors.primary }}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
       
       {/* PIN Modal */}
       <Modal

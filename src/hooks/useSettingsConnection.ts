@@ -87,9 +87,17 @@ export const useSettingsConnection = (): UseSettingsConnectionReturn => {
     setNetworks(loadedNetworks);
   }, []);
 
-  const updateAutoReconnectConfig = useCallback(async (config: Partial<AutoReconnectConfig>) => {
-    await autoReconnectService.setConfig({ ...autoReconnectConfig!, ...config });
-    setAutoReconnectConfig(autoReconnectService.getConfig());
+  const updateAutoReconnectConfig = useCallback(async (config: Partial<AutoReconnectConfig> | AutoReconnectConfig) => {
+    // If config is a full AutoReconnectConfig, use it directly
+    // Otherwise merge with existing config
+    const fullConfig = ('enabled' in config && 'maxAttempts' in config) 
+      ? config as AutoReconnectConfig
+      : { ...autoReconnectConfig!, ...config };
+    
+    // Note: This function doesn't know which network, so we can't call setConfig here
+    // The caller should handle setting the config for the specific network
+    // We just update the local state for UI refresh
+    setAutoReconnectConfig(fullConfig as AutoReconnectConfig);
   }, [autoReconnectConfig]);
 
   const updateRateLimitConfig = useCallback(async (config: Partial<RateLimitConfig>) => {

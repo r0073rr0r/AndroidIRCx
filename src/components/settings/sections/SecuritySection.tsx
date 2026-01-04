@@ -181,7 +181,9 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
         await settingsService.setSetting('appLockUsePin', false);
         setAppLockUsePin(false);
       }
-      const enabled = await biometricAuthService.enableLock();
+      // CRITICAL FIX: Pass 'app' scope to match authenticate() scope in useAppLock.ts
+      // Without this, credentials are stored in wrong keychain service causing infinite error loop
+      const enabled = await biometricAuthService.enableLock('app');
       if (!enabled) {
         Alert.alert(
           t('Biometric setup failed', { _tags: tags }),
@@ -195,7 +197,8 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
       setAppLockEnabled(true);
       return;
     }
-    await biometricAuthService.disableLock();
+    // Pass 'app' scope to match enableLock
+    await biometricAuthService.disableLock('app');
     await settingsService.setSetting('appLockUseBiometric', false);
     setAppLockUseBiometric(false);
     if (!appLockUsePin) {
@@ -207,7 +210,8 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
   const handleAppLockPinToggle = async (value: boolean) => {
     if (value) {
       if (appLockUseBiometric) {
-        await biometricAuthService.disableLock();
+        // Pass 'app' scope to match enableLock
+        await biometricAuthService.disableLock('app');
         await settingsService.setSetting('appLockUseBiometric', false);
         setAppLockUseBiometric(false);
       }

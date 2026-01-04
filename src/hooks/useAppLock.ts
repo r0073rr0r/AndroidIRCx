@@ -66,6 +66,45 @@ export function useAppLock() {
   }, []);
 
   /**
+   * Migrate old biometric credentials from default service to 'app' scope
+   * Returns true if migration was successful
+   */
+  const migrateOldBiometricCredentials = useCallback(async () => {
+    console.log('[useAppLock] Attempting to migrate old biometric credentials...');
+    try {
+      // Try to authenticate with default service (old credentials location)
+      const oldResult = await biometricAuthService.authenticate(
+        'Migrate Biometric Credentials',
+        'Authenticate to update your biometric lock',
+        undefined // No scope = default service (where old credentials are stored)
+      );
+
+      if (oldResult.success) {
+        console.log('[useAppLock] Found old credentials, migrating to new location...');
+        // Old credentials exist and user authenticated successfully
+        // Now store them in the correct location with 'app' scope
+        const migrated = await biometricAuthService.enableLock('app');
+
+        if (migrated) {
+          console.log('[useAppLock] Migration successful!');
+          // Clean up old credentials from default service
+          await biometricAuthService.disableLock(undefined);
+          return true;
+        } else {
+          console.warn('[useAppLock] Migration failed - could not store credentials in new location');
+          return false;
+        }
+      } else {
+        console.log('[useAppLock] No old credentials found or authentication failed');
+        return false;
+      }
+    } catch (error) {
+      console.error('[useAppLock] Migration error:', error);
+      return false;
+    }
+  }, []);
+
+  /**
    * Attempt biometric authentication to unlock app
    */
   const attemptBiometricUnlock = useCallback(async (isManualRetry = false) => {
@@ -98,14 +137,14 @@ export function useAppLock() {
     }
 
     biometricAttemptInProgressRef.current = true;
-    
+
     // Clear any previous errors before attempting
     if (isMountedRef.current) {
       store.setAppPinError('');
     }
 
     try {
-      console.log('[useAppLock] Attempting biometric authentication...');
+      console.log('[useAppLock] Attempting biometric authentication with app scope...');
       const result = await biometricAuthService.authenticate(
         'Unlock AndroidIRCX',
         'Authenticate to unlock the app',
@@ -126,6 +165,47 @@ export function useAppLock() {
       } else {
         // Authentication failed or was cancelled
         console.log('[useAppLock] Biometric authentication failed or cancelled:', result.errorKey);
+
+        // RECOVERY MECHANISM: If credentials not found, try to migrate old credentials
+        if (result.errorKey === 'Authentication cancelled or credentials not found') {
+          console.log('[useAppLock] Credentials not found in app scope, attempting migration...');
+          const migrated = await migrateOldBiometricCredentials();
+
+          if (migrated && isMountedRef.current) {
+            // Migration successful! Now retry authentication with correct credentials
+            console.log('[useAppLock] Migration successful, retrying authentication...');
+            biometricAttemptInProgressRef.current = true;
+
+            const retryResult = await biometricAuthService.authenticate(
+              'Unlock AndroidIRCX',
+              'Authenticate to unlock the app',
+              'app'
+            );
+
+            biometricAttemptInProgressRef.current = false;
+
+            if (retryResult.success && isMountedRef.current) {
+              console.log('[useAppLock] Retry after migration successful!');
+              autoTriggeredRef.current = false;
+              store.setAppLocked(false);
+              store.setAppUnlockModalVisible(false);
+              store.setAppPinEntry('');
+              store.setAppPinError('');
+              return true;
+            }
+          } else {
+            // Migration failed or no old credentials found
+            console.warn('[useAppLock] Migration failed or no old credentials found');
+            if (isMountedRef.current) {
+              // Provide helpful error message with recovery options
+              store.setAppPinError(
+                'Biometric credentials not found. Please disable and re-enable biometric lock in Settings > Security.'
+              );
+            }
+            return false;
+          }
+        }
+
         // Don't hide the modal - allow user to retry
         if (isMountedRef.current) {
           // Show user-friendly error message
@@ -152,7 +232,7 @@ export function useAppLock() {
       }
       return false;
     }
-  }, []);
+  }, [migrateOldBiometricCredentials]);
 
   /**
    * Verify PIN and unlock app if correct

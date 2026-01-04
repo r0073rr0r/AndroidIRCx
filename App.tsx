@@ -97,6 +97,7 @@ import { useAutoConnectFavorite } from './src/hooks/useAutoConnectFavorite';
 import { useUserListActions } from './src/hooks/useUserListActions';
 import { useAppInitialization } from './src/hooks/useAppInitialization';
 import { useLazyMessageHistory } from './src/hooks/useLazyMessageHistory';
+import { useDeepLinkHandler } from './src/hooks/useDeepLinkHandler';
 import { killSwitchService } from './src/services/KillSwitchService';
 import {
   serverTabId,
@@ -540,6 +541,18 @@ function AppContent() {
   const { handleFirstRunSetupComplete } = useFirstRunSetup({
     setShowFirstRunSetup,
     handleConnect,
+  });
+
+  // Deep Link Handler - Handle IRC URL deep links (irc:// and ircs://)
+  useDeepLinkHandler({
+    handleConnect,
+    handleJoinChannel,
+    isAppLocked: appLocked,
+    isFirstRunComplete: !showFirstRunSetup && !isCheckingFirstRun,
+    activeConnectionId,
+    tabs,
+    safeAlert,
+    t,
   });
 
   // Tab Context Menu - Handle tab long press menu options

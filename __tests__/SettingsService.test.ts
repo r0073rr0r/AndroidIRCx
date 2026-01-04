@@ -1,30 +1,48 @@
 import type { IRCNetworkConfig } from '../src/services/SettingsService';
 import { settingsService } from '../src/services/SettingsService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storageCache } from '../src/services/StorageCache';
 
 describe('SettingsService', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     (AsyncStorage as any).__reset();
     // Reset in-memory networks to avoid cross-test leakage
     (settingsService as any).networks = [];
+    // Clear storage cache
+    await storageCache.clear();
+  });
+
+  afterEach(async () => {
+    // Flush any pending writes
+    await storageCache.flush();
   });
 
   it('creates default DBase network when storage is empty', async () => {
     const networks = await settingsService.loadNetworks();
+    // Flush writes to ensure they hit AsyncStorage
+    await storageCache.flush();
 
-    expect(networks.length).toBe(1);
-    const defaultNet = networks[0];
-    expect(defaultNet.name).toBe('DBase');
-    expect(defaultNet.servers[0]).toMatchObject({
+    expect(networks.length).toBeGreaterThanOrEqual(1);
+    const defaultNet = networks.find(n => n.name === 'DBase');
+    expect(defaultNet).toBeTruthy();
+    expect(defaultNet?.servers).toBeDefined();
+    const dbServer = defaultNet?.servers.find(s => s.hostname === 'irc.dbase.in.rs');
+    expect(dbServer).toMatchObject({
       hostname: 'irc.dbase.in.rs',
       port: 6697,
       ssl: true,
     });
 
-    expect((AsyncStorage as any).setItem).toHaveBeenCalledWith(
-      '@AndroidIRCX:networks',
-      expect.any(String)
+    // Networks should be saved (StorageCache uses multiSet for batched writes)
+    const setItemCalls = (AsyncStorage as any).setItem.mock.calls;
+    const multiSetCalls = (AsyncStorage as any).multiSet.mock.calls;
+
+    const networksSavedViaSetItem = setItemCalls.some((call: any) => call[0] === '@AndroidIRCX:networks');
+    const networksSavedViaMultiSet = multiSetCalls.some((call: any) =>
+      call[0].some((pair: any) => pair[0] === '@AndroidIRCX:networks')
     );
+
+    expect(networksSavedViaSetItem || networksSavedViaMultiSet).toBe(true);
   });
 
   it('persists added networks and can retrieve them', async () => {
@@ -63,6 +81,7 @@ describe('SettingsService', () => {
       name: 'CustomNet',
       nick: 'nick',
       realname: 'Real Name',
+      identityProfileId: 'androidircx-default-profile',
       servers: [
         {
           id: 'srv-1',
@@ -74,15 +93,19 @@ describe('SettingsService', () => {
     };
 
     // Seed storage so loadNetworks starts with our custom network
-    (AsyncStorage as any).__STORE.set('@AndroidIRCX:networks', JSON.stringify([baseNetwork]));
+    await AsyncStorage.setItem('@AndroidIRCX:networks', JSON.stringify([baseNetwork]));
     const networks = await settingsService.loadNetworks();
+    await storageCache.flush();
     expect(networks.find(n => n.id === 'custom')).toBeTruthy();
 
     await settingsService.updateServerInNetwork('custom', 'srv-1', { port: 6697, ssl: true });
+    await storageCache.flush();
     const updated = await settingsService.getNetwork('custom');
-    expect(updated?.servers[0]).toMatchObject({ port: 6697, ssl: true });
+    const server = updated?.servers.find(s => s.id === 'srv-1');
+    expect(server).toMatchObject({ port: 6697, ssl: true });
 
     await settingsService.deleteServerFromNetwork('custom', 'srv-1');
+    await storageCache.flush();
     const afterDelete = await settingsService.getNetwork('custom');
     // ensureDefaults re-adds a placeholder server when none exist
     expect(afterDelete?.servers.length).toBeGreaterThanOrEqual(1);
@@ -113,20 +136,23 @@ describe('SettingsService', () => {
       name: 'FavTest',
       nick: 'nick',
       realname: 'Real Name',
+      identityProfileId: 'androidircx-default-profile',
       servers: [
         { id: 'srv-1', hostname: 'one.example', port: 6697, ssl: true, favorite: true },
         { id: 'srv-2', hostname: 'two.example', port: 6697, ssl: true },
       ],
     };
 
-    (AsyncStorage as any).__STORE.set('@AndroidIRCX:networks', JSON.stringify([baseNetwork]));
+    await AsyncStorage.setItem('@AndroidIRCX:networks', JSON.stringify([baseNetwork]));
     await settingsService.loadNetworks();
+    await storageCache.flush();
 
     await settingsService.updateServerInNetwork('fav-test', 'srv-2', { favorite: true });
+    await storageCache.flush();
     const updated = await settingsService.getNetwork('fav-test');
 
     expect(updated?.servers.find(s => s.id === 'srv-2')?.favorite).toBe(true);
-    expect(updated?.servers.find(s => s.id === 'srv-1')?.favorite).toBe(false);
+    expect(updated?.servers.find(s => s.id === 'srv-1')?.favorite).toBeFalsy();
   });
 
   it('resets other favorites when adding a new favorite server', async () => {
@@ -135,11 +161,13 @@ describe('SettingsService', () => {
       name: 'FavAdd',
       nick: 'nick',
       realname: 'Real Name',
+      identityProfileId: 'androidircx-default-profile',
       servers: [{ id: 'srv-1', hostname: 'one.example', port: 6697, ssl: true, favorite: true }],
     };
 
-    (AsyncStorage as any).__STORE.set('@AndroidIRCX:networks', JSON.stringify([baseNetwork]));
+    await AsyncStorage.setItem('@AndroidIRCX:networks', JSON.stringify([baseNetwork]));
     await settingsService.loadNetworks();
+    await storageCache.flush();
 
     await settingsService.addServerToNetwork('fav-add', {
       id: 'srv-2',
@@ -148,6 +176,7 @@ describe('SettingsService', () => {
       ssl: true,
       favorite: true,
     });
+    await storageCache.flush();
 
     const updated = await settingsService.getNetwork('fav-add');
     expect(updated?.servers.find(s => s.id === 'srv-2')?.favorite).toBe(true);

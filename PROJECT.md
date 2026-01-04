@@ -1,7 +1,7 @@
 # Android IRC Client - Project Documentation
 
-**Last Updated:** 2026-01-XX
-**Version:** 1.5.2 (Bug Fixes & Improvements)
+**Last Updated:** 2026-01-04
+**Version:** 1.5.5 (Critical Biometric Fix)
 **Status:** Active Development - Refactoring Complete
 
 ---
@@ -1000,6 +1000,46 @@ that can be done later if needed.
 ---
 
 ## Recent Changes
+
+### v1.5.5 (2026-01-04) - CRITICAL BIOMETRIC UNLOCK FIX
+
+**Critical Bug Fix:**
+
+- ✅ **FIXED: Biometric unlock infinite error loop** - Users stuck unable to unlock with biometrics
+  can now authenticate successfully
+    - **Root Cause:** Service scope mismatch between `enableLock()` and `authenticate()` -
+      credentials were stored in default keychain service but authentication attempted to read
+      from 'androidircx:app' service
+    - **Primary Fix:** Updated `SecuritySection.tsx` to pass 'app' scope to `enableLock('app')` and
+      `disableLock('app')` to match `authenticate('app')` scope
+    - **Recovery Mechanism:** Added automatic migration for users stuck with credentials in wrong
+      service:
+        - When credentials not found in 'app' scope, attempts to find and migrate old credentials
+          from default service
+        - Automatically re-stores credentials in correct location and retries authentication
+        - If migration fails, provides clear error message: "Biometric credentials not found. Please
+          disable and re-enable biometric lock in Settings > Security."
+    - **Improved Error Handling:** Better differentiation between user cancellation vs. missing
+      credentials
+    - **Files Modified:**
+        - `src/components/settings/sections/SecuritySection.tsx` (lines 186, 201, 214)
+        - `src/hooks/useAppLock.ts` (added `migrateOldBiometricCredentials()`, updated
+          `attemptBiometricUnlock()`)
+        - `src/services/BiometricAuthService.ts` (improved error handling and user cancellation
+          detection)
+
+**Impact:**
+
+- **NEW USERS:** Will never experience the bug - credentials stored in correct location from the
+  start
+- **EXISTING USERS:** Automatic migration on first unlock attempt after update - seamless recovery
+- **STUCK USERS:** Can now unlock successfully, or receive clear instructions to re-enable biometric
+  lock
+
+**Prevention:** All biometric operations now use consistent 'app' scope across enable, disable, and
+authenticate
+
+---
 
 ### v1.5.2 (2026-01-XX) - Bug Fixes & Improvements
 

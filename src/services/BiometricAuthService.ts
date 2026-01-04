@@ -91,20 +91,37 @@ class BiometricAuthService {
       console.log('[BiometricAuthService] getGenericPassword result:', result);
 
       if (result === false) {
-        return { 
-          success: false, 
+        // result === false can mean:
+        // 1. User cancelled the biometric prompt
+        // 2. No credentials were stored in this service
+        // We return a generic errorKey that the caller can use to trigger migration/recovery
+        return {
+          success: false,
           errorKey: 'Authentication cancelled or credentials not found',
-          errorMessage: 'Biometric authentication was cancelled or failed. Please try again.'
+          errorMessage: undefined // Don't set message here - let caller decide based on context
         };
       }
 
       return { success: Boolean(result) };
     } catch (error) {
       console.error('[BiometricAuthService] Auth exception:', error);
+      // Handle specific error types
+      const errorMsg = error instanceof Error ? error.message : String(error);
+
+      // Check if error indicates user cancellation
+      if (errorMsg.includes('cancel') || errorMsg.includes('Cancel')) {
+        return {
+          success: false,
+          errorKey: 'User cancelled',
+          errorMessage: undefined // User knows they cancelled, no need for error message
+        };
+      }
+
+      // Generic authentication failure
       return {
         success: false,
         errorKey: 'Authentication failed',
-        errorMessage: error instanceof Error ? error.message : undefined
+        errorMessage: errorMsg
       };
     }
   }

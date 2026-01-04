@@ -77,9 +77,15 @@ export const filterSettings = (
 
   return sections
     .map(section => {
+      // If section title matches, include all items
+      if (matches(section.title, term)) {
+        return section;
+      }
+
+      // Otherwise filter items
       const data = section.data.filter(item => {
         const selfMatch = matches(item.title, term) || matches(item.description, term);
-        const subMatch = item.submenuItems?.some(sub => 
+        const subMatch = item.submenuItems?.some(sub =>
           matches(sub.title, term) || matches(sub.description, term)
         );
         return selfMatch || subMatch;

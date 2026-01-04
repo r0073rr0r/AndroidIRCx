@@ -42,6 +42,16 @@
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
+        <!-- Deep link support for IRC URLs -->
+        <intent-filter android:autoVerify="true">
+            <action android:name="android.intent.action.VIEW" />
+
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+
+            <data android:scheme="irc" />
+            <data android:scheme="ircs" />
+        </intent-filter>
     </activity>
 
       <!-- Foreground service for maintaining IRC connection in background -->

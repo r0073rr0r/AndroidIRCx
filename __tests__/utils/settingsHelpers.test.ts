@@ -172,7 +172,8 @@ describe('settingsHelpers', () => {
     ];
 
     it('should order sections correctly', () => {
-      const result = orderSections(mockSections);
+      // With isSupporter=true or hasNoAds=true, Premium should be first
+      const result = orderSections(mockSections, true, false);
       expect(result[0].title).toBe('Premium');
       expect(result[1].title).toBe('Appearance');
     });

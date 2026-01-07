@@ -553,7 +553,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
               if (currentNetwork) {
                 const config = autoReconnectService.getConfig(currentNetwork) || getDefaultAutoReconnectConfig();
                 config.enabled = value as boolean;
-                autoReconnectService.setConfig(currentNetwork, config);
+                await autoReconnectService.setConfig(currentNetwork, config);
                 // Refresh config from service to update UI
                 const updatedConfig = autoReconnectService.getConfig(currentNetwork);
                 if (updatedConfig) {
@@ -574,7 +574,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
               if (currentNetwork) {
                 const config = autoReconnectService.getConfig(currentNetwork) || getDefaultAutoReconnectConfig();
                 config.rejoinChannels = value as boolean;
-                autoReconnectService.setConfig(currentNetwork, config);
+                await autoReconnectService.setConfig(currentNetwork, config);
                 // Refresh config from service to update UI
                 const updatedConfig = autoReconnectService.getConfig(currentNetwork);
                 if (updatedConfig) {
@@ -595,7 +595,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
               if (currentNetwork) {
                 const config = autoReconnectService.getConfig(currentNetwork) || getDefaultAutoReconnectConfig();
                 config.smartReconnect = value as boolean;
-                autoReconnectService.setConfig(currentNetwork, config);
+                await autoReconnectService.setConfig(currentNetwork, config);
                 // Refresh config from service to update UI
                 const updatedConfig = autoReconnectService.getConfig(currentNetwork);
                 if (updatedConfig) {
@@ -620,7 +620,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
                 const config = autoReconnectService.getConfig(currentNetwork) || getDefaultAutoReconnectConfig();
                 const attempts = parseInt(value as string, 10);
                 config.maxAttempts = isNaN(attempts) ? 0 : attempts;
-                autoReconnectService.setConfig(currentNetwork, config);
+                await autoReconnectService.setConfig(currentNetwork, config);
                 // Refresh config from service to update UI
                 const updatedConfig = autoReconnectService.getConfig(currentNetwork);
                 if (updatedConfig) {
@@ -643,7 +643,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
                 const config = autoReconnectService.getConfig(currentNetwork) || getDefaultAutoReconnectConfig();
                 const delay = parseInt(value as string, 10);
                 config.initialDelay = isNaN(delay) ? 1000 : delay;
-                autoReconnectService.setConfig(currentNetwork, config);
+                await autoReconnectService.setConfig(currentNetwork, config);
                 // Refresh config from service to update UI
                 const updatedConfig = autoReconnectService.getConfig(currentNetwork);
                 if (updatedConfig) {
@@ -666,7 +666,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
                 const config = autoReconnectService.getConfig(currentNetwork) || getDefaultAutoReconnectConfig();
                 const delay = parseInt(value as string, 10);
                 config.maxDelay = isNaN(delay) ? 60000 : delay;
-                autoReconnectService.setConfig(currentNetwork, config);
+                await autoReconnectService.setConfig(currentNetwork, config);
                 // Refresh config from service to update UI
                 const updatedConfig = autoReconnectService.getConfig(currentNetwork);
                 if (updatedConfig) {

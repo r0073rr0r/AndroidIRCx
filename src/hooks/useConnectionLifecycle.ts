@@ -13,6 +13,8 @@ import { scriptingService } from '../services/ScriptingService';
 import { dccChatService } from '../services/DCCChatService';
 import { dccFileService } from '../services/DCCFileService';
 import { useTabStore } from '../stores/tabStore';
+import { tabService } from '../services/TabService';
+import { messageHistoryService } from '../services/MessageHistoryService';
 import { serverTabId, channelTabId, queryTabId, noticeTabId, makeServerTab, sortTabsGrouped } from '../utils/tabUtils';
 import { useT } from '../i18n/transifex';
 import type { ChannelTab } from '../types';
@@ -147,14 +149,36 @@ export const useConnectionLifecycle = (params: UseConnectionLifecycleParams) => 
   // We use a timestamp to force re-check when ConnectionManager creates a new connection
   const [connectionCheckTimestamp, setConnectionCheckTimestamp] = useState(Date.now());
 
-  // Track connection changes - re-run when isConnected changes
+  // Track connection changes - re-run when isConnected changes OR networkName changes
+  // This ensures listeners are re-attached after auto-reconnect
   // Note: Removed 1-second polling interval that was causing render loop
+  const prevNetworkRef = useRef(networkName);
   useEffect(() => {
-    // Only update timestamp when isConnected actually changes
-    if (isConnected) {
+    // Update timestamp when isConnected becomes true or network changes
+    if (isConnected || networkName !== prevNetworkRef.current) {
+      if (networkName !== prevNetworkRef.current) {
+        console.log(`useConnectionLifecycle: Network changed from ${prevNetworkRef.current} to ${networkName}, re-setting up listeners`);
+        prevNetworkRef.current = networkName;
+      }
       setConnectionCheckTimestamp(Date.now());
     }
-  }, [isConnected]);
+  }, [isConnected, networkName]);
+
+  // Listen for connection-created events from ConnectionManager
+  // This handles the case where auto-reconnect creates a new IRCService instance
+  // and we need to re-attach all event listeners to the new instance
+  useEffect(() => {
+    console.log('useConnectionLifecycle: Setting up connection-created listener');
+    const cleanup = connectionManager.onConnectionCreated((networkId: string) => {
+      console.log(`useConnectionLifecycle: Received connection-created event for ${networkId}, forcing listener re-setup`);
+      setConnectionCheckTimestamp(Date.now());
+    });
+
+    return () => {
+      console.log('useConnectionLifecycle: Cleaning up connection-created listener');
+      cleanup();
+    };
+  }, []);
 
   useEffect(() => {
     if (__DEV__) {
@@ -367,17 +391,99 @@ export const useConnectionLifecycle = (params: UseConnectionLifecycleParams) => 
           }
           if (currentConnectionId) {
             const serverId = serverTabId(currentConnectionId);
-            latest.safeSetState(() => {
-              latest.setTabs(prev => {
-                const exists = prev.some(t => t.id === serverId);
-                const updated = exists
-                  ? prev
-                  : sortTabsGrouped([...prev, makeServerTab(currentConnectionId)], latest.tabSortAlphabetical);
-                return updated;
+            // Load tabs from storage if they don't exist (e.g., after reconnect)
+            const existingTabs = latest.tabsRef.current.filter(t => t.networkId === currentConnectionId);
+            if (existingTabs.length === 0) {
+              // No tabs for this network, load from storage
+              (async () => {
+                try {
+                  const loadedTabs = await tabService.getTabs(currentConnectionId);
+                  const normalizedTabs = loadedTabs
+                    .filter(tab => tab.networkId !== 'Not connected' && tab.name !== 'Not connected')
+                    .map(tab => ({
+                      ...tab,
+                      networkId: tab.networkId || currentConnectionId,
+                      id: tab.id.includes('::') ? tab.id : (tab.type === 'server' ? serverTabId(currentConnectionId) : tab.id),
+                    }));
+                  const withServerTab = normalizedTabs.some(t => t.type === 'server') 
+                    ? normalizedTabs 
+                    : [makeServerTab(currentConnectionId), ...normalizedTabs];
+                  
+                  // Load server tab history
+                  const initialServerTabId = serverTabId(currentConnectionId);
+                  let serverTabHistory: IRCMessage[] = [];
+                  const serverTab = withServerTab.find(t => t.id === initialServerTabId);
+                  if (serverTab) {
+                    try {
+                      serverTabHistory = await messageHistoryService.loadMessages(currentConnectionId, 'server');
+                    } catch (err) {
+                      console.error('Error loading server tab history on reconnect:', err);
+                    }
+                  }
+                  
+                  const tabsWithHistory = withServerTab.map(tab => {
+                    if (tab.id === initialServerTabId) {
+                      return { ...tab, messages: serverTabHistory };
+                    }
+                    return { ...tab, messages: [] };
+                  });
+                  
+                  latest.safeSetState(() => {
+                    latest.setTabs(prev => sortTabsGrouped([
+                      ...prev.filter(t => t.networkId !== currentConnectionId),
+                      ...tabsWithHistory,
+                    ], latest.tabSortAlphabetical));
+                    if (!latest.activeTabId || !latest.tabsRef.current.some(t => t.id === latest.activeTabId)) {
+                      latest.setActiveTabId(initialServerTabId);
+                    }
+                  });
+                } catch (error) {
+                  console.error('Error loading tabs on reconnect:', error);
+                  // Fallback: just add server tab
+                  latest.safeSetState(() => {
+                    latest.setTabs(prev => {
+                      const exists = prev.some(t => t.id === serverId);
+                      const updated = exists
+                        ? prev
+                        : sortTabsGrouped([...prev, makeServerTab(currentConnectionId)], latest.tabSortAlphabetical);
+                      return updated;
+                    });
+                    if (!latest.activeTabId || !latest.tabsRef.current.some(t => t.id === latest.activeTabId)) {
+                      latest.setActiveTabId(serverId);
+                    }
+                  });
+                }
+              })();
+            } else {
+              // Tabs already exist (reconnect after disconnect/kill)
+              console.log(`useConnectionLifecycle: Reconnected to ${currentConnectionId}, tabs already exist`);
+              latest.safeSetState(() => {
+                latest.setTabs(prev => {
+                  const exists = prev.some(t => t.id === serverId);
+                  const updated = exists
+                    ? prev
+                    : sortTabsGrouped([...prev, makeServerTab(currentConnectionId)], latest.tabSortAlphabetical);
+                  return updated;
+                });
               });
-            });
-            if (!latest.activeTabId || !latest.tabsRef.current.some(t => t.id === latest.activeTabId)) {
-              latest.safeSetState(() => latest.setActiveTabId(serverId));
+              // Add reconnection message to server tab
+              const reconnectMessage: IRCMessage = {
+                type: 'system',
+                text: latest.t('*** Reconnected to {network}').replace('{network}', currentConnectionId),
+                timestamp: Date.now(),
+                channel: 'server',
+                network: currentConnectionId,
+              };
+              latest.pendingMessagesRef.current.push({
+                message: reconnectMessage,
+                context: { targetTab: serverId }
+              });
+              latest.processBatchedMessages();
+
+              // Switch to server tab if current active tab is invalid
+              if (!latest.activeTabId || !latest.tabsRef.current.some(t => t.id === latest.activeTabId)) {
+                latest.safeSetState(() => latest.setActiveTabId(serverId));
+              }
             }
           }
           // Background service will handle keeping connection alive

@@ -403,16 +403,19 @@ export class IRCService {
               this.emitConnection(false);
               return;
             }
+            // Emit connection change even if isConnected is false (e.g., after KILL)
+            // This ensures AutoReconnectService is notified of disconnection
             if (this.isConnected) {
               this.addRawMessage(t('*** Connection closed by server'), 'connection');
-              this.isConnected = false;
-              this.registered = false;
-              this.socket = null;
-              this.emitConnection(false);
-
-              // Trigger auto-reconnect with exponential backoff
-              this.scheduleReconnect();
             }
+            this.isConnected = false;
+            this.registered = false;
+            this.socket = null;
+            this.emitConnection(false);
+
+            // AutoReconnectService will handle reconnection via connectionChange event
+            // IRCService's scheduleReconnect() is kept for backward compatibility but
+            // AutoReconnectService takes precedence in multi-network scenarios
           });
         };
 
@@ -809,7 +812,30 @@ export class IRCService {
           timestamp: messageTimestamp,
         });
         this.addRawMessage(t('*** Server error: {message}', { message: errorText }), 'server');
-        this.disconnect(errorText);
+        
+        // Check if this ERROR is due to KILL (server sends ERROR after KILL)
+        // If so, don't set manualDisconnect flag to allow auto-reconnect
+        const isKillError = errorText.toLowerCase().includes('killed') || errorText.toLowerCase().includes('kill');
+        
+        if (isKillError) {
+          // KILL-related ERROR - disconnect without manualDisconnect flag to allow auto-reconnect
+          this.logRaw(`IRCService: KILL-related ERROR received: ${errorText}, disconnecting and triggering auto-reconnect`);
+          this.isConnected = false;
+          this.registered = false;
+          if (this.socket) {
+            try {
+              this.socket.destroy();
+            } catch (error: any) {
+              this.logRaw(`IRCService: Socket destroy error during ERROR/KILL (ignored): ${error?.message || error}`);
+            }
+            this.socket = null;
+          }
+          // Ensure connectionChange event is emitted even if socket was already closed
+          this.emitConnection(false);
+        } else {
+          // Regular ERROR - use normal disconnect (may be manual disconnect)
+          this.disconnect(errorText);
+        }
         return;
       }
 
@@ -1272,6 +1298,60 @@ export class IRCService {
           this.emit('part', partChannel, partNick);
         }
         break;
+
+      case 'KILL': {
+        // KILL command: :server KILL nick :reason
+        // When admin kills a user, server sends KILL and closes connection
+        const killedNick = params[0] || '';
+        const killReason = params.slice(1).join(' ').replace(/^:/, '') || t('No reason given');
+        const currentNick = this.getCurrentNick();
+        
+        // Check if we were killed
+        if (killedNick && currentNick && killedNick.toLowerCase() === currentNick.toLowerCase()) {
+          this.addRawMessage(
+            t('*** You were killed by {server}: {reason}', {
+              server: this.extractNick(prefix) || t('server'),
+              reason: killReason,
+            }),
+            'connection'
+          );
+          this.addMessage({
+            type: 'error',
+            text: t('*** You were killed: {reason}', { reason: killReason }),
+            timestamp: messageTimestamp,
+          });
+          
+          // Explicitly disconnect without manualDisconnect flag to trigger auto-reconnect
+          // Don't call this.disconnect() directly as it sets manualDisconnect = true
+          // Instead, mark as disconnected and emit connection change
+          this.logRaw(`IRCService: KILL received for ${currentNick}, disconnecting and triggering auto-reconnect`);
+          this.isConnected = false;
+          this.registered = false;
+          if (this.socket) {
+            try {
+              this.socket.destroy();
+            } catch (error: any) {
+              this.logRaw(`IRCService: Socket destroy error during KILL (ignored): ${error?.message || error}`);
+            }
+            this.socket = null;
+          }
+          // Ensure connectionChange event is emitted even if socket was already closed
+          this.emitConnection(false);
+          
+          // AutoReconnectService will handle reconnection via connectionChange event
+          return;
+        }
+        
+        // Someone else was killed - just show the message
+        this.addMessage({
+          type: 'raw',
+          text: t('*** {nick} was killed: {reason}', { nick: killedNick, reason: killReason }),
+          timestamp: messageTimestamp,
+          isRaw: true,
+          rawCategory: 'server',
+        });
+        break;
+      }
 
       case 'QUIT':
         const quitNick = this.extractNick(prefix);

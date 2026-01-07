@@ -1167,157 +1167,157 @@
     "string": ""
   },
   "DCC Transfer Complete": {
-    "string": ""
+    "string": "Перенос DCC завершен."
   },
   "{filename} received ({bytes} bytes).": {
-    "string": ""
+    "string": "Получено сообщение {filename} ( байты {bytes} )."
   },
   "DCC Transfer Failed": {
-    "string": ""
+    "string": "Передача DCC не удалась"
   },
   "Transfer failed.": {
-    "string": ""
+    "string": "Передача не удалась."
   },
   "No Network": {
-    "string": ""
+    "string": "Нет сети"
   },
   "No network available. Please configure a network first.": {
-    "string": ""
+    "string": "Сеть недоступна. Пожалуйста, сначала настройте сеть."
   },
   "Configure": {
-    "string": ""
+    "string": "Настройка"
   },
   "No Server Configured": {
-    "string": ""
+    "string": "Сервер не настроен"
   },
   "No server configured for \"{networkName}\". Would you like to configure one?": {
-    "string": ""
+    "string": "Для &quot; {networkName} &quot; не настроен ни один сервер. Хотите ли вы его настроить?"
   },
   "No server configured for \"{networkName}\"": {
-    "string": ""
+    "string": "Для &quot; {networkName} &quot; не настроен сервер."
   },
   "Connection failed": {
-    "string": ""
+    "string": "Соединение не удалось."
   },
   "{message}\n\nTried: {hostInfo}\nCheck host/port, SSL, and network reachability.": {
-    "string": ""
+    "string": "{message}\n\n Проверено: {hostInfo}\n Проверьте хост/порт, SSL-шифрование и доступность сети."
   },
   "Not Connected": {
-    "string": ""
+    "string": "Не подключено"
   },
   "Please connect to a server first": {
-    "string": ""
+    "string": "Пожалуйста, сначала подключитесь к серверу."
   },
   "Exit Application": {
-    "string": ""
+    "string": "Заявление о выходе"
   },
   "Are you sure you want to exit? This will disconnect from the server.": {
-    "string": ""
+    "string": "Вы уверены, что хотите выйти? Это приведет к отключению от сервера."
   },
   "Exit": {
-    "string": ""
+    "string": "Выход"
   },
   "Disconnected": {
-    "string": ""
+    "string": "Отключено"
   },
   "You can now close the app from the app switcher.": {
-    "string": ""
+    "string": "Теперь вы можете закрыть приложение через переключатель приложений."
   },
   "Network Not Found": {
-    "string": ""
+    "string": "Сеть не найдена"
   },
   "Cannot find saved configuration for \"{networkId}\". Please configure it first.": {
-    "string": ""
+    "string": "Не удалось найти сохраненную конфигурацию для &quot; {networkId} &quot;. Пожалуйста, сначала настройте ее."
   },
   "DCC Send Error": {
-    "string": ""
+    "string": "Ошибка отправки DCC"
   },
   "Failed to send file": {
-    "string": ""
+    "string": "Не удалось отправить файл."
   },
   "Download complete": {
-    "string": ""
+    "string": "Загрузка завершена"
   },
   "Saved to {path}": {
-    "string": ""
+    "string": "Сохранено в {path}"
   },
   "Download failed": {
-    "string": ""
+    "string": "Загрузка не удалась."
   },
   "Unable to download file": {
-    "string": ""
+    "string": "Не удалось загрузить файл."
   },
   "...": {
-    "string": ""
+    "string": "..."
   },
   "Download": {
-    "string": ""
+    "string": "Скачать"
   },
   "Networks & Servers": {
-    "string": ""
+    "string": "Сети и серверы"
   },
   "IRC network configurations and server settings": {
-    "string": ""
+    "string": "Настройки сети IRC и параметры сервера"
   },
   "App Settings": {
-    "string": ""
+    "string": "Настройки приложения"
   },
   "General app preferences and configurations": {
-    "string": ""
+    "string": "Общие настройки и параметры приложения"
   },
   "Encryption Keys": {
-    "string": ""
+    "string": "Ключи шифрования"
   },
   "Channel encryption keys and DM bundles": {
-    "string": ""
+    "string": "Ключи шифрования канала и пакеты DM"
   },
   "Identity & Connection Profiles": {
-    "string": ""
+    "string": "Профили идентичности и связей"
   },
   "User identity profiles and connection templates": {
-    "string": ""
+    "string": "Профили пользователей и шаблоны подключения"
   },
   "Favorite channels and auto-join settings": {
-    "string": ""
+    "string": "Избранные каналы и настройки автоматического подключения"
   },
   "Channel Notes & Bookmarks": {
-    "string": ""
+    "string": "Заметки и закладки канала"
   },
   "Channel notes, bookmarks, and user aliases": {
-    "string": ""
+    "string": "Заметки о канале, закладки и псевдонимы пользователей"
   },
   "Highlights & Notifications": {
-    "string": ""
+    "string": "Основные моменты и уведомления"
   },
   "Highlight words and notification preferences": {
-    "string": ""
+    "string": "Выделение слов и настройки уведомлений"
   },
   "Open Tabs": {
-    "string": ""
+    "string": "Открыть вкладки"
   },
   "Currently open channel and query tabs": {
-    "string": ""
+    "string": "В данный момент открыты вкладки «Канал» и «Запрос»."
   },
   "Saved message history for all tabs": {
-    "string": ""
+    "string": "Сохраненная история сообщений для всех вкладок"
   },
   "Activity Logs": {
-    "string": ""
+    "string": "Журналы активности"
   },
   "Channel activity logs and join/part history": {
-    "string": ""
+    "string": "Журналы активности канала и история присоединения/отсоединения"
   },
   "No Options Selected": {
-    "string": ""
+    "string": "Варианты не выбраны"
   },
   "Please select at least one backup option": {
-    "string": ""
+    "string": "Пожалуйста, выберите хотя бы один вариант резервного копирования."
   },
   "Generated backup with {count} items:\n{names}": {
-    "string": ""
+    "string": "Создана резервная копия с элементами {count} :\n {names}"
   },
   "Failed to generate backup": {
-    "string": ""
+    "string": "Не удалось создать резервную копию."
   },
   "Please paste backup data first": {
     "string": ""

@@ -21,7 +21,8 @@ export function useAppLock() {
   const appStateRef = useRef(AppState.currentState);
   const isMountedRef = useRef(true);
   const biometricAttemptInProgressRef = useRef(false);
-  const autoTriggeredRef = useRef(false);
+  const backgroundTimeRef = useRef<number>(0); // Track when app went to background
+  const lockScreenFreezeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Zustand selectors - only subscribe to what we need
   const appLockEnabled = useUIStore(state => state.appLockEnabled);
@@ -156,7 +157,6 @@ export function useAppLock() {
 
       if (result.success && isMountedRef.current) {
         console.log('[useAppLock] Biometric authentication successful');
-        autoTriggeredRef.current = false; // Reset auto-trigger flag on success
         store.setAppLocked(false);
         store.setAppUnlockModalVisible(false);
         store.setAppPinEntry('');
@@ -186,7 +186,6 @@ export function useAppLock() {
 
             if (retryResult.success && isMountedRef.current) {
               console.log('[useAppLock] Retry after migration successful!');
-              autoTriggeredRef.current = false;
               store.setAppLocked(false);
               store.setAppUnlockModalVisible(false);
               store.setAppPinEntry('');
@@ -312,44 +311,97 @@ export function useAppLock() {
       const currentStore = useUIStore.getState();
       if (!currentStore.appLockEnabled) return;
 
-      // Lock when going to background
-      if (currentStore.appLockOnBackground && prevState === 'active' && nextState !== 'active') {
-        currentStore.setAppLocked(true);
-        currentStore.setAppUnlockModalVisible(true);
+      // Track when app goes to background
+      if (prevState === 'active' && nextState !== 'active') {
+        backgroundTimeRef.current = Date.now();
+        console.log('[useAppLock] App went to background, recording time');
+
+        // Lock when going to background
+        if (currentStore.appLockOnBackground) {
+          currentStore.setAppLocked(true);
+          currentStore.setAppUnlockModalVisible(true);
+        }
       }
 
-      // Lock when coming to foreground
-      if (currentStore.appLockOnLaunch && prevState !== 'active' && nextState === 'active') {
-        currentStore.setAppLocked(true);
-        currentStore.setAppUnlockModalVisible(true);
+      // Handle app coming to foreground
+      if (prevState !== 'active' && nextState === 'active') {
+        const timeInBackground = Date.now() - backgroundTimeRef.current;
+        const wasLongBackground = timeInBackground > 60000; // More than 1 minute
+
+        console.log(`[useAppLock] App came to foreground after ${Math.round(timeInBackground / 1000)}s in background`);
+
+        // CRITICAL FIX: Reset biometric state if app was in background for a long time
+        // This prevents the lock screen from freezing due to stuck biometric attempts
+        if (wasLongBackground) {
+          console.log('[useAppLock] Long background detected - resetting biometric state');
+          biometricAttemptInProgressRef.current = false;
+
+          // Clear any error messages
+          currentStore.setAppPinError('');
+
+          // If lock screen is showing, set up a safety timeout to detect freeze
+          if (currentStore.appLocked && currentStore.appUnlockModalVisible) {
+            console.log('[useAppLock] Lock screen active after long background - setting up freeze detection');
+
+            // Clear any existing timeout
+            if (lockScreenFreezeTimeoutRef.current) {
+              clearTimeout(lockScreenFreezeTimeoutRef.current);
+            }
+
+            // Set up a 30-second timeout to detect if lock screen is frozen
+            lockScreenFreezeTimeoutRef.current = setTimeout(() => {
+              console.warn('[useAppLock] Lock screen freeze detected! Force resetting...');
+              const emergencyStore = useUIStore.getState();
+
+              // Force reset all lock-related state
+              biometricAttemptInProgressRef.current = false;
+
+              // Hide and re-show modal to force refresh
+              emergencyStore.setAppUnlockModalVisible(false);
+              setTimeout(() => {
+                emergencyStore.setAppUnlockModalVisible(true);
+                emergencyStore.setAppPinError('Lock screen refreshed. Please try again.');
+              }, 100);
+            }, 30000); // 30 seconds
+          }
+        }
+
+        // Lock when coming to foreground
+        if (currentStore.appLockOnLaunch) {
+          currentStore.setAppLocked(true);
+          currentStore.setAppUnlockModalVisible(true);
+        }
       }
     });
 
-    return () => subscription.remove();
+    return () => {
+      subscription.remove();
+      // Clean up timeout on unmount
+      if (lockScreenFreezeTimeoutRef.current) {
+        clearTimeout(lockScreenFreezeTimeoutRef.current);
+      }
+    };
   }, [appLockEnabled, appLockOnBackground, appLockOnLaunch]);
 
-  // Effect: Auto-trigger biometric unlock when locked (only once when app becomes locked)
+  // Effect: Clean up state when unlocked
+  // NOTE: Auto-trigger biometric has been DISABLED per user request
+  // Biometric unlock now only happens when user manually clicks the button
   useEffect(() => {
     if (!appLocked) {
       // Reset flags when app is unlocked
-      autoTriggeredRef.current = false;
       biometricAttemptInProgressRef.current = false;
+
+      // Clear freeze detection timeout when unlocked
+      if (lockScreenFreezeTimeoutRef.current) {
+        clearTimeout(lockScreenFreezeTimeoutRef.current);
+        lockScreenFreezeTimeoutRef.current = null;
+      }
       return;
     }
-    if (!appLockUseBiometric) return;
-    
-    // Only auto-trigger if modal is visible and we haven't auto-triggered yet
-    const store = useUIStore.getState();
-    if (store.appUnlockModalVisible && !autoTriggeredRef.current) {
-      autoTriggeredRef.current = true;
-      // Small delay to ensure modal is rendered before triggering biometric prompt
-      const timeoutId = setTimeout(() => {
-        attemptBiometricUnlock(false);
-      }, 300);
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [appLocked, appLockUseBiometric, attemptBiometricUnlock]);
+
+    // Auto-trigger has been disabled - biometric only activates when user clicks button
+    // This prevents the biometric prompt from appearing automatically when lock screen shows
+  }, [appLocked]);
 
   // Effect: Lock on launch if enabled
   useEffect(() => {

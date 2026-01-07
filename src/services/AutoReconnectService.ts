@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ircService, IRCConnectionConfig } from './IRCService';
+import { ircService, IRCConnectionConfig, IRCService } from './IRCService';
 import { channelFavoritesService } from './ChannelFavoritesService';
 import { bouncerService } from './BouncerService';
+import { connectionManager } from './ConnectionManager';
+import { IRCNetworkConfig } from './SettingsService';
 
 export interface AutoReconnectConfig {
   enabled: boolean;
@@ -17,6 +19,7 @@ export interface AutoReconnectConfig {
 export interface ConnectionState {
   network: string;
   config: IRCConnectionConfig;
+  networkConfig?: IRCNetworkConfig; // Network config for reconnection via ConnectionManager
   channels: string[]; // Channels we were in before disconnect
   lastConnected?: number;
   lastDisconnected?: number;
@@ -30,6 +33,9 @@ class AutoReconnectService {
   private isReconnecting: Map<string, boolean> = new Map(); // network -> is reconnecting
   private lastReconnectTime: Map<string, number> = new Map(); // network -> last reconnect timestamp
   private readonly STORAGE_KEY = '@AndroidIRCX:connectionStates';
+  private readonly CONFIG_STORAGE_KEY = '@AndroidIRCX:autoReconnectConfigs';
+  private connectionListeners: Map<string, () => void> = new Map(); // network -> cleanup function
+  private messageListeners: Map<string, () => void> = new Map(); // network -> cleanup function
 
   /**
    * Initialize auto-reconnect service
@@ -46,7 +52,19 @@ class AutoReconnectService {
       console.error('Failed to load connection states:', error);
     }
 
-    // Listen for connection changes
+    // Load persisted auto-reconnect configs
+    try {
+      const storedConfigs = await AsyncStorage.getItem(this.CONFIG_STORAGE_KEY);
+      if (storedConfigs) {
+        const data = JSON.parse(storedConfigs);
+        this.config = new Map(Object.entries(data));
+        console.log(`AutoReconnectService: Loaded ${this.config.size} auto-reconnect configs from storage`);
+      }
+    } catch (error) {
+      console.error('Failed to load auto-reconnect configs:', error);
+    }
+
+    // Listen for connection changes on singleton service (backward compatibility)
     ircService.onConnectionChange((connected) => {
       const network = ircService.getNetworkName();
       if (network && network !== 'Not connected') {
@@ -58,7 +76,7 @@ class AutoReconnectService {
       }
     });
 
-    // Listen for channel joins/parts to track channels
+    // Listen for channel joins/parts on singleton service (backward compatibility)
     ircService.onMessage((message) => {
       const network = ircService.getNetworkName();
       if (network && network !== 'Not connected') {
@@ -76,6 +94,66 @@ class AutoReconnectService {
         }
       }
     });
+
+    console.log('AutoReconnectService: Initialized and ready to monitor connections');
+  }
+
+  /**
+   * Register listeners for a specific connection (called by ConnectionManager)
+   */
+  registerConnection(networkId: string, ircServiceInstance: IRCService): void {
+    // Clean up existing listeners if any
+    this.unregisterConnection(networkId);
+
+    console.log(`AutoReconnectService: Registering listeners for ${networkId}`);
+
+    // Listen for connection changes
+    const connectionCleanup = ircServiceInstance.onConnectionChange((connected) => {
+      console.log(`AutoReconnectService: Connection change for ${networkId}: ${connected ? 'connected' : 'disconnected'}`);
+      if (connected) {
+        this.handleConnected(networkId);
+      } else {
+        this.handleDisconnected(networkId);
+      }
+    });
+
+    // Listen for channel joins/parts
+    const messageCleanup = ircServiceInstance.onMessage((message) => {
+      const currentNick = ircServiceInstance.getCurrentNick();
+      if (message.type === 'join' && message.channel && message.from === currentNick) {
+        this.addChannelToState(networkId, message.channel);
+      } else if (message.type === 'part' && message.channel && message.from === currentNick) {
+        this.removeChannelFromState(networkId, message.channel);
+      } else if (message.type === 'mode' && message.text.includes('KICK') && message.text.includes(currentNick)) {
+        const parts = message.text.split(' ');
+        if (parts.length >= 4 && parts[2] === currentNick) {
+          const channel = parts[1];
+          this.removeChannelFromState(networkId, channel);
+        }
+      }
+    });
+
+    this.connectionListeners.set(networkId, connectionCleanup);
+    this.messageListeners.set(networkId, messageCleanup);
+  }
+
+  /**
+   * Unregister listeners for a specific connection (called when connection is closed)
+   */
+  unregisterConnection(networkId: string): void {
+    const connectionCleanup = this.connectionListeners.get(networkId);
+    if (connectionCleanup) {
+      connectionCleanup();
+      this.connectionListeners.delete(networkId);
+    }
+
+    const messageCleanup = this.messageListeners.get(networkId);
+    if (messageCleanup) {
+      messageCleanup();
+      this.messageListeners.delete(networkId);
+    }
+
+    console.log(`AutoReconnectService: Unregistered listeners for ${networkId}`);
   }
 
   /**
@@ -125,25 +203,40 @@ class AutoReconnectService {
    * Handle disconnection
    */
   private handleDisconnected(network: string): void {
+    console.log(`AutoReconnectService: handleDisconnected called for ${network}`);
+
+    // Check if already reconnecting - prevent duplicate reconnect attempts
+    if (this.isReconnecting.get(network)) {
+      console.log(`AutoReconnectService: Already reconnecting ${network}, ignoring duplicate disconnect event`);
+      return;
+    }
+
     const config = this.config.get(network);
     if (!config || !config.enabled) {
+      console.log(`AutoReconnectService: Auto-reconnect not enabled for ${network} (config: ${!!config}, enabled: ${config?.enabled})`);
       return;
     }
 
     const state = this.connectionStates.get(network);
     if (!state) {
+      console.log(`AutoReconnectService: No connection state found for ${network}, cannot reconnect`);
       return;
     }
-
-    state.lastDisconnected = Date.now();
-    this.connectionStates.set(network, state);
-    this.saveConnectionStates();
 
     // Check if we should attempt reconnection
     if (config.maxAttempts && state.reconnectAttempts >= config.maxAttempts) {
       console.log(`AutoReconnectService: Max attempts reached for ${network}`);
       return;
     }
+
+    // Set reconnecting flag immediately to prevent duplicate attempts
+    this.isReconnecting.set(network, true);
+
+    console.log(`AutoReconnectService: Starting reconnect process for ${network} (attempt ${state.reconnectAttempts + 1})`);
+
+    state.lastDisconnected = Date.now();
+    this.connectionStates.set(network, state);
+    this.saveConnectionStates();
 
     // Check smart reconnect (avoid flood)
     if (config.smartReconnect) {
@@ -168,18 +261,15 @@ class AutoReconnectService {
    * Attempt reconnection with exponential backoff
    */
   private attemptReconnect(network: string): void {
-    if (this.isReconnecting.get(network)) {
-      return; // Already reconnecting
-    }
-
     const config = this.config.get(network);
     const state = this.connectionStates.get(network);
 
     if (!config || !state) {
+      console.error(`AutoReconnectService: Cannot reconnect ${network}, missing config or state`);
+      this.isReconnecting.set(network, false);
       return;
     }
 
-    this.isReconnecting.set(network, true);
     this.lastReconnectTime.set(network, Date.now());
 
     // Calculate delay with exponential backoff
@@ -201,16 +291,30 @@ class AutoReconnectService {
         this.connectionStates.set(network, state);
         this.saveConnectionStates();
 
-        // Attempt reconnection
-        await ircService.connect(state.config);
+        // Attempt reconnection via ConnectionManager if networkConfig is available
+        if (state.networkConfig) {
+          console.log(`AutoReconnectService: Reconnecting via ConnectionManager for ${network}`);
+          const reconnectedId = await connectionManager.connect(network, state.networkConfig, state.config);
+          // Ensure this connection is set as active
+          connectionManager.setActiveConnection(reconnectedId);
+          console.log(`AutoReconnectService: Reconnected to ${network} with ID ${reconnectedId}`);
+          // Flag will be cleared by handleConnected when connection succeeds
+        } else {
+          // Fallback to singleton ircService for backward compatibility
+          console.log(`AutoReconnectService: Reconnecting via singleton ircService for ${network}`);
+          await ircService.connect(state.config);
+          // Flag will be cleared by handleConnected when connection succeeds
+        }
       } catch (error) {
         console.error(`AutoReconnectService: Reconnection failed for ${network}:`, error);
         this.isReconnecting.set(network, false);
 
         // Check if we should try again
         if (!config.maxAttempts || state.reconnectAttempts < config.maxAttempts) {
-          // Try again with increased delay
-          this.attemptReconnect(network);
+          // Try again with increased delay (will set isReconnecting again)
+          this.handleDisconnected(network);
+        } else {
+          console.log(`AutoReconnectService: Max reconnect attempts reached for ${network}, giving up`);
         }
       }
     }, delay);
@@ -223,6 +327,15 @@ class AutoReconnectService {
    */
   private async rejoinChannels(network: string, channels: string[]): Promise<void> {
     console.log(`AutoReconnectService: Rejoining ${channels.length} channels for ${network}`);
+
+    // Get IRCService instance from ConnectionManager
+    const connection = connectionManager.getConnection(network);
+    if (!connection) {
+      console.error(`AutoReconnectService: Connection not found for ${network}, cannot rejoin channels`);
+      return;
+    }
+
+    const ircServiceInstance = connection.ircService;
 
     // Get favorites with auto-join enabled
     const favorites = channelFavoritesService.getAutoJoinChannels(network);
@@ -237,7 +350,7 @@ class AutoReconnectService {
     let delay = 0;
     for (const [channel, key] of allChannels) {
       setTimeout(() => {
-        ircService.joinChannel(channel, key);
+        ircServiceInstance.joinChannel(channel, key);
       }, delay);
       delay += 1000; // 1 second between each join
     }
@@ -246,10 +359,11 @@ class AutoReconnectService {
   /**
    * Save connection state for a network
    */
-  async saveConnectionState(network: string, config: IRCConnectionConfig, channels: string[]): Promise<void> {
+  async saveConnectionState(network: string, config: IRCConnectionConfig, channels: string[], networkConfig?: IRCNetworkConfig): Promise<void> {
     const state: ConnectionState = {
       network,
       config,
+      networkConfig,
       channels,
       lastConnected: Date.now(),
       reconnectAttempts: 0,
@@ -303,8 +417,9 @@ class AutoReconnectService {
   /**
    * Configure auto-reconnect for a network
    */
-  setConfig(network: string, config: AutoReconnectConfig): void {
+  async setConfig(network: string, config: AutoReconnectConfig): Promise<void> {
     this.config.set(network, config);
+    await this.saveConfigs();
   }
 
   /**
@@ -317,10 +432,11 @@ class AutoReconnectService {
   /**
    * Enable/disable auto-reconnect for a network
    */
-  setEnabled(network: string, enabled: boolean): void {
+  async setEnabled(network: string, enabled: boolean): Promise<void> {
     const config = this.config.get(network) || this.getDefaultConfig();
     config.enabled = enabled;
     this.config.set(network, config);
+    await this.saveConfigs();
   }
 
   /**
@@ -368,6 +484,18 @@ class AutoReconnectService {
       await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
       console.error('Failed to save connection states:', error);
+    }
+  }
+
+  /**
+   * Save auto-reconnect configs to storage
+   */
+  private async saveConfigs(): Promise<void> {
+    try {
+      const data = Object.fromEntries(this.config);
+      await AsyncStorage.setItem(this.CONFIG_STORAGE_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.error('Failed to save auto-reconnect configs:', error);
     }
   }
 }

@@ -10,6 +10,7 @@ import { STSService } from './STSService';
 import { CommandService } from './CommandService';
 import { IRCNetworkConfig } from './SettingsService';
 import { identityProfilesService } from './IdentityProfilesService';
+import { autoReconnectService } from './AutoReconnectService';
 import { tx } from '../i18n/transifex';
 
 const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
@@ -32,9 +33,38 @@ export interface ConnectionContext {
 class ConnectionManager {
   private connections: Map<string, ConnectionContext> = new Map();
   private activeConnectionId: string | null = null;
+  private connectionCreatedCallbacks: Array<(networkId: string) => void> = [];
 
   constructor() {
     //
+  }
+
+  /**
+   * Subscribe to connection-created events
+   * @param callback - Callback function called when a new connection is created
+   * @returns Cleanup function to remove listener
+   */
+  public onConnectionCreated(callback: (networkId: string) => void): () => void {
+    this.connectionCreatedCallbacks.push(callback);
+    return () => {
+      const index = this.connectionCreatedCallbacks.indexOf(callback);
+      if (index > -1) {
+        this.connectionCreatedCallbacks.splice(index, 1);
+      }
+    };
+  }
+
+  /**
+   * Emit connection-created event to all listeners
+   */
+  private emitConnectionCreated(networkId: string): void {
+    this.connectionCreatedCallbacks.forEach(callback => {
+      try {
+        callback(networkId);
+      } catch (error) {
+        console.error('ConnectionManager: Error in connection-created callback:', error);
+      }
+    });
   }
 
   public async connect(networkId: string, networkConfig: IRCNetworkConfig, connectionConfig: IRCConnectionConfig): Promise<string> {
@@ -178,9 +208,19 @@ class ConnectionManager {
     this.connections.set(finalId, context);
     this.setActiveConnection(finalId);
 
+    // Register with AutoReconnectService for automatic reconnection
+    console.log(`ConnectionManager: Registering ${finalId} with AutoReconnectService`);
+    autoReconnectService.registerConnection(finalId, ircService);
+
     console.log(`ConnectionManager: Connecting to IRC server for ${finalId}`);
     ircService.addRawMessage(t('*** Connecting to IRC server for {networkId}', { networkId: finalId }), 'connection');
     await ircService.connect(connectionConfig);
+
+    // Emit event to notify listeners that a new connection was created
+    // This allows useConnectionLifecycle to re-attach event listeners to the new IRCService instance
+    console.log(`ConnectionManager: Emitting connection-created event for ${finalId}`);
+    this.emitConnectionCreated(finalId);
+
     return finalId;
   }
 
@@ -188,6 +228,10 @@ class ConnectionManager {
     const connection = this.connections.get(networkId);
     if (connection) {
       console.log(`ConnectionManager: Cleaning up resources for ${networkId}`);
+
+      // Unregister from AutoReconnectService
+      console.log(`ConnectionManager: Unregistering ${networkId} from AutoReconnectService`);
+      autoReconnectService.unregisterConnection(networkId);
 
       // Clean up services that have destroy methods
       try {

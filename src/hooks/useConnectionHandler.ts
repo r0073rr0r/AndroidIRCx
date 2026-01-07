@@ -296,7 +296,7 @@ export const useConnectionHandler = (params: UseConnectionHandlerParams) => {
             }
           });
         }
-        await autoReconnectService.saveConnectionState(finalId, config, channels);
+        await autoReconnectService.saveConnectionState(finalId, config, channels, networkToUse);
       }
 
     } catch (error: any) {

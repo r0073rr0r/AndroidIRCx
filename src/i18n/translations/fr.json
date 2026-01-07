@@ -1167,211 +1167,211 @@
     "string": ""
   },
   "DCC Transfer Complete": {
-    "string": ""
+    "string": "Transfert DCC terminé"
   },
   "{filename} received ({bytes} bytes).": {
-    "string": ""
+    "string": "{filename} reçu ( {bytes} octets)."
   },
   "DCC Transfer Failed": {
-    "string": ""
+    "string": "Échec du transfert DCC"
   },
   "Transfer failed.": {
-    "string": ""
+    "string": "Le transfert a échoué."
   },
   "No Network": {
-    "string": ""
+    "string": "Pas de réseau"
   },
   "No network available. Please configure a network first.": {
-    "string": ""
+    "string": "Aucun réseau disponible. Veuillez d&#39;abord configurer un réseau."
   },
   "Configure": {
-    "string": ""
+    "string": "Configure"
   },
   "No Server Configured": {
-    "string": ""
+    "string": "Aucun serveur configuré"
   },
   "No server configured for \"{networkName}\". Would you like to configure one?": {
-    "string": ""
+    "string": "Aucun serveur n&#39;est configuré pour « {networkName} ». Souhaitez-vous en configurer un ?"
   },
   "No server configured for \"{networkName}\"": {
-    "string": ""
+    "string": "Aucun serveur configuré pour « {networkName} »"
   },
   "Connection failed": {
-    "string": ""
+    "string": "Échec de la connexion"
   },
   "{message}\n\nTried: {hostInfo}\nCheck host/port, SSL, and network reachability.": {
-    "string": ""
+    "string": "{message}\n\n Tentative : {hostInfo}\n Vérifiez l&#39;hôte/le port, le SSL et la connectivité réseau."
   },
   "Not Connected": {
-    "string": ""
+    "string": "Non connecté"
   },
   "Please connect to a server first": {
-    "string": ""
+    "string": "Veuillez d&#39;abord vous connecter à un serveur."
   },
   "Exit Application": {
-    "string": ""
+    "string": "Quitter l&#39;application"
   },
   "Are you sure you want to exit? This will disconnect from the server.": {
-    "string": ""
+    "string": "Êtes-vous sûr de vouloir quitter ? Cela vous déconnectera du serveur."
   },
   "Exit": {
-    "string": ""
+    "string": "Sortie"
   },
   "Disconnected": {
-    "string": ""
+    "string": "Déconnecté"
   },
   "You can now close the app from the app switcher.": {
-    "string": ""
+    "string": "Vous pouvez désormais fermer l&#39;application depuis le sélecteur d&#39;applications."
   },
   "Network Not Found": {
-    "string": ""
+    "string": "Réseau introuvable"
   },
   "Cannot find saved configuration for \"{networkId}\". Please configure it first.": {
-    "string": ""
+    "string": "Impossible de trouver la configuration enregistrée pour « {networkId} ». Veuillez la configurer au préalable."
   },
   "DCC Send Error": {
-    "string": ""
+    "string": "Erreur d&#39;envoi DCC"
   },
   "Failed to send file": {
-    "string": ""
+    "string": "Échec de l&#39;envoi du fichier"
   },
   "Download complete": {
-    "string": ""
+    "string": "Téléchargement complet"
   },
   "Saved to {path}": {
-    "string": ""
+    "string": "Enregistré sous {path}"
   },
   "Download failed": {
-    "string": ""
+    "string": "Échec du téléchargement"
   },
   "Unable to download file": {
-    "string": ""
+    "string": "Impossible de télécharger le fichier"
   },
   "...": {
-    "string": ""
+    "string": "..."
   },
   "Download": {
-    "string": ""
+    "string": "Télécharger"
   },
   "Networks & Servers": {
-    "string": ""
+    "string": "Réseaux et serveurs"
   },
   "IRC network configurations and server settings": {
-    "string": ""
+    "string": "Configurations réseau et paramètres du serveur IRC"
   },
   "App Settings": {
-    "string": ""
+    "string": "Paramètres de l&#39;application"
   },
   "General app preferences and configurations": {
-    "string": ""
+    "string": "Préférences et configurations générales de l&#39;application"
   },
   "Encryption Keys": {
-    "string": ""
+    "string": "Clés de chiffrement"
   },
   "Channel encryption keys and DM bundles": {
-    "string": ""
+    "string": "Clés de chiffrement de canal et ensembles DM"
   },
   "Identity & Connection Profiles": {
-    "string": ""
+    "string": "Profils d&#39;identité et de connexion"
   },
   "User identity profiles and connection templates": {
-    "string": ""
+    "string": "Profils d&#39;identité utilisateur et modèles de connexion"
   },
   "Favorite channels and auto-join settings": {
-    "string": ""
+    "string": "Paramètres des chaînes favorites et de l&#39;abonnement automatique"
   },
   "Channel Notes & Bookmarks": {
-    "string": ""
+    "string": "Notes et signets de la chaîne"
   },
   "Channel notes, bookmarks, and user aliases": {
-    "string": ""
+    "string": "Notes de chaîne, signets et alias d&#39;utilisateur"
   },
   "Highlights & Notifications": {
-    "string": ""
+    "string": "Points saillants et notifications"
   },
   "Highlight words and notification preferences": {
-    "string": ""
+    "string": "Mots en surbrillance et préférences de notification"
   },
   "Open Tabs": {
-    "string": ""
+    "string": "Ouvrir les onglets"
   },
   "Currently open channel and query tabs": {
-    "string": ""
+    "string": "Onglets de canal et de requête actuellement ouverts"
   },
   "Saved message history for all tabs": {
-    "string": ""
+    "string": "Historique des messages enregistrés pour tous les onglets"
   },
   "Activity Logs": {
-    "string": ""
+    "string": "Journaux d&#39;activité"
   },
   "Channel activity logs and join/part history": {
-    "string": ""
+    "string": "Journaux d&#39;activité du canal et historique des connexions/déconnexions"
   },
   "No Options Selected": {
-    "string": ""
+    "string": "Aucune option sélectionnée"
   },
   "Please select at least one backup option": {
-    "string": ""
+    "string": "Veuillez sélectionner au moins une option de sauvegarde"
   },
   "Generated backup with {count} items:\n{names}": {
-    "string": ""
+    "string": "Sauvegarde générée avec les éléments {count} :\n {names}"
   },
   "Failed to generate backup": {
-    "string": ""
+    "string": "Échec de la génération de la sauvegarde"
   },
   "Please paste backup data first": {
-    "string": ""
+    "string": "Veuillez coller d&#39;abord les données de sauvegarde."
   },
   "Confirm Restore": {
-    "string": ""
+    "string": "Confirmer la restauration"
   },
   "This will overwrite existing data. Are you sure?": {
-    "string": ""
+    "string": "Cela écrasera les données existantes. Êtes-vous sûr ?"
   },
   "Failed to restore backup": {
-    "string": ""
+    "string": "Échec de la restauration de la sauvegarde"
   },
   "Storage Statistics": {
-    "string": ""
+    "string": "Statistiques de stockage"
   },
   "{count} items ~{size} KB": {
-    "string": ""
+    "string": "{count} éléments ~ {size} KB"
   },
   "Quick Presets": {
-    "string": ""
+    "string": "Préréglages rapides"
   },
   "All Data": {
-    "string": ""
+    "string": "Toutes les données"
   },
   "Settings Only": {
-    "string": ""
+    "string": "Paramètres uniquement"
   },
   "Minimal": {
-    "string": ""
+    "string": "Minimal"
   },
   "Clear All": {
-    "string": ""
+    "string": "Effacer tout"
   },
   "Select Data to Backup ({count} selected)": {
-    "string": ""
+    "string": "Sélectionnez les données à sauvegarder ( {count} sélectionné)"
   },
   "Generate Backup": {
-    "string": ""
+    "string": "Générer une sauvegarde"
   },
   "Restore from Backup": {
-    "string": ""
+    "string": "Restaurer à partir d&#39;une sauvegarde"
   },
   "Backup Data": {
-    "string": ""
+    "string": "Données de sauvegarde"
   },
   "Copy this JSON to save your backup, or save it to a file.": {
-    "string": ""
+    "string": "Copiez ce fichier JSON pour enregistrer votre sauvegarde, ou enregistrez-le dans un fichier."
   },
   "Paste your backup JSON here to restore your data.": {
-    "string": ""
+    "string": "Collez ici votre fichier JSON de sauvegarde pour restaurer vos données."
   },
   "Backup JSON appears here...": {
-    "string": ""
+    "string": "Le fichier JSON de sauvegarde apparaît ici..."
   },
   "Failed to load networks and profiles": {
     "string": ""

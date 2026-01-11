@@ -3,11 +3,17 @@
  */
 
 export interface ParsedMessagePart {
-  type: 'text' | 'url' | 'image' | 'emoji';
+  type: 'text' | 'url' | 'image' | 'emoji' | 'media';
   content: string;
   url?: string;
   emoji?: string;
+  mediaId?: string;
 }
+
+/**
+ * Media tag pattern - matches !enc-media [uuid]
+ */
+const MEDIA_TAG_PATTERN = /!enc-media\s+\[([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\]/gi;
 
 /**
  * URL regex pattern - matches http, https, ftp, and common URL patterns
@@ -146,7 +152,32 @@ export function extractEmojis(text: string): string[] {
 }
 
 /**
- * Parse message text into parts (text, URLs, images, emojis)
+ * Extract media tags from text
+ */
+export function extractMediaTags(text: string): Array<{ tag: string; mediaId: string }> {
+  const matches: Array<{ tag: string; mediaId: string }> = [];
+  const regex = new RegExp(MEDIA_TAG_PATTERN.source, 'gi');
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    matches.push({
+      tag: match[0],
+      mediaId: match[1],
+    });
+  }
+
+  return matches;
+}
+
+/**
+ * Check if text contains media tags
+ */
+export function hasMediaTags(text: string): boolean {
+  return MEDIA_TAG_PATTERN.test(text);
+}
+
+/**
+ * Parse message text into parts (text, URLs, images, emojis, media tags)
  */
 export function parseMessage(text: string): ParsedMessagePart[] {
   if (!text) {
@@ -156,8 +187,20 @@ export function parseMessage(text: string): ParsedMessagePart[] {
   const parts: ParsedMessagePart[] = [];
   let lastIndex = 0;
 
-  // Find all URLs and images
-  const allMatches: Array<{ index: number; url: string; isImage: boolean }> = [];
+  // Find all URLs, images, and media tags
+  const allMatches: Array<{ index: number; content: string; type: 'url' | 'image' | 'media'; mediaId?: string }> = [];
+
+  // Find media tags first
+  let mediaMatch;
+  const mediaRegex = new RegExp(MEDIA_TAG_PATTERN.source, 'gi');
+  while ((mediaMatch = mediaRegex.exec(text)) !== null) {
+    allMatches.push({
+      index: mediaMatch.index,
+      content: mediaMatch[0],
+      type: 'media',
+      mediaId: mediaMatch[1],
+    });
+  }
   
   // Find image URLs first (they're also URLs)
   let imageMatch;
@@ -165,8 +208,8 @@ export function parseMessage(text: string): ParsedMessagePart[] {
   while ((imageMatch = imageRegex.exec(text)) !== null) {
     allMatches.push({
       index: imageMatch.index,
-      url: imageMatch[0],
-      isImage: true,
+      content: imageMatch[0],
+      type: 'image',
     });
   }
 
@@ -174,17 +217,17 @@ export function parseMessage(text: string): ParsedMessagePart[] {
   let urlMatch;
   const urlRegex = new RegExp(URL_PATTERN.source, 'gi');
   while ((urlMatch = urlRegex.exec(text)) !== null) {
-    // Check if this URL is already captured as an image
-    const isImage = isImageUrl(urlMatch[0]);
-    const alreadyCaptured = allMatches.some(m => 
-      m.index === urlMatch.index && m.url === urlMatch[0]
+    // Check if this URL is already captured as an image or media tag
+    const alreadyCaptured = allMatches.some(m =>
+      m.index === urlMatch.index && m.content === urlMatch[0]
     );
-    
+
     if (!alreadyCaptured) {
+      const isImage = isImageUrl(urlMatch[0]);
       allMatches.push({
         index: urlMatch.index,
-        url: urlMatch[0],
-        isImage,
+        content: urlMatch[0],
+        type: isImage ? 'image' : 'url',
       });
     }
   }
@@ -205,14 +248,22 @@ export function parseMessage(text: string): ParsedMessagePart[] {
       }
     }
 
-    // Add the URL/image
-    parts.push({
-      type: match.isImage ? 'image' : 'url',
-      content: match.url,
-      url: match.url,
-    });
+    // Add the URL/image/media
+    if (match.type === 'media') {
+      parts.push({
+        type: 'media',
+        content: match.content,
+        mediaId: match.mediaId,
+      });
+    } else {
+      parts.push({
+        type: match.type,
+        content: match.content,
+        url: match.content,
+      });
+    }
 
-    lastIndex = match.index + match.url.length;
+    lastIndex = match.index + match.content.length;
   }
 
   // Add remaining text

@@ -116,6 +116,32 @@ export const NetworksListScreen: React.FC<NetworksListScreenProps> = ({
     );
   };
 
+  const handleDeleteServer = (network: IRCNetworkConfig, server: IRCServerConfig) => {
+    if (network.servers.length <= 1) {
+      Alert.alert(
+        t('Cannot Delete Server'),
+        t('Each network must have at least one server.')
+      );
+      return;
+    }
+    const serverLabel = server.name || server.hostname;
+    Alert.alert(
+      t('Delete Server'),
+      t('Are you sure you want to delete "{serverName}"?').replace('{serverName}', serverLabel),
+      [
+        { text: t('Cancel'), style: 'cancel' },
+        {
+          text: t('Delete'),
+          style: 'destructive',
+          onPress: async () => {
+            await settingsService.deleteServerFromNetwork(network.id, server.id);
+            await loadNetworks();
+          },
+        },
+      ]
+    );
+  };
+
   const handleConnect = (network: IRCNetworkConfig, serverId?: string) => {
     onSelectNetwork(network, serverId);
     onClose();
@@ -175,6 +201,15 @@ export const NetworksListScreen: React.FC<NetworksListScreenProps> = ({
                       {server.hostname}:{server.port} {server.ssl ? t('(SSL)') : ''}
                     </Text>
                   </View>
+                  <TouchableOpacity
+                    onPress={() => handleDeleteServer(item, server)}
+                    style={[
+                      styles.serverDeleteButton,
+                      item.servers.length <= 1 && styles.serverDeleteButtonDisabled,
+                    ]}
+                    disabled={item.servers.length <= 1}>
+                    <Text style={styles.deleteText}>{t('Delete')}</Text>
+                  </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => handleEditServer(item.id, server.id)}
                     style={styles.serverEditButton}>
@@ -310,6 +345,17 @@ const styles = StyleSheet.create({
   },
   serverEditButton: {
     padding: 8,
+  },
+  serverDeleteButton: {
+    padding: 8,
+    marginRight: 4,
+  },
+  serverDeleteButtonDisabled: {
+    opacity: 0.5,
+  },
+  deleteText: {
+    color: '#E53935',
+    fontSize: 14,
   },
   addServerButton: {
     paddingVertical: 12,

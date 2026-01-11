@@ -5,7 +5,7 @@
  * Extracted from App.tsx to reduce complexity.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { View } from 'react-native';
 import { ChannelTabs } from './ChannelTabs';
 import { MessageArea } from './MessageArea';
@@ -42,11 +42,16 @@ interface AppLayoutProps {
     tabPosition: 'top' | 'bottom' | 'left' | 'right';
     userListPosition: 'left' | 'right' | 'top' | 'bottom';
   };
+  sideTabsVisible: boolean;
+  showSideTabsToggle: boolean;
+  onToggleSideTabs: () => void;
   showNicklistButton: boolean;
   appLockEnabled: boolean;
   appLocked: boolean;
   showUserList: boolean;
+  showSearchButton: boolean;
   safeAreaInsets: { top: number; bottom: number };
+  keyboardInset: number;
   styles: any;
   handleTabPress: (tabId: string) => void;
   handleTabLongPress: (tab: ChannelTab) => void;
@@ -83,11 +88,16 @@ export function AppLayout({
   bannerVisible,
   prefillMessage,
   layoutConfig,
+  sideTabsVisible,
+  showSideTabsToggle,
+  onToggleSideTabs,
   showNicklistButton,
   appLockEnabled,
   appLocked,
   showUserList,
+  showSearchButton,
   safeAreaInsets,
+  keyboardInset,
   styles,
   handleTabPress,
   handleTabLongPress,
@@ -102,6 +112,12 @@ export function AppLayout({
   showKillSwitchButton = false,
   onKillSwitchPress,
 }: AppLayoutProps) {
+  const isSideTabs = layoutConfig.tabPosition === 'left' || layoutConfig.tabPosition === 'right';
+  const showSideTabs = isSideTabs && sideTabsVisible;
+
+  // Message search state
+  const [searchVisible, setSearchVisible] = useState(false);
+
   const renderUserList = (position: 'left' | 'right' | 'top' | 'bottom') => {
     if (!activeTab || activeTab.type !== 'channel' || !showUserList) {
       return null;
@@ -136,6 +152,11 @@ export function AppLayout({
         onEncryptionPress={() => useUIStore.getState().setShowQueryEncryptionMenu(true)}
         showKillSwitchButton={showKillSwitchButton}
         onKillSwitchPress={onKillSwitchPress}
+        showSideTabsToggle={showSideTabsToggle}
+        sideTabsVisible={sideTabsVisible}
+        onToggleSideTabs={onToggleSideTabs}
+        showSearchButton={showSearchButton}
+        onSearchPress={() => setSearchVisible(prev => !prev)}
       />
       {layoutConfig.tabPosition === 'top' && (
         <ChannelTabs
@@ -150,9 +171,9 @@ export function AppLayout({
       <View
         style={[
           styles.contentArea,
-          (layoutConfig.tabPosition === 'left' || layoutConfig.tabPosition === 'right') && styles.contentAreaRow,
+          showSideTabs && styles.contentAreaRow,
         ]}>
-        {layoutConfig.tabPosition === 'left' && (
+        {layoutConfig.tabPosition === 'left' && showSideTabs && (
           <ChannelTabs
             tabs={tabs}
             activeTabId={activeTabId}
@@ -181,13 +202,16 @@ export function AppLayout({
               hideIrcServiceListenerMessages={hideIrcServiceListenerMessages}
               channel={activeTab?.type === 'channel' ? activeTab.name : undefined}
               network={activeTab?.networkId}
+              tabId={activeTab?.id}
               bottomInset={safeAreaInsets.bottom}
+              searchVisible={searchVisible}
+              onSearchVisibleChange={setSearchVisible}
             />
           </View>
           {layoutConfig.userListPosition === 'right' && renderUserList('right')}
           {layoutConfig.userListPosition === 'bottom' && renderUserList('bottom')}
         </View>
-        {layoutConfig.tabPosition === 'right' && (
+        {layoutConfig.tabPosition === 'right' && showSideTabs && (
           <ChannelTabs
             tabs={tabs}
             activeTabId={activeTabId}
@@ -233,8 +257,11 @@ export function AppLayout({
         prefilledMessage={prefillMessage || undefined}
         onPrefillUsed={() => useUIStore.getState().setPrefillMessage(null)}
         bottomInset={safeAreaInsets.bottom}
+        keyboardInset={keyboardInset}
         tabType={activeTab?.type}
         tabName={activeTab?.name}
+        network={activeTab?.networkId}
+        tabId={activeTab?.id}
       />
     </View>
   );

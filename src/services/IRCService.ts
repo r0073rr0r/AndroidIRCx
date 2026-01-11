@@ -943,8 +943,13 @@ export class IRCService {
       case 'PRIVMSG':
         const target = params[0] || '';
         const fromNick = this.extractNick(prefix);
-        const msgText = params[1] || '';
-        
+        let msgText = params[1] || '';
+
+        // Strip ZNC playback timestamps to allow proper decryption
+        // ZNC adds timestamps like: [HH:MM:SS] text [HH:MM:SS]
+        msgText = msgText.replace(/^\[\d{2}:\d{2}:\d{2}\]\s*/, ''); // Remove leading timestamp
+        msgText = msgText.replace(/\s*\[\d{2}:\d{2}:\d{2}\]$/, ''); // Remove trailing timestamp
+
         if (!target || target === '*' || target.trim() === '') {
           return;
         }
@@ -1274,7 +1279,7 @@ export class IRCService {
         const partChannel = params[0] || '';
         const partNick = this.extractNick(prefix);
         const partMessage = params[1] || '';
-        
+
         if (partChannel && partNick) {
           const usersMap = this.channelUsers.get(partChannel);
           if (usersMap) {
@@ -1282,10 +1287,14 @@ export class IRCService {
             this.updateChannelUserList(partChannel);
           }
         }
-        
+
+        // When current user leaves channel, route message via notice routing rules
+        // to prevent reopening the closed tab
+        const isCurrentUserLeaving = partNick === this.currentNick;
+
         this.addMessage({
-          type: 'part',
-          channel: partChannel,
+          type: isCurrentUserLeaving ? 'notice' : 'part',
+          channel: isCurrentUserLeaving ? undefined : partChannel,
           from: partNick,
           text: t('{nick} left {channel}{message}', {
             nick: partNick,
@@ -1294,7 +1303,7 @@ export class IRCService {
           }),
           timestamp: messageTimestamp,
         });
-        if (partNick === this.currentNick && partChannel) {
+        if (isCurrentUserLeaving && partChannel) {
           this.emit('part', partChannel, partNick);
         }
         break;

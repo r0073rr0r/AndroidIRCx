@@ -15,6 +15,7 @@ import { parseMessage, isVideoUrl, isAudioUrl, isDownloadableFileUrl } from '../
 import { LinkPreview } from './LinkPreview';
 import { ImagePreview } from './ImagePreview';
 import { MessageReactionsComponent } from './MessageReactions';
+import { MediaMessageDisplay } from './MediaMessageDisplay';
 import { connectionManager } from '../services/ConnectionManager';
 import { layoutService } from '../services/LayoutService';
 import { performanceService } from '../services/PerformanceService';
@@ -26,6 +27,9 @@ import { userManagementService } from '../services/UserManagementService';
 import { dccChatService } from '../services/DCCChatService';
 import { ircService } from '../services/IRCService';
 import { formatIRCTextAsComponent } from '../utils/IRCFormatter';
+import { MessageSearchBar, MessageSearchFilters } from './MessageSearchBar';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import { settingsService } from '../services/SettingsService';
 
 interface MessageAreaProps {
   messages: IRCMessage[];
@@ -37,7 +41,10 @@ interface MessageAreaProps {
   hideIrcServiceListenerMessages?: boolean;
   channel?: string;
   network?: string;
+  tabId?: string; // Tab ID for media display (format: "channel::{network}::{channel}" or "query::{network}::{nick}")
   bottomInset?: number;
+  searchVisible?: boolean;
+  onSearchVisibleChange?: (visible: boolean) => void;
 }
 
 interface MessageItemProps {
@@ -54,6 +61,9 @@ interface MessageItemProps {
   isSelected?: boolean;
   selectionMode?: boolean;
   showImages?: boolean;
+  network?: string;
+  channel?: string;
+  tabId?: string;
 }
 
 // Memoized message item component for performance
@@ -71,6 +81,9 @@ const MessageItem = React.memo<MessageItemProps>(({
   isSelected = false,
   selectionMode = false,
   showImages = true,
+  network,
+  channel,
+  tabId,
 }) => {
   const formatTimestamp = useCallback((timestamp: number): string => {
     const date = new Date(timestamp);
@@ -134,9 +147,12 @@ const MessageItem = React.memo<MessageItemProps>(({
     const audioUrls: string[] = [];
     const linkUrls: string[] = [];
     const fileUrls: string[] = [];
+    const mediaIds: string[] = [];
 
     parts.forEach(part => {
-      if (part.type === 'image' && part.url) {
+      if (part.type === 'media' && part.mediaId) {
+        mediaIds.push(part.mediaId);
+      } else if (part.type === 'image' && part.url) {
         imageUrls.push(part.url);
       } else if (part.type === 'url' && part.url) {
         if (isVideoUrl(part.url)) {
@@ -164,6 +180,7 @@ const MessageItem = React.memo<MessageItemProps>(({
       videoUrls,
       audioUrls,
       fileUrls,
+      mediaIds,
       linkUrls: linkUrls.filter(url =>
         !imageUrls.includes(url) &&
         !videoUrls.includes(url) &&
@@ -239,6 +256,25 @@ const MessageItem = React.memo<MessageItemProps>(({
                     StyleSheet.flatten([styles.messageText, { fontStyle: 'italic', color: colors.actionMessage }])
                   )}
                 </View>
+                {showImages && parsed.mediaIds.map((mediaId, index) => {
+                  // Use the MessageArea's tabId as the primary source for media decryption
+                  // This ensures that media in a specific channel/query uses the correct encryption key
+                  const mediaTabId = tabId;
+
+                  return mediaTabId && network ? (
+                    <MediaMessageDisplay
+                      key={`media-${message.id}-${index}`}
+                      mediaId={mediaId}
+                      network={network}
+                      tabId={mediaTabId}
+                    />
+                  ) : (
+                    // If tabId is not available, we can't decrypt the media, so show an error or skip
+                    <Text key={`media-${message.id}-${index}`} style={{color: 'red'}}>
+                      [Encrypted media - unable to decrypt: no tab context]
+                    </Text>
+                  );
+                })}
                 {showImages && parsed.imageUrls.map((url, index) => (
                   <ImagePreview key={`img-${message.id}-${index}`} url={url} thumbnail />
                 ))}
@@ -276,6 +312,25 @@ const MessageItem = React.memo<MessageItemProps>(({
                     styles.messageText,
                   )}
                 </View>
+                {showImages && parsed.mediaIds.map((mediaId, index) => {
+                  // Use the MessageArea's tabId as the primary source for media decryption
+                  // This ensures that media in a specific channel/query uses the correct encryption key
+                  const mediaTabId = tabId;
+
+                  return mediaTabId && network ? (
+                    <MediaMessageDisplay
+                      key={`media-${message.id}-${index}`}
+                      mediaId={mediaId}
+                      network={network}
+                      tabId={mediaTabId}
+                    />
+                  ) : (
+                    // If tabId is not available, we can't decrypt the media, so show an error or skip
+                    <Text key={`media-${message.id}-${index}`} style={{color: 'red'}}>
+                      [Encrypted media - unable to decrypt: no tab context]
+                    </Text>
+                  );
+                })}
                 {showImages && parsed.imageUrls.map((url, index) => (
                   <ImagePreview key={`img-${message.id}-${index}`} url={url} thumbnail />
                 ))}
@@ -338,7 +393,9 @@ const MessageItem = React.memo<MessageItemProps>(({
     prevProps.currentNick === nextProps.currentNick &&
     prevProps.isSelected === nextProps.isSelected &&
     prevProps.selectionMode === nextProps.selectionMode &&
-    prevProps.showImages === nextProps.showImages
+    prevProps.showImages === nextProps.showImages &&
+    prevProps.network === nextProps.network &&
+    prevProps.channel === nextProps.channel
   );
 });
 
@@ -354,7 +411,10 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
   hideIrcServiceListenerMessages = true,
   channel,
   network,
+  tabId,
   bottomInset = 0,
+  searchVisible: searchVisibleProp,
+  onSearchVisibleChange,
 }) => {
   const t = useT();
   const { colors } = useTheme();
@@ -367,7 +427,47 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
   const [copyStatus, setCopyStatus] = useState('');
   const selectionMode = selectedMessageIds.size > 0;
-  
+  const [showMessageAreaSearchButton, setShowMessageAreaSearchButton] = useState(true);
+
+  // Search state (controlled or uncontrolled)
+  const [internalSearchVisible, setInternalSearchVisible] = useState(false);
+  const searchVisible = searchVisibleProp !== undefined ? searchVisibleProp : internalSearchVisible;
+  const [searchFilters, setSearchFilters] = useState<MessageSearchFilters>({
+    searchTerm: '',
+    messageTypes: {
+      message: true,
+      notice: true,
+      system: true,
+      join: false,
+      part: false,
+      quit: false,
+    },
+  });
+
+  const handleSearchVisibleChange = (visible: boolean) => {
+    if (onSearchVisibleChange) {
+      onSearchVisibleChange(visible);
+    } else {
+      setInternalSearchVisible(visible);
+    }
+  };
+
+  useEffect(() => {
+    const loadSetting = async () => {
+      const enabled = await settingsService.getSetting('showMessageAreaSearchButton', true);
+      setShowMessageAreaSearchButton(enabled);
+    };
+    loadSetting();
+
+    const unsubscribe = settingsService.onSettingChange<boolean>('showMessageAreaSearchButton', (value) => {
+      setShowMessageAreaSearchButton(Boolean(value));
+    });
+
+    return () => {
+      unsubscribe && unsubscribe();
+    };
+  }, []);
+
   const connection = network ? connectionManager.getConnection(network) : null;
   const currentNick = connection?.ircService.getCurrentNick() || '';
   const handleNickAction = useCallback((action: string) => {
@@ -493,10 +593,37 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
       return true;
     });
 
+    // Apply search filtering
+    const searchFiltered = visibilityFiltered.filter(msg => {
+      // If search is not active, show all messages
+      if (!searchVisible || !searchFilters.searchTerm.trim()) {
+        return true;
+      }
+
+      // Filter by message type
+      const typeMatch =
+        (msg.type === 'message' && searchFilters.messageTypes.message) ||
+        (msg.type === 'notice' && searchFilters.messageTypes.notice) ||
+        (msg.type === 'join' && searchFilters.messageTypes.join) ||
+        (msg.type === 'part' && searchFilters.messageTypes.part) ||
+        (msg.type === 'quit' && searchFilters.messageTypes.quit) ||
+        (['system', 'error', 'topic', 'mode', 'invite', 'monitor', 'raw'].includes(msg.type) && searchFilters.messageTypes.system);
+
+      if (!typeMatch) return false;
+
+      // Filter by search term (search in text, from nick, and channel)
+      const searchTerm = searchFilters.searchTerm.toLowerCase();
+      const textMatch = msg.text.toLowerCase().includes(searchTerm);
+      const nickMatch = msg.from?.toLowerCase().includes(searchTerm);
+      const channelMatch = msg.channel?.toLowerCase().includes(searchTerm);
+
+      return textMatch || nickMatch || channelMatch;
+    });
+
     // Apply message limit if enabled
-    const limitedMessages = (perfConfig.enableMessageCleanup && visibilityFiltered.length > perfConfig.messageLimit)
-      ? visibilityFiltered.slice(-perfConfig.messageLimit)
-      : visibilityFiltered;
+    const limitedMessages = (perfConfig.enableMessageCleanup && searchFiltered.length > perfConfig.messageLimit)
+      ? searchFiltered.slice(-perfConfig.messageLimit)
+      : searchFiltered;
 
     // Group consecutive messages
     return limitedMessages.map((message, index) => {
@@ -527,6 +654,8 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
     hidePartMessages,
     hideQuitMessages,
     hideIrcServiceListenerMessages,
+    searchVisible,
+    searchFilters,
   ]);
 
   // Track if we're at the bottom for auto-scroll
@@ -643,30 +772,57 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
         isSelected={selectedMessageIds.has(item.id)}
         selectionMode={selectionMode}
         showImages={perfConfig.imageLazyLoad !== false}
+        network={network}
+        channel={channel}
+        tabId={tabId}
       />
     );
-  }, [layoutState.timestampDisplay, layoutState.timestampFormat, colors, styles, currentNick, handleMessageLongPress, handleMessagePress, selectedMessageIds, selectionMode, perfConfig.imageLazyLoad]);
+  }, [layoutState.timestampDisplay, layoutState.timestampFormat, colors, styles, currentNick, handleMessageLongPress, handleMessagePress, selectedMessageIds, selectionMode, perfConfig.imageLazyLoad, network, channel]);
 
   // Get item key
   const getItemKey = useCallback((item: IRCMessage) => item.id, []);
 
   // Get item layout (for optimization)
-  const getItemLayout = useCallback((data: any, index: number) => {
-    // Estimate item height (can be improved with actual measurement)
-    const estimatedHeight = 50;
-    return {
-      length: estimatedHeight,
-      offset: estimatedHeight * index,
-      index,
-    };
-  }, []);
+  // NOTE: Disabled because fixed height estimation causes message overlap
+  // when messages have variable heights (long text, images, links, etc.)
+  // FlatList will automatically measure heights at the cost of some performance
+  // const getItemLayout = useCallback((data: any, index: number) => {
+  //   const estimatedHeight = 50;
+  //   return {
+  //     length: estimatedHeight,
+  //     offset: estimatedHeight * index,
+  //     index,
+  //   };
+  // }, []);
+
+  // Search result count
+  const searchResultCount = useMemo(() => {
+    if (!searchVisible || !searchFilters.searchTerm.trim()) return undefined;
+    return displayMessages.length;
+  }, [searchVisible, searchFilters.searchTerm, displayMessages.length]);
 
   if (displayMessages.length === 0) {
     return (
-      <View style={styles.container}>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>{t('No messages yet')}</Text>
+      <View style={styles.wrapper}>
+        <MessageSearchBar
+          visible={searchVisible}
+          onClose={() => handleSearchVisibleChange(false)}
+          onSearch={(filters) => setSearchFilters(filters)}
+          resultCount={searchResultCount}
+        />
+        <View style={styles.container}>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>{t('No messages yet')}</Text>
+          </View>
         </View>
+        {!searchVisible && showMessageAreaSearchButton && (
+          <TouchableOpacity
+            style={styles.searchButton}
+            onPress={() => handleSearchVisibleChange(true)}
+            activeOpacity={0.7}>
+            <Icon name="search" size={20} color={colors.buttonText || '#fff'} />
+          </TouchableOpacity>
+        )}
       </View>
     );
   }
@@ -674,6 +830,13 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
   if (perfConfig.enableVirtualization) {
     return (
       <View style={styles.wrapper}>
+        {/* Message Search Bar */}
+        <MessageSearchBar
+          visible={searchVisible}
+          onClose={() => handleSearchVisibleChange(false)}
+          onSearch={(filters) => setSearchFilters(filters)}
+          resultCount={searchResultCount}
+        />
         <FlatList
           ref={flatListRef}
           data={reversedMessages}
@@ -684,7 +847,6 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
           scrollEventThrottle={16}
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.5}
-          getItemLayout={getItemLayout}
           initialNumToRender={perfConfig.maxVisibleMessages}
           maxToRenderPerBatch={perfConfig.messageLoadChunk}
           windowSize={10}
@@ -693,6 +855,15 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
           style={styles.container}
           contentContainerStyle={styles.contentContainer}
         />
+        {/* Search Button (Floating) */}
+        {!searchVisible && !selectionMode && showMessageAreaSearchButton && (
+          <TouchableOpacity
+            style={styles.searchButton}
+            onPress={() => handleSearchVisibleChange(true)}
+            activeOpacity={0.7}>
+            <Icon name="search" size={20} color={colors.buttonText || '#fff'} />
+          </TouchableOpacity>
+        )}
         <NickContextMenu
           visible={showContextMenu}
           nick={contextNick}
@@ -730,6 +901,13 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
   // Fallback to ScrollView for small message lists
     return (
       <View style={styles.wrapper}>
+        {/* Message Search Bar */}
+        <MessageSearchBar
+          visible={searchVisible}
+          onClose={() => handleSearchVisibleChange(false)}
+          onSearch={(filters) => setSearchFilters(filters)}
+          resultCount={searchResultCount}
+        />
         <FlatList
           ref={flatListRef}
           data={reversedMessages}
@@ -742,6 +920,15 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
           style={styles.container}
           contentContainerStyle={styles.contentContainer}
         />
+      {/* Search Button (Floating) */}
+      {!searchVisible && !selectionMode && showMessageAreaSearchButton && (
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={() => handleSearchVisibleChange(true)}
+          activeOpacity={0.7}>
+          <Icon name="search" size={20} color={colors.buttonText || '#fff'} />
+        </TouchableOpacity>
+      )}
       <NickContextMenu
         visible={showContextMenu}
         nick={contextNick}
@@ -1023,6 +1210,22 @@ const createStyles = (colors: any, layoutConfig: any, bottomInset: number = 0) =
   selectionToastText: {
     color: colors.text,
     fontWeight: '600',
+  },
+  searchButton: {
+    position: 'absolute',
+    bottom: 80,
+    right: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
   },
 });
 };

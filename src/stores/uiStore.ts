@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RawMessageCategory } from '../services/IRCService';
 import { ChannelLogEntry } from '../services/ChannelNotesService';
 
+
 export interface UIState {
   // First run setup
   showFirstRunSetup: boolean;
@@ -72,6 +73,14 @@ export interface UIState {
   showDccSendModal: boolean;
   dccSendTarget: { nick: string; networkId: string } | null;
   dccSendPath: string;
+
+  // Help Screens
+  showHelpConnection: boolean;
+  showHelpCommands: boolean;
+  showHelpEncryption: boolean;
+  showHelpMedia: boolean;
+  showHelpChannelManagement: boolean;
+  showHelpTroubleshooting: boolean;
 
   // Actions - First Run
   setShowFirstRunSetup: (show: boolean) => void;
@@ -139,6 +148,14 @@ export interface UIState {
   setDccSendTarget: (target: { nick: string; networkId: string } | null) => void;
   setDccSendPath: (path: string) => void;
 
+  // Actions - Help Screens
+  setShowHelpConnection: (show: boolean) => void;
+  setShowHelpCommands: (show: boolean) => void;
+  setShowHelpEncryption: (show: boolean) => void;
+  setShowHelpMedia: (show: boolean) => void;
+  setShowHelpChannelManagement: (show: boolean) => void;
+  setShowHelpTroubleshooting: (show: boolean) => void;
+
   // Bulk updates
   updateUIState: (updates: Partial<UIState>) => void;
 
@@ -198,6 +215,12 @@ const initialState = {
   showDccSendModal: false,
   dccSendTarget: null,
   dccSendPath: '',
+  showHelpConnection: false,
+  showHelpCommands: false,
+  showHelpEncryption: false,
+  showHelpMedia: false,
+  showHelpChannelManagement: false,
+  showHelpTroubleshooting: false,
 };
 
 export const useUIStore = create<UIState>()(
@@ -282,16 +305,49 @@ export const useUIStore = create<UIState>()(
       setDccSendTarget: (target) => set({ dccSendTarget: target }),
       setDccSendPath: (path) => set({ dccSendPath: path }),
 
+      // Help Screens
+      setShowHelpConnection: (show) => set({ showHelpConnection: show }),
+      setShowHelpCommands: (show) => set({ showHelpCommands: show }),
+      setShowHelpEncryption: (show) => set({ showHelpEncryption: show }),
+      setShowHelpMedia: (show) => set({ showHelpMedia: show }),
+      setShowHelpChannelManagement: (show) => set({ showHelpChannelManagement: show }),
+      setShowHelpTroubleshooting: (show) => set({ showHelpTroubleshooting: show }),
+
       // Bulk updates
       updateUIState: (updates) => set((state) => ({ ...state, ...updates })),
 
       // Reset
       reset: () => set(initialState),
+      // Function to reset only modal states to default (useful for clearing any bad persisted state)
+      resetModalStates: () => set({
+        showChannelModal: false,
+        showNetworksList: false,
+        showSettings: false,
+        showPurchaseScreen: false,
+        showIgnoreList: false,
+        showWHOIS: false,
+        showQueryEncryptionMenu: false,
+        showChannelList: false,
+        showChannelSettings: false,
+        showOptionsMenu: false,
+        showRenameModal: false,
+        showTabOptionsModal: false,
+        showChannelNoteModal: false,
+        showChannelLogModal: false,
+        showDccTransfers: false,
+        showDccSendModal: false,
+        showHelpConnection: false,
+        showHelpCommands: false,
+        showHelpEncryption: false,
+        showHelpMedia: false,
+        showHelpChannelManagement: false,
+        showHelpTroubleshooting: false,
+      }),
     }),
     {
       name: 'ui-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      // Persist important UI settings
+      // Persist important UI settings - explicitly exclude modal visibility states
       partialize: (state) => ({
         appLockEnabled: state.appLockEnabled,
         appLockUseBiometric: state.appLockUseBiometric,
@@ -306,6 +362,8 @@ export const useUIStore = create<UIState>()(
         hidePartMessages: state.hidePartMessages,
         hideQuitMessages: state.hideQuitMessages,
         hideIrcServiceListenerMessages: state.hideIrcServiceListenerMessages,
+        // NOTE: Modal visibility states are intentionally excluded from persistence
+        // They should always start as false on app launch
       }),
     }
   )

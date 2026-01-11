@@ -72,6 +72,7 @@ export const BackgroundBatterySection: React.FC<BackgroundBatterySectionProps> =
         description: t('Maintain IRC connection in background', { _tags: tags }),
         type: 'switch',
         value: backgroundEnabled,
+        searchKeywords: ['background', 'keep', 'alive', 'connection', 'maintain', 'persistent'],
         onValueChange: async (value: string | boolean) => {
           await setBackgroundEnabled(value as boolean);
         },
@@ -84,12 +85,14 @@ export const BackgroundBatterySection: React.FC<BackgroundBatterySectionProps> =
           : 'Battery optimization is disabled (recommended for persistent connection)',
         type: 'button',
         disabled: true,
+        searchKeywords: ['battery', 'optimization', 'status', 'power', 'saving'],
       },
       {
         id: 'background-battery-settings',
         title: t('Open Battery Settings', { _tags: tags }),
         description: t('Configure battery optimization for this app', { _tags: tags }),
         type: 'button',
+        searchKeywords: ['battery', 'settings', 'optimization', 'configure', 'power', 'whitelist'],
         onPress: handleBatteryOptimizationWrapper,
       },
     ];

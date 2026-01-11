@@ -136,21 +136,35 @@ class IRCForegroundService : Service() {
 
     private fun stopForegroundService() {
         try {
+            // Release wake lock first to allow CPU to sleep
             wakeLock?.let {
                 if (it.isHeld) {
                     it.release()
                 }
             }
+            wakeLock = null
+
+            // Stop foreground service immediately
             stopForeground(STOP_FOREGROUND_REMOVE)
+
+            // Stop self - this should complete quickly
             stopSelf()
         } catch (e: Exception) {
-            android.util.Log.e("IRCForegroundService", "Error stopping service: ${e.message}")
+            android.util.Log.e("IRCForegroundService", "Error stopping service: ${e.message}", e)
+        } finally {
+            isServiceStarted = false
         }
-        isServiceStarted = false
     }
 
     override fun onDestroy() {
-        super.onDestroy()
-        stopForegroundService()
+        android.util.Log.d("IRCForegroundService", "onDestroy called")
+        try {
+            // Ensure cleanup happens quickly
+            stopForegroundService()
+        } catch (e: Exception) {
+            android.util.Log.e("IRCForegroundService", "Error in onDestroy: ${e.message}", e)
+        } finally {
+            super.onDestroy()
+        }
     }
 }

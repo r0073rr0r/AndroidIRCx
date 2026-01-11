@@ -516,6 +516,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
         title: t('Setup Wizard', { _tags: tags }),
         description: t('Quick setup for identity and network connection', { _tags: tags }),
         type: 'button',
+        searchKeywords: ['setup', 'wizard', 'first', 'run', 'initial', 'configure', 'identity', 'network'],
         onPress: () => onShowFirstRunSetup?.(),
       },
       {
@@ -524,6 +525,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
         description: t('When opening a network, prefer the server marked as favorite.', { _tags: tags }),
         type: 'switch',
         value: autoConnectFavoriteServer,
+        searchKeywords: ['auto', 'connect', 'favorite', 'server', 'automatic', 'preferred'],
         onValueChange: async (value: string | boolean) => {
           const boolValue = value as boolean;
           setAutoConnectFavoriteServer(boolValue);
@@ -543,6 +545,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
             })
           : t('Automatically reconnect on disconnect', { _tags: tags }),
         type: 'submenu',
+        searchKeywords: ['auto', 'reconnect', 'automatic', 'disconnect', 'retry', 'attempts'],
         submenuItems: [
           {
             id: 'auto-reconnect-enabled',
@@ -685,6 +688,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
           ? `Lag: ${connectionStats.currentLag}ms (${connectionStats.lagStatus}), ${connectionStats.messagesSent} sent, ${connectionStats.messagesReceived} received`
           : 'Rate limiting, flood protection, and lag monitoring',
         type: 'submenu',
+        searchKeywords: ['connection', 'quality', 'lag', 'rate', 'limit', 'flood', 'protection', 'monitoring'],
         submenuItems: [
           {
             id: 'quality-rate-limit',
@@ -905,15 +909,17 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
         title: t('Identity Profiles', { _tags: tags }),
         description: `${identityProfiles.length} saved`,
         type: 'button',
+        searchKeywords: ['identity', 'profiles', 'connection', 'manage', 'nicks', 'networks'],
         onPress: () => onShowConnectionProfiles?.(),
       },
       {
         id: 'connection-global-proxy',
         title: t('Global Proxy', { _tags: tags }),
-        description: globalProxyEnabled 
-          ? `${globalProxyType === 'tor' ? 'TOR' : globalProxyType.toUpperCase()} - ${globalProxyHost}:${globalProxyPort}` 
+        description: globalProxyEnabled
+          ? `${globalProxyType === 'tor' ? 'TOR' : globalProxyType.toUpperCase()} - ${globalProxyHost}:${globalProxyPort}`
           : 'Configure proxy for all connections',
         type: 'submenu',
+        searchKeywords: ['proxy', 'global', 'socks', 'socks5', 'socks4', 'http', 'tor', 'connection'],
         submenuItems: [
           {
             id: 'proxy-enable',
@@ -1033,27 +1039,29 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
         id: 'connection-biometric-lock',
         title: t('Biometric Lock for Passwords', { _tags: tags }),
         description: biometricAvailable
-          ? (biometricLockEnabled 
-              ? (pinLockEnabled 
-                  ? 'Fingerprint or PIN required (fallback to PIN if biometric fails)' 
+          ? (biometricLockEnabled
+              ? (pinLockEnabled
+                  ? 'Fingerprint or PIN required (fallback to PIN if biometric fails)'
                   : 'Fingerprint required before showing/editing passwords')
               : 'Require fingerprint before showing/editing passwords (can be used with PIN)')
           : 'Biometrics unavailable on this device',
         type: 'switch',
         value: biometricLockEnabled,
         disabled: !biometricAvailable,
+        searchKeywords: ['biometric', 'lock', 'passwords', 'fingerprint', 'face', 'security', 'authentication'],
         onValueChange: handleBiometricLockToggle,
       },
       {
         id: 'connection-pin-lock',
         title: t('PIN Lock for Passwords', { _tags: tags }),
         description: pinLockEnabled
-          ? (biometricLockEnabled 
-              ? 'PIN required (fallback if biometric fails)' 
+          ? (biometricLockEnabled
+              ? 'PIN required (fallback if biometric fails)'
               : 'PIN required before showing/editing passwords')
           : 'Require a PIN before showing/editing passwords (can be used with biometric)',
         type: 'switch',
         value: pinLockEnabled,
+        searchKeywords: ['pin', 'lock', 'passwords', 'passcode', 'security', 'number', 'code'],
         onValueChange: handlePinLockToggle,
       },
       ...(passwordLockActive ? [{
@@ -1075,6 +1083,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
             : t('{count} favorites across networks', { count: favoritesCount, _tags: tags }))
           : t('Manage favorite channels', { _tags: tags }),
         type: 'submenu',
+        searchKeywords: ['channel', 'favorites', 'bookmark', 'manage', 'saved'],
         submenuItems: [
           ...(allFavorites.length === 0
             ? [
@@ -1147,6 +1156,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
         description: t('Join favorited channels after connect/identify', { _tags: tags }),
         type: 'switch',
         value: autoJoinFavoritesEnabled,
+        searchKeywords: ['auto', 'join', 'favorites', 'automatic', 'connect', 'channel'],
         onValueChange: async (value: string | boolean) => {
           const boolValue = value as boolean;
           setAutoJoinFavoritesEnabled(boolValue);
@@ -1160,6 +1170,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
         type: 'switch',
         value: autoRejoinEnabled,
         disabled: !currentNetwork,
+        searchKeywords: ['auto', 'rejoin', 'kick', 'automatic', 'channel'],
         onValueChange: (value: string | boolean) => {
           if (currentNetwork) {
             autoRejoinService.setEnabled(currentNetwork, value as boolean);
@@ -1174,6 +1185,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
           ? `${autoVoiceConfig.forAll ? 'All users' : ''}${autoVoiceConfig.forOperators ? 'Operators' : ''}${autoVoiceConfig.forIRCOps ? 'IRC Ops' : ''}`
           : 'Automatically request voice when joining channels',
         type: 'submenu',
+        searchKeywords: ['auto', 'voice', 'join', 'automatic', 'channel', 'mode'],
         submenuItems: [
           {
             id: 'auto-voice-enabled',
@@ -1242,6 +1254,7 @@ export const ConnectionNetworkSection: React.FC<ConnectionNetworkSectionProps> =
         title: t('DCC Settings', { _tags: tags }),
         description: `Port range ${dccMinPort}-${dccMaxPort}`,
         type: 'submenu',
+        searchKeywords: ['dcc', 'direct', 'client', 'connection', 'file', 'transfer', 'chat', 'port'],
         submenuItems: dccSubmenuItems,
       },
     ];

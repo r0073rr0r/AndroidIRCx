@@ -72,6 +72,7 @@ class EncryptedDMService {
   }
 
   private toB64(bytes: Uint8Array) {
+    // Keep default variant for backward compatibility with stored keys
     return sodium.to_base64(bytes);
   }
 
@@ -80,6 +81,7 @@ class EncryptedDMService {
   }
 
   private fromB64(b64: string) {
+    // Keep default variant for backward compatibility with stored keys
     return sodium.from_base64(b64);
   }
 

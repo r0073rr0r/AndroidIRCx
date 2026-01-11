@@ -68,6 +68,7 @@ export const UsersServicesSection: React.FC<UsersServicesSectionProps> = ({
         type: 'input',
         value: newIrcService,
         placeholder: t('Enter a service name (e.g., Q)', { _tags: tags }),
+        searchKeywords: ['irc', 'services', 'nickserv', 'chanserv', 'memoserv', 'bot', 'service', 'nickname'],
         onValueChange: (value: string | boolean) => setNewIrcService(value as string),
         onPress: async () => {
           if (newIrcService.trim()) {
@@ -106,6 +107,7 @@ export const UsersServicesSection: React.FC<UsersServicesSectionProps> = ({
         title: t('Ignore List', { _tags: tags }),
         description: t('Manage ignored users', { _tags: tags }),
         type: 'button',
+        searchKeywords: ['ignore', 'list', 'block', 'mute', 'users', 'ban'],
         onPress: () => {
           if (onShowIgnoreList) {
             onShowIgnoreList();
@@ -122,6 +124,7 @@ export const UsersServicesSection: React.FC<UsersServicesSectionProps> = ({
         title: t('User Notes', { _tags: tags }),
         description: userNotes.length > 0 ? `${userNotes.length} note${userNotes.length !== 1 ? 's' : ''}` : 'No notes yet',
         type: 'submenu',
+        searchKeywords: ['user', 'notes', 'memo', 'annotation', 'comment', 'remember'],
         submenuItems: userNotes.length === 0
           ? [
               {
@@ -160,6 +163,7 @@ export const UsersServicesSection: React.FC<UsersServicesSectionProps> = ({
         title: t('User Aliases', { _tags: tags }),
         description: userAliases.length > 0 ? `${userAliases.length} alias${userAliases.length !== 1 ? 'es' : ''}` : 'No aliases yet',
         type: 'submenu',
+        searchKeywords: ['user', 'aliases', 'nickname', 'shortcut', 'mapping', 'alternative'],
         submenuItems: userAliases.length === 0
           ? [
               {

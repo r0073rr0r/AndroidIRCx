@@ -231,6 +231,7 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
         title: t('Manage Encryption Keys', { _tags: tags }),
         description: 'View, delete, copy, and move encryption keys',
         type: 'button',
+        searchKeywords: ['manage', 'encryption', 'keys', 'view', 'delete', 'copy', 'move', 'e2ee'],
         onPress: () => onShowKeyManagement?.(),
       },
       {
@@ -238,6 +239,7 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
         title: t('Migrate Old Keys', { _tags: tags }),
         description: 'Move old nick-only keys to network-based storage',
         type: 'button',
+        searchKeywords: ['migrate', 'old', 'keys', 'network', 'storage', 'nick', 'move', 'transfer'],
         onPress: () => onShowMigrationDialog?.(),
       },
       {
@@ -246,6 +248,7 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
         description: allowQrVerification ? 'QR verification enabled' : 'QR verification disabled',
         type: 'switch',
         value: allowQrVerification,
+        searchKeywords: ['qr', 'verification', 'code', 'scan', 'verify', 'quick', 'response'],
         onValueChange: async (value: string | boolean) => {
           const boolValue = value as boolean;
           setAllowQrVerification(boolValue);
@@ -258,6 +261,7 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
         description: allowFileExchange ? 'File import/export enabled' : 'File import/export disabled',
         type: 'switch',
         value: allowFileExchange,
+        searchKeywords: ['file', 'key', 'exchange', 'import', 'export', 'share', 'transfer'],
         onValueChange: async (value: string | boolean) => {
           const boolValue = value as boolean;
           setAllowFileExchange(boolValue);
@@ -270,6 +274,7 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
         description: allowNfcExchange ? 'NFC exchange enabled' : 'NFC exchange disabled',
         type: 'switch',
         value: allowNfcExchange,
+        searchKeywords: ['nfc', 'key', 'exchange', 'near', 'field', 'communication', 'tap', 'wireless'],
         onValueChange: async (value: string | boolean) => {
           const boolValue = value as boolean;
           setAllowNfcExchange(boolValue);
@@ -282,31 +287,34 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
         description: appLockEnabled ? 'App lock enabled' : 'App lock disabled',
         type: 'switch',
         value: appLockEnabled,
+        searchKeywords: ['app', 'lock', 'enable', 'disable', 'security', 'protect', 'privacy'],
         onValueChange: handleAppLockToggle,
       },
       {
         id: 'security-app-lock-biometric',
         title: t('App Lock with Biometrics', { _tags: tags }),
-        description: appLockUseBiometric 
-          ? (appLockUsePin 
-              ? 'Biometric unlock enabled (fallback to PIN if biometric fails)' 
+        description: appLockUseBiometric
+          ? (appLockUsePin
+              ? 'Biometric unlock enabled (fallback to PIN if biometric fails)'
               : 'Biometric unlock enabled')
           : 'Use fingerprint/biometric to unlock (can be used with PIN)',
         type: 'switch',
         value: appLockUseBiometric,
         disabled: !biometricAvailable,
+        searchKeywords: ['biometric', 'fingerprint', 'face', 'unlock', 'authentication', 'touch', 'id'],
         onValueChange: handleAppLockBiometricToggle,
       },
       {
         id: 'security-app-lock-pin',
         title: t('App Lock with PIN', { _tags: tags }),
         description: appLockUsePin
-          ? (appLockUseBiometric 
+          ? (appLockUseBiometric
               ? t('PIN unlock enabled (fallback if biometric fails)', { _tags: tags })
               : t('PIN unlock enabled', { _tags: tags }))
           : t('Use a PIN to unlock (can be used with biometric)', { _tags: tags }),
         type: 'switch',
         value: appLockUsePin,
+        searchKeywords: ['pin', 'password', 'unlock', 'code', 'numeric', 'passcode', 'number'],
         onValueChange: handleAppLockPinToggle,
       },
       {
@@ -317,6 +325,7 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
           : t('Does not lock on launch', { _tags: tags }),
         type: 'switch',
         value: appLockOnLaunch,
+        searchKeywords: ['lock', 'launch', 'startup', 'open', 'app', 'start'],
         onValueChange: async (value: string | boolean) => {
           const boolValue = value as boolean;
           setAppLockOnLaunch(boolValue);
@@ -331,6 +340,7 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
           : t('Does not lock on background', { _tags: tags }),
         type: 'switch',
         value: appLockOnBackground,
+        searchKeywords: ['lock', 'background', 'minimize', 'hide', 'switch'],
         onValueChange: async (value: string | boolean) => {
           const boolValue = value as boolean;
           setAppLockOnBackground(boolValue);
@@ -343,6 +353,7 @@ export const SecuritySection: React.FC<SecuritySectionProps> = ({
         description: t('Immediately lock the app', { _tags: tags }),
         type: 'button',
         disabled: !appLockEnabled,
+        searchKeywords: ['lock', 'now', 'immediately', 'instant', 'quick'],
         onPress: async () => {
           if (!appLockEnabled) {
             Alert.alert(

@@ -35,6 +35,7 @@ export interface SettingItem {
   submenuItems?: SettingItem[];
   secureTextEntry?: boolean;
   icon?: string | SettingIcon;
+  searchKeywords?: string[]; // Keywords for better search results
 }
 
 /**

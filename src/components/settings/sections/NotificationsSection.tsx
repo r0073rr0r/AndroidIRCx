@@ -90,6 +90,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
         description: t('Receive notifications for messages', { _tags: tags }),
         type: 'switch',
         value: notificationPrefs.enabled,
+        searchKeywords: ['notifications', 'enable', 'alerts', 'push', 'messages'],
         onValueChange: (value: string | boolean) => handleNotificationChange('enabled', value as boolean),
       },
       {
@@ -99,6 +100,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
         type: 'switch',
         value: notificationPrefs.notifyOnMentions,
         disabled: !notificationPrefs.enabled,
+        searchKeywords: ['notify', 'mentions', 'nickname', 'highlight', 'ping'],
         onValueChange: (value: string | boolean) => handleNotificationChange('notifyOnMentions', value as boolean),
       },
       {
@@ -108,6 +110,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
         type: 'switch',
         value: notificationPrefs.notifyOnPrivateMessages,
         disabled: !notificationPrefs.enabled,
+        searchKeywords: ['notify', 'private', 'messages', 'pm', 'query', 'direct'],
         onValueChange: (value: string | boolean) => handleNotificationChange('notifyOnPrivateMessages', value as boolean),
       },
       {
@@ -117,6 +120,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
         type: 'switch',
         value: notificationPrefs.notifyOnAllMessages,
         disabled: !notificationPrefs.enabled,
+        searchKeywords: ['notify', 'all', 'messages', 'channel', 'every'],
         onValueChange: (value: string | boolean) => handleNotificationChange('notifyOnAllMessages', value as boolean),
       },
       {
@@ -125,6 +129,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
         description: t('Disable all notifications', { _tags: tags }),
         type: 'switch',
         value: notificationPrefs.doNotDisturb,
+        searchKeywords: ['dnd', 'disturb', 'silent', 'mute', 'quiet', 'disable', 'notifications'],
         onValueChange: (value: string | boolean) => handleNotificationChange('doNotDisturb', value as boolean),
       },
       {
@@ -132,6 +137,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
         title: t('Per-Channel Settings', { _tags: tags }),
         description: t('Configure notifications for specific channels', { _tags: tags }),
         type: 'button',
+        searchKeywords: ['channel', 'specific', 'configure', 'custom', 'notifications', 'override'],
         onPress: () => {
           setChannelNotifList(notificationService.listChannelPreferences());
           setShowChannelNotifModal(true);

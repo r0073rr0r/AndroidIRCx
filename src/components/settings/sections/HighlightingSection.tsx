@@ -54,6 +54,7 @@ export const HighlightingSection: React.FC<HighlightingSectionProps> = ({
         type: 'input',
         value: newHighlightWord,
         placeholder: t('Enter a word to highlight...', { _tags: tags }),
+        searchKeywords: ['highlight', 'word', 'keyword', 'notify', 'alert', 'ping', 'mention'],
         onValueChange: (value: string | boolean) => setNewHighlightWord(value as string),
         onPress: async () => {
           if (newHighlightWord.trim()) {

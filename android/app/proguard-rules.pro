@@ -31,7 +31,22 @@
 # Firebase Crashlytics (OBAVEZNO)
 -keepattributes SourceFile,LineNumberTable
 -keepattributes *Annotation*
+-keepattributes Exceptions, InnerClasses, Signature, EnclosingMethod
 -keep class com.google.firebase.crashlytics.** { *; }
+-dontwarn com.google.firebase.crashlytics.**
+
+# Keep Crashlytics internal classes used for stack trace capture
+-keep class com.google.firebase.crashlytics.internal.** { *; }
+-keep class com.google.firebase.crashlytics.internal.common.** { *; }
+-keep class com.google.firebase.crashlytics.internal.model.** { *; }
+-keep class com.google.firebase.crashlytics.internal.settings.** { *; }
+
+# Keep classes used by Crashlytics for thread stack trace capture
+-keep class java.lang.Thread { *; }
+-keep class java.lang.ThreadGroup { *; }
+-keep class java.lang.StackTraceElement { *; }
+-keep class java.lang.reflect.Method { *; }
+-keep class dalvik.system.VMStack { *; }
 
 # Firebase Analytics
 -keep class com.google.firebase.analytics.** { *; }
@@ -43,6 +58,10 @@
 # Keep GMS measurement/analytics classes specifically
 -keep class com.google.android.gms.measurement.** { *; }
 -keep class com.google.android.gms.common.** { *; }
+
+# Keep GMS tasks classes (used by Crashlytics)
+-keep class com.google.android.gms.tasks.** { *; }
+-dontwarn com.google.android.gms.tasks.**
 
 # Keep Parcelable classes and Creator fields
 -keepclassmembers class * implements android.os.Parcelable {
@@ -88,6 +107,23 @@
 # Keep all React Native core classes
 -keep class com.facebook.react.** { *; }
 -dontwarn com.facebook.react.**
+
+# Keep SoLoader classes (critical for native library loading)
+-keep class com.facebook.soloader.** { *; }
+-dontwarn com.facebook.soloader.**
+-keep class com.facebook.soloader.SoLoader { *; }
+-keep class com.facebook.soloader.SoSource { *; }
+-keep class com.facebook.soloader.ApplicationSoSource { *; }
+-keep class com.facebook.soloader.DirectApkSoSource { *; }
+-keep class com.facebook.soloader.DirectorySoSource { *; }
+
+# Keep React Native native library loading classes
+-keep class com.facebook.react.internal.featureflags.** { *; }
+-keep class com.facebook.react.internal.featureflags.ReactNativeFeatureFlagsCxxInterop { *; }
+-keep class com.facebook.react.internal.featureflags.ReactNativeFeatureFlagsCxxAccessor { *; }
+-keep class com.facebook.react.internal.featureflags.ReactNativeFeatureFlags { *; }
+-keep class com.facebook.react.defaults.DefaultNewArchitectureEntryPoint { *; }
+-keep class com.facebook.react.ReactNativeApplicationEntryPoint { *; }
 
 # Keep React Native PackageList and autolinking classes
 -keep class com.facebook.react.PackageList { *; }
@@ -259,6 +295,25 @@
 # Keep all classes that might be loaded dynamically
 -keepattributes Exceptions, InnerClasses, Signature, *Annotation*, EnclosingMethod
 
+# Keep all classes used by VMStack.getThreadStackTrace() and Thread.getStackTrace()
+# These are critical for Crashlytics stack trace capture
+-keep class dalvik.system.** { *; }
+-keep class java.lang.** { *; }
+-keep class java.util.concurrent.** { *; }
+-keep class java.util.concurrent.locks.** { *; }
+-keep class java.lang.reflect.** { *; }
+
+# Keep Firebase concurrent classes (used by Crashlytics background threads)
+-keep class com.google.firebase.concurrent.** { *; }
+-dontwarn com.google.firebase.concurrent.**
+
+# Keep Firebase worker classes
+-keep class com.google.firebase.crashlytics.internal.concurrency.** { *; }
+-keep class com.google.firebase.crashlytics.internal.common.CrashlyticsWorker { *; }
+-keep class com.google.firebase.crashlytics.internal.common.CrashlyticsReportDataCapture { *; }
+-keep class com.google.firebase.crashlytics.internal.common.SessionReportingCoordinator { *; }
+-keep class com.google.firebase.crashlytics.internal.common.CrashlyticsController { *; }
+
 # Keep all classes with native methods
 -keepclasseswithmembernames,includedescriptorclasses class * {
     native <methods>;
@@ -275,6 +330,12 @@
     <init>();
     void onCreate();
 }
+
+# Keep all classes that might be loaded via Class.forName() or reflection
+-keep class com.facebook.react.PackageList { *; }
+-keep class com.facebook.react.defaults.DefaultReactHost { *; }
+-keep class com.facebook.react.ReactHost { *; }
+-keep class com.facebook.react.ReactNativeHost { *; }
 
 # Prevent obfuscation of classes that might be instantiated via reflection
 -keepclassmembers class * {
@@ -297,3 +358,43 @@
     java.lang.Object writeReplace();
     java.lang.Object readResolve();
 }
+
+########################################
+# Critical: Prevent NoClassDefFoundError at Runtime
+########################################
+
+# Keep all classes that might be loaded via Class.forName() or reflection
+# This is critical for preventing NoClassDefFoundError without stack trace
+-keep class com.facebook.react.PackageList { *; }
+-keep class com.facebook.react.defaults.DefaultReactHost { *; }
+-keep class com.facebook.react.ReactHost { *; }
+-keep class com.facebook.react.ReactNativeHost { *; }
+-keep class com.facebook.react.ReactApplication { *; }
+-keep class com.facebook.react.ReactPackage { *; }
+
+# Keep all classes that extend or implement critical interfaces
+-keep class * implements com.facebook.react.ReactPackage { *; }
+-keep class * extends com.facebook.react.bridge.NativeModule { *; }
+-keep class * extends com.facebook.react.uimanager.ViewManager { *; }
+
+# Keep all classes used by React Native initialization
+-keep class com.facebook.react.bridge.** { *; }
+-keep class com.facebook.react.uimanager.** { *; }
+-keep class com.facebook.react.modules.** { *; }
+-keep class com.facebook.react.devsupport.** { *; }
+
+# Keep all classes that might be instantiated via reflection in MainApplication
+-keep class com.androidircx.PlayIntegrityPackage { *; }
+-keep class com.androidircx.HttpPostPackage { *; }
+-keep class com.androidircx.IRCForegroundServicePackage { *; }
+-keep class com.androidircx.IRCForegroundServiceModule { *; }
+
+# Keep all classes used by Class.forName() calls
+-keep class com.facebook.react.defaults.** { *; }
+-keep class com.facebook.react.ReactNativeApplicationEntryPoint { *; }
+
+# Keep all classes that might be loaded dynamically during app startup
+-keep class com.facebook.jni.** { *; }
+-keep class com.facebook.jni.DestructorThread { *; }
+-keep class com.facebook.jni.HybridData { *; }
+-dontwarn com.facebook.jni.**

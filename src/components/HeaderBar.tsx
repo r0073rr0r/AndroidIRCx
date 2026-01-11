@@ -42,6 +42,16 @@ interface HeaderBarProps {
 
   onKillSwitchPress?: () => void;
 
+  showSideTabsToggle?: boolean;
+
+  sideTabsVisible?: boolean;
+
+  onToggleSideTabs?: () => void;
+
+  showSearchButton?: boolean;
+
+  onSearchPress?: () => void;
+
 }
 
 
@@ -78,6 +88,16 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 
   onKillSwitchPress,
 
+  showSideTabsToggle = false,
+
+  sideTabsVisible = true,
+
+  onToggleSideTabs,
+
+  showSearchButton = true,
+
+  onSearchPress,
+
 }) => {
   const t = useT();
   const { colors } = useTheme();
@@ -100,7 +120,6 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
     <View style={styles.container}>
 
       <View style={styles.leftSection}>
-
         <TouchableOpacity
 
           onPress={!isConnected && onConnectPress ? onConnectPress : undefined}
@@ -108,6 +127,14 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           disabled={isConnected || !onConnectPress}>
 
           <View style={styles.networkNameContainer}>
+            {showSideTabsToggle && onToggleSideTabs && (
+              <TouchableOpacity
+                style={styles.sideTabsToggleButton}
+                onPress={onToggleSideTabs}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={[styles.sideTabsToggleIcon, !sideTabsVisible && styles.sideTabsToggleIconHidden]}>=</Text>
+              </TouchableOpacity>
+            )}
             <Text style={styles.networkName}>{networkName}</Text>
             {isSupporter && (
               <Text style={styles.supporterBadge}>❤️</Text>
@@ -175,6 +202,22 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 
         )}
 
+        {showSearchButton && onSearchPress && (
+
+          <TouchableOpacity
+
+            style={styles.iconButton}
+
+            onPress={onSearchPress}
+
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+
+            <Text style={styles.icon}>🔍</Text>
+
+          </TouchableOpacity>
+
+        )}
+
         <TouchableOpacity
 
           style={styles.iconButton}
@@ -224,6 +267,18 @@ const createStyles = (colors: any) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+  },
+  sideTabsToggleButton: {
+    marginRight: 8,
+    padding: 4,
+  },
+  sideTabsToggleIcon: {
+    color: colors.onPrimary,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  sideTabsToggleIconHidden: {
+    opacity: 0.6,
   },
   networkName: {
     color: colors.onPrimary,

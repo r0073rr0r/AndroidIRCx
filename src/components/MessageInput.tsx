@@ -7,11 +7,18 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import { useTheme } from '../hooks/useTheme';
 import { useT } from '../i18n/transifex';
 import { commandService } from '../services/CommandService';
 import { layoutService } from '../services/LayoutService';
 import { connectionManager } from '../services/ConnectionManager';
+import { mediaSettingsService } from '../services/MediaSettingsService';
+import { mediaEncryptionService } from '../services/MediaEncryptionService';
+import { settingsService } from '../services/SettingsService';
+import { MediaUploadModal } from './MediaUploadModal';
+import { MediaPreviewModal } from './MediaPreviewModal';
+import { MediaPickResult } from '../services/MediaPickerService';
 
 interface MessageInputProps {
   placeholder?: string;
@@ -20,8 +27,11 @@ interface MessageInputProps {
   prefilledMessage?: string;
   onPrefillUsed?: () => void;
   bottomInset?: number;
+  keyboardInset?: number;
   tabType?: 'channel' | 'query' | 'server' | 'notice' | 'dcc';
   tabName?: string;
+  network?: string;
+  tabId?: string;
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
@@ -31,20 +41,100 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   prefilledMessage,
   onPrefillUsed,
   bottomInset = 0,
+  keyboardInset = 0,
   tabType = 'server',
   tabName,
+  network,
+  tabId,
 }) => {
   const t = useT();
   const { colors } = useTheme();
   const layoutConfig = layoutService.getConfig();
-  const totalBottomInset = bottomInset + layoutConfig.navigationBarOffset;
+  const totalBottomInset = bottomInset + layoutConfig.navigationBarOffset + keyboardInset;
   const styles = createStyles(colors, totalBottomInset);
   const [message, setMessage] = useState('');
   const [suggestions, setSuggestions] = useState<Array<{ text: string; description?: string; source: 'command' | 'alias' | 'history' }>>([]);
 
+  // Media upload state
+  const [showMediaUploadModal, setShowMediaUploadModal] = useState(false);
+  const [showMediaPreviewModal, setShowMediaPreviewModal] = useState(false);
+  const [selectedMedia, setSelectedMedia] = useState<MediaPickResult | null>(null);
+  const [showAttachmentButton, setShowAttachmentButton] = useState(false);
+
+  // Send button state
+  const [showSendButton, setShowSendButton] = useState(true);
+
   // Typing indicator state
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isTypingRef = useRef(false);
+
+  // Load send button setting and subscribe to changes
+  useEffect(() => {
+    const loadSendButtonSetting = async () => {
+      const enabled = await settingsService.getSetting('showSendButton', true);
+      setShowSendButton(enabled);
+    };
+    loadSendButtonSetting();
+
+    // Subscribe to setting changes
+    const unsubscribe = settingsService.onSettingChange<boolean>('showSendButton', (value) => {
+      setShowSendButton(value);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Check if attachment button should be shown
+  useEffect(() => {
+    const checkAttachmentButton = async () => {
+      // If no network, hide button
+      if (!network) {
+        console.log('[MessageInput] No network, hiding attachment button');
+        setShowAttachmentButton(false);
+        return;
+      }
+
+      // Construct tabId if not provided (fallback)
+      let effectiveTabId = tabId;
+      if (!effectiveTabId && tabType && tabName) {
+        if (tabType === 'channel') {
+          effectiveTabId = `channel::${network}::${tabName}`;
+        } else if (tabType === 'query') {
+          effectiveTabId = `query::${network}::${tabName}`;
+        } else {
+          // Server/notice tabs don't support media
+          console.log('[MessageInput] Server/notice tab, hiding attachment button');
+          setShowAttachmentButton(false);
+          return;
+        }
+      }
+
+      if (!effectiveTabId) {
+        console.log('[MessageInput] No tabId available, hiding attachment button');
+        setShowAttachmentButton(false);
+        return;
+      }
+
+      console.log('[MessageInput] Checking attachment button visibility:', { network, tabId, effectiveTabId, tabType, tabName });
+
+      // Check if media feature is enabled
+      const mediaEnabled = await mediaSettingsService.isMediaEnabled();
+      console.log('[MessageInput] Media enabled:', mediaEnabled);
+      if (!mediaEnabled) {
+        setShowAttachmentButton(false);
+        return;
+      }
+
+      // Check if tab has E2E encryption
+      const hasEncryption = await mediaEncryptionService.hasEncryptionKey(network, effectiveTabId);
+      console.log('[MessageInput] Has encryption:', hasEncryption);
+      setShowAttachmentButton(hasEncryption);
+    };
+
+    checkAttachmentButton();
+  }, [network, tabId, tabType, tabName]);
 
   const sendTypingIndicator = (status: 'active' | 'paused' | 'done') => {
     if (!tabName || tabType === 'server' || disabled) return;
@@ -77,6 +167,34 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         typingTimeoutRef.current = null;
       }
     }
+  };
+
+  // Media upload handlers
+  const handleAttachmentPress = () => {
+    setShowMediaUploadModal(true);
+  };
+
+  const handleMediaSelected = (result: MediaPickResult) => {
+    setSelectedMedia(result);
+    setShowMediaUploadModal(false);
+    setShowMediaPreviewModal(true);
+  };
+
+  const handleMediaSendComplete = (ircTag: string, caption?: string) => {
+    // Construct message: IRC tag + optional caption
+    const mediaMessage = caption ? `${ircTag} ${caption}` : ircTag;
+
+    // Send through normal onSubmit
+    onSubmit(mediaMessage);
+
+    // Reset state
+    setSelectedMedia(null);
+    setShowMediaPreviewModal(false);
+  };
+
+  const handleMediaPreviewClose = () => {
+    setSelectedMedia(null);
+    setShowMediaPreviewModal(false);
   };
 
   // Cleanup typing indicator on unmount
@@ -228,6 +346,17 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
+        {/* Attachment button (conditional) */}
+        {showAttachmentButton && (
+          <TouchableOpacity
+            style={styles.attachmentButton}
+            onPress={handleAttachmentPress}
+            disabled={disabled}
+            accessibilityLabel={t('Attach media')}>
+            <Text style={styles.attachmentIcon}>📎</Text>
+          </TouchableOpacity>
+        )}
+
         <TextInput
           style={styles.input}
           value={message}
@@ -238,6 +367,22 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           editable={!disabled}
           multiline={false}
         />
+
+        {/* Send button (conditional) */}
+        {showSendButton && (
+          <TouchableOpacity
+            style={styles.sendButton}
+            onPress={handleSubmit}
+            disabled={disabled || !message.trim()}
+            accessibilityLabel={t('Send message')}>
+            <Icon
+              name="arrow-up"
+              size={18}
+              color={message.trim() && !disabled ? colors.primary : colors.textSecondary}
+              solid
+            />
+          </TouchableOpacity>
+        )}
       </View>
       {suggestions.length > 0 && (
         <View style={[styles.suggestionsContainer, { borderColor: colors.border, backgroundColor: colors.surface }]}>
@@ -259,6 +404,24 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             </TouchableOpacity>
           ))}
         </View>
+      )}
+
+      {/* Media upload modals */}
+      <MediaUploadModal
+        visible={showMediaUploadModal}
+        onClose={() => setShowMediaUploadModal(false)}
+        onMediaSelected={handleMediaSelected}
+      />
+
+      {network && tabId && (
+        <MediaPreviewModal
+          visible={showMediaPreviewModal}
+          onClose={handleMediaPreviewClose}
+          mediaResult={selectedMedia}
+          network={network}
+          tabId={tabId}
+          onSendComplete={handleMediaSendComplete}
+        />
       )}
     </View>
   );
@@ -291,6 +454,23 @@ const createStyles = (colors: any, bottomInset: number = 0) => StyleSheet.create
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
+  },
+  attachmentButton: {
+    marginRight: 8,
+    padding: 4,
+  },
+  attachmentIcon: {
+    fontSize: 20,
+    opacity: 0.7,
+  },
+  sendButton: {
+    marginLeft: 8,
+    padding: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+    width: 32,
+    height: 32,
   },
   input: {
     flex: 1,

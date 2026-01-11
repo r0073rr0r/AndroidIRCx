@@ -344,11 +344,15 @@ export const useConnectionLifecycle = (params: UseConnectionLifecycleParams) => 
             targetTabType = 'channel';
             newTabIsEncrypted = await channelEncryptionService.hasChannelKey(message.channel, messageNetwork);
           } else if (message.from) {
-            targetTabId = queryTabId(messageNetwork, message.from);
+            // For private messages (query), use channel (recipient) for tab ID
+            // This ensures both local echo (from=currentNick) and incoming messages (from=sagovornik)
+            // are routed to the same tab identified by the other party's nick
+            targetTabId = queryTabId(messageNetwork, message.channel);
             targetTabType = 'query';
-            newTabIsEncrypted = await encryptedDMService.isEncryptedForNetwork(messageNetwork, message.from);
+            newTabIsEncrypted = await encryptedDMService.isEncryptedForNetwork(messageNetwork, message.channel);
           }
         } else if (message.from && hasValidNetwork) {
+          // Fallback: if no channel specified, use message.from
           targetTabId = queryTabId(messageNetwork, message.from);
           targetTabType = 'query';
           newTabIsEncrypted = await encryptedDMService.isEncryptedForNetwork(messageNetwork, message.from);
@@ -367,12 +371,12 @@ export const useConnectionLifecycle = (params: UseConnectionLifecycleParams) => 
         });
 
         if (__DEV__) {
-          console.log('📨 Message queued for batch:', {
-            type: message.type,
-            text: message.text?.substring(0, 50),
-            queueLength: latest.pendingMessagesRef.current.length,
-            targetTab: targetTabId,
-          });
+//           console.log('📨 Message queued for batch:', {
+//             type: message.type,
+//             text: message.text?.substring(0, 50),
+//             queueLength: latest.pendingMessagesRef.current.length,
+//             targetTab: targetTabId,
+//           });
         }
 
         // Clear existing timeout and set new one

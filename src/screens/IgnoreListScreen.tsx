@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { userManagementService, IgnoredUser } from '../services/UserManagementService';
+import { connectionManager } from '../services/ConnectionManager';
 import { useT } from '../i18n/transifex';
 
 interface IgnoreListScreenProps {
@@ -35,14 +36,27 @@ export const IgnoreListScreen: React.FC<IgnoreListScreenProps> = ({
     }
   }, [visible, network]);
 
+  const getUserManagementService = () => {
+    // Use connection-specific service if available, otherwise fallback to singleton
+    if (network) {
+      const conn = connectionManager.getConnection(network);
+      if (conn?.userManagementService) {
+        return conn.userManagementService;
+      }
+    }
+    return userManagementService;
+  };
+
   const loadIgnoredUsers = () => {
-    const ignored = userManagementService.getIgnoredUsers(network);
+    const svc = getUserManagementService();
+    const ignored = svc.getIgnoredUsers(network);
     setIgnoredUsers(ignored);
   };
 
   const handleAddIgnore = async () => {
     if (newMask.trim()) {
-      await userManagementService.ignoreUser(
+      const svc = getUserManagementService();
+      await svc.ignoreUser(
         newMask.trim(),
         newReason.trim() || undefined,
         network
@@ -65,7 +79,8 @@ export const IgnoreListScreen: React.FC<IgnoreListScreenProps> = ({
           text: t('Remove'),
           style: 'destructive',
           onPress: async () => {
-            await userManagementService.unignoreUser(mask, network);
+            const svc = getUserManagementService();
+            await svc.unignoreUser(mask, network);
             loadIgnoredUsers();
             Alert.alert(t('Success'), t('User removed from ignore list'));
           },

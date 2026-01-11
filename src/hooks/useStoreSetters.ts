@@ -181,6 +181,31 @@ export function useStoreSetters() {
     useUIStore.getState().setShowSettings(value);
   }, []);
 
+  // Help screen setters
+  const setShowHelpConnection = useCallback((value: boolean) => {
+    useUIStore.getState().setShowHelpConnection(value);
+  }, []);
+
+  const setShowHelpCommands = useCallback((value: boolean) => {
+    useUIStore.getState().setShowHelpCommands(value);
+  }, []);
+
+  const setShowHelpEncryption = useCallback((value: boolean) => {
+    useUIStore.getState().setShowHelpEncryption(value);
+  }, []);
+
+  const setShowHelpMedia = useCallback((value: boolean) => {
+    useUIStore.getState().setShowHelpMedia(value);
+  }, []);
+
+  const setShowHelpChannelManagement = useCallback((value: boolean) => {
+    useUIStore.getState().setShowHelpChannelManagement(value);
+  }, []);
+
+  const setShowHelpTroubleshooting = useCallback((value: boolean) => {
+    useUIStore.getState().setShowHelpTroubleshooting(value);
+  }, []);
+
   return {
     // Connection setters
     setActiveTabId,
@@ -225,5 +250,12 @@ export function useStoreSetters() {
     setDccSendPath,
     setShowOptionsMenu,
     setShowSettings,
+    // Help screen setters
+    setShowHelpConnection,
+    setShowHelpCommands,
+    setShowHelpEncryption,
+    setShowHelpMedia,
+    setShowHelpChannelManagement,
+    setShowHelpTroubleshooting,
   };
 }

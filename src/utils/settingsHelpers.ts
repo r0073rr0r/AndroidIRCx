@@ -23,6 +23,7 @@ export const getSectionIcon = (title: string): SectionIcon | null => {
     'Messages & History': { name: 'history', solid: false },
     'Messages': { name: 'history', solid: false }, // Legacy support
     'Message History': { name: 'history', solid: false }, // Legacy support
+    'Media': { name: 'image', solid: false },
     'Notifications': { name: 'bell', solid: true },
     'Highlighting': { name: 'highlighter', solid: false },
     'Connection & Network': { name: 'network-wired', solid: false },
@@ -88,7 +89,11 @@ export const filterSettings = (
         const subMatch = item.submenuItems?.some(sub =>
           matches(sub.title, term) || matches(sub.description, term)
         );
-        return selfMatch || subMatch;
+        // Also check search keywords
+        const keywordMatch = item.searchKeywords?.some(keyword =>
+          matches(keyword, term)
+        );
+        return selfMatch || subMatch || keywordMatch;
       });
       return data.length > 0 ? { ...section, data } : null;
     })
@@ -110,6 +115,7 @@ export const orderSections = (
     'Appearance',                 // Visual customization
     'Display & UI',               // UI layout and display
     'Messages & History',         // Message handling and history
+    'Media',                      // Encrypted media sharing
     'Notifications',             // Notification settings
     'Highlighting',              // Message highlighting
     'Connection & Network',       // Network, bouncer, proxy, etc.

@@ -14,6 +14,16 @@ if (!global.Buffer) {
   global.Buffer = Buffer;
 }
 
+// Ensure fetch is available globally (React Native should provide it, but ensure it's not false)
+// Some bundlers or environments might set fetch to false, so we ensure it's available
+if (typeof global !== 'undefined' && (!global.fetch || global.fetch === false)) {
+  // React Native should provide fetch, but if it's missing or false, we'll use a fallback
+  // In most cases, React Native provides fetch natively, so this is just a safety check
+  if (typeof fetch !== 'undefined' && typeof fetch === 'function') {
+    global.fetch = fetch;
+  }
+}
+
 // Initialize console manager for dev builds
 if (__DEV__) {
   consoleManager.initialize();

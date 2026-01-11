@@ -98,6 +98,7 @@ import { useUserListActions } from './src/hooks/useUserListActions';
 import { useAppInitialization } from './src/hooks/useAppInitialization';
 import { useLazyMessageHistory } from './src/hooks/useLazyMessageHistory';
 import { useDeepLinkHandler } from './src/hooks/useDeepLinkHandler';
+import { useKeyboardInset } from './src/hooks/useKeyboardInset';
 import { killSwitchService } from './src/services/KillSwitchService';
 import {
   serverTabId,
@@ -339,6 +340,7 @@ function AppContent() {
   const [autoConnectFavoriteServer, setAutoConnectFavoriteServer] = useState(false);
   const autoConnectFavoriteServerRef = useRef(false);
   const [tabSortAlphabetical, setTabSortAlphabetical] = useState(true);
+  const [showHeaderSearchButton, setShowHeaderSearchButton] = useState(true);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
 
   const pendingAlertRef = useRef<{ title: string; message?: string; buttons?: any } | null>(null);
@@ -381,6 +383,22 @@ function AppContent() {
     setShowEncryptionIndicators,
     setAutoConnectFavoriteServer,
   });
+
+  useEffect(() => {
+    const loadSetting = async () => {
+      const enabled = await settingsService.getSetting('showHeaderSearchButton', true);
+      setShowHeaderSearchButton(enabled);
+    };
+    loadSetting();
+
+    const unsubscribe = settingsService.onSettingChange<boolean>('showHeaderSearchButton', (value) => {
+      setShowHeaderSearchButton(Boolean(value));
+    });
+
+    return () => {
+      unsubscribe && unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     autoConnectFavoriteServerRef.current = autoConnectFavoriteServer;
@@ -452,6 +470,15 @@ function AppContent() {
   useLazyMessageHistory({ activeTabId });
 
   const layoutConfig = useLayoutConfig();
+  const keyboardInset = useKeyboardInset();
+  const [sideTabsVisible, setSideTabsVisible] = useState(true);
+
+  useEffect(() => {
+    if (!layoutConfig) return;
+    if (layoutConfig.tabPosition === 'top' || layoutConfig.tabPosition === 'bottom') {
+      setSideTabsVisible(true);
+    }
+  }, [layoutConfig]);
   useUserManagementNetworkSync({ networkName, getActiveUserManagementService });
   useServerTabNameSync({ networkName });
   useDccSessionSync({ isMountedRef, tabSortAlphabetical });
@@ -644,6 +671,7 @@ function AppContent() {
     activeConnectionId ||
     (networkName !== 'Not connected' ? networkName : undefined) ||
     tabs.find(t => t.type === 'server')?.networkId;
+  const showSideTabsToggle = layoutConfig?.tabPosition === 'left' || layoutConfig?.tabPosition === 'right';
 
   // User list action handlers
   const { handleUserPress, handleWHOISPress } = useUserListActions({
@@ -682,11 +710,16 @@ function AppContent() {
         bannerVisible={bannerVisible}
         prefillMessage={prefillMessage}
         layoutConfig={layoutConfig}
+        sideTabsVisible={sideTabsVisible}
+        showSideTabsToggle={showSideTabsToggle}
+        onToggleSideTabs={() => setSideTabsVisible(prev => !prev)}
         showNicklistButton={showNicklistButton}
+        showSearchButton={showHeaderSearchButton}
         appLockEnabled={appLockEnabled}
         appLocked={appLocked}
         showUserList={showUserList}
         safeAreaInsets={safeAreaInsets}
+        keyboardInset={keyboardInset}
         styles={styles}
         handleTabPress={handleTabPress}
         handleTabLongPress={handleTabLongPress}

@@ -54,10 +54,11 @@ export const SecurityQuickConnectSection: React.FC<SecurityQuickConnectSectionPr
     {
       id: 'quick-connect-network',
       title: t('Quick Connect Network', { _tags: tags }),
-      description: quickConnectNetworkId 
+      description: quickConnectNetworkId
         ? t('Current: {network}', { network: networkLabel(quickConnectNetworkId), _tags: tags })
         : t('Tap header to connect to default network', { _tags: tags }),
       type: 'button',
+      searchKeywords: ['quick', 'connect', 'network', 'header', 'tap', 'default'],
       onPress: () => {
         Alert.alert(
           t('Select Quick Connect Network', { _tags: tags }),
@@ -86,6 +87,7 @@ export const SecurityQuickConnectSection: React.FC<SecurityQuickConnectSectionPr
       description: t('Show kill switch button (💀) in header', { _tags: tags }),
       type: 'switch',
       value: killSwitchEnabledOnHeader,
+      searchKeywords: ['kill', 'switch', 'header', 'emergency', 'wipe', 'delete', 'panic', 'skull'],
       onValueChange: async (value: boolean | string) => {
         await setKillSwitchEnabledOnHeader(value as boolean);
       },
@@ -96,6 +98,7 @@ export const SecurityQuickConnectSection: React.FC<SecurityQuickConnectSectionPr
       description: t('Show kill switch button on app unlock screen', { _tags: tags }),
       type: 'switch',
       value: killSwitchEnabledOnLockScreen,
+      searchKeywords: ['kill', 'switch', 'lock', 'screen', 'unlock', 'emergency', 'wipe', 'delete', 'panic'],
       onValueChange: async (value: boolean | string) => {
         await setKillSwitchEnabledOnLockScreen(value as boolean);
       },
@@ -106,6 +109,7 @@ export const SecurityQuickConnectSection: React.FC<SecurityQuickConnectSectionPr
       description: t('Show confirmation dialogs before activating kill switch (header only)', { _tags: tags }),
       type: 'switch',
       value: killSwitchShowWarnings,
+      searchKeywords: ['kill', 'switch', 'warnings', 'confirmation', 'dialog', 'alert'],
       onValueChange: async (value: boolean | string) => {
         await setKillSwitchShowWarnings(value as boolean);
       },

@@ -9,7 +9,7 @@ import { logger } from './Logger';
 const STORAGE_KEY = '@AndroidIRCX:consentShown';
 const CONSENT_STATUS_KEY = '@AndroidIRCX:consentStatus';
 const MANUAL_CONSENT_KEY = '@AndroidIRCX:manualConsent';
-const PRIVACY_POLICY_URL = 'https://androidircx.com/privacy.php';
+const PRIVACY_POLICY_URL = 'https://androidircx.com/privacy';
 
 type ConsentStatusListener = (status: AdsConsentStatus) => void;
 

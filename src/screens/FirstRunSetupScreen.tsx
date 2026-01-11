@@ -24,7 +24,7 @@ interface FirstRunSetupScreenProps {
   onSkip?: () => void;
 }
 
-type SetupStep = 'welcome' | 'privacy' | 'identity' | 'network' | 'complete';
+type SetupStep = 'welcome' | 'privacy' | 'identity' | 'network' | 'channels' | 'complete';
 
 export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
   onComplete,
@@ -52,11 +52,15 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
   const [customPort, setCustomPort] = useState('6697');
   const [useSSL, setUseSSL] = useState(true);
 
+  // Channel setup
+  const [channelsInput, setChannelsInput] = useState('#DBase, #AndroidIRCX');
+
   const getStepNumber = () => {
-    if (step === 'welcome') return '1/4';
-    if (step === 'privacy') return '2/4';
-    if (step === 'identity') return '3/4';
-    if (step === 'network') return '4/4';
+    if (step === 'welcome') return '1/5';
+    if (step === 'privacy') return '2/5';
+    if (step === 'identity') return '3/5';
+    if (step === 'network') return '4/5';
+    if (step === 'channels') return '5/5';
     return '';
   };
 
@@ -65,6 +69,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
     if (step === 'privacy') return t('Privacy & Ads');
     if (step === 'identity') return t('Set Up Your Identity');
     if (step === 'network') return t('Choose Your Network');
+    if (step === 'channels') return t('Choose Your Channels');
     if (step === 'complete') return t('All Set!');
     return '';
   };
@@ -85,6 +90,8 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
       }
       setStep('network');
     } else if (step === 'network') {
+      setStep('channels');
+    } else if (step === 'channels') {
       handleComplete();
     }
   };
@@ -96,6 +103,8 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
       setStep('privacy');
     } else if (step === 'network') {
       setStep('identity');
+    } else if (step === 'channels') {
+      setStep('network');
     }
   };
 
@@ -104,6 +113,15 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
   const handleComplete = async () => {
     try {
       let finalNetwork: IRCNetworkConfig;
+
+      // Parse channels from user input
+      const parsedChannels = channelsInput
+        .split(',')
+        .map(ch => ch.trim())
+        .filter(ch => ch.length > 0 && (ch.startsWith('#') || ch.startsWith('&')));
+
+      // Use parsed channels or default if none provided
+      const autoJoinChannels = parsedChannels.length > 0 ? parsedChannels : ['#DBase', '#AndroidIRCX'];
 
       // Create identity profile with user's entered data
       const newProfile = await identityProfilesService.add({
@@ -119,11 +137,6 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
         const existingNetwork = await settingsService.getNetwork('DBase');
 
         if (existingNetwork) {
-          const defaultAutoJoin = ['#DBase', '#AndroidIRCX'];
-          const autoJoinChannels =
-            existingNetwork.autoJoinChannels && existingNetwork.autoJoinChannels.length > 0
-              ? existingNetwork.autoJoinChannels
-              : defaultAutoJoin;
           // Update existing DBase network with user's identity profile
           await settingsService.updateNetwork('DBase', {
             nick: nickname.trim(),
@@ -148,7 +161,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
             ident: username.trim() || 'androidircx',
             identityProfileId: newProfile.id,
             connectOnStartup: true,
-            autoJoinChannels: ['#DBase', '#AndroidIRCX'],
+            autoJoinChannels,
           });
           finalNetwork = (await settingsService.getNetwork('DBase'))!;
         }
@@ -183,6 +196,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
           altNick: altNick.trim() || `${nickname.trim()}_`,
           identityProfileId: newProfile.id,
           connectOnStartup: true,
+          autoJoinChannels,
         };
 
         await settingsService.addNetwork(network);
@@ -564,6 +578,55 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
     </ScrollView>
   );
 
+  const renderChannels = () => (
+    <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+      <Text style={styles.description}>
+        {t('Which channels do you want to join automatically?')}
+      </Text>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>{t('Auto-Join Channels')}</Text>
+        <TextInput
+          style={[styles.input, styles.channelsInput]}
+          value={channelsInput}
+          onChangeText={setChannelsInput}
+          placeholder={t('#channel1, #channel2, #channel3')}
+          placeholderTextColor={colors.textSecondary}
+          autoCapitalize="none"
+          autoCorrect={false}
+          multiline
+          numberOfLines={3}
+        />
+        <Text style={styles.hint}>
+          {t('Enter channel names separated by commas. Channels should start with # or &')}
+        </Text>
+      </View>
+
+      <View style={styles.channelExamplesCard}>
+        <Text style={styles.channelExamplesTitle}>{t('Popular Channels')}</Text>
+        <TouchableOpacity
+          style={styles.channelExampleRow}
+          onPress={() => setChannelsInput('#DBase, #AndroidIRCX')}>
+          <Text style={styles.channelExampleText}>#DBase, #AndroidIRCX</Text>
+          <Text style={styles.channelExampleDesc}>{t('Default channels')}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.channelExampleRow}
+          onPress={() => setChannelsInput('#DBase')}>
+          <Text style={styles.channelExampleText}>#DBase</Text>
+          <Text style={styles.channelExampleDesc}>{t('Main channel only')}</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.infoBox}>
+        <Icon name="info-circle" size={16} color={colors.primary} style={styles.infoIcon} />
+        <Text style={styles.infoText}>
+          {t('You can always change these channels later in network settings.')}
+        </Text>
+      </View>
+    </ScrollView>
+  );
+
   const renderComplete = () => (
     <View style={[styles.content, styles.completeContainer]}>
       <Text style={styles.successIcon}>✓</Text>
@@ -600,6 +663,8 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
         return renderIdentity();
       case 'network':
         return renderNetwork();
+      case 'channels':
+        return renderChannels();
       case 'complete':
         return renderComplete();
       default:
@@ -646,7 +711,7 @@ export const FirstRunSetupScreen: React.FC<FirstRunSetupScreenProps> = ({
           ]}
           onPress={handleNext}>
           <Text style={styles.primaryButtonText}>
-            {step === 'network' ? t('Complete Setup') : t('Next')}
+            {step === 'channels' ? t('Complete Setup') : t('Next')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -1044,5 +1109,59 @@ const createStyles = (colors: any) =>
       color: colors.textSecondary || '#B0B0B0',
       lineHeight: 18,
       fontStyle: 'italic',
+    },
+    channelsInput: {
+      minHeight: 80,
+      textAlignVertical: 'top',
+      paddingTop: 12,
+    },
+    channelExamplesCard: {
+      backgroundColor: colors.surface || '#1E1E1E',
+      borderWidth: 1,
+      borderColor: colors.border || '#333333',
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 16,
+    },
+    channelExamplesTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text || '#FFFFFF',
+      marginBottom: 12,
+    },
+    channelExampleRow: {
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border || '#333333',
+      marginBottom: 8,
+    },
+    channelExampleText: {
+      fontSize: 15,
+      color: colors.primary || '#2196F3',
+      fontWeight: '500',
+      marginBottom: 4,
+    },
+    channelExampleDesc: {
+      fontSize: 12,
+      color: colors.textSecondary || '#B0B0B0',
+    },
+    infoBox: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      backgroundColor: colors.primary + '15',
+      borderWidth: 1,
+      borderColor: colors.primary + '40',
+      borderRadius: 8,
+      padding: 12,
+    },
+    infoIcon: {
+      marginRight: 8,
+      marginTop: 2,
+    },
+    infoText: {
+      flex: 1,
+      fontSize: 13,
+      color: colors.text || '#FFFFFF',
+      lineHeight: 18,
     },
   });

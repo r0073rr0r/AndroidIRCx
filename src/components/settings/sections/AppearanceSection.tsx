@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Alert, Modal, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { SettingItem } from '../SettingItem';
 import { useSettingsAppearance } from '../../../hooks/useSettingsAppearance';
@@ -55,7 +55,31 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
     updateLayoutConfig,
   } = useSettingsAppearance();
   
+  const [showHeaderSearchButton, setShowHeaderSearchButton] = useState(true);
+  const [showMessageAreaSearchButton, setShowMessageAreaSearchButton] = useState(true);
   const [showSubmenu, setShowSubmenu] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const enabled = await settingsService.getSetting('showHeaderSearchButton', true);
+      setShowHeaderSearchButton(enabled);
+      const messageAreaEnabled = await settingsService.getSetting('showMessageAreaSearchButton', true);
+      setShowMessageAreaSearchButton(messageAreaEnabled);
+    };
+    loadSettings();
+
+    const unsubscribe = settingsService.onSettingChange<boolean>('showHeaderSearchButton', (value) => {
+      setShowHeaderSearchButton(Boolean(value));
+    });
+    const unsubscribeMessageArea = settingsService.onSettingChange<boolean>('showMessageAreaSearchButton', (value) => {
+      setShowMessageAreaSearchButton(Boolean(value));
+    });
+
+    return () => {
+      unsubscribe && unsubscribe();
+      unsubscribeMessageArea && unsubscribeMessageArea();
+    };
+  }, []);
 
   const sectionData: SettingItemType[] = useMemo(() => {
     const items: SettingItemType[] = [
@@ -64,6 +88,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
         title: t('Theme', { _tags: tags }),
         description: currentTheme.name,
         type: 'submenu',
+        searchKeywords: ['theme', 'color', 'dark', 'light', 'custom', 'appearance', 'style'],
         submenuItems: [
           ...availableThemes.map(theme => ({
             id: `theme-${theme.id}`,
@@ -127,6 +152,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
             ? t('System Default', { _tags: tags })
             : languageLabels[appLanguage] || appLanguage,
         type: 'submenu',
+        searchKeywords: ['language', 'locale', 'translation', 'i18n', 'internationalization'],
         submenuItems: [
           {
             id: 'language-system',
@@ -154,50 +180,53 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
         id: 'layout-tab-position',
         title: t('Tab Position', { _tags: tags }),
         description: t('Tabs at {position}', { position: layoutConfig?.tabPosition || 'top', _tags: tags }),
-        type: 'button',
-        onPress: () => {
-          Alert.alert(
-            t('Tab Position', { _tags: tags }),
-            t('Select tab position:', { _tags: tags }),
-            [
-              { text: t('Cancel', { _tags: tags }), style: 'cancel' },
-              {
-                text: t('Top', { _tags: tags }),
-                onPress: async () => {
-                  await layoutService.setTabPosition('top');
-                  updateLayoutConfig({});
-                },
-              },
-              {
-                text: t('Bottom', { _tags: tags }),
-                onPress: async () => {
-                  await layoutService.setTabPosition('bottom');
-                  updateLayoutConfig({});
-                },
-              },
-              {
-                text: t('Left', { _tags: tags }),
-                onPress: async () => {
-                  await layoutService.setTabPosition('left');
-                  updateLayoutConfig({});
-                },
-              },
-              {
-                text: t('Right', { _tags: tags }),
-                onPress: async () => {
-                  await layoutService.setTabPosition('right');
-                  updateLayoutConfig({});
-                },
-              },
-            ]
-          );
-        },
+        type: 'submenu',
+        searchKeywords: ['tab', 'position', 'layout', 'top', 'bottom', 'left', 'right', 'location'],
+        submenuItems: [
+          {
+            id: 'layout-tab-position-top',
+            title: t('Top', { _tags: tags }),
+            type: 'button' as const,
+            onPress: async () => {
+              await layoutService.setTabPosition('top');
+              updateLayoutConfig({});
+            },
+          },
+          {
+            id: 'layout-tab-position-bottom',
+            title: t('Bottom', { _tags: tags }),
+            type: 'button' as const,
+            onPress: async () => {
+              await layoutService.setTabPosition('bottom');
+              updateLayoutConfig({});
+            },
+          },
+          {
+            id: 'layout-tab-position-left',
+            title: t('Left', { _tags: tags }),
+            type: 'button' as const,
+            onPress: async () => {
+              await layoutService.setTabPosition('left');
+              updateLayoutConfig({});
+            },
+          },
+          {
+            id: 'layout-tab-position-right',
+            title: t('Right', { _tags: tags }),
+            type: 'button' as const,
+            onPress: async () => {
+              await layoutService.setTabPosition('right');
+              updateLayoutConfig({});
+            },
+          },
+        ],
       },
       {
         id: 'layout-userlist-position',
         title: t('User List Position', { _tags: tags }),
         description: t('User list at {position}', { position: layoutConfig?.userListPosition || 'right', _tags: tags }),
         type: 'button',
+        searchKeywords: ['userlist', 'nicklist', 'position', 'layout', 'left', 'right', 'top', 'bottom', 'users'],
         onPress: () => {
           Alert.alert(
             t('User List Position', { _tags: tags }),
@@ -241,6 +270,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
         title: t('View Mode', { _tags: tags }),
         description: t('Current: {mode}', { mode: layoutConfig?.viewMode || 'comfortable', _tags: tags }),
         type: 'button',
+        searchKeywords: ['view', 'mode', 'compact', 'comfortable', 'spacious', 'density', 'display'],
         onPress: () => {
           Alert.alert(
             t('View Mode', { _tags: tags }),
@@ -277,6 +307,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
         title: t('Font Size', { _tags: tags }),
         description: t('Current: {size}', { size: layoutConfig?.fontSize || 'medium', _tags: tags }),
         type: 'button',
+        searchKeywords: ['font', 'size', 'text', 'small', 'medium', 'large', 'xlarge', 'big'],
         onPress: () => {
           Alert.alert(
             t('Font Size', { _tags: tags }),
@@ -316,12 +347,43 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
         },
       },
       {
+        id: 'header-search-button',
+        title: t('Show Header Search', { _tags: tags }),
+        description: showHeaderSearchButton
+          ? t('Search icon visible in the header', { _tags: tags })
+          : t('Search icon hidden from the header', { _tags: tags }),
+        type: 'switch',
+        value: showHeaderSearchButton,
+        searchKeywords: ['search', 'header', 'icon', 'appearance', 'ui'],
+        onValueChange: async (value: boolean | string) => {
+          const enabled = value as boolean;
+          setShowHeaderSearchButton(enabled);
+          await settingsService.setSetting('showHeaderSearchButton', enabled);
+        },
+      },
+      {
+        id: 'message-area-search-button',
+        title: t('Show Message Search Button', { _tags: tags }),
+        description: showMessageAreaSearchButton
+          ? t('Floating search button visible in message view', { _tags: tags })
+          : t('Floating search button hidden', { _tags: tags }),
+        type: 'switch',
+        value: showMessageAreaSearchButton,
+        searchKeywords: ['search', 'message', 'button', 'floating', 'icon', 'appearance', 'ui'],
+        onValueChange: async (value: boolean | string) => {
+          const enabled = value as boolean;
+          setShowMessageAreaSearchButton(enabled);
+          await settingsService.setSetting('showMessageAreaSearchButton', enabled);
+        },
+      },
+      {
         id: 'layout-message-spacing',
         title: t('Message Spacing', { _tags: tags }),
         description: `Spacing: ${layoutConfig?.messageSpacing || 4}px`,
         type: 'input',
         value: layoutConfig?.messageSpacing?.toString() || '4',
         keyboardType: 'numeric',
+        searchKeywords: ['message', 'spacing', 'padding', 'gap', 'distance', 'vertical'],
         onValueChange: async (value: string | boolean) => {
           const spacing = parseInt(value as string, 10);
           if (!isNaN(spacing) && spacing >= 0 && spacing <= 20) {
@@ -337,6 +399,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
         type: 'input',
         value: layoutConfig?.messagePadding?.toString() || '8',
         keyboardType: 'numeric',
+        searchKeywords: ['message', 'padding', 'spacing', 'margin', 'border', 'horizontal'],
         onValueChange: async (value: string | boolean) => {
           const padding = parseInt(value as string, 10);
           if (!isNaN(padding) && padding >= 0 && padding <= 20) {
@@ -352,6 +415,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
         type: 'input',
         value: layoutConfig?.navigationBarOffset?.toString() || '0',
         keyboardType: 'numeric',
+        searchKeywords: ['navigation', 'bar', 'offset', 'android', 'bottom', 'button', '3-button'],
         onValueChange: async (value: string | boolean) => {
           const offset = parseInt(value as string, 10);
           if (!isNaN(offset) && offset >= 0 && offset <= 100) {
@@ -363,7 +427,7 @@ export const AppearanceSection: React.FC<AppearanceSectionProps> = ({
     ];
 
     return items;
-  }, [currentTheme, availableThemes, layoutConfig, appLanguage, languageLabels, t, tags, refreshThemes, setAppLanguageFromHook, updateLayoutConfig, onShowThemeEditor]);
+  }, [currentTheme, availableThemes, layoutConfig, appLanguage, languageLabels, t, tags, refreshThemes, setAppLanguageFromHook, updateLayoutConfig, onShowThemeEditor, showHeaderSearchButton, showMessageAreaSearchButton]);
 
   const handleSubmenuPress = (itemId: string) => {
     const item = sectionData.find(i => i.id === itemId);

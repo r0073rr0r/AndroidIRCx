@@ -60,6 +60,7 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
   );
   const [noticeTarget, setNoticeTarget] = useState<'active' | 'server' | 'notice' | 'private'>('server');
   const [showEncryptionIndicatorsSetting, setShowEncryptionIndicatorsSetting] = useState(propShowEncryptionIndicators ?? true);
+  const [showSendButton, setShowSendButton] = useState(true);
   const [showSubmenu, setShowSubmenu] = useState<string | null>(null);
 
   // Load initial state
@@ -67,12 +68,15 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
     const loadSettings = async () => {
       const sortTabs = await settingsService.getSetting('tabSortAlphabetical', true);
       setTabSortAlphabetical(sortTabs);
-      
+
       const notice = await settingsService.getSetting('noticeTarget', 'server');
       setNoticeTarget(notice);
-      
+
       const showEncryption = await settingsService.getSetting('showEncryptionIndicators', true);
       setShowEncryptionIndicatorsSetting(showEncryption);
+
+      const sendButton = await settingsService.getSetting('showSendButton', true);
+      setShowSendButton(sendButton);
     };
     loadSettings();
   }, []);
@@ -100,6 +104,7 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
         description: tabSortAlphabetical ? 'Sorting tabs A→Z per network' : 'Keep tabs in join/open order',
         type: 'switch',
         value: tabSortAlphabetical,
+        searchKeywords: ['sort', 'tabs', 'alphabetical', 'order', 'arrange', 'organize'],
         onValueChange: async (value: boolean | string) => {
           setTabSortAlphabetical(value as boolean);
           await settingsService.setSetting('tabSortAlphabetical', value);
@@ -111,6 +116,7 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
         description: t('Display raw IRC protocol messages', { _tags: tags }),
         type: 'switch',
         value: localShowRawCommands,
+        searchKeywords: ['raw', 'commands', 'protocol', 'irc', 'messages', 'debug', 'technical'],
         onValueChange: (value: boolean | string) => {
           const boolValue = value as boolean;
           setLocalShowRawCommands(boolValue);
@@ -131,6 +137,7 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
         description: t('Choose which raw messages are shown', { _tags: tags }),
         type: 'submenu',
         disabled: !localShowRawCommands,
+        searchKeywords: ['raw', 'categories', 'filter', 'messages', 'types'],
         submenuItems: RAW_MESSAGE_CATEGORIES.map((category) => ({
           id: `raw-category-${category.id}`,
           title: category.title,
@@ -163,6 +170,7 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
           }
         })(),
         type: 'submenu',
+        searchKeywords: ['notice', 'routing', 'messages', 'server', 'tab', 'active'],
         submenuItems: [
           {
             id: 'notice-active',
@@ -208,6 +216,7 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
         description: t('Display message timestamps', { _tags: tags }),
         type: 'switch',
         value: true,
+        searchKeywords: ['timestamps', 'time', 'clock', 'display', 'show'],
         onValueChange: () => Alert.alert(
           t('Info', { _tags: tags }),
           t('Timestamp display setting coming soon', { _tags: tags })
@@ -218,6 +227,7 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
         title: t('Timestamp Display', { _tags: tags }),
         description: t('Show timestamps: {mode}', { mode: layoutConfig?.timestampDisplay || 'grouped', _tags: tags }),
         type: 'button',
+        searchKeywords: ['timestamp', 'display', 'mode', 'always', 'grouped', 'never', 'time'],
         onPress: () => {
           Alert.alert(
             t('Timestamp Display', { _tags: tags }),
@@ -255,6 +265,7 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
         description: t('Format: {format}', { format: layoutConfig?.timestampFormat || '12h', _tags: tags }),
         type: 'button',
         disabled: layoutConfig?.timestampDisplay === 'never',
+        searchKeywords: ['timestamp', 'format', '12h', '24h', 'time', 'clock', 'am', 'pm'],
         onPress: () => {
           Alert.alert(
             t('Timestamp Format', { _tags: tags }),
@@ -287,11 +298,27 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
           : t('Hide lock icons', { _tags: tags }),
         type: 'switch',
         value: showEncryptionIndicatorsSetting,
+        searchKeywords: ['encryption', 'indicators', 'lock', 'icons', 'security', 'e2ee', 'encrypted'],
         onValueChange: async (value: boolean | string) => {
           const boolValue = value as boolean;
           setShowEncryptionIndicatorsSetting(boolValue);
           await settingsService.setSetting('showEncryptionIndicators', boolValue);
           onShowEncryptionIndicatorsChange && onShowEncryptionIndicatorsChange(boolValue);
+        },
+      },
+      {
+        id: 'display-send-button',
+        title: t('Show Send Button', { _tags: tags }),
+        description: showSendButton
+          ? t('Display send button next to message input', { _tags: tags })
+          : t('Hide send button (use Enter key)', { _tags: tags }),
+        type: 'switch',
+        value: showSendButton,
+        searchKeywords: ['send', 'button', 'message', 'input', 'enter', 'submit'],
+        onValueChange: async (value: boolean | string) => {
+          const boolValue = value as boolean;
+          setShowSendButton(boolValue);
+          await settingsService.setSetting('showSendButton', boolValue);
         },
       },
     ];
@@ -303,6 +330,7 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
     localRawCategoryVisibility,
     noticeTarget,
     showEncryptionIndicatorsSetting,
+    showSendButton,
     layoutConfig,
     t,
     tags,

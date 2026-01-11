@@ -81,6 +81,7 @@ export const CommandsSection: React.FC<CommandsSectionProps> = ({
         title: t('Command History', { _tags: tags }),
         description: `${commandHistory.length} commands in history`,
         type: 'submenu',
+        searchKeywords: ['command', 'history', 'past', 'previous', 'log', 'recent', 'old'],
         submenuItems: [
           ...commandHistory.map((entry) => ({
             id: `history-${entry.id}`,
@@ -137,6 +138,7 @@ export const CommandsSection: React.FC<CommandsSectionProps> = ({
         title: t('Command Aliases', { _tags: tags }),
         description: `${commandAliases.length} aliases configured`,
         type: 'submenu',
+        searchKeywords: ['command', 'aliases', 'shortcut', 'macro', 'abbreviation', 'quick'],
         submenuItems: [
           {
             id: 'alias-name-input',
@@ -211,6 +213,7 @@ export const CommandsSection: React.FC<CommandsSectionProps> = ({
         title: t('Custom Commands', { _tags: tags }),
         description: `${customCommands.length} custom commands`,
         type: 'submenu',
+        searchKeywords: ['custom', 'command', 'template', 'placeholder', 'parameter', 'variable'],
         submenuItems: [
           {
             id: 'custom-name-input',

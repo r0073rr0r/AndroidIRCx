@@ -85,6 +85,12 @@ export function useUIState() {
   const showDccSendModal = useUIStore(state => state.showDccSendModal);
   const dccSendTarget = useUIStore(state => state.dccSendTarget);
   const dccSendPath = useUIStore(state => state.dccSendPath);
+  const showHelpConnection = useUIStore(state => state.showHelpConnection);
+  const showHelpCommands = useUIStore(state => state.showHelpCommands);
+  const showHelpEncryption = useUIStore(state => state.showHelpEncryption);
+  const showHelpMedia = useUIStore(state => state.showHelpMedia);
+  const showHelpChannelManagement = useUIStore(state => state.showHelpChannelManagement);
+  const showHelpTroubleshooting = useUIStore(state => state.showHelpTroubleshooting);
 
   return {
     // Connection state
@@ -153,5 +159,11 @@ export function useUIState() {
     showDccSendModal,
     dccSendTarget,
     dccSendPath,
+    showHelpConnection,
+    showHelpCommands,
+    showHelpEncryption,
+    showHelpMedia,
+    showHelpChannelManagement,
+    showHelpTroubleshooting,
   };
 }

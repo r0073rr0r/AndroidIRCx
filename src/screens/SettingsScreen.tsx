@@ -52,7 +52,7 @@ import { SUPPORTED_LOCALES } from '../i18n/config';
 import consoleManager from '../utils/consoleManager';
 import { SettingItem as SettingItemComponent } from '../components/settings/SettingItem';
 import { SettingsSectionHeader } from '../components/settings/SettingsSectionHeader';
-import { ScriptingAdsSection, SecurityQuickConnectSection, PrivacyLegalSection, AboutSection, AppearanceSection, DisplayUISection, MessageHistorySection, NotificationsSection, ConnectionNetworkSection, BackgroundBatterySection, HighlightingSection, SecuritySection, UsersServicesSection, CommandsSection } from '../components/settings/sections';
+import { ScriptingAdsSection, SecurityQuickConnectSection, PrivacyLegalSection, AboutSection, HelpSection, AppearanceSection, DisplayUISection, MessageHistorySection, NotificationsSection, ConnectionNetworkSection, BackgroundBatterySection, HighlightingSection, SecuritySection, UsersServicesSection, CommandsSection, MediaSection } from '../components/settings/sections';
 import { SettingItem, SettingIcon } from '../types/settings';
 import { useSettingsPremium } from '../hooks/useSettingsPremium';
 import { useSettingsSecurity } from '../hooks/useSettingsSecurity';
@@ -108,6 +108,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     []
   );
   const aboutTitle = t('About', { _tags: tags });
+  const helpTitle = t('📖 Help & Documentation', { _tags: tags });
   const scriptingAdsTitle = t('Scripting & Ads', { _tags: tags });
   const premiumTitle = t('💎 Premium', { _tags: tags });
   const connectionTitle = t('Connection & Network', { _tags: tags });
@@ -270,7 +271,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [hideIrcServiceListenerMessages, setHideIrcServiceListenerMessages] = useState(true);
   const [closePrivateMessage, setClosePrivateMessage] = useState(false);
   const [closePrivateMessageText, setClosePrivateMessageText] = useState('Closing window');
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['About']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [lagCheckMethod, setLagCheckMethod] = useState<'ctcp' | 'server'>('server');
   const sectionListRef = useRef<SectionList>(null);
   // DCC submenu items now managed by ConnectionNetworkSection
@@ -292,6 +293,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     // No need for periodic updates here - hook handles it
     }
   }, [visible, showRawCommands, showEncryptionIndicators, currentNetwork, rawCategoryVisibility]);
+
+  // Ensure About section is always expanded, but Help section expands only when clicked
+  useEffect(() => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      newSet.add(aboutTitle);
+      return newSet;
+    });
+  }, [aboutTitle]);
 
   // Theme changes now handled by useSettingsAppearance hook
 
@@ -848,21 +858,37 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           type: 'button' as const,
           icon: { name: 'crown', solid: true },
           onPress: () => onShowPurchaseScreen?.(),
+          searchKeywords: ['premium', 'upgrade', 'pro', 'supporter', 'no-ads', 'remove ads', 'unlimited', 'scripting', 'purchase', 'buy'],
         },
       ],
     },
     {
       title: t('Appearance', { _tags: tags }),
-      data: [{ id: 'appearance-section', title: 'appearance-section', type: 'custom' as const }], // Placeholder - actual rendering handled by component
+      data: [{
+        id: 'appearance-section',
+        title: 'appearance-section',
+        type: 'custom' as const,
+        searchKeywords: ['theme', 'dark', 'light', 'color', 'style', 'font', 'size'],
+      }], // Placeholder - actual rendering handled by component
     },
     {
       title: t('Display & UI', { _tags: tags }),
-      data: [{ id: 'display-ui-section', title: 'display-ui-section', type: 'custom' as const }], // Placeholder - actual rendering handled by component
+      data: [{
+        id: 'display-ui-section',
+        title: 'display-ui-section',
+        type: 'custom' as const,
+        searchKeywords: ['layout', 'tabs', 'userlist', 'nicklist', 'position', 'top', 'bottom', 'left', 'right'],
+      }], // Placeholder - actual rendering handled by component
     },
     {
       title: t('Messages & History', { _tags: tags }),
       data: [
-        { id: 'message-history-section', title: 'message-history-section', type: 'custom' as const }, // Message settings component
+        {
+          id: 'message-history-section',
+          title: 'message-history-section',
+          type: 'custom' as const,
+          searchKeywords: ['message', 'timestamp', 'format', 'raw', 'join', 'part', 'quit', 'notice', 'routing'],
+        }, // Message settings component
         {
           id: 'history-stats',
           title: t('History Statistics', { _tags: tags }),
@@ -875,12 +901,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               `Total Messages: ${stats.totalMessages}\nChannels: ${stats.channelCount}\nOldest Message: ${new Date(stats.oldestMessage).toLocaleString()}\nNewest Message: ${new Date(stats.newestMessage).toLocaleString()}`
             );
           },
+          searchKeywords: ['history', 'statistics', 'stats', 'messages', 'count', 'total'],
         },
         {
           id: 'history-export',
           title: t('Export History', { _tags: tags }),
           description: t('Export message history to file', { _tags: tags }),
           type: 'submenu' as const,
+          searchKeywords: ['export', 'history', 'messages', 'json', 'txt', 'csv', 'file', 'save', 'download'],
           submenuItems: [
             {
               id: 'export-json',
@@ -929,6 +957,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               ]
             );
           },
+          searchKeywords: ['clear', 'delete', 'remove', 'history', 'messages', 'wipe', 'erase'],
         },
         {
           id: 'history-storage',
@@ -936,6 +965,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           description: storageStats ? `${(storageStats.totalBytes / 1024 / 1024).toFixed(2)} MB used` : 'Loading...',
           type: 'button' as const,
           disabled: true,
+          searchKeywords: ['storage', 'space', 'usage', 'size', 'disk', 'mb', 'data'],
         },
         {
           id: 'history-backup',
@@ -943,21 +973,46 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           description: t('Backup or restore all app data', { _tags: tags }),
           type: 'button' as const,
           onPress: () => setShowBackupScreen(true),
+          searchKeywords: ['backup', 'restore', 'import', 'export', 'save', 'load', 'data', 'settings'],
         },
       ],
     },
     {
+      title: t('Media', { _tags: tags }),
+      data: [{
+        id: 'media-section',
+        title: 'media-section',
+        type: 'custom' as const,
+        searchKeywords: ['image', 'video', 'audio', 'photo', 'camera', 'voice', 'recorder', 'upload', 'download', 'media'],
+      }], // Placeholder - actual rendering handled by component
+    },
+    {
       title: t('Notifications', { _tags: tags }),
-      data: [{ id: 'notifications-section', title: 'notifications-section', type: 'custom' as const }], // Placeholder - actual rendering handled by component
+      data: [{
+        id: 'notifications-section',
+        title: 'notifications-section',
+        type: 'custom' as const,
+        searchKeywords: ['notification', 'alert', 'sound', 'vibrate', 'badge', 'push'],
+      }], // Placeholder - actual rendering handled by component
     },
     {
       title: t('Highlighting', { _tags: tags }),
-      data: [{ id: 'highlighting-section', title: 'highlighting-section', type: 'custom' as const }], // Placeholder - actual rendering handled by component
+      data: [{
+        id: 'highlighting-section',
+        title: 'highlighting-section',
+        type: 'custom' as const,
+        searchKeywords: ['highlight', 'keyword', 'mention', 'nick', 'color'],
+      }], // Placeholder - actual rendering handled by component
     },
     {
       title: connectionTitle,
       data: [
-        { id: 'connection-network-section', title: 'connection-network-section', type: 'custom' as const }, // Connection & Network component
+        {
+          id: 'connection-network-section',
+          title: 'connection-network-section',
+          type: 'custom' as const,
+          searchKeywords: ['network', 'server', 'connection', 'proxy', 'tor', 'ssl', 'tls', 'port', 'bouncer', 'znc', 'auto-reconnect', 'favorites', 'dcc'],
+        }, // Connection & Network component
         // IRC Bouncer settings moved here
         {
           id: 'bouncer-info',
@@ -967,6 +1022,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             : 'Not connected or not detected',
           type: 'button' as const,
           disabled: true,
+          searchKeywords: ['bouncer', 'status', 'znc', 'bnc', 'playback', 'connected'],
         },
         {
           id: 'bouncer-config',
@@ -975,6 +1031,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             ? `${bouncerConfig.type} mode, ${bouncerConfig.handlePlayback ? 'playback enabled' : 'playback disabled'}`
             : 'Configure bouncer support',
           type: 'submenu' as const,
+          searchKeywords: ['bouncer', 'settings', 'znc', 'bnc', 'playback', 'buffer', 'timeout', 'age', 'limit'],
           submenuItems: [
             {
               id: 'bouncer-enabled',
@@ -1102,17 +1159,42 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     {
       title: t('Security', { _tags: tags }),
       data: [
-        { id: 'security-section', title: 'security-section', type: 'custom' as const }, // Security component
-        { id: 'security-quick-connect-section', title: 'security-quick-connect-section', type: 'custom' as const }, // Security & Quick Connect merged here
+        {
+          id: 'security-section',
+          title: 'security-section',
+          type: 'custom' as const,
+          searchKeywords: ['pin', 'password', 'lock', 'biometric', 'fingerprint', 'face', 'encryption', 'keys', 'identity', 'profile'],
+        }, // Security component
+        {
+          id: 'security-quick-connect-section',
+          title: 'security-quick-connect-section',
+          type: 'custom' as const,
+          searchKeywords: ['quick', 'connect', 'favorite', 'identity', 'profile'],
+        }, // Security & Quick Connect merged here
       ],
     },
     {
       title: t('Users & Services', { _tags: tags }),
-      data: [{ id: 'users-services-section', title: 'users-services-section', type: 'custom' as const }], // Placeholder - actual rendering handled by component
+      data: [{
+        id: 'users-services-section',
+        title: 'users-services-section',
+        type: 'custom' as const,
+        searchKeywords: ['ignore', 'block', 'monitor', 'watch', 'nickserv', 'chanserv', 'user', 'service'],
+      }], // Placeholder - actual rendering handled by component
     },
     {
       title: t('Commands', { _tags: tags }),
-      data: [{ id: 'commands-section', title: 'commands-section', type: 'custom' as const }], // Placeholder - actual rendering handled by component
+      data: [{
+        id: 'commands-section',
+        title: 'commands-section',
+        type: 'custom' as const,
+        searchKeywords: [
+          'command', 'alias', 'custom', 'history', 'kill', 'kick', 'ban', 'mode', 'whois',
+          'join', 'part', 'quit', 'nick', 'msg', 'notice', 'topic', 'invite', 'voice',
+          'op', 'deop', 'halfop', 'dehalfop', 'owner', 'deowner', 'admin', 'deadmin',
+          'znc', 'oper', 'ctcp', 'dcc', 'away', 'back', 'list', 'names', 'who', 'whowas',
+        ],
+      }], // Placeholder - actual rendering handled by component
     },
     {
       title: t('Performance', { _tags: tags }),
@@ -1127,6 +1209,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             await performanceService.setConfig({ enableVirtualization: value });
             setPerformanceConfig(performanceService.getConfig());
           },
+          searchKeywords: ['virtualization', 'performance', 'flatlist', 'scroll', 'optimize', 'speed'],
         },
         {
           id: 'perf-lazy-loading',
@@ -1139,6 +1222,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             setPerformanceConfig(performanceService.getConfig());
           },
           disabled: !performanceConfig?.enableVirtualization,
+          searchKeywords: ['lazy', 'load', 'loading', 'old', 'messages', 'scroll', 'performance'],
         },
         {
           id: 'perf-render-optimization',
@@ -1150,6 +1234,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             await performanceService.setConfig({ renderOptimization: value });
             setPerformanceConfig(performanceService.getConfig());
           },
+          searchKeywords: ['render', 'optimization', 'optimize', 'memo', 'performance', 'speed'],
         },
         {
           id: 'perf-message-cleanup',
@@ -1161,6 +1246,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             await performanceService.setConfig({ enableMessageCleanup: value });
             setPerformanceConfig(performanceService.getConfig());
           },
+          searchKeywords: ['cleanup', 'clean', 'remove', 'old', 'messages', 'memory', 'automatic'],
         },
         {
           id: 'perf-message-limit',
@@ -1177,6 +1263,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             }
           },
           disabled: !performanceConfig?.enableMessageCleanup,
+          searchKeywords: ['message', 'limit', 'max', 'maximum', 'channel', 'memory', 'count'],
         },
         {
           id: 'perf-max-visible',
@@ -1193,6 +1280,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             }
           },
           disabled: !performanceConfig?.enableVirtualization,
+          searchKeywords: ['max', 'maximum', 'visible', 'messages', 'render', 'display'],
         },
         {
           id: 'perf-load-chunk',
@@ -1209,6 +1297,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             }
           },
           disabled: !performanceConfig?.enableVirtualization || !performanceConfig?.enableLazyLoading,
+          searchKeywords: ['load', 'chunk', 'size', 'batch', 'messages', 'performance'],
         },
         {
           id: 'perf-image-lazy',
@@ -1220,12 +1309,18 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             await performanceService.setConfig({ imageLazyLoad: value });
             setPerformanceConfig(performanceService.getConfig());
           },
+          searchKeywords: ['lazy', 'load', 'images', 'photos', 'visible', 'performance'],
         },
       ],
     },
     {
       title: t('Background & Battery', { _tags: tags }),
-      data: [{ id: 'background-battery-section', title: 'background-battery-section', type: 'custom' as const }], // Placeholder - actual rendering handled by component
+      data: [{
+        id: 'background-battery-section',
+        title: 'background-battery-section',
+        type: 'custom' as const,
+        searchKeywords: ['background', 'service', 'foreground', 'battery', 'optimization', 'doze', 'persistent'],
+      }], // Placeholder - actual rendering handled by component
     },
     {
       title: t('Scripting & Ads', { _tags: tags }),
@@ -1236,6 +1331,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           description: t('Manage IRC scripts and automation. Scripting time is also ad-free time.', { _tags: tags }),
           type: 'button' as const,
           onPress: () => setShowScripting(true),
+          searchKeywords: ['scripts', 'scripting', 'automation', 'time', 'no-ads', 'ad-free', 'manage'],
         },
         {
           id: 'advanced-scripts-help',
@@ -1243,6 +1339,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           description: t('Learn how to write and use scripts', { _tags: tags }),
           type: 'button' as const,
           onPress: () => setShowScriptingHelp(true),
+          searchKeywords: ['scripting', 'help', 'guide', 'tutorial', 'write', 'scripts'],
         },
         {
           id: 'watch-ad-button-premium',
@@ -1256,17 +1353,24 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             await setWatchAdButtonEnabledForPremium(value as boolean);
           },
           disabled: !(hasNoAds || hasScriptingPro || isSupporter),
+          searchKeywords: ['watch', 'ad', 'button', 'premium', 'ads', 'advertising', 'support'],
         },
         {
           id: 'watch-ad-button',
           title: 'watch-ad-button',
           type: 'custom' as const,
+          searchKeywords: ['watch', 'ad', 'reward', 'video', 'ads', 'time', 'scripting'],
         },
       ],
     },
     {
       title: t('Privacy & Legal', { _tags: tags }),
-      data: [{ id: 'privacy-legal-section', title: 'privacy-legal-section', type: 'custom' as const }], // Placeholder - actual rendering handled by component
+      data: [{
+        id: 'privacy-legal-section',
+        title: 'privacy-legal-section',
+        type: 'custom' as const,
+        searchKeywords: ['privacy', 'legal', 'terms', 'policy', 'data', 'gdpr', 'license', 'copyright'],
+      }], // Placeholder - actual rendering handled by component
     },
     ...(__DEV__
       ? [
@@ -1283,6 +1387,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   setConsoleEnabled(value);
                   await consoleManager.setEnabled(value);
                 },
+                searchKeywords: ['console', 'logging', 'log', 'debug', 'development', 'dev'],
               },
             ],
           },
@@ -1290,7 +1395,21 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       : []),
     {
       title: aboutTitle,
-      data: [{ id: 'about-section', title: 'about-section', type: 'custom' as const }], // Placeholder - actual rendering handled by component
+      data: [{
+        id: 'about-section',
+        title: 'about-section',
+        type: 'custom' as const,
+        searchKeywords: ['about', 'version', 'info', 'credits', 'author', 'developer', 'contact', 'support'],
+      }], // Placeholder - actual rendering handled by component
+    },
+    {
+      title: helpTitle,
+      data: [{
+        id: 'help-section',
+        title: 'help-section',
+        type: 'custom' as const,
+        searchKeywords: ['help', 'guide', 'tutorial', 'documentation', 'faq', 'troubleshooting', 'support'],
+      }], // Help & Documentation section
     },
   ];
 
@@ -1368,6 +1487,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             onShowAbout={() => setShowAbout(true)}
           />
         );
+      }
+      if (item.id === 'help-section' && sectionTitle === helpTitle) {
+        return <HelpSection key={item.id} />;
       }
       if (item.id === 'appearance-section' && sectionTitle === t('Appearance', { _tags: tags })) {
         return (
@@ -1487,6 +1609,16 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 />
               );
             }
+            if (item.id === 'media-section' && sectionTitle === t('Media', { _tags: tags })) {
+              return (
+                <MediaSection
+                  key={item.id}
+                  colors={colors}
+                  styles={styles}
+                  settingIcons={settingIcons}
+                />
+              );
+            }
       
       // Custom render function for special cases like watch-ad-button
       if (item.id === 'watch-ad-button' && showWatchAdButton) {
@@ -1537,7 +1669,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   };
 
   const toggleSection = (sectionTitle: string) => {
-    const newExpandedSections = toggleSectionExpansion(sectionTitle, expandedSections, ['About']);
+    const newExpandedSections = toggleSectionExpansion(sectionTitle, expandedSections, [aboutTitle]);
     setExpandedSections(newExpandedSections);
   };
 

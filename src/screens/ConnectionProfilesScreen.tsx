@@ -160,6 +160,67 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
     }
   };
 
+  const handleDeleteNetwork = (network: IRCNetworkConfig) => {
+    Alert.alert(
+      t('Delete Network', { _tags: tags }),
+      t('Are you sure you want to delete "{networkName}"? This cannot be undone.', { networkName: network.name, _tags: tags }),
+      [
+        { text: t('Cancel', { _tags: tags }), style: 'cancel' },
+        {
+          text: t('Delete', { _tags: tags }),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await settingsService.deleteNetwork(network.id);
+              setExpandedNetworkId(prev => (prev === network.id ? null : prev));
+              await loadData();
+            } catch (error) {
+              console.error('Failed to delete network:', error);
+              Alert.alert(
+                t('Error', { _tags: tags }),
+                t('Failed to delete network', { _tags: tags })
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleDeleteServer = (network: IRCNetworkConfig, server: IRCServerConfig) => {
+    if (network.servers.length <= 1) {
+      Alert.alert(
+        t('Cannot Delete Server', { _tags: tags }),
+        t('Each network must have at least one server.', { _tags: tags })
+      );
+      return;
+    }
+    const serverLabel = server.name || server.hostname;
+    Alert.alert(
+      t('Delete Server', { _tags: tags }),
+      t('Are you sure you want to delete "{serverName}"?', { serverName: serverLabel, _tags: tags }),
+      [
+        { text: t('Cancel', { _tags: tags }), style: 'cancel' },
+        {
+          text: t('Delete', { _tags: tags }),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await settingsService.deleteServerFromNetwork(network.id, server.id);
+              await loadData();
+            } catch (error) {
+              console.error('Failed to delete server:', error);
+              Alert.alert(
+                t('Error', { _tags: tags }),
+                t('Failed to delete server', { _tags: tags })
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const openIdentityProfileModal = (profile?: IdentityProfile, networkId?: string) => {
     setEditingProfileId(profile?.id || null);
     setSelectedNetworkForIdentity(networkId || null);
@@ -213,6 +274,13 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
               }}>
               <Text style={[styles.editButtonText, { color: colors.onPrimary }]}>
                 {t('Edit Network Settings', { _tags: tags })}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.deleteButton, { backgroundColor: colors.error }]}
+              onPress={() => handleDeleteNetwork(item)}>
+              <Text style={[styles.deleteButtonText, { color: colors.onPrimary }]}>
+                {t('Delete Network', { _tags: tags })}
               </Text>
             </TouchableOpacity>
 
@@ -314,6 +382,18 @@ export const ConnectionProfilesScreen: React.FC<ConnectionProfilesScreenProps> =
                   {server.favorite && (
                     <Text style={styles.favoriteIndicator}>★</Text>
                   )}
+                  <TouchableOpacity
+                    style={[
+                      styles.deleteServerButton,
+                      { backgroundColor: colors.error },
+                      item.servers.length <= 1 && styles.deleteServerButtonDisabled,
+                    ]}
+                    onPress={() => handleDeleteServer(item, server)}
+                    disabled={item.servers.length <= 1}>
+                    <Text style={[styles.deleteServerButtonText, { color: colors.onPrimary }]}>
+                      {t('Delete', { _tags: tags })}
+                    </Text>
+                  </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.editServerButton, { backgroundColor: colors.primary }]}
                     onPress={() => {
@@ -858,6 +938,16 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  deleteButton: {
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  deleteButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
   editServerButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -865,6 +955,19 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginLeft: 8,
   },
   editServerButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  deleteServerButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  deleteServerButtonDisabled: {
+    opacity: 0.5,
+  },
+  deleteServerButtonText: {
     fontSize: 12,
     fontWeight: '600',
   },

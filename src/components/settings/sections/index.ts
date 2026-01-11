@@ -14,3 +14,5 @@ export { HighlightingSection } from './HighlightingSection';
 export { SecuritySection } from './SecuritySection';
 export { UsersServicesSection } from './UsersServicesSection';
 export { CommandsSection } from './CommandsSection';
+export { MediaSection } from './MediaSection';
+export { HelpSection } from './HelpSection';

@@ -35,13 +35,8 @@ class MainApplication : Application(), ReactApplication {
               Log.d(TAG, "Critical React Native classes verified")
           } catch (e: ClassNotFoundException) {
               Log.e(TAG, "CRITICAL: Required React Native class not found: ${e.message}", e)
-              // Report to Crashlytics if available
-              try {
-                  com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance()
-                      .recordException(e)
-              } catch (ignored: Exception) {
-                  // Crashlytics not available, continue
-              }
+              // Report to Crashlytics if available (safely)
+              reportToCrashlyticsSafely(e)
               throw RuntimeException("React Native classes not available", e)
           }
 
@@ -54,23 +49,15 @@ class MainApplication : Application(), ReactApplication {
           loadedPackages
       } catch (e: NoClassDefFoundError) {
           Log.e(TAG, "CRITICAL: NoClassDefFoundError loading PackageList: ${e.message}", e)
-          // Report to Crashlytics
-          try {
-              com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e)
-          } catch (ignored: Exception) {
-              // Crashlytics not available
-          }
+          // Report to Crashlytics safely
+          reportToCrashlyticsSafely(e)
           // Fallback: return empty list - autolinking via Gradle should handle packages
           Log.w(TAG, "Falling back to empty package list - autolinking should handle packages")
           mutableListOf()
       } catch (e: Exception) {
           Log.e(TAG, "Failed to get packages from PackageList: ${e.message}", e)
-          // Report to Crashlytics
-          try {
-              com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e)
-          } catch (ignored: Exception) {
-              // Crashlytics not available
-          }
+          // Report to Crashlytics safely
+          reportToCrashlyticsSafely(e)
           // Fallback: return empty list - autolinking via Gradle should handle packages
           mutableListOf()
       }
@@ -93,6 +80,24 @@ class MainApplication : Application(), ReactApplication {
               // Don't fail completely if custom package fails
           }
 
+          // Add our custom package for HTTP POST requests
+          try {
+              packages.add(HttpPostPackage())
+              Log.d(TAG, "Added HttpPostPackage")
+          } catch (e: Exception) {
+              Log.e(TAG, "Failed to add HttpPostPackage: ${e.message}", e)
+              // Don't fail completely if custom package fails
+          }
+
+          // Add our custom package for HTTP PUT requests
+          try {
+              packages.add(HttpPutPackage())
+              Log.d(TAG, "Added HttpPutPackage")
+          } catch (e: Exception) {
+              Log.e(TAG, "Failed to add HttpPutPackage: ${e.message}", e)
+              // Don't fail completely if custom package fails
+          }
+
           Log.d(TAG, "Creating ReactHost with ${packages.size} packages...")
           val host = getDefaultReactHost(
               context = applicationContext,
@@ -102,16 +107,41 @@ class MainApplication : Application(), ReactApplication {
           host
       } catch (e: Exception) {
           Log.e(TAG, "CRITICAL: Failed to initialize ReactHost: ${e.message}", e)
-          // Report to Crashlytics
-          try {
-              com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e)
-          } catch (ignored: Exception) {
-              // Crashlytics not available
-          }
+          // Report to Crashlytics safely
+          reportToCrashlyticsSafely(e)
           // Re-throw to prevent app from starting in broken state
           throw RuntimeException("Failed to initialize React Native", e)
       }
   }
+
+    /**
+     * Safely report exception to Crashlytics.
+     * This method handles all possible exceptions to prevent secondary crashes.
+     */
+    private fun reportToCrashlyticsSafely(exception: Throwable) {
+        try {
+            // Check if Firebase is initialized
+            if (!FirebaseApp.getApps(this).isEmpty()) {
+                try {
+                    val crashlytics =
+                        com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance()
+                    crashlytics.recordException(exception)
+                    Log.d(TAG, "Exception reported to Crashlytics")
+                } catch (e: NoClassDefFoundError) {
+                    // Crashlytics classes not available - likely ProGuard issue
+                    Log.w(TAG, "Crashlytics classes not found (ProGuard issue?): ${e.message}")
+                } catch (e: Exception) {
+                    // Any other error reporting to Crashlytics - don't fail
+                    Log.w(TAG, "Failed to report to Crashlytics: ${e.message}")
+                }
+            } else {
+                Log.d(TAG, "Firebase not initialized, skipping Crashlytics report")
+            }
+        } catch (e: Exception) {
+            // Even checking Firebase can fail - don't propagate
+            Log.w(TAG, "Failed to check Firebase status: ${e.message}")
+        }
+    }
 
   override fun onCreate() {
     super.onCreate()
@@ -122,14 +152,22 @@ class MainApplication : Application(), ReactApplication {
           Log.d(TAG, "Initializing Firebase...")
           FirebaseApp.initializeApp(this)
           Log.d(TAG, "Firebase initialized successfully")
+
+          // Enable Crashlytics collection (disabled by default in debug builds)
+          try {
+              val crashlytics = com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance()
+              // Set custom keys for better crash reporting
+              crashlytics.setCustomKey("app_version", "1.6.0")
+              crashlytics.setCustomKey("build_number", "61")
+              Log.d(TAG, "Crashlytics configured successfully")
+          } catch (e: Exception) {
+              Log.w(TAG, "Failed to configure Crashlytics: ${e.message}", e)
+              // Don't fail - Crashlytics is optional
+          }
       } catch (e: Exception) {
           Log.e(TAG, "Failed to initialize Firebase: ${e.message}", e)
           // Don't fail completely - Firebase is optional for basic functionality
-          try {
-              com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e)
-          } catch (ignored: Exception) {
-              // Crashlytics not available
-          }
+          // Don't try to report to Crashlytics here as it might not be initialized yet
       }
 
       try {
@@ -139,12 +177,8 @@ class MainApplication : Application(), ReactApplication {
           Log.d(TAG, "React Native loaded successfully")
       } catch (e: Exception) {
           Log.e(TAG, "CRITICAL: Failed to load React Native: ${e.message}", e)
-          // Report to Crashlytics
-          try {
-              com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e)
-          } catch (ignored: Exception) {
-              // Crashlytics not available
-          }
+          // Report to Crashlytics safely
+          reportToCrashlyticsSafely(e)
           // Re-throw - app cannot function without React Native
           throw RuntimeException("Failed to load React Native", e)
       }

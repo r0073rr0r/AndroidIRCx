@@ -28,6 +28,12 @@ import { ChannelSettingsScreen } from '../screens/ChannelSettingsScreen';
 import { DccTransfersModal } from './DccTransfersModal';
 import { DccSendModal } from './DccSendModal';
 import { AppUnlockModal } from './AppUnlockModal';
+import { HelpTroubleshootingScreen } from '../screens/help/HelpTroubleshootingScreen';
+import { HelpConnectionScreen } from '../screens/help/HelpConnectionScreen';
+import { HelpCommandsScreen } from '../screens/help/HelpCommandsScreen';
+import { HelpEncryptionScreen } from '../screens/help/HelpEncryptionScreen';
+import { HelpMediaScreen } from '../screens/help/HelpMediaScreen';
+import { HelpChannelManagementScreen } from '../screens/help/HelpChannelManagementScreen';
 import { channelNotesService } from '../services/ChannelNotesService';
 import { dccFileService } from '../services/DCCFileService';
 import { ChannelTab } from '../types';
@@ -135,6 +141,12 @@ export function AppModals({
     appLockUsePin,
     appPinEntry,
     appPinError,
+    showHelpConnection,
+    showHelpCommands,
+    showHelpEncryption,
+    showHelpMedia,
+    showHelpChannelManagement,
+    showHelpTroubleshooting,
   } = uiState;
 
   const {
@@ -147,12 +159,13 @@ export function AppModals({
     setAppPinError,
     setShowOptionsMenu,
     setShowSettings,
+    setShowHelpConnection,
+    setShowHelpCommands,
+    setShowHelpEncryption,
+    setShowHelpMedia,
+    setShowHelpChannelManagement,
+    setShowHelpTroubleshooting,
   } = setters;
-
-  // Debug logging for modal visibility
-  useEffect(() => {
-    console.log('🔍 AppModals render: showOptionsMenu =', showOptionsMenu, 'showSettings =', showSettings);
-  }, [showOptionsMenu, showSettings]);
 
   return (
     <>
@@ -369,6 +382,44 @@ export function AppModals({
         colors={colors}
         styles={styles}
       />
+
+      {/* Help Screens - Only render when state is true to prevent auto-opening */}
+      {showHelpTroubleshooting && (
+        <HelpTroubleshootingScreen
+          visible={showHelpTroubleshooting}
+          onClose={() => setShowHelpTroubleshooting(false)}
+        />
+      )}
+      {showHelpConnection && (
+        <HelpConnectionScreen
+          visible={showHelpConnection}
+          onClose={() => setShowHelpConnection(false)}
+        />
+      )}
+      {showHelpCommands && (
+        <HelpCommandsScreen
+          visible={showHelpCommands}
+          onClose={() => setShowHelpCommands(false)}
+        />
+      )}
+      {showHelpEncryption && (
+        <HelpEncryptionScreen
+          visible={showHelpEncryption}
+          onClose={() => setShowHelpEncryption(false)}
+        />
+      )}
+      {showHelpMedia && (
+        <HelpMediaScreen
+          visible={showHelpMedia}
+          onClose={() => setShowHelpMedia(false)}
+        />
+      )}
+      {showHelpChannelManagement && (
+        <HelpChannelManagementScreen
+          visible={showHelpChannelManagement}
+          onClose={() => setShowHelpChannelManagement(false)}
+        />
+      )}
     </>
   );
 }

@@ -84,6 +84,7 @@ export const MessageHistorySection: React.FC<MessageHistorySectionProps> = ({
         type: 'input',
         value: partMessage,
         placeholder: DEFAULT_PART_MESSAGE,
+        searchKeywords: ['part', 'message', 'leave', 'channel', 'exit', 'goodbye'],
         onValueChange: async (value: string | boolean) => {
           const strValue = value as string;
           setPartMessage(strValue);
@@ -97,6 +98,7 @@ export const MessageHistorySection: React.FC<MessageHistorySectionProps> = ({
         type: 'input',
         value: quitMessage,
         placeholder: DEFAULT_QUIT_MESSAGE,
+        searchKeywords: ['quit', 'message', 'disconnect', 'logout', 'exit', 'goodbye'],
         onValueChange: async (value: string | boolean) => {
           const strValue = value as string;
           setQuitMessage(strValue);
@@ -109,6 +111,7 @@ export const MessageHistorySection: React.FC<MessageHistorySectionProps> = ({
         description: t('Do not show join events in channels.', { _tags: tags }),
         type: 'switch',
         value: hideJoinMessages,
+        searchKeywords: ['hide', 'join', 'messages', 'events', 'channel', 'enter'],
         onValueChange: async (value: string | boolean) => {
           const boolValue = value as boolean;
           setHideJoinMessages(boolValue);
@@ -121,6 +124,7 @@ export const MessageHistorySection: React.FC<MessageHistorySectionProps> = ({
         description: t('Do not show part/leave events in channels.', { _tags: tags }),
         type: 'switch',
         value: hidePartMessages,
+        searchKeywords: ['hide', 'part', 'messages', 'events', 'leave', 'channel', 'exit'],
         onValueChange: async (value: string | boolean) => {
           const boolValue = value as boolean;
           setHidePartMessages(boolValue);
@@ -133,6 +137,7 @@ export const MessageHistorySection: React.FC<MessageHistorySectionProps> = ({
         description: t('Do not show quit events in channels.', { _tags: tags }),
         type: 'switch',
         value: hideQuitMessages,
+        searchKeywords: ['hide', 'quit', 'messages', 'events', 'disconnect', 'channel'],
         onValueChange: async (value: string | boolean) => {
           const boolValue = value as boolean;
           setHideQuitMessages(boolValue);
@@ -145,6 +150,7 @@ export const MessageHistorySection: React.FC<MessageHistorySectionProps> = ({
         description: t('Suppress "*** IRCService: Message listener registered..." raw logs.', { _tags: tags }),
         type: 'switch',
         value: hideIrcServiceListenerMessages,
+        searchKeywords: ['hide', 'irc', 'service', 'listener', 'messages', 'raw', 'logs'],
         onValueChange: async (value: string | boolean) => {
           const boolValue = value as boolean;
           setHideIrcServiceListenerMessages(boolValue);
@@ -157,6 +163,7 @@ export const MessageHistorySection: React.FC<MessageHistorySectionProps> = ({
         description: t('Send a message when you close a private message window.', { _tags: tags }),
         type: 'switch',
         value: closePrivateMessage,
+        searchKeywords: ['send', 'message', 'query', 'close', 'private', 'window', 'pm'],
         onValueChange: async (value: string | boolean) => {
           const boolValue = value as boolean;
           setClosePrivateMessage(boolValue);
@@ -171,6 +178,7 @@ export const MessageHistorySection: React.FC<MessageHistorySectionProps> = ({
         value: closePrivateMessageText,
         placeholder: t('Enter message...', { _tags: tags }),
         disabled: !closePrivateMessage,
+        searchKeywords: ['query', 'close', 'message', 'text', 'private', 'goodbye'],
         onValueChange: async (value: string | boolean) => {
           const strValue = value as string;
           setClosePrivateMessageText(strValue);

@@ -64,6 +64,7 @@ interface MessageItemProps {
   network?: string;
   channel?: string;
   tabId?: string;
+  layoutWidth?: number;
 }
 
 // Memoized message item component for performance
@@ -84,6 +85,7 @@ const MessageItem = React.memo<MessageItemProps>(({
   network,
   channel,
   tabId,
+  layoutWidth,
 }) => {
   const formatTimestamp = useCallback((timestamp: number): string => {
     const date = new Date(timestamp);
@@ -244,7 +246,7 @@ const MessageItem = React.memo<MessageItemProps>(({
           <>
             {actionText !== null ? (
               // ACTION (/me) message
-              <View style={styles.messageWrapper}>
+              <View style={[styles.messageWrapper, layoutWidth ? { maxWidth: layoutWidth } : null]}>
                 <View style={styles.messageContent}>
                   {!isGrouped && (
                     <Text style={[styles.messageText, { fontStyle: 'italic', color: colors.actionMessage }]}>
@@ -297,7 +299,7 @@ const MessageItem = React.memo<MessageItemProps>(({
               </View>
             ) : (
               // Regular message
-              <View style={styles.messageWrapper}>
+              <View style={[styles.messageWrapper, layoutWidth ? { maxWidth: layoutWidth } : null]}>
                 <View style={styles.messageContent}>
                   {!isGrouped && (
                     <Text
@@ -395,7 +397,8 @@ const MessageItem = React.memo<MessageItemProps>(({
     prevProps.selectionMode === nextProps.selectionMode &&
     prevProps.showImages === nextProps.showImages &&
     prevProps.network === nextProps.network &&
-    prevProps.channel === nextProps.channel
+    prevProps.channel === nextProps.channel &&
+    prevProps.layoutWidth === nextProps.layoutWidth
   );
 });
 
@@ -428,6 +431,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
   const [copyStatus, setCopyStatus] = useState('');
   const selectionMode = selectedMessageIds.size > 0;
   const [showMessageAreaSearchButton, setShowMessageAreaSearchButton] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
 
   // Search state (controlled or uncontrolled)
   const [internalSearchVisible, setInternalSearchVisible] = useState(false);
@@ -451,6 +455,13 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
       setInternalSearchVisible(visible);
     }
   };
+
+  const handleContainerLayout = useCallback((event: any) => {
+    const nextWidth = Math.round(event?.nativeEvent?.layout?.width || 0);
+    if (nextWidth > 0 && nextWidth !== containerWidth) {
+      setContainerWidth(nextWidth);
+    }
+  }, [containerWidth]);
 
   useEffect(() => {
     const loadSetting = async () => {
@@ -775,9 +786,25 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
         network={network}
         channel={channel}
         tabId={tabId}
+        layoutWidth={containerWidth}
       />
     );
-  }, [layoutState.timestampDisplay, layoutState.timestampFormat, colors, styles, currentNick, handleMessageLongPress, handleMessagePress, selectedMessageIds, selectionMode, perfConfig.imageLazyLoad, network, channel]);
+  }, [
+    layoutState.timestampDisplay,
+    layoutState.timestampFormat,
+    colors,
+    styles,
+    currentNick,
+    handleMessageLongPress,
+    handleMessagePress,
+    selectedMessageIds,
+    selectionMode,
+    perfConfig.imageLazyLoad,
+    network,
+    channel,
+    tabId,
+    containerWidth,
+  ]);
 
   // Get item key
   const getItemKey = useCallback((item: IRCMessage) => item.id, []);
@@ -803,7 +830,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
 
   if (displayMessages.length === 0) {
     return (
-      <View style={styles.wrapper}>
+      <View style={styles.wrapper} onLayout={handleContainerLayout}>
         <MessageSearchBar
           visible={searchVisible}
           onClose={() => handleSearchVisibleChange(false)}
@@ -829,7 +856,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
 
   if (perfConfig.enableVirtualization) {
     return (
-      <View style={styles.wrapper}>
+      <View style={styles.wrapper} onLayout={handleContainerLayout}>
         {/* Message Search Bar */}
         <MessageSearchBar
           visible={searchVisible}
@@ -842,6 +869,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
           data={reversedMessages}
           renderItem={renderItem}
           keyExtractor={getItemKey}
+          extraData={containerWidth}
           inverted // Show newest at bottom
           onScroll={handleScroll}
           scrollEventThrottle={16}
@@ -900,7 +928,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
 
   // Fallback to ScrollView for small message lists
     return (
-      <View style={styles.wrapper}>
+      <View style={styles.wrapper} onLayout={handleContainerLayout}>
         {/* Message Search Bar */}
         <MessageSearchBar
           visible={searchVisible}
@@ -913,6 +941,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
           data={reversedMessages}
           renderItem={renderItem}
           keyExtractor={getItemKey}
+          extraData={containerWidth}
           inverted
           onScroll={handleScroll}
           scrollEventThrottle={16}

@@ -221,6 +221,7 @@ export const useConnectionLifecycle = (params: UseConnectionLifecycleParams) => 
     listenerTargets.forEach(target => {
       const activeIRCService = target.ircService;
       const activeUserMgmt = target.userManagementService;
+      const targetNetworkId = target.id;
 
       // Listen for messages per connection
       const unsubscribeMessages = activeIRCService.onMessage(async (message: IRCMessage) => {
@@ -245,6 +246,8 @@ export const useConnectionLifecycle = (params: UseConnectionLifecycleParams) => 
           !!(currentActiveTab && messageNetwork && currentActiveTab.networkId?.toLowerCase() === messageNetwork.toLowerCase());
         const currentNick = activeIRCService.getCurrentNick?.() || '';
         const normalizedChannel = (message.channel || '').trim();
+        const isChannelTarget = (target: string) =>
+          target.startsWith('#') || target.startsWith('&') || target.startsWith('+') || target.startsWith('!');
         const isServerNoticeTarget =
           normalizedChannel === '*' ||
           (!!currentNick && normalizedChannel.toLowerCase() === currentNick.toLowerCase());
@@ -254,6 +257,21 @@ export const useConnectionLifecycle = (params: UseConnectionLifecycleParams) => 
           message.from.includes('.');
         const forceServerNotice = isServerNoticeTarget && isServerNoticeOrigin;
         scriptingService.handleMessage(message);
+
+        if (message.typing && message.from) {
+          const typingTarget =
+            currentNick && normalizedChannel && normalizedChannel.toLowerCase() === currentNick.toLowerCase()
+              ? message.from
+              : normalizedChannel;
+          if (typingTarget) {
+            latest.safeSetState(() => {
+              latest.setTypingUser(targetNetworkId, typingTarget, message.from!, {
+                status: message.typing!,
+                timestamp: Date.now(),
+              });
+            });
+          }
+        }
 
         // Handle DCC CHAT invites (CTCP)
         const dccInvite = dccChatService.parseDccChatInvite(message.text);
@@ -364,7 +382,7 @@ export const useConnectionLifecycle = (params: UseConnectionLifecycleParams) => 
           const isServerOrigin = !!message.from && message.from.includes('.');
           if (isWildcardTarget || (isSelfTarget && isServerOrigin)) {
             // keep server tab for server-originated non-channel targets
-          } else if (normalizedChannel.startsWith('#') || normalizedChannel.startsWith('&')) {
+          } else if (isChannelTarget(normalizedChannel)) {
             targetTabId = channelTabId(messageNetwork, message.channel);
             targetTabType = 'channel';
             newTabIsEncrypted = await channelEncryptionService.hasChannelKey(message.channel, messageNetwork);
@@ -690,9 +708,14 @@ export const useConnectionLifecycle = (params: UseConnectionLifecycleParams) => 
       // Listen for typing indicators
       const unsubscribeTyping = activeIRCService.on('typing-indicator', (target: string, nick: string, status: 'active' | 'paused' | 'done') => {
         const latest = latestRef.current;
+        const currentNick = activeIRCService.getCurrentNick?.() || '';
+        const resolvedTarget =
+          currentNick && target && target.toLowerCase() === currentNick.toLowerCase()
+            ? nick
+            : target;
         latest.safeSetState(() => {
           // Use message store to update typing status
-          latest.setTypingUser(latest.networkName, target, nick, { status, timestamp: Date.now() });
+          latest.setTypingUser(targetNetworkId, resolvedTarget, nick, { status, timestamp: Date.now() });
         });
       });
 

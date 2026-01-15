@@ -80,6 +80,8 @@ interface SettingsScreenProps {
   onRawCategoryVisibilityChange?: (value: Record<RawMessageCategory, boolean>) => void;
   showEncryptionIndicators?: boolean;
   onShowEncryptionIndicatorsChange?: (value: boolean) => void;
+  showTypingIndicators?: boolean;
+  onShowTypingIndicatorsChange?: (value: boolean) => void;
   onShowIgnoreList?: () => void;
   onShowPurchaseScreen?: () => void;
 }
@@ -96,6 +98,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onRawCategoryVisibilityChange,
   showEncryptionIndicators = true,
   onShowEncryptionIndicatorsChange,
+  showTypingIndicators = true,
+  onShowTypingIndicatorsChange,
   onShowIgnoreList,
   onShowPurchaseScreen,
 }) => {
@@ -236,6 +240,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [tabSortAlphabetical, setTabSortAlphabetical] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showEncryptionIndicatorsSetting, setShowEncryptionIndicatorsSetting] = useState(showEncryptionIndicators);
+  const [showTypingIndicatorsSetting, setShowTypingIndicatorsSetting] = useState(showTypingIndicators);
   // appLanguage now comes from useSettingsAppearance hook (see above)
   const [biometricLockEnabled, setBiometricLockEnabled] = useState(false);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
@@ -1584,6 +1589,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             onRawCategoryVisibilityChange={onRawCategoryVisibilityChange}
             showEncryptionIndicators={showEncryptionIndicatorsSetting}
             onShowEncryptionIndicatorsChange={onShowEncryptionIndicatorsChange}
+            showTypingIndicators={showTypingIndicatorsSetting}
+            onShowTypingIndicatorsChange={onShowTypingIndicatorsChange}
           />
         );
       }

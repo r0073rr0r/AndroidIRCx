@@ -19,6 +19,8 @@
 import { AppState, AppStateStatus } from 'react-native';
 import { IRCService, IRCMessage, ircService } from './IRCService';
 import { notificationService } from './NotificationService';
+import { messageHistoryService } from './MessageHistoryService';
+import { settingsService } from './SettingsService';
 import { RequestDisableOptimization, BatteryOptEnabled, OpenOptimizationSettings } from "react-native-battery-optimization-check";
 import { connectionManager } from './ConnectionManager';
 import { tx } from '../i18n/transifex';
@@ -41,12 +43,20 @@ class BackgroundService {
   private readonly NOTIFICATION_THROTTLE_MS = 5000; // Don't spam notifications
   private backgroundConnectionEnabled: boolean = true;
   private backgroundCheckTimer: ReturnType<typeof setInterval> | null = null;
+  private backgroundConnectionListeners: Array<(enabled: boolean) => void> = [];
+  private showRawCommandsEnabled: boolean = true;
+  private showRawCommandsUnsub: (() => void) | null = null;
 
   /**
    * Initialize background service
    */
   async initialize(): Promise<void> {
     try {
+      const showRaw = await settingsService.getSetting('showRawCommands', true);
+      this.showRawCommandsEnabled = Boolean(showRaw);
+      this.showRawCommandsUnsub = settingsService.onSettingChange('showRawCommands', (value: boolean) => {
+        this.showRawCommandsEnabled = Boolean(value);
+      });
       this.setupAppStateListener();
       console.log('BackgroundService: Initialized');
     } catch (error) {
@@ -64,6 +74,10 @@ class BackgroundService {
         this.appStateListener.remove();
       }
       this.appStateListener = null;
+    }
+    if (this.showRawCommandsUnsub) {
+      this.showRawCommandsUnsub();
+      this.showRawCommandsUnsub = null;
     }
     this.unregisterMessageListener();
     this.stopBackgroundPolling();
@@ -161,6 +175,13 @@ class BackgroundService {
       }
       const cleanup = service.onMessage(async (message: IRCMessage) => {
         if (!this.isAppInBackground()) return;
+        const networkName = message.network || service.getNetworkName();
+        const isRawMessage = message.type === 'raw' || message.isRaw;
+        if (!isRawMessage || this.showRawCommandsEnabled) {
+          messageHistoryService.saveMessage(message, networkName).catch(err => {
+            console.error('BackgroundService: Failed to save message history in background:', err);
+          });
+        }
         if (this.shouldNotify(message, service)) {
           await this.handleBackgroundMessage(message, service);
         }
@@ -349,7 +370,24 @@ class BackgroundService {
    */
   setBackgroundConnectionEnabled(enabled: boolean): void {
     this.backgroundConnectionEnabled = enabled;
+    this.backgroundConnectionListeners.forEach(listener => {
+      try {
+        listener(enabled);
+      } catch (error) {
+        console.error('BackgroundService: Error in background connection listener:', error);
+      }
+    });
     console.log(`BackgroundService: Background connection ${enabled ? 'enabled' : 'disabled'}`);
+  }
+
+  onBackgroundConnectionChange(callback: (enabled: boolean) => void): () => void {
+    this.backgroundConnectionListeners.push(callback);
+    return () => {
+      const index = this.backgroundConnectionListeners.indexOf(callback);
+      if (index > -1) {
+        this.backgroundConnectionListeners.splice(index, 1);
+      }
+    };
   }
 
   /**

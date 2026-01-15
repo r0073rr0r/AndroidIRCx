@@ -11,6 +11,7 @@ import { CommandService } from './CommandService';
 import { IRCNetworkConfig } from './SettingsService';
 import { identityProfilesService } from './IdentityProfilesService';
 import { autoReconnectService } from './AutoReconnectService';
+import { ircForegroundService } from './IRCForegroundService';
 import { tx } from '../i18n/transifex';
 
 const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
@@ -64,6 +65,36 @@ class ConnectionManager {
       } catch (error) {
         console.error('ConnectionManager: Error in connection-created callback:', error);
       }
+    });
+  }
+
+  private updateForegroundConnectionSummary(): void {
+    if (!ircForegroundService.isServiceRunning()) {
+      return;
+    }
+    const activeConnections = Array.from(this.connections.values()).filter(
+      ctx => ctx.ircService.getConnectionStatus()
+    );
+    const count = activeConnections.length;
+    if (count === 0) {
+      ircForegroundService.stop().catch(err => {
+        console.error('ConnectionManager: Failed to stop foreground service:', err);
+      });
+      return;
+    }
+    const names = activeConnections.map(ctx => ctx.networkId).filter(Boolean);
+    const uniqueNames = Array.from(new Set(names));
+    let suffix = '';
+    if (uniqueNames.length > 0) {
+      const trimmed = uniqueNames.slice(0, 3);
+      suffix = ` (${trimmed.join(', ')}${uniqueNames.length > 3 ? ` +${uniqueNames.length - 3}` : ''})`;
+    }
+    const title = t('IRC Connected');
+    const text = count <= 1
+      ? t('Connected to {networkName}', { networkName: uniqueNames[0] || t('IRC server') })
+      : t('Connected to {count} servers{suffix}', { count, suffix });
+    ircForegroundService.updateNotification(title, text).catch(err => {
+      console.error('ConnectionManager: Failed to update foreground notification:', err);
     });
   }
 
@@ -220,6 +251,7 @@ class ConnectionManager {
     // This allows useConnectionLifecycle to re-attach event listeners to the new IRCService instance
     console.log(`ConnectionManager: Emitting connection-created event for ${finalId}`);
     this.emitConnectionCreated(finalId);
+    this.updateForegroundConnectionSummary();
 
     return finalId;
   }
@@ -265,6 +297,7 @@ class ConnectionManager {
       if (this.activeConnectionId === networkId) {
         this.activeConnectionId = this.connections.keys().next().value || null;
       }
+      this.updateForegroundConnectionSummary();
     }
   }
 

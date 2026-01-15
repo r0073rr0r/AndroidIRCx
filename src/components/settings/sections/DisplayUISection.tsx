@@ -36,6 +36,8 @@ interface DisplayUISectionProps {
   onRawCategoryVisibilityChange?: (value: Record<RawMessageCategory, boolean>) => void;
   showEncryptionIndicators?: boolean;
   onShowEncryptionIndicatorsChange?: (value: boolean) => void;
+  showTypingIndicators?: boolean;
+  onShowTypingIndicatorsChange?: (value: boolean) => void;
 }
 
 export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
@@ -48,6 +50,8 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
   onRawCategoryVisibilityChange,
   showEncryptionIndicators: propShowEncryptionIndicators,
   onShowEncryptionIndicatorsChange,
+  showTypingIndicators: propShowTypingIndicators,
+  onShowTypingIndicatorsChange,
 }) => {
   const t = useT();
   const tags = 'screen:settings,file:DisplayUISection.tsx,feature:settings';
@@ -60,6 +64,7 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
   );
   const [noticeTarget, setNoticeTarget] = useState<'active' | 'server' | 'notice' | 'private'>('server');
   const [showEncryptionIndicatorsSetting, setShowEncryptionIndicatorsSetting] = useState(propShowEncryptionIndicators ?? true);
+  const [showTypingIndicatorsSetting, setShowTypingIndicatorsSetting] = useState(propShowTypingIndicators ?? true);
   const [showSendButton, setShowSendButton] = useState(true);
   const [keyboardAvoidingEnabled, setKeyboardAvoidingEnabled] = useState(true);
   const [keyboardBehaviorIOS, setKeyboardBehaviorIOS] = useState<'padding' | 'height' | 'position' | 'translate-with-padding'>('padding');
@@ -79,6 +84,9 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
 
       const showEncryption = await settingsService.getSetting('showEncryptionIndicators', true);
       setShowEncryptionIndicatorsSetting(showEncryption);
+
+      const showTypingIndicators = await settingsService.getSetting('showTypingIndicators', true);
+      setShowTypingIndicatorsSetting(showTypingIndicators);
 
       const sendButton = await settingsService.getSetting('showSendButton', true);
       setShowSendButton(sendButton);
@@ -115,6 +123,10 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
   useEffect(() => {
     setShowEncryptionIndicatorsSetting(propShowEncryptionIndicators ?? true);
   }, [propShowEncryptionIndicators]);
+
+  useEffect(() => {
+    setShowTypingIndicatorsSetting(propShowTypingIndicators ?? true);
+  }, [propShowTypingIndicators]);
 
   const sectionData: SettingItemType[] = useMemo(() => {
     const formatBehaviorLabel = (value: string) => {
@@ -349,6 +361,22 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
         },
       },
       {
+        id: 'display-typing-indicators',
+        title: t('Show Typing Indicators', { _tags: tags }),
+        description: showTypingIndicatorsSetting
+          ? t('Display who is typing in the active tab', { _tags: tags })
+          : t('Hide typing indicators', { _tags: tags }),
+        type: 'switch',
+        value: showTypingIndicatorsSetting,
+        searchKeywords: ['typing', 'indicator', 'status', 'tagmsg', 'activity'],
+        onValueChange: async (value: boolean | string) => {
+          const boolValue = value as boolean;
+          setShowTypingIndicatorsSetting(boolValue);
+          await settingsService.setSetting('showTypingIndicators', boolValue);
+          onShowTypingIndicatorsChange && onShowTypingIndicatorsChange(boolValue);
+        },
+      },
+      {
         id: 'display-send-button',
         title: t('Show Send Button', { _tags: tags }),
         description: showSendButton
@@ -455,6 +483,7 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
     localRawCategoryVisibility,
     noticeTarget,
     showEncryptionIndicatorsSetting,
+    showTypingIndicatorsSetting,
     showSendButton,
     keyboardAvoidingEnabled,
     keyboardBehaviorIOS,
@@ -468,6 +497,7 @@ export const DisplayUISection: React.FC<DisplayUISectionProps> = ({
     onShowRawCommandsChange,
     onRawCategoryVisibilityChange,
     onShowEncryptionIndicatorsChange,
+    onShowTypingIndicatorsChange,
   ]);
 
   const handleSubmenuPress = (itemId: string) => {

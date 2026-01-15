@@ -73,6 +73,10 @@ export function useStoreSetters() {
     useUIStore.getState().setRawCategoryVisibility(visibility);
   }, []);
 
+  const setShowTypingIndicators = useCallback((value: boolean) => {
+    useUIStore.getState().setShowTypingIndicators(value);
+  }, []);
+
   const setHideJoinMessages = useCallback((value: boolean) => {
     useUIStore.getState().setHideJoinMessages(value);
   }, []);
@@ -220,6 +224,7 @@ export function useStoreSetters() {
     setIsCheckingFirstRun,
     setShowRawCommands,
     setRawCategoryVisibility,
+    setShowTypingIndicators,
     setHideJoinMessages,
     setHidePartMessages,
     setHideQuitMessages,

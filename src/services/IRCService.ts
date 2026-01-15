@@ -755,7 +755,7 @@ export class IRCService {
     const channelContextTag = tags.get('+draft/channel-context') || undefined;
     const replyTag = tags.get('+draft/reply') || tags.get('+reply') || undefined;
     const reactTag = tags.get('+draft/react') || tags.get('+react') || undefined;
-    const typingTag = tags.get('+typing') || undefined;
+    const typingTag = tags.get('typing') || tags.get('draft/typing') || tags.get('+typing') || undefined;
 
     // Extract multiline concat tag (draft/multiline)
     const multilineConcatTag = tags.get('draft/multiline-concat') || undefined;
@@ -1654,6 +1654,31 @@ export class IRCService {
         // IRCv3 TAGMSG: message with only tags (reactions, typing indicators)
         const tagTarget = params[0] || '';
         const tagFrom = this.extractNick(prefix);
+        const tagSummary = [
+          reactTag ? `react=${reactTag}` : null,
+          typingTag ? `typing=${typingTag}` : null,
+        ].filter(Boolean).join(' ');
+
+        if (tagSummary) {
+          this.addRawMessage(
+            t('*** TAGMSG {from} -> {target} ({tags})', {
+              from: tagFrom,
+              target: tagTarget || '-',
+              tags: tagSummary,
+            }),
+            'user',
+            messageTimestamp
+          );
+        } else {
+          this.addRawMessage(
+            t('*** TAGMSG {from} -> {target}', {
+              from: tagFrom,
+              target: tagTarget || '-',
+            }),
+            'user',
+            messageTimestamp
+          );
+        }
 
         // Handle reactions
         if (reactTag) {
@@ -3829,7 +3854,7 @@ export class IRCService {
           .map(c => c.split('=')[0])
           .filter(c => [
             'server-time', 'account-notify', 'extended-join', 'userhost-in-names',
-            'away-notify', 'chghost', 'message-tags', 'batch', 'labeled-response',
+            'away-notify', 'chghost', 'message-tags', 'typing', 'draft/typing', 'batch', 'labeled-response',
             'echo-message', 'multi-prefix', 'invite-notify', 'monitor', 'account-tag',
             'setname', 'metadata', 'draft/multiline', 'draft/chathistory', 'draft/read-marker',
             'draft/message-redaction'
@@ -3874,7 +3899,7 @@ export class IRCService {
   private requestCapabilities(): void {
     const capsToRequest: string[] = [
       'server-time', 'account-notify', 'extended-join', 'userhost-in-names',
-      'away-notify', 'chghost', 'message-tags', 'batch', 'labeled-response',
+      'away-notify', 'chghost', 'message-tags', 'typing', 'draft/typing', 'batch', 'labeled-response',
       'echo-message', 'multi-prefix', 'invite-notify', 'monitor', 'extended-monitor',
       'cap-notify', 'account-tag', 'setname', 'standard-replies', 'message-ids',
       'bot', 'utf8only', 'draft/chathistory', 'draft/multiline', 'draft/read-marker',
@@ -5024,20 +5049,81 @@ export class IRCService {
     this.connectionListeners.forEach(cb => cb(connected));
 
     // Start/stop foreground service for background operation (Android only)
+    const buildForegroundNotification = () => {
+      let connectedNames: string[] = [];
+      let connectedCount = 0;
+      try {
+        const { connectionManager } = require('./ConnectionManager');
+        const connections = connectionManager?.getAllConnections?.() || [];
+        const activeConnections = connections.filter(
+          (ctx: any) => ctx?.ircService?.getConnectionStatus?.()
+        );
+        connectedNames = activeConnections
+          .map((ctx: any) => ctx.networkId)
+          .filter(Boolean);
+        connectedCount = activeConnections.length;
+      } catch {
+        // Ignore if ConnectionManager is unavailable (singleton mode)
+      }
+
+      if (!connectedCount && connected) {
+        connectedCount = 1;
+        const name = this.getNetworkName();
+        if (name) {
+          connectedNames = [name];
+        }
+      }
+
+      const fallbackName = this.getNetworkName() || t('IRC server');
+      const title = t('IRC Connected');
+      if (connectedCount === 0) {
+        return { title, text: '', networkName: fallbackName, connectedCount };
+      }
+      if (connectedCount <= 1) {
+        const name = connectedNames[0] || fallbackName;
+        return { title, text: t('Connected to {networkName}', { networkName: name }), networkName: name, connectedCount };
+      }
+
+      const uniqueNames = Array.from(new Set(connectedNames)).filter(Boolean);
+      let namesSummary = '';
+      if (uniqueNames.length > 0) {
+        const trimmed = uniqueNames.slice(0, 3);
+        namesSummary = trimmed.join(', ');
+        if (uniqueNames.length > 3) {
+          namesSummary = `${namesSummary} +${uniqueNames.length - 3}`;
+        }
+      }
+      const suffix = namesSummary ? ` (${namesSummary})` : '';
+      return {
+        title,
+        text: t('Connected to {count} servers{suffix}', { count: connectedCount, suffix }),
+        networkName: uniqueNames[0] || fallbackName,
+        connectedCount,
+      };
+    };
+
     if (connected) {
-      const networkName = this.getNetworkName();
-      const fallbackName = networkName || t('IRC server');
-      ircForegroundService.start(
-        networkName,
-        t('IRC Connected'),
-        t('Connected to {networkName}', { networkName: fallbackName })
-      ).catch(err => {
-        this.logRaw(`IRCService: Failed to start foreground service: ${err.message || err}`);
-      });
+      const { title, text, networkName } = buildForegroundNotification();
+      if (ircForegroundService.isServiceRunning()) {
+        ircForegroundService.updateNotification(title, text).catch(err => {
+          this.logRaw(`IRCService: Failed to update foreground service: ${err.message || err}`);
+        });
+      } else {
+        ircForegroundService.start(networkName, title, text).catch(err => {
+          this.logRaw(`IRCService: Failed to start foreground service: ${err.message || err}`);
+        });
+      }
     } else {
-      ircForegroundService.stop().catch(err => {
-        this.logRaw(`IRCService: Failed to stop foreground service: ${err.message || err}`);
-      });
+      const { title, text, connectedCount } = buildForegroundNotification();
+      if (connectedCount > 0) {
+        ircForegroundService.updateNotification(title, text).catch(err => {
+          this.logRaw(`IRCService: Failed to update foreground service: ${err.message || err}`);
+        });
+      } else {
+        ircForegroundService.stop().catch(err => {
+          this.logRaw(`IRCService: Failed to stop foreground service: ${err.message || err}`);
+        });
+      }
     }
   }
 }

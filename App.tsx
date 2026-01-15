@@ -167,6 +167,7 @@ function AppContent() {
     isCheckingFirstRun,
     showRawCommands,
     rawCategoryVisibility,
+    showTypingIndicators,
     hideJoinMessages,
     hidePartMessages,
     hideQuitMessages,
@@ -200,6 +201,7 @@ function AppContent() {
     setIsCheckingFirstRun,
     setShowRawCommands,
     setRawCategoryVisibility,
+    setShowTypingIndicators,
     setHideJoinMessages,
     setHidePartMessages,
     setHideQuitMessages,
@@ -375,6 +377,14 @@ function AppContent() {
     persistentSetRawCategoryVisibility,
     persistentSetShowEncryptionIndicators,
   } = useRawSettings({ setShowEncryptionIndicators });
+
+  const persistentSetShowTypingIndicators = useCallback(
+    async (value: boolean) => {
+      setShowTypingIndicators(value);
+      await settingsService.setSetting('showTypingIndicators', value);
+    },
+    [setShowTypingIndicators]
+  );
 
   const { safeAlert } = useSafeAlert({ appStateRef, pendingAlertRef });
 
@@ -756,6 +766,7 @@ function AppContent() {
         hideQuitMessages={hideQuitMessages}
         hideIrcServiceListenerMessages={hideIrcServiceListenerMessages}
         showEncryptionIndicators={showEncryptionIndicators}
+        showTypingIndicators={showTypingIndicators}
         typingUsers={typingUsers}
         bannerVisible={bannerVisible}
         prefillMessage={prefillMessage}
@@ -796,6 +807,7 @@ function AppContent() {
         showRawCommands={showRawCommands}
         rawCategoryVisibility={rawCategoryVisibility}
         showEncryptionIndicators={showEncryptionIndicators}
+        showTypingIndicators={showTypingIndicators}
         tabSortAlphabetical={tabSortAlphabetical}
         dccTransfers={dccTransfers}
         channelName={channelName}
@@ -806,6 +818,7 @@ function AppContent() {
         persistentSetShowRawCommands={persistentSetShowRawCommands}
         persistentSetRawCategoryVisibility={persistentSetRawCategoryVisibility}
         persistentSetShowEncryptionIndicators={persistentSetShowEncryptionIndicators}
+        persistentSetShowTypingIndicators={persistentSetShowTypingIndicators}
         setActiveConnectionId={setActiveConnectionId}
         setTabs={setTabs}
         getActiveIRCService={getActiveIRCService}

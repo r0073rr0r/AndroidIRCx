@@ -81,6 +81,9 @@ export function useUISettings({
       store.setHideIrcServiceListenerMessages(
         await settingsService.getSetting('hideIrcServiceListenerMessages', true)
       );
+      store.setShowTypingIndicators(
+        await settingsService.getSetting('showTypingIndicators', true)
+      );
 
       // Load other UI settings (these aren't in UI store yet, so use setters)
       setAutoSwitchPrivate(
@@ -118,6 +121,12 @@ export function useUISettings({
         useUIStore.getState().setHideIrcServiceListenerMessages(Boolean(v));
       }
     );
+    const unsubTypingIndicators = settingsService.onSettingChange(
+      'showTypingIndicators',
+      (v: boolean) => {
+        useUIStore.getState().setShowTypingIndicators(Boolean(v));
+      }
+    );
 
     const unsubAutoFavorite = settingsService.onSettingChange(
       'autoConnectFavoriteServer',
@@ -129,6 +138,7 @@ export function useUISettings({
       unsubPart && unsubPart();
       unsubQuit && unsubQuit();
       unsubListenerHide && unsubListenerHide();
+      unsubTypingIndicators && unsubTypingIndicators();
       unsubAutoFavorite && unsubAutoFavorite();
     };
   }, [

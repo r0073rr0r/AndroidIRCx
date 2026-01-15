@@ -25,6 +25,7 @@ export function useLazyMessageHistory(params: UseLazyMessageHistoryParams) {
   const { activeTabId } = params;
   const loadedTabsRef = useRef<Set<string>>(new Set());
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const tabs = useTabStore(state => state.tabs);
   // Use ref to track activeTabId to avoid stale closures in async callbacks
   const activeTabIdRef = useRef<string | null>(activeTabId);
   
@@ -160,7 +161,7 @@ export function useLazyMessageHistory(params: UseLazyMessageHistoryParams) {
     return () => {
       subscription.remove();
     };
-  }, [activeTabId, forceReloadHistory]);
+  }, [activeTabId, forceReloadHistory, tabs.length]);
 
   useEffect(() => {
     if (!activeTabId) {
@@ -253,7 +254,6 @@ export function useLazyMessageHistory(params: UseLazyMessageHistoryParams) {
 
   // Clear loaded cache when tabs change (e.g., on network switch)
   // Subscribe to tabs to detect when they change
-  const tabs = useTabStore(state => state.tabs);
   useEffect(() => {
     const currentTabIds = new Set(tabs.map(t => t.id));
 

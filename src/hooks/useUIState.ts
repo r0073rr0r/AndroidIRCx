@@ -31,6 +31,7 @@ export function useUIState() {
   const isCheckingFirstRun = useUIStore(state => state.isCheckingFirstRun);
   const showRawCommands = useUIStore(state => state.showRawCommands);
   const rawCategoryVisibility = useUIStore(state => state.rawCategoryVisibility);
+  const showTypingIndicators = useUIStore(state => state.showTypingIndicators);
   const hideJoinMessages = useUIStore(state => state.hideJoinMessages);
   const hidePartMessages = useUIStore(state => state.hidePartMessages);
   const hideQuitMessages = useUIStore(state => state.hideQuitMessages);
@@ -107,6 +108,7 @@ export function useUIState() {
     isCheckingFirstRun,
     showRawCommands,
     rawCategoryVisibility,
+    showTypingIndicators,
     hideJoinMessages,
     hidePartMessages,
     hideQuitMessages,

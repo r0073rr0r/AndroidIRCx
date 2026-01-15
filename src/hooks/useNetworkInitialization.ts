@@ -109,7 +109,12 @@ export const useNetworkInitialization = (params: UseNetworkInitializationParams)
         });
 
         setTabs(tabsWithHistory);
-        setActiveTabId(initialServerId);
+        const lastActiveKey = `@AndroidIRCX:lastActiveTab:${initialNetworkName}`;
+        const lastActiveId = await AsyncStorage.getItem(lastActiveKey);
+        const nextActiveId = lastActiveId && tabsWithHistory.some(t => t.id === lastActiveId)
+          ? lastActiveId
+          : initialServerId;
+        setActiveTabId(nextActiveId);
 
       } catch (error) {
         console.error('Error loading initial data:', error);

@@ -143,8 +143,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const connection = connectionManager.getConnection(activeNetworkId);
     if (!connection?.ircService) return;
 
-    // Send TAGMSG with +typing tag
-    connection.ircService.sendRaw(`@+typing=${status} TAGMSG ${tabName}`);
+    // Send TAGMSG with typing tag (server-visible)
+    connection.ircService.sendRaw(`@typing=${status} TAGMSG ${tabName}`);
   };
 
   const handleSubmit = () => {

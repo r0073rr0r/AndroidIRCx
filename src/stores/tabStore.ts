@@ -5,6 +5,7 @@
  * Replaces tab-related useState calls from App.tsx
  */
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { ChannelTab } from '../types';
 import { tabService } from '../services/TabService';
@@ -45,6 +46,8 @@ export interface TabState {
   reset: () => void;
 }
 
+const LAST_ACTIVE_TAB_PREFIX = '@AndroidIRCX:lastActiveTab:';
+
 export const useTabStore = create<TabState>((set, get) => ({
   // Initial state
   tabs: [],
@@ -53,7 +56,15 @@ export const useTabStore = create<TabState>((set, get) => ({
   // Actions
   setTabs: (tabs) => set({ tabs }),
 
-  setActiveTabId: (id) => set({ activeTabId: id }),
+  setActiveTabId: (id) => {
+    set({ activeTabId: id });
+    const tab = get().tabs.find(t => t.id === id);
+    if (tab?.networkId) {
+      AsyncStorage.setItem(`${LAST_ACTIVE_TAB_PREFIX}${tab.networkId}`, id).catch(err => {
+        console.error('Failed to persist last active tab:', err);
+      });
+    }
+  },
 
   addTab: (tab) =>
     set((state) => {

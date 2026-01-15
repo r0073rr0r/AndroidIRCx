@@ -36,6 +36,7 @@ export interface UIState {
   // Message display settings
   showRawCommands: boolean;
   rawCategoryVisibility: Record<RawMessageCategory, boolean>;
+  showTypingIndicators: boolean;
   hideJoinMessages: boolean;
   hidePartMessages: boolean;
   hideQuitMessages: boolean;
@@ -110,6 +111,7 @@ export interface UIState {
   setShowRawCommands: (show: boolean) => void;
   setRawCategoryVisibility: (visibility: Record<RawMessageCategory, boolean>) => void;
   toggleRawCategory: (category: RawMessageCategory) => void;
+  setShowTypingIndicators: (show: boolean) => void;
   setHideJoinMessages: (hide: boolean) => void;
   setHidePartMessages: (hide: boolean) => void;
   setHideQuitMessages: (hide: boolean) => void;
@@ -180,6 +182,7 @@ const initialState = {
   adFreeTimeMs: 0,
   showRawCommands: true,
   rawCategoryVisibility: {} as Record<RawMessageCategory, boolean>,
+  showTypingIndicators: true,
   hideJoinMessages: false,
   hidePartMessages: false,
   hideQuitMessages: false,
@@ -266,6 +269,7 @@ export const useUIStore = create<UIState>()(
             [category]: !state.rawCategoryVisibility[category],
           },
         })),
+      setShowTypingIndicators: (show) => set({ showTypingIndicators: show }),
       setHideJoinMessages: (hide) => set({ hideJoinMessages: hide }),
       setHidePartMessages: (hide) => set({ hidePartMessages: hide }),
       setHideQuitMessages: (hide) => set({ hideQuitMessages: hide }),
@@ -355,6 +359,7 @@ export const useUIStore = create<UIState>()(
         adFreeTimeMs: state.adFreeTimeMs,
         showRawCommands: state.showRawCommands,
         rawCategoryVisibility: state.rawCategoryVisibility,
+        showTypingIndicators: state.showTypingIndicators,
         hideJoinMessages: state.hideJoinMessages,
         hidePartMessages: state.hidePartMessages,
         hideQuitMessages: state.hideQuitMessages,

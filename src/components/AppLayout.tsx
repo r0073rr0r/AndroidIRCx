@@ -36,6 +36,7 @@ interface AppLayoutProps {
   hideQuitMessages: boolean;
   hideIrcServiceListenerMessages: boolean;
   showEncryptionIndicators: boolean;
+  showTypingIndicators: boolean;
   typingUsers: Map<string, Map<string, Map<string, any>>>;
   bannerVisible: boolean;
   prefillMessage: string | null;
@@ -89,6 +90,7 @@ export function AppLayout({
   hideQuitMessages,
   hideIrcServiceListenerMessages,
   showEncryptionIndicators,
+  showTypingIndicators,
   typingUsers,
   bannerVisible,
   prefillMessage,
@@ -251,7 +253,7 @@ export function AppLayout({
           position="bottom"
         />
       )}
-      {activeTab && typingUsers.get(activeTab.networkId)?.get(activeTab.name) && (
+      {activeTab && showTypingIndicators && typingUsers.get(activeTab.networkId)?.get(activeTab.name) && (
         <TypingIndicator typingUsers={typingUsers.get(activeTab.networkId)!.get(activeTab.name)!} />
       )}
       <View style={[

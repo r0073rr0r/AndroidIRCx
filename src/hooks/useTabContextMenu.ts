@@ -139,12 +139,10 @@ export const useTabContextMenu = (params: UseTabContextMenuParams) => {
                   fingerprint,
                   FingerprintFormat.COLON_SEPARATED_UPPER
                 );
-                const command = `/msg NickServ CERT ADD ${formatted}`;
-
-                // Send command to IRC server
+                // Send PRIVMSG directly; "/msg" is a client-side alias and not a server command.
                 const tabConnection = connectionManager.getConnection(tab.networkId);
                 if (tabConnection?.ircService) {
-                  tabConnection.ircService.sendRaw(command.substring(1)); // Remove leading /
+                  tabConnection.ircService.sendRaw(`PRIVMSG NickServ :CERT ADD ${formatted}`);
                   safeAlert(t('Sent'), t('Certificate fingerprint sent to NickServ'));
                 } else {
                   safeAlert(t('Error'), t('Not connected to IRC server'));

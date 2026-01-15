@@ -47,6 +47,7 @@ interface AppModalsProps {
   showRawCommands: boolean;
   rawCategoryVisibility: Record<string, boolean>;
   showEncryptionIndicators: boolean;
+  showTypingIndicators: boolean;
   tabSortAlphabetical: boolean;
   dccTransfers: any[];
   channelName: string;
@@ -57,6 +58,7 @@ interface AppModalsProps {
   persistentSetShowRawCommands: (value: boolean) => void;
   persistentSetRawCategoryVisibility: (visibility: Record<string, boolean>) => void;
   persistentSetShowEncryptionIndicators: (value: boolean) => void;
+  persistentSetShowTypingIndicators: (value: boolean) => void;
   setActiveConnectionId: (id: string | null) => void;
   setTabs: (updater: ChannelTab[] | ((prev: ChannelTab[]) => ChannelTab[])) => void;
   getActiveIRCService: () => any;
@@ -77,6 +79,7 @@ export function AppModals({
   showRawCommands,
   rawCategoryVisibility,
   showEncryptionIndicators,
+  showTypingIndicators,
   tabSortAlphabetical,
   dccTransfers,
   channelName,
@@ -87,6 +90,7 @@ export function AppModals({
   persistentSetShowRawCommands,
   persistentSetRawCategoryVisibility,
   persistentSetShowEncryptionIndicators,
+  persistentSetShowTypingIndicators,
   setActiveConnectionId,
   setTabs,
   getActiveIRCService,
@@ -241,6 +245,8 @@ export function AppModals({
         onRawCategoryVisibilityChange={persistentSetRawCategoryVisibility}
         showEncryptionIndicators={showEncryptionIndicators}
         onShowEncryptionIndicatorsChange={persistentSetShowEncryptionIndicators}
+        showTypingIndicators={showTypingIndicators}
+        onShowTypingIndicatorsChange={persistentSetShowTypingIndicators}
         onShowIgnoreList={() => useUIStore.getState().setShowIgnoreList(true)}
         onShowPurchaseScreen={() => useUIStore.getState().setShowPurchaseScreen(true)}
       />

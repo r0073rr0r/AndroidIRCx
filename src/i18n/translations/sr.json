@@ -495,13 +495,13 @@
     "string": "Prikaz i korisnicki interfejs"
   },
   "Show Raw Commands": {
-    "string": "Show Raw Commands"
+    "string": "Prikaži sirove komande"
   },
   "Display raw IRC protocol messages": {
-    "string": "Display raw IRC protocol messages"
+    "string": "Prikaži sirove poruke IRC protokola"
   },
   "Hide Join Messages": {
-    "string": "Hide Join Messages"
+    "string": "Sakrij poruke o ulasku"
   },
   "Do not show join events in channels.": {
     "string": "Do not show join events in channels."
@@ -582,7 +582,7 @@
     "string": "Connection Statistics"
   },
   "Identity Profiles": {
-    "string": "Identity Profiles"
+    "string": "Identitetski profili"
   },
   "Global Proxy": {
     "string": "Global Proxy"
@@ -615,79 +615,79 @@
     "string": "Proxy server port"
   },
   "Proxy Username (optional)": {
-    "string": "Proxy Username (optional)"
+    "string": "Korisničko ime za proxy (opciono)"
   },
   "Leave blank if no authentication required": {
-    "string": "Leave blank if no authentication required"
+    "string": "Ostavi prazno ako autentifikacija nije potrebna"
   },
   "username": {
-    "string": "username"
+    "string": "Korisničko ime"
   },
   "Proxy Password (optional)": {
-    "string": "Proxy Password (optional)"
+    "string": "Lozinka za proxy (opciono)"
   },
   "password": {
-    "string": "password"
+    "string": "lozinka"
   },
   "Biometric Lock for Passwords": {
-    "string": "Biometric Lock for Passwords"
+    "string": "Biometrijsko zaključavanje za lozinke"
   },
   "PIN Lock for Passwords": {
-    "string": "PIN Lock for Passwords"
+    "string": "PIN zaključavanje za lozinke"
   },
   "Security": {
-    "string": "Security"
+    "string": "Bezbednost"
   },
   "Allow QR Verification": {
-    "string": "Allow QR Verification"
+    "string": "Dozvoli QR verifikaciju"
   },
   "Allow File Key Exchange": {
-    "string": "Allow File Key Exchange"
+    "string": "Dozvoli razmenu ključeva fajlom"
   },
   "Allow NFC Key Exchange": {
-    "string": "Allow NFC Key Exchange"
+    "string": "Dozvoli NFC razmenu ključeva"
   },
   "App Lock": {
-    "string": "App Lock"
+    "string": "Zaključavanje aplikacije"
   },
   "App Lock with Biometrics": {
-    "string": "App Lock with Biometrics"
+    "string": "Zaključavanje aplikacije biometrijom"
   },
   "App Lock with PIN": {
-    "string": "App Lock with PIN"
+    "string": "Zaključavanje aplikacije sa PIN"
   },
   "PIN unlock enabled": {
-    "string": "PIN unlock enabled"
+    "string": "PIN otključavanje omogućeno"
   },
   "Use a PIN to unlock": {
-    "string": "Use a PIN to unlock"
+    "string": "Koristi PIN za otključavanje"
   },
   "Lock on Launch": {
-    "string": "Lock on Launch"
+    "string": "Zaključaj pri pokretanju"
   },
   "Locks when app is opened": {
-    "string": "Locks when app is opened"
+    "string": "Zaključava pri otvaranju aplikacije"
   },
   "Does not lock on launch": {
-    "string": "Does not lock on launch"
+    "string": "Ne zaključava pri pokretanju"
   },
   "Lock on Background": {
-    "string": "Lock on Background"
+    "string": "Zaključaj u pozadini"
   },
   "Locks after app is backgrounded": {
-    "string": "Locks after app is backgrounded"
+    "string": "Zaključava kada aplikacija ide u pozadinu"
   },
   "Does not lock on background": {
-    "string": "Does not lock on background"
+    "string": "Ne zaključava u pozadini"
   },
   "Lock Now": {
-    "string": "Lock Now"
+    "string": "Zaključaj odmah"
   },
   "Immediately lock the app": {
-    "string": "Immediately lock the app"
+    "string": "Odmah zaključaj aplikaciju"
   },
   "Channels": {
-    "string": "Channels"
+    "string": "Kanali"
   },
   "{count} favorite across networks": {
     "string": "{count} favorite across networks"

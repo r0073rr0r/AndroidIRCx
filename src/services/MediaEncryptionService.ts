@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MediaEncryptionService - Encrypt/decrypt media files using existing E2E keys
  *
  * IMPORTANT: This service REUSES existing E2E encryption keys:

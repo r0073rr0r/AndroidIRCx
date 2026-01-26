@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MessageBatcher.ts
  *
  * Batches rapid message updates to reduce re-renders and improve performance.

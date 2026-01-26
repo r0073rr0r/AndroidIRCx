@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,

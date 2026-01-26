@@ -1,10 +1,11 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * ChannelManagementService
  * 
  * Manages channel state including modes, bans, exceptions, keys, limits, and topics.
  * Tracks channel information and provides methods to query and modify channel settings.
- * Copyright (c) 2025-2026 Velimir Majstorov
- * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { IRCService } from './IRCService';

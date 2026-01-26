@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import React from 'react';
 import { View, Text, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';

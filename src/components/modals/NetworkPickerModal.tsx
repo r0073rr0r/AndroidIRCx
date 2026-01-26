@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * Network Picker Modal
  *
  * Modal for selecting a network to add a ZNC server to.

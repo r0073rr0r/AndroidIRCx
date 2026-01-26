@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 const en = require('./en.json') as Record<string, string>;
 const fr = require('./fr.json') as Record<string, string>;
 const de = require('./de.json') as Record<string, string>;

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import React from 'react';
 import { SettingItem as SettingItemType, SettingIcon } from '../../types/settings';
 import { SettingSwitch } from './SettingSwitch';

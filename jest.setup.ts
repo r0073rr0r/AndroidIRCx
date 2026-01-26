@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 // Global Jest setup for React Native project to mock native modules used in tests.
 
 jest.mock('@react-native-async-storage/async-storage', () => {

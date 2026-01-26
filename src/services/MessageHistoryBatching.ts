@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MessageHistoryBatching.ts
  *
  * Batches message history writes to reduce AsyncStorage I/O operations.

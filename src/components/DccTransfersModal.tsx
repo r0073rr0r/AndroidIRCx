@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import React from 'react';
 import { Modal, TouchableOpacity, View, Text, Alert } from 'react-native';
 import Share from 'react-native-share';

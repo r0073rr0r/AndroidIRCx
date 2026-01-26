@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * SoundService - Manages notification sound playback
  *
  * Uses react-native-sound for audio playback.

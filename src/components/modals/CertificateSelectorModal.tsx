@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * Certificate Selector Modal
  *
  * UI for selecting existing certificates or generating new ones.

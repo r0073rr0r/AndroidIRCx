@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import TcpSocket, { Server, Socket } from 'react-native-tcp-socket';
 import { IRCMessage } from './IRCService';
 import { tx } from '../i18n/transifex';

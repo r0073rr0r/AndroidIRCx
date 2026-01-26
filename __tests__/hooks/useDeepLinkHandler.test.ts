@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * Tests for useDeepLinkHandler hook
  * Tests deep link handling to ensure no duplicate connections or tab flooding
  */

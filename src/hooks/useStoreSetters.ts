@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * useStoreSetters.ts
  *
  * Hook that provides stable setter references for all Zustand stores.

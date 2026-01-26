@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { useCallback } from 'react';
 import { ChannelTab } from '../services/IRCService';
 import { encryptedDMService } from '../services/EncryptedDMService';

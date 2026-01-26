@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * Certificate Manager Service
  *
  * Manages RSA-2048 X.509 self-signed certificates for IRC SASL EXTERNAL authentication.

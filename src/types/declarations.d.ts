@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 // Declaration file for modules without TypeScript definitions
 
 declare module 'react-native-vector-icons/FontAwesome5' {

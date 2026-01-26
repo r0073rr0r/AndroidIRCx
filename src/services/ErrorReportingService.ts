@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import crashlytics from '@react-native-firebase/crashlytics';
 import { Linking, Platform } from 'react-native';
 import { logger } from './Logger';

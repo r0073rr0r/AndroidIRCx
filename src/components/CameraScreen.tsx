@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * CameraScreen - Full-screen camera for taking photos
  * 
  * Uses react-native-vision-camera to capture photos

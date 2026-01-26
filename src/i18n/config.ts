@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import Config from 'react-native-config';
 
 export const TRANSIFEX_NATIVE_TOKEN = Config.TRANSIFEX_NATIVE_TOKEN ?? '';

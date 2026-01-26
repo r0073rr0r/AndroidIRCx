@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { useEffect } from 'react';
 import { initializeAppCheck } from '@react-native-firebase/app-check';
 import { getApp } from '@react-native-firebase/app';

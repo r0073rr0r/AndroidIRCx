@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import { Alert, Platform, PermissionsAndroid } from 'react-native';
 import { notificationService, NotificationPreferences } from '../services/NotificationService';

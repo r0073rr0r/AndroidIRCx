@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MediaUploadModal - Select media source (camera, gallery, file, voice)
  *
  * Grid layout with action buttons:

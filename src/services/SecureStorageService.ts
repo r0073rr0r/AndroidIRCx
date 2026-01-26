@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Optional dependency: react-native-keychain. Code guards in case it's missing.

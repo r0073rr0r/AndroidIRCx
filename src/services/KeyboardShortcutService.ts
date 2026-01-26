@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 // KeyboardShortcutService.ts
 // This service provides a simple way to register keyboard shortcuts for the app.
 // It uses the 'react-native-keyevent' library on Android to capture hardware keyboard events.

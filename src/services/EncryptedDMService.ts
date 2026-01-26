@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import sodium from 'react-native-libsodium';
 import { x25519 } from '@noble/curves/ed25519.js';
 import { TextEncoder, TextDecoder } from 'text-encoding';

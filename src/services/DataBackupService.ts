@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { tx } from '../i18n/transifex';
 import { identityProfilesService } from './IdentityProfilesService';

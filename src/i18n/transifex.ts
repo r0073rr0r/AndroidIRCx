@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { tx, SourceErrorPolicy, SourceStringPolicy, normalizeLocale } from '@transifex/native';
 import { TXProvider, useT } from '@transifex/react';
 import * as RNLocalize from 'react-native-localize';

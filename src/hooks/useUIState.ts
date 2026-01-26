@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * useUIState.ts
  *
  * Hook that provides UI state subscriptions from Zustand stores.

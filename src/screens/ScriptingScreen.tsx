@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Switch, TextInput, Modal, ScrollView, Alert, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { scriptingService, ScriptConfig, ScriptLogEntry } from '../services/ScriptingService';

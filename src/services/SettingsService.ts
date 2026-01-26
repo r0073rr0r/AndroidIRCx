@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { DEFAULT_PROFILE_ID, identityProfilesService } from './IdentityProfilesService';
 import { secureStorageService } from './SecureStorageService';
 import { storageCache } from './StorageCache';

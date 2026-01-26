@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * VideoRecorderScreen - Full-screen camera for recording videos
  * 
  * Uses react-native-vision-camera to record videos with audio

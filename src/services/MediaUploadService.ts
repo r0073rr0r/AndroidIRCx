@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MediaUploadService - Handle media upload to AndroidIRCx API
  *
  * Two-step upload process:

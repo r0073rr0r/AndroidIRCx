@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { useEffect, useRef, useCallback } from 'react';
 import { Alert, Linking } from 'react-native';
 import { parseIRCUrl, findMatchingNetwork, createTempNetworkFromUrl, getUrlDisplayName } from '../utils/ircUrlParser';

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Alert, Modal, View, Text, TextInput, TouchableOpacity, AppState, ScrollView, Switch } from 'react-native';
 import { SettingItem } from '../SettingItem';

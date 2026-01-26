@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { useEffect, useRef, useState } from 'react';
 import { Alert } from 'react-native';
 import { IRCMessage, ChannelUser } from '../services/IRCService';

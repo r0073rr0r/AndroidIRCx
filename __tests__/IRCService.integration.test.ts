@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { IRCService, IRCConnectionConfig, IRCMessage } from '../src/services/IRCService';
 import { DEFAULT_PART_MESSAGE, DEFAULT_QUIT_MESSAGE, settingsService } from '../src/services/SettingsService';
 import { FakeSocket } from '../test-support/FakeSocket';

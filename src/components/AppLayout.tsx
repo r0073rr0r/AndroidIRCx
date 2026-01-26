@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * AppLayout.tsx
  *
  * Component that renders the main app layout (tabs, message area, user list).

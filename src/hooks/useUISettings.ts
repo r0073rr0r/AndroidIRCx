@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2025-2026 Velimir Majstorov
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * useUISettings Hook
  *
  * Loads and syncs UI-related settings from storage to UI store:

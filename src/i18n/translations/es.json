@@ -7459,5 +7459,20 @@
   },
   "These are all current channel modes. Use switches below to toggle common modes.": {
     "string": "Estos son todos los modos de canal actuales. Use los interruptores a continuación para alternar los modos comunes."
+  },
+  "Enter a valid number": {
+    "string": "Ingrese un número válido"
+  },
+  "Value must be greater than 0": {
+    "string": "El valor debe ser mayor que 0"
+  },
+  "Nicklist Tongue Button": {
+    "string": "Botón de La Lista Nicklist"
+  },
+  "Show a small center handle to open/close the user list": {
+    "string": "Mostrar un pequeño identificador central para abrir/cerrar la lista de usuarios"
+  },
+  "Nicklist Tongue Size": {
+    "string": ""
   }
 }

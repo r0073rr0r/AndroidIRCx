@@ -245,6 +245,7 @@ export const useMessageBatching = (params: UseMessageBatchingParams) => {
           if (hasValidNetwork) {
             if (!tabsModified) newTabs = [...newTabs];
             const channelName = message.channel || message.from || targetTabId;
+            //console.log(`📨 useMessageBatching: Creating new tab ${targetTabId} with message (batchTag: ${message.batchTag || 'none'})`);
             newTabs.push({
               id: targetTabId,
               name: targetTabType === 'server' ? messageNetwork : channelName,
@@ -272,6 +273,7 @@ export const useMessageBatching = (params: UseMessageBatchingParams) => {
           // Update existing tab
           if (!tabsModified) newTabs = [...newTabs];
           const tab = newTabs[tabIndex];
+          //console.log(`📨 useMessageBatching: Adding message to existing tab ${tab.id} (current: ${tab.messages.length}, batchTag: ${message.batchTag || 'none'}, isPlayback: ${message.isPlayback || false})`);
           const newMessages = [...tab.messages, message];
           const perfConfig = performanceService.getConfig();
           const messagesFinal =
@@ -284,6 +286,7 @@ export const useMessageBatching = (params: UseMessageBatchingParams) => {
             messages: messagesFinal,
             hasActivity: tab.id !== activeTabId ? true : tab.hasActivity,
           };
+          //console.log(`📨 useMessageBatching: Tab ${tab.id} now has ${messagesFinal.length} messages`);
           tabsModified = true;
         }
       }
@@ -296,7 +299,7 @@ export const useMessageBatching = (params: UseMessageBatchingParams) => {
       }
       const result = newTabs.length === prevTabs.length ? newTabs : sortTabsGrouped(newTabs, tabSortAlphabetical);
       if (__DEV__) {
-        console.log('✅ Batch processed, returning', result.length, 'tabs');
+        //console.log('✅ Batch processed, returning', result.length, 'tabs');
       }
       return result;
     });

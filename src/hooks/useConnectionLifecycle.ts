@@ -256,6 +256,9 @@ export const useConnectionLifecycle = (params: UseConnectionLifecycleParams) => 
 
       // Listen for messages per connection
       const unsubscribeMessages = activeIRCService.onMessage(async (message: IRCMessage) => {
+        if (__DEV__ || message.batchTag) {
+          //console.log(`📥 useConnectionLifecycle: Received message type=${message.type}, channel=${message.channel}, batchTag=${message.batchTag || 'none'}`);
+        }
         const latest = latestRef.current;
         // Check if user is ignored (filter messages from ignored users)
         if (message.from && message.type === 'message') {
@@ -556,10 +559,11 @@ export const useConnectionLifecycle = (params: UseConnectionLifecycleParams) => 
           },
         });
 
-        if (__DEV__) {
-//           console.log('📨 Message queued for batch:', {
+        if (__DEV__ || message.batchTag) {
+//           console.log('📥 useConnectionLifecycle: Message queued for batch:', {
 //             type: message.type,
-//             text: message.text?.substring(0, 50),
+//             channel: message.channel,
+//             batchTag: message.batchTag || 'none',
 //             queueLength: latest.pendingMessagesRef.current.length,
 //             targetTab: targetTabId,
 //           });

@@ -11,6 +11,8 @@
 import React, { useEffect } from 'react';
 import { Modal } from 'react-native';
 import { useUIStore } from '../stores/uiStore';
+import { useTabStore } from '../stores/tabStore';
+import { connectionManager } from '../services/ConnectionManager';
 import { useStoreSetters } from '../hooks/useStoreSetters';
 import { useUIState } from '../hooks/useUIState';
 import { FirstRunSetupScreen } from '../screens/FirstRunSetupScreen';
@@ -284,6 +286,38 @@ export function AppModals({
           nick={whoisNick}
           network={activeTab?.networkId}
           onClose={() => {
+            useUIStore.getState().setShowWHOIS(false);
+            useUIStore.getState().setWhoisNick('');
+          }}
+          onChannelPress={(channel) => {
+            // Send join command for the channel
+            const network = activeTab?.networkId;
+            if (network) {
+              const connection = connectionManager.getConnection(network);
+              connection?.ircService?.sendRaw(`JOIN ${channel}`);
+            }
+          }}
+          onNickPress={(nick) => {
+            // Open query with the nick
+            const network = activeTab?.networkId;
+            if (!network) return;
+            const queryId = `query:${network}:${nick.toLowerCase()}`;
+            const tabStore = useTabStore.getState();
+            const existingTab = tabStore.tabs.find(t => t.id === queryId && t.type === 'query');
+            if (existingTab) {
+              tabStore.setActiveTabId(existingTab.id);
+            } else {
+              const newQueryTab = {
+                id: queryId,
+                name: nick,
+                type: 'query' as const,
+                networkId: network,
+                messages: [],
+              };
+              tabStore.setTabs([...tabStore.tabs, newQueryTab]);
+              tabStore.setActiveTabId(newQueryTab.id);
+            }
+            // Close WHOIS modal
             useUIStore.getState().setShowWHOIS(false);
             useUIStore.getState().setWhoisNick('');
           }}

@@ -26,6 +26,8 @@ interface WHOISDisplayProps {
   nick: string;
   network?: string;
   onClose: () => void;
+  onChannelPress?: (channel: string) => void;
+  onNickPress?: (nick: string) => void;
 }
 
 export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
@@ -33,6 +35,8 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
   nick,
   network,
   onClose,
+  onChannelPress,
+  onNickPress,
 }) => {
   const t = useT();
   const [whoisInfo, setWhoisInfo] = useState<WHOISInfo | undefined>();
@@ -190,7 +194,13 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
       onRequestClose={onClose}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>{t('WHOIS: {nick}', { nick })}</Text>
+          {onNickPress ? (
+            <TouchableOpacity onPress={() => onNickPress(nick)} activeOpacity={0.7}>
+              <Text style={styles.headerTitle}>{t('WHOIS: {nick}', { nick })}</Text>
+            </TouchableOpacity>
+          ) : (
+            <Text style={styles.headerTitle}>{t('WHOIS: {nick}', { nick })}</Text>
+          )}
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeButtonText}>{t('Close')}</Text>
           </TouchableOpacity>
@@ -284,9 +294,34 @@ export const WHOISDisplay: React.FC<WHOISDisplayProps> = ({
               {whoisInfo.channels && whoisInfo.channels.length > 0 && (
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>{t('Channels')}</Text>
-                  <Text style={styles.infoValue}>
-                    {whoisInfo.channels.join(', ')}
-                  </Text>
+                  <View style={styles.channelsContainer}>
+                    {whoisInfo.channels.map((channel, index) => {
+                      // Extract channel name without prefix (@, +, %, etc.)
+                      const cleanChannel = channel.replace(/^[~&@%+]/, '');
+                      const prefix = channel.match(/^[~&@%+]/)?.[0] || '';
+                      return (
+                        <React.Fragment key={channel}>
+                          {index > 0 && <Text style={styles.channelSeparator}>, </Text>}
+                          {onChannelPress ? (
+                            <TouchableOpacity
+                              onPress={() => onChannelPress(cleanChannel)}
+                              activeOpacity={0.7}
+                            >
+                              <Text style={styles.channelText}>
+                                {prefix && <Text style={styles.channelPrefix}>{prefix}</Text>}
+                                {cleanChannel}
+                              </Text>
+                            </TouchableOpacity>
+                          ) : (
+                            <Text style={styles.channelText}>
+                              {prefix && <Text style={styles.channelPrefix}>{prefix}</Text>}
+                              {cleanChannel}
+                            </Text>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </View>
                 </View>
               )}
             </>
@@ -578,6 +613,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#212121',
     marginBottom: 6,
+  },
+  channelsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+  },
+  channelSeparator: {
+    fontSize: 14,
+    color: '#757575',
+  },
+  channelText: {
+    fontSize: 14,
+    color: '#2196F3',
+    textDecorationLine: 'underline',
+  },
+  channelPrefix: {
+    color: '#757575',
+    textDecorationLine: 'none',
   },
 });
 

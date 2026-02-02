@@ -136,6 +136,12 @@ export interface IRCMessage {
   command?: string;
   isScrollback?: boolean; // Message loaded from local scrollback history
   isPlayback?: boolean; // Message from bouncer playback buffer
+  batchTag?: string; // IRCv3.2 batch tag - indicates message is part of a batch
+  whoisData?: {
+    // Structured WHOIS data for clickable rendering
+    nick?: string;
+    channels?: string[];
+  };
 }
 
 export interface ChannelUser {
@@ -512,6 +518,8 @@ export class IRCService {
         this.capEnabledSet.clear();
         this.capLSReceived = false;
         this.capLSVersion = 300;
+        this.userhostInNames = false;
+        this.extendedJoin = false;
 
         const proxy =
           config.proxy && config.proxy.enabled === false
@@ -899,7 +907,7 @@ export class IRCService {
 
   private handleIRCMessage(line: string): void {
     if (this.verboseLogging) {
-      this.logRaw(`IRCService: << ${line.substring(0, 150)}`);
+      this.logRaw(`IRCService: << ${line.substring(0, 200)}`);
     }
     let tags: Map<string, string> = new Map();
     let messageLine = line;
@@ -1423,7 +1431,7 @@ export class IRCService {
             hostname,
             target,
             command: 'PRIVMSG',
-          });
+          }, batchTag); // Pass batchTag for IRCv3 batch support (chathistory)
         }
         break;
 
@@ -1545,7 +1553,7 @@ export class IRCService {
           hostname: noticeHostname,
           target: noticeTarget,
           command: 'NOTICE',
-        });
+        }, batchTag); // Pass batchTag for IRCv3 batch support (chathistory)
         break;
       case 'WALLOPS': {
         const wallopsText = params[0] || '';
@@ -2849,6 +2857,11 @@ export class IRCService {
           this.namesBuffer.delete(endChannel);
           this.emitUserListChange(endChannel, Array.from(usersMap.values()));
           this.maybeEmitChannelIntro(endChannel, timestamp);
+          
+          // Request channel history if supported by server
+          if (this.capEnabledSet.has('chathistory') || this.capEnabledSet.has('draft/chathistory')) {
+            this.requestChatHistory(endChannel, 50);
+          }
         }
         break;
       }
@@ -3943,7 +3956,10 @@ export class IRCService {
           text: t('*** End of WHOIS for {nick}', { nick: whoisNick }),
           timestamp: timestamp,
           isRaw: true,
-          rawCategory: 'server'
+          rawCategory: 'server',
+          whoisData: {
+            nick: whoisNick
+          }
         });
         break;
       }
@@ -3951,13 +3967,19 @@ export class IRCService {
       case 319: {
         // RPL_WHOISCHANNELS: :server 319 yournick theirnick :@#channel1 +#channel2 #channel3
         const whoisNick = params[1] || '';
-        const channels = params.slice(2).join(' ').replace(/^:/, '') || '';
+        const channelsStr = params.slice(2).join(' ').replace(/^:/, '') || '';
+        // Parse channels for structured data
+        const channels = channelsStr.split(/\s+/).filter(c => c.length > 0);
         this.addMessage({
           type: 'raw',
-          text: t('*** {nick} is on channels: {channels}', { nick: whoisNick, channels }),
+          text: t('*** {nick} is on channels: {channels}', { nick: whoisNick, channels: channelsStr }),
           timestamp: timestamp,
           isRaw: true,
-          rawCategory: 'server'
+          rawCategory: 'server',
+          whoisData: {
+            nick: whoisNick,
+            channels: channels
+          }
         });
         break;
       }
@@ -4236,20 +4258,36 @@ export class IRCService {
   }
 
   private handleCAPCommand(params: string[]): void {
-    const subcommand = params[0]?.toUpperCase();
+    // Handle CAP responses where first param might be '*' (placeholder for nick before registration)
+    let subcommand = params[0]?.toUpperCase();
+    let actualParams = params;
+    
+    if (subcommand === '*') {
+      // Multi-line CAP response: * LS :caps... or * ACK :caps...
+      subcommand = params[1]?.toUpperCase();
+      actualParams = params.slice(1);
+    }
     
     switch (subcommand) {
       case 'LS':
         let capabilities = '';
         let isLastLine = false;
         
-        if (params.length >= 2) {
-          if (params[1] === '*') {
-            capabilities = params.slice(2).join(' ').replace(/^:/, '');
+        // Handle multi-line CAP LS responses
+        // Format: :* LS :cap1 cap2... (multi-line) or :LS :cap1 cap2... (single line)
+        if (actualParams.length >= 2) {
+          if (actualParams[1] === '*') {
+            // Multi-line response: LS * :cap1 cap2...
+            capabilities = actualParams.slice(2).join(' ').replace(/^:/, '');
           } else {
+            // Single line response: LS :cap1 cap2...
             isLastLine = true;
-            capabilities = params.slice(1).join(' ').replace(/^:/, '');
+            capabilities = actualParams.slice(1).join(' ').replace(/^:/, '');
           }
+        } else if (actualParams.length === 1) {
+          // Last line of multi-line: just capabilities
+          isLastLine = true;
+          capabilities = actualParams[0].replace(/^:/, '');
         }
         
         const capList = capabilities.split(/\s+/).filter(c => c && c !== '*');
@@ -4270,9 +4308,8 @@ export class IRCService {
         break;
         
       case 'ACK':
-        const ackCapsString = params.slice(1).join(' ').replace(/^:/, '');
+        const ackCapsString = actualParams.slice(1).join(' ').replace(/^:/, '');
         const ackCaps = ackCapsString.split(/\s+/).filter(c => c);
-        
         ackCaps.forEach(cap => {
           const [capName, capValue] = cap.split('=');
           if (capName) {
@@ -4280,6 +4317,12 @@ export class IRCService {
             this.logRaw(`IRCService: CAP enabled: ${capName}`);
             if (capName === 'sts' && capValue && this.config) {
               this.emit('sts-policy', this.config.host, capValue);
+            }
+            if (capName === 'userhost-in-names') {
+              this.userhostInNames = true;
+            }
+            if (capName === 'extended-join') {
+              this.extendedJoin = true;
             }
           }
         });
@@ -4293,7 +4336,7 @@ export class IRCService {
         break;
         
       case 'NAK':
-        const nakCaps = params.slice(1).join(' ').replace(/^:/, '').split(/\s+/).filter(c => c);
+        const nakCaps = actualParams.slice(1).join(' ').replace(/^:/, '').split(/\s+/).filter(c => c);
         nakCaps.forEach(cap => {
           this.logRaw(`IRCService: CAP rejected: ${cap}`);
           this.capRequested.delete(cap);
@@ -4304,7 +4347,7 @@ export class IRCService {
 
       case 'NEW':
         // cap-notify: server advertises new capabilities
-        const newCapsString = params.slice(1).join(' ').replace(/^:/, '');
+        const newCapsString = actualParams.slice(1).join(' ').replace(/^:/, '');
         const newCaps = newCapsString.split(/\s+/).filter(c => c);
 
         newCaps.forEach(cap => {
@@ -4323,7 +4366,7 @@ export class IRCService {
             'server-time', 'account-notify', 'extended-join', 'userhost-in-names',
             'away-notify', 'chghost', 'message-tags', 'typing', 'draft/typing', 'batch', 'labeled-response',
             'echo-message', 'multi-prefix', 'invite-notify', 'monitor', 'account-tag',
-            'setname', 'metadata', 'draft/multiline', 'draft/chathistory', 'draft/read-marker',
+            'setname', 'metadata', 'draft/multiline', 'chathistory', 'draft/chathistory', 'draft/read-marker',
             'draft/message-redaction'
           ].includes(c));
 
@@ -4334,10 +4377,10 @@ export class IRCService {
         }
         break;
 
-      case 'DEL':
+      case 'DEL': {
         // cap-notify: server removes capabilities
-        const delCapsString = params.slice(1).join(' ').replace(/^:/, '');
-        const delCaps = delCapsString.split(/\s+/).filter(c => c);
+        const delCapsStr = actualParams.slice(1).join(' ').replace(/^:/, '');
+        const delCaps = delCapsStr.split(/\s+/).filter(c => c);
 
         delCaps.forEach(cap => {
           if (this.capAvailable.has(cap)) {
@@ -4349,6 +4392,7 @@ export class IRCService {
           }
         });
         break;
+      }
     }
   }
 
@@ -4364,14 +4408,15 @@ export class IRCService {
   }
 
   private requestCapabilities(): void {
-    const capsToRequest: string[] = [
+    const allCapsWeWant = [
       'server-time', 'account-notify', 'extended-join', 'userhost-in-names',
       'away-notify', 'chghost', 'message-tags', 'typing', 'draft/typing', 'batch', 'labeled-response',
       'echo-message', 'multi-prefix', 'invite-notify', 'monitor', 'extended-monitor',
       'cap-notify', 'account-tag', 'setname', 'standard-replies', 'message-ids',
-      'bot', 'utf8only', 'draft/chathistory', 'draft/multiline', 'draft/read-marker',
+      'bot', 'utf8only', 'chathistory', 'draft/chathistory', 'draft/multiline', 'draft/read-marker',
       'draft/message-redaction', 'sts'
-    ].filter(cap => this.capAvailable.has(cap));
+    ];
+    const capsToRequest: string[] = allCapsWeWant.filter(cap => this.capAvailable.has(cap));
     
     if ((this.config?.sasl || (this.config?.clientCert && this.config?.clientKey)) && this.capAvailable.has('sasl')) {
       capsToRequest.push('sasl');
@@ -4534,10 +4579,9 @@ export class IRCService {
       const at = nick.indexOf('@');
       if (exclamation !== -1 && at !== -1) {
         const parsedNick = nick.substring(0, exclamation);
-        const user = nick.substring(exclamation + 1, at);
         host = nick.substring(at + 1);
         nick = parsedNick;
-        if (user && user !== '*') account = user;
+        // Note: we don't set account here - account comes from extended-join or account-notify
       }
     }
     
@@ -5205,17 +5249,12 @@ export class IRCService {
    * Handle start of BATCH (IRCv3.2)
    */
   private handleBatchStart(refTag: string, type: string, params: string[], timestamp: number): void {
-    this.logRaw(`IRCService: BATCH START - ref=${refTag}, type=${type}, params=${params.join(' ')}`);
-
     this.activeBatches.set(refTag, {
       type,
       params,
       messages: [],
       startTime: timestamp,
     });
-
-    // Log batch start for debugging
-    this.addRawMessage(t('*** BATCH START: {type} ({ref})', { type, ref: refTag }), 'server');
   }
 
   /**
@@ -5224,11 +5263,8 @@ export class IRCService {
   private handleBatchEnd(refTag: string, timestamp: number): void {
     const batch = this.activeBatches.get(refTag);
     if (!batch) {
-      this.logRaw(`IRCService: BATCH END - unknown batch ref=${refTag}`);
       return;
     }
-
-    this.logRaw(`IRCService: BATCH END - ref=${refTag}, type=${batch.type}, messages=${batch.messages.length}`);
 
     // Process completed batch based on type
     this.processBatch(refTag, batch, timestamp);
@@ -5281,15 +5317,7 @@ export class IRCService {
       }
 
       case 'chathistory': {
-        // Chat history playback: emit messages in order
-        this.addMessage({
-          type: 'raw',
-          text: t('*** Loading chat history ({count} messages)', { count: messages.length }),
-          timestamp,
-          isRaw: true,
-          rawCategory: 'server',
-        });
-        // Messages are already added during batch, just log completion
+        // Chat history loaded silently - messages are already in the channel
         break;
       }
 
@@ -5329,7 +5357,6 @@ export class IRCService {
     const batch = this.activeBatches.get(batchTag);
     if (batch) {
       batch.messages.push(message);
-      this.logRaw(`IRCService: Message added to batch ${batchTag} (${batch.messages.length} total)`);
     }
   }
 
@@ -5451,13 +5478,14 @@ export class IRCService {
   }
 
   requestChatHistory(target: string, limit: number = 100, before?: string): void {
-    // IRCv3 draft/chathistory capability - request message history
-    if (this.isConnected && this.capEnabledSet.has('draft/chathistory')) {
+    // IRCv3 chathistory capability - request message history
+    const hasChatHistory = this.capEnabledSet.has('chathistory') || this.capEnabledSet.has('draft/chathistory');
+    if (this.isConnected && hasChatHistory) {
       // CHATHISTORY LATEST <target> <timestamp|msgid|*> <limit>
       const reference = before || '*';
       this.sendRaw(`CHATHISTORY LATEST ${target} ${reference} ${limit}`);
       this.logRaw(`IRCService: Requesting chat history for ${target} (limit: ${limit})`);
-    } else if (!this.capEnabledSet.has('draft/chathistory')) {
+    } else if (!hasChatHistory) {
       this.addMessage({
         type: 'error',
         text: t('CHATHISTORY is not supported by this server'),
@@ -6505,10 +6533,12 @@ export class IRCService {
   }
 
   addMessage(message: Omit<IRCMessage, 'id' | 'network'> & { status?: 'pending' | 'sent' }, batchTag?: string): void {
-    const fullMessage: IRCMessage = { ...message, id: `${Date.now()}-${Math.random()}`, network: this.getNetworkName() };
-    if (this.verboseLogging) {
-      this.logRaw(`IRCService: Adding message - Type: ${fullMessage.type}, Channel: ${fullMessage.channel || 'N/A'}, Text: ${fullMessage.text?.substring(0, 50) || 'N/A'}`);
-    }
+    const fullMessage: IRCMessage = { 
+      ...message, 
+      id: `${Date.now()}-${Math.random()}`, 
+      network: this.getNetworkName(),
+      batchTag 
+    };
 
     // Add to batch if batch tag is present
     if (batchTag) {
@@ -6532,9 +6562,6 @@ export class IRCService {
   }
 
   private emitMessage(message: IRCMessage): void {
-    if (this.verboseLogging) {
-      this.logRaw(`IRCService: Emitting message to ${this.messageListeners.length} listeners`);
-    }
     if (this.messageListeners.length === 0) {
       // Buffer early messages until at least one listener is attached (keep last 100 to avoid unbounded growth)
       this.pendingMessages.push(message);

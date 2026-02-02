@@ -26,6 +26,7 @@ import { pick, types, errorCodes, isErrorWithCode } from '@react-native-document
 import NfcManager, { Ndef, NfcTech } from 'react-native-nfc-manager';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { IRCMessage, RawMessageCategory, ChannelUser } from '../services/IRCService';
+import { ChannelTab } from '../types';
 import { useTheme } from '../hooks/useTheme';
 import { useT } from '../i18n/transifex';
 import { parseMessage, isVideoUrl, isAudioUrl, isDownloadableFileUrl } from '../utils/MessageParser';
@@ -87,6 +88,7 @@ interface MessageItemProps {
   currentNick: string;
   isGrouped: boolean;
   onNickLongPress?: (nick: string) => void;
+  onNickPress?: (nick: string) => void;
   onChannelPress?: (channel: string) => void;
   onPressMessage?: (message: IRCMessage) => void;
   onLongPressMessage?: (message: IRCMessage) => void;
@@ -152,6 +154,7 @@ const MessageItem = React.memo<MessageItemProps>(({
   currentNick,
   isGrouped,
   onNickLongPress,
+  onNickPress,
   onChannelPress,
   onPressMessage,
   onLongPressMessage,
@@ -602,11 +605,61 @@ const MessageItem = React.memo<MessageItemProps>(({
           </Text>
         )}
         {message.type === 'raw' ? (
-          formatIRCTextAsComponent(
-            message.text.startsWith(`:${currentNick}!`)
-              ? message.text.substring(message.text.indexOf(' ') + 1) // Remove the entire :nick!user@host part
-              : message.text,
-            StyleSheet.flatten([styles.messageText, { color: getMessageColor(message.type) }])
+          message.whoisData?.channels ? (
+            // Render WHOIS channels with clickable links
+            <Text style={StyleSheet.flatten([styles.messageText, { color: getMessageColor(message.type) }])}>
+              <Text>*** {message.whoisData.nick} is on channels: </Text>
+              {message.whoisData.channels.map((channel, index) => {
+                const cleanChannel = channel.replace(/^[~&@%+]/, '');
+                const prefix = channel.match(/^[~&@%+]/)?.[0] || '';
+                return (
+                  <React.Fragment key={channel}>
+                    {index > 0 && <Text>, </Text>}
+                    {prefix && <Text>{prefix}</Text>}
+                    {onChannelPress ? (
+                      <Text
+                        style={{ color: colors.primary, textDecorationLine: 'underline' }}
+                        onPress={() => onChannelPress(cleanChannel)}
+                      >
+                        {cleanChannel}
+                      </Text>
+                    ) : (
+                      <Text>{cleanChannel}</Text>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </Text>
+          ) : message.whoisData?.nick ? (
+            // Render other WHOIS messages with clickable nick
+            <Text style={StyleSheet.flatten([styles.messageText, { color: getMessageColor(message.type) }])}>
+              {(() => {
+                const parts = message.text.split(message.whoisData.nick);
+                return (
+                  <>
+                    {parts[0]}
+                    {onNickPress ? (
+                      <Text
+                        style={{ color: colors.primary, textDecorationLine: 'underline' }}
+                        onPress={() => onNickPress(message.whoisData!.nick!)}
+                      >
+                        {message.whoisData.nick}
+                      </Text>
+                    ) : (
+                      message.whoisData.nick
+                    )}
+                    {parts.slice(1).join(message.whoisData.nick)}
+                  </>
+                );
+              })()}
+            </Text>
+          ) : (
+            formatIRCTextAsComponent(
+              message.text.startsWith(`:${currentNick}!`)
+                ? message.text.substring(message.text.indexOf(' ') + 1) // Remove the entire :nick!user@host part
+                : message.text,
+              StyleSheet.flatten([styles.messageText, { color: getMessageColor(message.type) }])
+            )
           )
         ) : message.type === 'message' ? (
           <>
@@ -1209,7 +1262,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
           setActiveTabId(existingTab.id);
         } else {
           const isEncrypted = await encryptedDMService.isEncryptedForNetwork(currentNetwork, contextNick);
-          const newQueryTab = {
+          const newQueryTab: ChannelTab = {
             id: queryId,
             name: contextNick,
             type: 'query',
@@ -1217,7 +1270,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
             messages: [],
             isEncrypted,
           };
-          setTabs(prev => sortTabsGrouped([...prev, newQueryTab], tabSortAlphabetical));
+          setTabs(sortTabsGrouped([...tabs, newQueryTab], tabSortAlphabetical));
           soundService.playSound(SoundEventType.RING);
           setActiveTabId(newQueryTab.id);
         }
@@ -1672,8 +1725,16 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
 
   // Filter and group messages
   const displayMessages = useMemo(() => {
-      const filtered = messages.filter((msg) => {
-        if (msg.isRaw && !showRawCommands) return false;
+    if (__DEV__ && messages.length > 0) {
+//       console.log(`📺 MessageArea: Tab ${tabId} has ${messages.length} messages, types:`,
+//         messages.slice(-5).map(m => ({ type: m.type, isRaw: m.isRaw, batchTag: m.batchTag, text: m.text?.substring(0, 30) }))
+//       );
+    }
+    const filtered = messages.filter((msg) => {
+      if (msg.isRaw && !showRawCommands) {
+        //console.log(`📺 MessageArea: Filtering out raw message (showRawCommands: ${showRawCommands})`);
+        return false;
+      }
       if (msg.isRaw && showRawCommands && rawCategoryVisibility) {
         const categoryKey = (msg.rawCategory || 'debug') as RawMessageCategory;
         if (rawCategoryVisibility[categoryKey] === false) {
@@ -1695,6 +1756,10 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
       }
       return true;
     });
+
+//     if (__DEV__) {
+//       console.log(`📺 MessageArea: After visibility filter: ${visibilityFiltered.length} messages`);
+//     }
 
     // Apply search filtering
     const searchFiltered = visibilityFiltered.filter(msg => {
@@ -1751,7 +1816,12 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
 
       return { ...message, isGrouped };
     });
+
+//     if (__DEV__) {
+//       console.log(`📺 MessageArea: Final displayMessages: ${grouped.length} messages for tab ${tabId}`);
+//     }
     
+    return grouped;
   }, [
     messages,
     showRawCommands,
@@ -1911,6 +1981,27 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
         }}
         onChannelPress={(channelName) => {
           activeIrc.sendRaw?.(`JOIN ${channelName}`);
+        }}
+        onNickPress={(nick) => {
+          // Open query with the nick
+          if (!network) return;
+          const queryId = `query:${network}:${nick.toLowerCase()}`;
+          const tabStore = useTabStore.getState();
+          const currentTabs = tabStore.tabs;
+          const existingTab = currentTabs.find(t => t.id === queryId && t.type === 'query');
+          if (existingTab) {
+            tabStore.setActiveTabId(existingTab.id);
+          } else {
+            const newQueryTab: ChannelTab = {
+              id: queryId,
+              name: nick,
+              type: 'query',
+              networkId: network,
+              messages: [],
+            };
+            tabStore.setTabs(sortTabsGrouped([...currentTabs, newQueryTab], tabSortAlphabetical));
+            tabStore.setActiveTabId(newQueryTab.id);
+          }
         }}
         onLongPressMessage={handleMessageLongPress}
         onPressMessage={handleMessagePress}

@@ -235,6 +235,11 @@ export class BouncerService {
     // 2. Sent shortly after connection
     // 3. From channels you were in before disconnect
 
+    // Skip IRCv3 batch messages (e.g., chathistory) - these are not ZNC playback
+    if (message.batchTag) {
+      return false;
+    }
+
     if (!message.timestamp) return false;
 
     const messageAge = Date.now() - message.timestamp;

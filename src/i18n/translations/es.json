@@ -8148,114 +8148,114 @@
     "string": "Version {version}"
   },
   "Blacklist Nick": {
-    "string": ""
+    "string": "Lista Negra Nick"
   },
   "Default Ban Type": {
-    "string": ""
+    "string": "Tipo de Ban por defecto"
   },
   "Select the default ban mask type (0-9)": {
-    "string": ""
+    "string": "Seleccione el tipo de máscara de ban por defecto (0-9)"
   },
   "Ban by user@host": {
-    "string": ""
+    "string": "Ban por user@host"
   },
   "Ban by *user@host": {
-    "string": ""
+    "string": "Ban por *user@host"
   },
   "Ban by host only": {
-    "string": ""
+    "string": "Ban por solo host"
   },
   "Ban by *user@*.domain": {
-    "string": ""
+    "string": "Ban por *user@*.domain"
   },
   "Ban by *.domain only": {
-    "string": ""
+    "string": "Ban por solo *.domain"
   },
   "Ban exact nick!user@host": {
-    "string": ""
+    "string": "Ban exacto nick!user@host"
   },
   "Ban nick with *user@host": {
-    "string": ""
+    "string": "Ban nick con *user@host"
   },
   "Ban nick with any user@host": {
-    "string": ""
+    "string": "Ban nick con cualquiera user@host"
   },
   "Ban nick with *user@*.domain": {
-    "string": ""
+    "string": "Ban nick con *user@*.domain"
   },
   "Ban nick with *.domain": {
-    "string": ""
+    "string": "Ban nick con *.domain"
   },
   "Select Default Ban Type": {
-    "string": ""
+    "string": "Seleccione el Tipo de Ban por defecto"
   },
   "Choose the default ban mask type": {
-    "string": ""
+    "string": "Elija el tipo de máscara de ban por defecto"
   },
   "Predefined Kick/Ban Reasons": {
-    "string": ""
+    "string": "Predefinido Kick/Ban Razones"
   },
   "{count} reasons": {
-    "string": ""
+    "string": "{count} razones"
   },
   "Show Ban Mask Preview": {
-    "string": ""
+    "string": "Mostrar Vista Previa de la Máscara de Ban"
   },
   "Display the ban mask before applying": {
-    "string": ""
+    "string": "Muestre la máscara de ban antes de aplicar"
   },
   "Always Confirm Kick/Ban": {
-    "string": ""
+    "string": "Siempre confirme Kick/Ban"
   },
   "Show reason dialog for all kick/ban actions": {
-    "string": ""
+    "string": "Mostrar diálogo de motivos para todas las acciones de kick/ban"
   },
   "Add new reason...": {
-    "string": ""
+    "string": "Agrega una nueva razón..."
   },
   "Reset to Defaults": {
-    "string": ""
+    "string": "Restablecer por defecto"
   },
   "Load Scrollback on Join": {
-    "string": ""
+    "string": "Cargar Desplazamiento hacia atrás en Join"
   },
   "Load previous messages from local history when joining channels": {
-    "string": ""
+    "string": "Cargar mensajes anteriores del historial local al unirse a canales"
   },
   "Scrollback Lines": {
-    "string": ""
+    "string": "Líneas de Desplazamiento hacia Atrás"
   },
   "Number of previous messages to load: {count}": {
-    "string": ""
+    "string": "Número de mensajes anteriores a cargar: {count}"
   },
   "IRcap Theme": {
-    "string": ""
+    "string": "Tema IRcap"
   },
   "enters": {
-    "string": ""
+    "string": "entra"
   },
   "leaves": {
-    "string": ""
+    "string": "sale"
   },
   "closes": {
-    "string": ""
+    "string": "cierra"
   },
   "kicked_by": {
-    "string": ""
+    "string": " expulsado por "
   },
   "now_known_as": {
-    "string": ""
+    "string": " es ahora "
   },
   "invites_you_to": {
-    "string": ""
+    "string": " te invita a "
   },
   "joined_monitor_list": {
-    "string": ""
+    "string": " entró al chat "
   },
   "sets_mode": {
-    "string": ""
+    "string": " pone modo "
   },
   "sets_topic": {
-    "string": ""
+    "string": " pone topic "
   }
 }

@@ -8257,5 +8257,20 @@
   },
   "sets_topic": {
     "string": ""
+  },
+  "Usage: /clones <channel> - Must be used in a channel or specify a channel": {
+    "string": ""
+  },
+  "*** No clones detected in {channel}": {
+    "string": ""
+  },
+  "*** Clones detected in {channel}:": {
+    "string": ""
+  },
+  "***   {host}: {nicks}": {
+    "string": ""
+  },
+  "*** Error detecting clones: {error}": {
+    "string": ""
   }
 }

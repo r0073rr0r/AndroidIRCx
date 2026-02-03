@@ -246,6 +246,8 @@ export const useConnectionHandler = (params: UseConnectionHandlerParams) => {
       rejectUnauthorized: serverToUse.rejectUnauthorized,
       proxy: proxyToUse,
       sasl: networkToUse.sasl,
+      clientCert: networkToUse.clientCert,
+      clientKey: networkToUse.clientKey,
     };
 
     try {
@@ -258,7 +260,8 @@ export const useConnectionHandler = (params: UseConnectionHandlerParams) => {
         proxy: config.proxy
           ? { ...config.proxy, password: config.proxy.password ? '[redacted]' : undefined }
           : config.proxy,
-        clientKey: config.clientKey ? '[redacted]' : undefined,
+        clientCert: config.clientCert ? '[present]' : undefined,
+        clientKey: config.clientKey ? '[present]' : undefined,
       };
       console.log('App: Attempting to connect to IRC server using ConnectionManager...', safeConfig);
       // Use ConnectionManager for multi-server support

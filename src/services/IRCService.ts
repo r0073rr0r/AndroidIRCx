@@ -38,6 +38,7 @@ export interface IRCConnectionConfig {
   sasl?: {
     account: string;
     password: string;
+    force?: boolean;  // Force SASL even if server doesn't advertise capability
   };
 }
 
@@ -212,6 +213,14 @@ export class IRCService {
     messages: IRCMessage[];
     startTime: number;
   }> = new Map();
+
+  // Clone detection state
+  private cloneDetectionActive: boolean = false;
+  private cloneDetectionQueue: string[] = [];
+  private cloneDetectionResults: Map<string, string[]> = new Map(); // host -> nicks[]
+  private cloneDetectionCallback: ((results: Map<string, string[]>) => void) | null = null;
+  private cloneDetectionBatchSize: number = 100; // Process 100 users at a time
+  private cloneDetectionDelay: number = 100; // ms between batches
 
   // Labeled-response tracking (IRCv3.2)
   private pendingLabels: Map<string, {
@@ -4224,18 +4233,30 @@ export class IRCService {
   }
 
   private startSASL(): void {
-    if (!this.capEnabledSet.has('sasl')) return;
+    const forceSASL = this.config?.sasl?.force === true;
+    if (!this.capEnabledSet.has('sasl') && !forceSASL) {
+      this.logRaw('IRCService: SASL not enabled on server');
+      return;
+    }
 
     if (this.config?.clientCert && this.config?.clientKey) {
-      this.logRaw('IRCService: Starting SASL EXTERNAL authentication');
+      this.logRaw('IRCService: Starting SASL EXTERNAL authentication with cert');
       this.saslAuthenticating = true;
       this.sendRaw('AUTHENTICATE EXTERNAL');
       return;
     }
 
-    if (!this.config?.sasl) return;
+    if (!this.config?.sasl) {
+      this.logRaw('IRCService: No SASL config available');
+      return;
+    }
     
-    this.logRaw('IRCService: Starting SASL PLAIN authentication');
+    if (!this.config.sasl.account || !this.config.sasl.password) {
+      this.logRaw('IRCService: SASL account or password missing');
+      return;
+    }
+    
+    this.logRaw(`IRCService: Starting SASL PLAIN authentication for account: ${this.config.sasl.account}`);
     this.saslAuthenticating = true;
     this.sendRaw('AUTHENTICATE PLAIN');
   }
@@ -4275,12 +4296,13 @@ export class IRCService {
         
         // Handle multi-line CAP LS responses
         // Format: :* LS :cap1 cap2... (multi-line) or :LS :cap1 cap2... (single line)
+        // Or: LS cap1 cap2... (without colon prefix)
         if (actualParams.length >= 2) {
           if (actualParams[1] === '*') {
             // Multi-line response: LS * :cap1 cap2...
             capabilities = actualParams.slice(2).join(' ').replace(/^:/, '');
           } else {
-            // Single line response: LS :cap1 cap2...
+            // Single line response: LS :cap1 cap2... OR LS cap1 cap2...
             isLastLine = true;
             capabilities = actualParams.slice(1).join(' ').replace(/^:/, '');
           }
@@ -4327,7 +4349,14 @@ export class IRCService {
           }
         });
         
-        if (this.config?.sasl && this.capEnabledSet.has('sasl') && !this.saslAuthenticating) {
+        const forceSASL = this.config?.sasl?.force === true;
+        const saslAcknowledged = this.capEnabledSet.has('sasl') || forceSASL;
+        if ((this.config?.sasl || (this.config?.clientCert && this.config?.clientKey)) && saslAcknowledged && !this.saslAuthenticating) {
+          if (forceSASL && !this.capEnabledSet.has('sasl')) {
+            this.logRaw('IRCService: Force SASL enabled, starting authentication');
+          } else {
+            this.logRaw('IRCService: SASL capability acknowledged, will start authentication');
+          }
           setTimeout(() => this.startSASL(), 50);
           return;
         }
@@ -4418,8 +4447,22 @@ export class IRCService {
     ];
     const capsToRequest: string[] = allCapsWeWant.filter(cap => this.capAvailable.has(cap));
     
-    if ((this.config?.sasl || (this.config?.clientCert && this.config?.clientKey)) && this.capAvailable.has('sasl')) {
+    // Check SASL availability and add to requested caps
+    const hasSaslConfig = !!this.config?.sasl?.account && !!this.config?.sasl?.password;
+    const hasCert = !!(this.config?.clientCert && this.config?.clientKey);
+    const saslAvailable = this.capAvailable.has('sasl');
+    const forceSASL = this.config?.sasl?.force === true;
+    
+    // Allow SASL if: (1) server advertises it, OR (2) user forces it
+    const shouldUseSASL = (hasSaslConfig || hasCert) && (saslAvailable || forceSASL);
+    
+    if (shouldUseSASL) {
       capsToRequest.push('sasl');
+      if (forceSASL && !saslAvailable) {
+        this.logRaw('IRCService: Force-enabling SASL (server does not advertise capability)');
+      }
+    } else if (hasSaslConfig && !saslAvailable && !forceSASL) {
+      this.logRaw('IRCService: Server does not advertise SASL. NickServ identify will be used after connection');
     }
     
     if (capsToRequest.length > 0) {
@@ -4782,6 +4825,59 @@ export class IRCService {
         this.silentModeNicks.delete(nick.toLowerCase());
       }
     }
+  }
+
+  /**
+   * Detect clones in a channel by grouping users by their hostname.
+   * Uses existing user data from NAMES list (requires userhost-in-names capability).
+   * Processes users in batches to avoid blocking the UI on large channels.
+   * @param channel The channel to check for clones
+   * @returns Promise that resolves with a map of host -> nicks[] for clones only
+   */
+  public async detectClones(channel: string): Promise<Map<string, string[]>> {
+    const users = this.channelUsers.get(channel);
+    if (!users || users.size === 0) {
+      return new Map();
+    }
+
+    const userArray = Array.from(users.values());
+    const hostMap = new Map<string, string[]>();
+    
+    // Process users in batches to avoid blocking UI
+    for (let i = 0; i < userArray.length; i += this.cloneDetectionBatchSize) {
+      const batch = userArray.slice(i, i + this.cloneDetectionBatchSize);
+      
+      // Process this batch
+      batch.forEach(user => {
+        if (user.host) {
+          const existing = hostMap.get(user.host) || [];
+          existing.push(user.nick);
+          hostMap.set(user.host, existing);
+        }
+      });
+
+      // Yield to event loop between batches
+      if (i + this.cloneDetectionBatchSize < userArray.length) {
+        await new Promise(resolve => setTimeout(resolve, this.cloneDetectionDelay));
+      }
+    }
+
+    // Filter to only include hosts with multiple nicks (clones)
+    const clones = new Map<string, string[]>();
+    hostMap.forEach((nicks, host) => {
+      if (nicks.length > 1) {
+        clones.set(host, nicks);
+      }
+    });
+
+    return clones;
+  }
+
+  /**
+   * Check if clone detection is currently active
+   */
+  public isCloneDetectionActive(): boolean {
+    return this.cloneDetectionActive;
   }
 
   disconnect(message?: string): void {
@@ -6068,6 +6164,52 @@ export class IRCService {
           // /time [server] - Get server time
           const timeTarget = args.length > 0 ? args[0] : '';
           this.sendCommand(timeTarget ? `TIME ${timeTarget}` : 'TIME');
+          break;
+        case 'CLONES':
+        case 'DETECTCLONES':
+        case 'CLONESDETECT':
+          // /clones [channel] - Detect clones (users with same host) in channel
+          // /detectclones [channel] - Alias
+          // /clonesdetect [channel] - Alias
+          {
+            const targetChannel = args.length > 0 ? args[0] : target;
+            if (!targetChannel || (!targetChannel.startsWith('#') && !targetChannel.startsWith('&'))) {
+              this.addMessage({
+                type: 'error',
+                text: t('Usage: /clones <channel> - Must be used in a channel or specify a channel'),
+                timestamp: Date.now(),
+              });
+            } else {
+              this.detectClones(targetChannel).then(clones => {
+                if (clones.size === 0) {
+                  this.addMessage({
+                    type: 'notice',
+                    text: t('*** No clones detected in {channel}', { channel: targetChannel }),
+                    timestamp: Date.now(),
+                  });
+                } else {
+                  this.addMessage({
+                    type: 'notice',
+                    text: t('*** Clones detected in {channel}:', { channel: targetChannel }),
+                    timestamp: Date.now(),
+                  });
+                  clones.forEach((nicks, host) => {
+                    this.addMessage({
+                      type: 'notice',
+                      text: t('***   {host}: {nicks}', { host, nicks: nicks.join(', ') }),
+                      timestamp: Date.now(),
+                    });
+                  });
+                }
+              }).catch(error => {
+                this.addMessage({
+                  type: 'error',
+                  text: t('*** Error detecting clones: {error}', { error: error?.message || String(error) }),
+                  timestamp: Date.now(),
+                });
+              });
+            }
+          }
           break;
         case 'ADMIN':
           // /admin [server] - Get server administrator info

@@ -1869,25 +1869,25 @@
     "string": "No hay modos establecidos"
   },
   "Invite Only (i)": {
-    "string": "Solo por Invitación (i)"
+    "string": "Solo invitados (+i)"
   },
   "Topic Protected (t)": {
-    "string": "Topic Protegido (t)"
+    "string": "Topic Protegido (+t)"
   },
   "No External Messages (n)": {
-    "string": "No Permite Mensajes Externos (n)"
+    "string": "No Permite Mensajes Externos (+n)"
   },
   "Moderated (m)": {
-    "string": "Moderado (m)"
+    "string": "Moderado (+m)"
   },
   "Private (p)": {
-    "string": "Privado (p)"
+    "string": "Privado (+p)"
   },
   "Secret (s)": {
-    "string": "Secreto (s)"
+    "string": "Secreto (+s)"
   },
   "Channel Key (Password)": {
-    "string": "Clave de canal (Contraseña)"
+    "string": "Canal con clave (+k)"
   },
   "Channel key (leave empty to remove)": {
     "string": "Clave de Canal (dejar vacío para eliminarla)"
@@ -1929,7 +1929,7 @@
     "string": "Habilitar para cifrar automáticamente todos los mensajes en este canal."
   },
   "User Limit": {
-    "string": "Límite de usuarios"
+    "string": "Límite de usuarios (+l)"
   },
   "Maximum users (leave empty to remove)": {
     "string": "Máximo de usuarios (dejar vacío para eliminar)"
@@ -1956,13 +1956,13 @@
     "string": "Sin bans"
   },
   "Exception List": {
-    "string": "Lista de Excepciones"
+    "string": "Lista de Excepción Ban"
   },
   "Exception mask": {
     "string": "Máscara de Excepción"
   },
   "Refresh Exception List": {
-    "string": "Actualizar la Lista de Excepciones"
+    "string": "Actualizar la Lista de Excepción Ban"
   },
   "No exceptions": {
     "string": "Sin excepciones"
@@ -3777,7 +3777,7 @@
     "string": "char modo desconocido"
   },
   "Cannot join channel (invite only)": {
-    "string": "No se puede unir al canal (solo por invitación)"
+    "string": "No se puede unir al canal (solo invitados)"
   },
   "Cannot join channel (you are banned)": {
     "string": "No puedes unirte al canal (estás baneado)"
@@ -7080,7 +7080,7 @@
     "string": "Excepción de invitación eliminada"
   },
   "Invite Exception List": {
-    "string": "Lista de Excepciones de Invitación"
+    "string": "Lista de invitados"
   },
   "Invite mask (e.g., *!*@trusted.host)": {
     "string": "Máscara de invitación (e.j., *!*@trusted.host)"
@@ -7089,7 +7089,7 @@
     "string": "Actualizar la Lista de Invitaciones"
   },
   "No invite exceptions": {
-    "string": "No invitar a las excepciones"
+    "string": "Sin invitados"
   },
   "Highlights": {
     "string": "Destacados"
@@ -8106,7 +8106,7 @@
     "string": "sender-nick pone modo +o other-nick"
   },
   "sender-nick changed topic to: Example topic": {
-    "string": "sender-nick pone topic: Bienvenido a #AndroidIRCX"
+    "string": "Bienvenido a #AndroidIRCX"
   },
   "*** RAW Command: PING :example": {
     "string": "*** Comando RAW: PING :ejemplo"
@@ -8257,5 +8257,20 @@
   },
   "sets_topic": {
     "string": " pone topic "
+  },
+  "Usage: /clones <channel> - Must be used in a channel or specify a channel": {
+    "string": "Uso: /clones <channel> - Debe usarse en un canal o especificar un canal"
+  },
+  "*** No clones detected in {channel}": {
+    "string": "*** No se detectaron clones en {channel}"
+  },
+  "*** Clones detected in {channel}:": {
+    "string": "*** Clones detectados en {channel}:"
+  },
+  "***   {host}: {nicks}": {
+    "string": "*** {host}: {nicks}"
+  },
+  "*** Error detecting clones: {error}": {
+    "string": "*** Error al detectar clones: {error}"
   }
 }

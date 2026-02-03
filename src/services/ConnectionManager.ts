@@ -171,6 +171,7 @@ class ConnectionManager {
       const motdEndCleanup = ircService.on('motdEnd', () => {
         try {
           ircService.sendRaw(`PRIVMSG NickServ :IDENTIFY ${nickservPassword}`);
+          ircService.addRawMessage(t('*** Sending NickServ IDENTIFY...'), 'auth');
         } catch (error) {
           console.error(`ConnectionManager: Failed to send NickServ IDENTIFY for ${finalId}:`, error);
         }

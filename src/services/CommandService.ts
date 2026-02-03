@@ -141,6 +141,8 @@ export class CommandService {
       { alias: 'zncsrv', command: '/znc listservers', description: 'ZNC: list servers' },
       { alias: 'zncplay', command: '/znc playbuffer {channel}', description: 'ZNC: play buffer for channel/query', },
       { alias: 'zncclear', command: '/znc clearbuffer {channel}', description: 'ZNC: clear buffer for channel/query', },
+      // Clone detector
+      { alias: 'dc', command: '/clones {channel}', description: 'Detect clones in channel' },
       { alias: 'zncrehash', command: '/znc rehash', description: 'ZNC: reload config/modules' },
       { alias: 'zncsave', command: '/znc saveconfig', description: 'ZNC: save current config' },
       { alias: 'zncjump', command: '/znc jump', description: 'ZNC: jump to next server' },

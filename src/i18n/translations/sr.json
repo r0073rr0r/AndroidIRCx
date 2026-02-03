@@ -825,7 +825,7 @@
     "string": "Dodaj prečicu"
   },
   "Create or update alias": {
-    "string": "Kreiraj ili ažuriraj alias"
+    "string": "Kreiraj ili ažuriraj prečicu"
   },
   "Custom Commands": {
     "string": "Prilagođene komande"
@@ -1284,7 +1284,7 @@
     "string": "Beleške i obeleživači kanala"
   },
   "Channel notes, bookmarks, and user aliases": {
-    "string": "Beleške kanala, obeleživači i korisnički alijasi"
+    "string": "Beleške kanala, obeleživači i korisničke prečice"
   },
   "Highlights & Notifications": {
     "string": "Isticanja i obaveštenja"
@@ -1617,7 +1617,7 @@
     "string": "Unesite poruku"
   },
   "alias": {
-    "string": "alias"
+    "string": "prečica"
   },
   "recent": {
     "string": "nedavno"
@@ -2202,7 +2202,7 @@
     "string": "Dobrodošlica"
   },
   "Alias (/hello)": {
-    "string": "Alias (/zdravo)"
+    "string": "Prečica (/zdravo)"
   },
   "Tips": {
     "string": "Saveti"
@@ -2802,10 +2802,10 @@
     "string": "Beleška uklonjena"
   },
   "Alias saved": {
-    "string": "Alias sačuvan"
+    "string": "Prečica sačuvana"
   },
   "Alias removed": {
-    "string": "Alias uklonjen"
+    "string": "Prečica uklonjena"
   },
   "Ignore {nick}?": {
     "string": "Ignorisati {nick}?"
@@ -2895,16 +2895,16 @@
     "string": "Nema praćene nedavne aktivnosti"
   },
   "User Alias": {
-    "string": "Korisnički alias"
+    "string": "Korisnička prečica"
   },
   "No alias": {
-    "string": "Nema aliasa"
+    "string": "Nema prečica"
   },
   "Edit Alias": {
-    "string": "Uredi alias"
+    "string": "Uredi prečicu"
   },
   "Enter alias for this user": {
-    "string": "Unesite alias za ovog korisnika"
+    "string": "Unesite prečicu za ovog korisnika"
   },
   "Actions": {
     "string": "Akcije"
@@ -3228,7 +3228,7 @@
     "string": "{channel} ({count} nova poruka{suffix})"
   },
   "Quick aliases: /zncver, /zncm, /zncplay #chan, /zncclear #chan": {
-    "string": "Brzi aliasi: /zncver, /zncm, /zncplay #chan, /zncclear #chan"
+    "string": "Brze prečice: /zncver, /zncm, /zncplay #chan, /zncclear #chan"
   },
   "*** Detected bouncer type: {type}{hint}": {
     "string": "*** Detektovan tip bouncera: {type}{hint}"
@@ -4257,7 +4257,7 @@
     "string": "Prilagođena prečica komande"
   },
   "Adds /hello alias as example.": {
-    "string": "Dodaje /hello alias kao primer."
+    "string": "Dodaje /zdravo prečicu kao primer."
   },
   "Script {name} failed to compile: {error}": {
     "string": "Skripta {name} nije uspela da se kompajlira: {error}"
@@ -4725,7 +4725,7 @@
     "string": "Plutajuće dugme za pretragu je sakriveno"
   },
   "Alias name and command are required": {
-    "string": "Naziv aliasa i komanda su obavezni"
+    "string": "Naziv prečice i komanda su obavezni"
   },
   "Command name and template are required": {
     "string": "Naziv komande i šablon su obavezni"
@@ -6426,10 +6426,10 @@
     "string": "Automatski dodaje vaš nadimak u reči za isticanje kada je pomenut."
   },
   "User Alias Resolver": {
-    "string": "Razrešivač korisničkih alijasa"
+    "string": "Razrešivač korisničkih prečica"
   },
   "Resolves user aliases and shows real nicks in logs.": {
-    "string": "Razrešava korisničke alijase i prikazuje prave nadimke u logovima."
+    "string": "Razrešava korisničke prečice i prikazuje prave nadimke u logovima."
   },
   "Channel Notes Reminder": {
     "string": "Podsetnik za beleške kanala"
@@ -8257,5 +8257,20 @@
   },
   "sets_topic": {
     "string": "postavlja temu"
+  },
+  "Usage: /clones <channel> - Must be used in a channel or specify a channel": {
+    "string": ""
+  },
+  "*** No clones detected in {channel}": {
+    "string": ""
+  },
+  "*** Clones detected in {channel}:": {
+    "string": ""
+  },
+  "***   {host}: {nicks}": {
+    "string": ""
+  },
+  "*** Error detecting clones: {error}": {
+    "string": ""
   }
 }

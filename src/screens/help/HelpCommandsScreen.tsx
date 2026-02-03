@@ -90,6 +90,12 @@ export const HelpCommandsScreen: React.FC<HelpCommandsScreenProps> = ({
           <HelpParagraph>Get past information about user</HelpParagraph>
           <HelpCode>Example: /whowas OldNick</HelpCode>
         </HelpSubsection>
+
+        <HelpSubsection title="/clones [channel]">
+          <HelpParagraph>Detect clones (users with same hostname) in a channel. Requires userhost-in-names capability.</HelpParagraph>
+          <HelpCode>Example: /clones #channel</HelpCode>
+          <HelpCode>Aliases: /dc, /detectclones, /clonesdetect</HelpCode>
+        </HelpSubsection>
       </HelpSection>
 
       <HelpSection title="Action & Formatting">

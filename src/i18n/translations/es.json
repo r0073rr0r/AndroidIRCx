@@ -4761,13 +4761,13 @@
     "string": "Traducir con relleno"
   },
   "Show Typing Indicators": {
-    "string": "Mostrar Indicadores de Escritura"
+    "string": "Mostrar Indicadores de Escritura TAGMSG"
   },
   "Display who is typing in the active tab": {
     "string": "Mostrar quién está escribiendo en la pestaña activa"
   },
   "Hide typing indicators": {
-    "string": "Ocultar indicadores de escritura"
+    "string": "Ocultar indicador de escritura TAGMSG flood del status"
   },
   "Show Send Button": {
     "string": "Mostrar botón Enviar"

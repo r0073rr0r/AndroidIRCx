@@ -90,7 +90,9 @@ export const UserList: React.FC<UserListProps> = ({
   const [showBlacklistModal, setShowBlacklistModal] = useState(false);
   const [showBlacklistActionPicker, setShowBlacklistActionPicker] = useState(false);
   const [blacklistAction, setBlacklistAction] = useState<BlacklistActionType>('ban');
-  const [blacklistMaskChoice, setBlacklistMaskChoice] = useState<string>('nick');
+  // Only the setter is used (we don't read the current choice in this component).
+  const blacklistMaskChoiceState = useState<string>('nick');
+  const setBlacklistMaskChoice = blacklistMaskChoiceState[1];
   const [showBlacklistMaskPicker, setShowBlacklistMaskPicker] = useState(false);
   const [selectedBanMaskTypeId, setSelectedBanMaskTypeId] = useState<number | null>(null);
   const [blacklistReason, setBlacklistReason] = useState('');
@@ -165,30 +167,10 @@ export const UserList: React.FC<UserListProps> = ({
     { id: 'custom', label: t('Custom Command') },
   ]), [t]);
 
-  const getBlacklistMaskOptions = useCallback((user: ChannelUser) => {
-    const options: Array<{ id: string; label: string; mask: string }> = [
-      { id: 'nick', label: t('Nick only'), mask: user.nick },
-      { id: 'nick_user_any', label: t('Nick!user@*'), mask: `${user.nick}!*@*` },
-    ];
-    if (user.host) {
-      options.push({ id: 'host', label: t('*!*@host'), mask: `*!*@${user.host}` });
-      options.push({ id: 'nick_host', label: t('Nick!*@host'), mask: `${user.nick}!*@${user.host}` });
-    }
-    return options;
-  }, [t]);
-
   const getBlacklistBanMaskOptions = useCallback((user: ChannelUser) => {
-    const resolveUserHost = (rawHost?: string | null) => {
-      if (!rawHost) {
-        return { user: '*', host: '*' };
-      }
-      if (rawHost.includes('@')) {
-        const [userPart, hostPart] = rawHost.split('@');
-        return { user: userPart || '*', host: hostPart || '*' };
-      }
-      return { user: '*', host: rawHost };
-    };
-    const { user: ident, host } = resolveUserHost(user.host);
+    // Use ident from user object (from userhost-in-names) or fallback to '*'
+    const ident = user?.ident || '*';
+    const host = user?.host || '*';
     return banService.getBanMaskTypes().map(type => ({
       id: type.id,
       label: `(${type.id}) ${type.pattern}`,
@@ -993,6 +975,18 @@ const getModeColor = (modes?: string[], colors?: any): string => {
 
   const contextConnection = network ? connectionManager.getConnection(network) : null;
 
+  // IMPORTANT: Use the per-connection UserManagementService when available so UI and enforcement
+  // are consistent (and Settings -> Blacklist shows the same data immediately).
+  const getUserManagementServiceForNetwork = useCallback(() => {
+    if (network) {
+      const conn = connectionManager.getConnection(network);
+      if (conn?.userManagementService) {
+        return conn.userManagementService;
+      }
+    }
+    return userManagementService;
+  }, [network]);
+
   return (
     <View
       style={[
@@ -1208,9 +1202,9 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                 onPress={async () => {
                   if (!selectedUser) return;
                   if (noteText.trim()) {
-                    await userManagementService.addUserNote(selectedUser.nick, noteText.trim(), network);
+                    await getUserManagementServiceForNetwork().addUserNote(selectedUser.nick, noteText.trim(), network);
                   } else {
-                    await userManagementService.removeUserNote(selectedUser.nick, network);
+                    await getUserManagementServiceForNetwork().removeUserNote(selectedUser.nick, network);
                   }
                   setShowNoteModal(false);
                 }}>
@@ -1282,7 +1276,7 @@ const getModeColor = (modes?: string[], colors?: any): string => {
                       const templateCommand = blacklistAction === 'custom'
                         ? blacklistCustomCommand.trim()
                         : await getBlacklistTemplate(blacklistAction, network);
-                      await userManagementService.addBlacklistEntry(
+                      await getUserManagementServiceForNetwork().addBlacklistEntry(
                         choice.mask,
                         blacklistAction,
                         blacklistReason.trim() || undefined,
@@ -1788,10 +1782,14 @@ const createStyles = (colors: any = {}, panelSizePx: number = 150, nickFontSizeP
     borderRadius: 6,
     padding: 10,
     marginBottom: 8,
+    backgroundColor: colors.surfaceVariant || colors.messageBackground || '#F5F5F5',
+    minHeight: 44,
+    justifyContent: 'center',
   },
   blacklistPickerText: {
     fontSize: 14,
     color: colors.text || '#212121',
+    fontWeight: '500',
   },
   blacklistInput: {
     borderWidth: 1,

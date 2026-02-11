@@ -71,6 +71,26 @@ describe('ConsoleManager', () => {
       await AsyncStorage.setItem('@console_enabled', 'invalid');
       await expect(consoleManager.initialize()).resolves.not.toThrow();
     });
+
+    it('should keep current state when stored value is null', async () => {
+      const before = consoleManager.getEnabled();
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(null);
+      await consoleManager.initialize();
+      expect(consoleManager.getEnabled()).toBe(before);
+    });
+
+    it('should load true from storage and enable console', async () => {
+      await consoleManager.setEnabled(false);
+      await AsyncStorage.setItem('@console_enabled', 'true');
+      await consoleManager.initialize();
+      expect(consoleManager.getEnabled()).toBe(true);
+    });
+
+    it('should handle getItem rejection path without throwing', async () => {
+      const getItemSpy = jest.spyOn(AsyncStorage, 'getItem').mockRejectedValueOnce(new Error('read-fail'));
+      await expect(consoleManager.initialize()).resolves.not.toThrow();
+      expect(getItemSpy).toHaveBeenCalledWith('@console_enabled');
+    });
   });
 
   describe('setEnabled', () => {
@@ -121,6 +141,11 @@ describe('ConsoleManager', () => {
       await prodManager.setEnabled(true);
       expect(setItemSpy).not.toHaveBeenCalled();
     });
+
+    it('should early-return in applyConsoleState when not in DEV', () => {
+      const { default: prodManager } = require('../../src/utils/consoleManager');
+      expect(() => (prodManager as any).applyConsoleState()).not.toThrow();
+    });
   });
 
   describe('applyConsoleState', () => {
@@ -140,6 +165,12 @@ describe('ConsoleManager', () => {
       await consoleManager.setEnabled(true);
       // Console.log should be restored (not the noop)
       expect(console.log).not.toBe(noopLog);
+    });
+
+    it('should keep console.error active when logging is disabled', async () => {
+      const originalError = console.error;
+      await consoleManager.setEnabled(false);
+      expect(console.error).toBe(originalError);
     });
   });
 });

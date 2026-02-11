@@ -169,6 +169,35 @@ describe('settingsHelpers', () => {
       const result = filterSettings(mockSections, 'THEME');
       expect(result).toHaveLength(1);
     });
+
+    it('should match item by searchKeywords', () => {
+      const sections: SettingsSection[] = [
+        {
+          id: 'media',
+          title: 'Media',
+          data: [
+            {
+              id: 'uploads',
+              title: 'Upload',
+              description: 'Upload settings',
+              type: 'button',
+              searchKeywords: ['cdn', 'attachment', 'files'],
+            },
+          ],
+        },
+      ];
+
+      const result = filterSettings(sections, 'attachment');
+      expect(result).toHaveLength(1);
+      expect(result[0].data).toHaveLength(1);
+      expect(result[0].data[0].id).toBe('uploads');
+    });
+
+    it('should trim search term before filtering', () => {
+      const result = filterSettings(mockSections, '   theme   ');
+      expect(result).toHaveLength(1);
+      expect(result[0].data[0].id).toBe('theme');
+    });
   });
 
   describe('orderSections', () => {
@@ -215,6 +244,16 @@ describe('settingsHelpers', () => {
       expect(result[0].id).toBe('custom-1');
       expect(result[1].id).toBe('custom-2');
     });
+
+    it('should prioritize known sections over unknown sections', () => {
+      const mixedSections: SettingsSection[] = [
+        { id: 'custom-x', title: 'Custom', data: [] },
+        { id: 'security', title: 'Security', data: [] },
+      ];
+      const result = orderSections(mixedSections);
+      expect(result[0].id).toBe('security');
+      expect(result[1].id).toBe('custom-x');
+    });
   });
 
   describe('validateSetting', () => {
@@ -243,6 +282,10 @@ describe('settingsHelpers', () => {
       expect(validateSetting([1, 2, 3], 'array')).toBe(true);
       expect(validateSetting('[]', 'array')).toBe(false);
       expect(validateSetting({}, 'array')).toBe(false);
+    });
+
+    it('should return false for unsupported type in default case', () => {
+      expect(validateSetting('x', 'unknown' as any)).toBe(false);
     });
   });
 
@@ -345,6 +388,31 @@ describe('settingsHelpers', () => {
       const result = buildGlobalProxyConfig(inputs);
       expect(result.type).toBe('socks5');
     });
+
+    it('should reject out-of-range ports', () => {
+      expect(buildGlobalProxyConfig({ ...mockInputs, port: '0' }).port).toBeUndefined();
+      expect(buildGlobalProxyConfig({ ...mockInputs, port: '65536' }).port).toBeUndefined();
+      expect(buildGlobalProxyConfig({ ...mockInputs, port: '-1' }).port).toBeUndefined();
+    });
+
+    it('should allow max valid port 65535', () => {
+      const result = buildGlobalProxyConfig({ ...mockInputs, port: '65535' });
+      expect(result.port).toBe(65535);
+    });
+
+    it('should let overrides win over inputs', () => {
+      const result = buildGlobalProxyConfig(mockInputs, {
+        host: ' override.host ',
+        username: ' override-user ',
+      });
+      expect(result.host).toBe('override.host');
+      expect(result.username).toBe('override-user');
+    });
+
+    it('should set port undefined when override port is empty string', () => {
+      const result = buildGlobalProxyConfig(mockInputs, { port: '' });
+      expect(result.port).toBeUndefined();
+    });
   });
 
   describe('toggleSectionExpansion', () => {
@@ -415,6 +483,17 @@ describe('settingsHelpers', () => {
       };
       const result = getSettingIcon(item, mockIconMap);
       expect(result).toBeUndefined();
+    });
+
+    it('should ignore non-object item.icon and use iconMap/default path', () => {
+      const item = {
+        id: 'setting-2',
+        title: 'Test',
+        type: 'button',
+        icon: 'not-an-object',
+      } as unknown as SettingItem;
+      const result = getSettingIcon(item, mockIconMap);
+      expect(result).toEqual({ name: 'icon2', solid: false });
     });
   });
 });

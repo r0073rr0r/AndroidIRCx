@@ -5,8 +5,15 @@
  * Tests for TabUpdateBatcher
  */
 
+jest.mock('../../src/services/TabService', () => ({
+  tabService: {
+    saveTabs: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
 import { TabUpdateBatcher, SaveCallback } from '../../src/utils/TabUpdateBatcher';
 import { ChannelTab } from '../../src/types';
+import { tabService } from '../../src/services/TabService';
 
 // Helper to create mock tabs
 const createMockTabs = (count: number, networkId: string): ChannelTab[] => {
@@ -27,6 +34,7 @@ describe('TabUpdateBatcher', () => {
   let batcher: TabUpdateBatcher;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     mockSaveCallback = jest.fn().mockResolvedValue(undefined);
     batcher = new TabUpdateBatcher(100, mockSaveCallback); // Use shorter debounce for tests
   });
@@ -190,6 +198,11 @@ describe('TabUpdateBatcher', () => {
 
       expect(mockSaveCallback).not.toHaveBeenCalled();
     });
+
+    it('should be safe to clear when no timer exists', () => {
+      expect(() => batcher.clear()).not.toThrow();
+      expect(batcher.hasPendingSaves()).toBe(false);
+    });
   });
 
   describe('destroy', () => {
@@ -244,6 +257,17 @@ describe('TabUpdateBatcher', () => {
       // All saves should have been called
       expect(mockSaveCallback).toHaveBeenCalledTimes(3);
       expect(savePromises.length).toBe(3);
+    });
+
+    it('should use default constructor args and default tabService save callback', async () => {
+      const defaultBatcher = new TabUpdateBatcher();
+      const tabs = createMockTabs(2, 'default-net');
+
+      defaultBatcher.queueSave('default-net', tabs);
+      await defaultBatcher.flush();
+
+      expect(tabService.saveTabs).toHaveBeenCalledTimes(1);
+      expect(tabService.saveTabs).toHaveBeenCalledWith('default-net', tabs);
     });
   });
 });

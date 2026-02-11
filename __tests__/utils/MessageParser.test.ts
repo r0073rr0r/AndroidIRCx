@@ -185,6 +185,11 @@ describe('MessageParser', () => {
     it('should handle complex URLs', () => {
       expect(getUrlExtension('https://example.com:8080/path/to/file.zip?param=value#hash')).toBe('zip');
     });
+
+    it('should return null for dot-only filename segment', () => {
+      // Covers defensive branch where parsed extension is empty string
+      expect(getUrlExtension('https://example.com/.')).toBeNull();
+    });
   });
 
   describe('getUrlExtension', () => {
@@ -456,6 +461,28 @@ describe('MessageParser', () => {
       expect(result.length).toBeGreaterThan(1);
     });
 
+    it('should not duplicate image URL as both image and url', () => {
+      const result = parseMessage('Image https://example.com/pic.png');
+      const imageParts = result.filter(p => p.type === 'image');
+      const urlParts = result.filter(p => p.type === 'url');
+      expect(imageParts).toHaveLength(1);
+      expect(urlParts).toHaveLength(0);
+    });
+
+    it('should preserve ordering for text, media tag and url', () => {
+      const msg = 'A !enc-media [550e8400-e29b-41d4-a716-446655440000] B https://example.com C';
+      const result = parseMessage(msg);
+      expect(result[0]).toEqual({ type: 'text', content: 'A ' });
+      expect(result[1].type).toBe('media');
+      expect(result[2]).toEqual({ type: 'text', content: ' B ' });
+      expect(result[3]).toEqual({
+        type: 'url',
+        content: 'https://example.com',
+        url: 'https://example.com',
+      });
+      expect(result[4]).toEqual({ type: 'text', content: ' C' });
+    });
+
     it('should handle URL at start of text', () => {
       const result = parseMessage('https://example.com is great');
       expect(result[0].type).toBe('url');
@@ -480,6 +507,12 @@ describe('MessageParser', () => {
     it('should handle mixed content', () => {
       const result = parseMessage('Hello https://a.com world https://b.com/image.jpg!');
       expect(result.length).toBeGreaterThan(2);
+    });
+
+    it('should parse media tags case-insensitively', () => {
+      const result = parseMessage('!ENC-MEDIA [550e8400-e29b-41d4-a716-446655440000]');
+      expect(result).toHaveLength(1);
+      expect(result[0].type).toBe('media');
     });
   });
 

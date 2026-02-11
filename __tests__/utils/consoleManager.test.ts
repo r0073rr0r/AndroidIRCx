@@ -5,6 +5,9 @@
  * Tests for ConsoleManager
  */
 
+// Store original __DEV__ value
+const originalDev = (global as any).__DEV__;
+
 import consoleManager from '../../src/utils/consoleManager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -90,6 +93,53 @@ describe('ConsoleManager', () => {
     it('should handle storage errors gracefully', async () => {
       jest.spyOn(AsyncStorage, 'setItem').mockRejectedValueOnce(new Error('Storage error'));
       await expect(consoleManager.setEnabled(true)).resolves.not.toThrow();
+    });
+  });
+
+  describe('non-DEV mode', () => {
+    beforeEach(() => {
+      (global as any).__DEV__ = false;
+      // Re-import to get fresh instance with new __DEV__ value
+      jest.resetModules();
+    });
+
+    afterEach(() => {
+      (global as any).__DEV__ = originalDev;
+      jest.resetModules();
+    });
+
+    it('should not initialize in production mode', async () => {
+      const { default: prodManager } = require('../../src/utils/consoleManager');
+      const getItemSpy = jest.spyOn(AsyncStorage, 'getItem');
+      await prodManager.initialize();
+      expect(getItemSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not setEnabled in production mode', async () => {
+      const { default: prodManager } = require('../../src/utils/consoleManager');
+      const setItemSpy = jest.spyOn(AsyncStorage, 'setItem');
+      await prodManager.setEnabled(true);
+      expect(setItemSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('applyConsoleState', () => {
+    it('should disable console methods when setEnabled(false)', async () => {
+      // Store original log function
+      const originalLog = console.log;
+      await consoleManager.setEnabled(false);
+      // Console.log should now be a different function (noop)
+      expect(console.log).not.toBe(originalLog);
+      // Restore
+      console.log = originalLog;
+    });
+
+    it('should restore console methods when setEnabled(true)', async () => {
+      await consoleManager.setEnabled(false);
+      const noopLog = console.log;
+      await consoleManager.setEnabled(true);
+      // Console.log should be restored (not the noop)
+      expect(console.log).not.toBe(noopLog);
     });
   });
 });

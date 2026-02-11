@@ -236,6 +236,28 @@ describe('OfflineQueueService', () => {
         offlineQueueService.addMessage('testnet', '#channel', 'test');
       }).not.toThrow();
     });
+
+    it('should handle load queue errors gracefully', async () => {
+      // Reset the service to trigger loadQueue in constructor
+      (AsyncStorage.getItem as jest.Mock).mockRejectedValueOnce(new Error('Load error'));
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // Import fresh to trigger constructor with mocked error
+      jest.isolateModules(() => {
+        const { offlineQueueService: freshService } = require('../../src/services/OfflineQueueService');
+        expect(freshService.getQueue()).toEqual([]);
+      });
+    });
+
+    it('should handle invalid JSON in storage gracefully', async () => {
+      (AsyncStorage.getItem as jest.Mock).mockReturnValueOnce(Promise.resolve('invalid json'));
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      jest.isolateModules(() => {
+        const { offlineQueueService: freshService } = require('../../src/services/OfflineQueueService');
+        expect(freshService.getQueue()).toEqual([]);
+      });
+    });
   });
 
   describe('edge cases', () => {

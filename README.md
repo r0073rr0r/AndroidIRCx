@@ -4,7 +4,7 @@
 [![GitHub Issues](https://img.shields.io/github/issues/androidircx/androidircx)](https://github.com/androidircx/androidircx/issues)
 [![GitHub License](https://img.shields.io/github/license/androidircx/androidircx)](https://github.com/androidircx/androidircx/blob/main/LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/androidircx/androidircx?style=flat)](https://github.com/androidircx/androidircx/stargazers)
-[![Coverage](https://codecov.io/gh/AndroidIRCx/AndroidIRCx/branch/master/graph/badge.svg)]()
+[![Coverage](https://codecov.io/gh/AndroidIRCx/AndroidIRCx/branch/master/graph/badge.svg)](https://app.codecov.io/gh/AndroidIRCx/AndroidIRCx/)
 
 Modern IRC client for Android and iOS built with React Native, inspired by the classic AndroIRC client. This project aims to provide a full-featured, IRCv3-compliant IRC client with a clean and intuitive user interface.
 

@@ -6,10 +6,10 @@
     "string": ""
   },
   "App lock disabled": {
-    "string": "Verrouillage de l&#39;application désactivé"
+    "string": "Verrouillage de l'application désactivé"
   },
   "Enable app lock first.": {
-    "string": "Activez d&#39;abord le verrouillage de l&#39;application."
+    "string": "Activez d'abord le verrouillage de l'application."
   },
   "Cancel": {
     "string": "Annuler"
@@ -39,16 +39,16 @@
     "string": "Sauvegarde enregistrée sous :\n {path}"
   },
   "OK": {
-    "string": "D&#39;ACCORD"
+    "string": "D'ACCORD"
   },
   "Failed to save backup file": {
-    "string": "Échec de l&#39;enregistrement du fichier de sauvegarde"
+    "string": "Échec de l'enregistrement du fichier de sauvegarde"
   },
   "Restore": {
     "string": "Restaurer"
   },
   "Backup restored. Restart app to ensure all data reloads.": {
-    "string": "Sauvegarde restaurée. Redémarrez l&#39;application pour que toutes les données soient rechargées."
+    "string": "Sauvegarde restaurée. Redémarrez l'application pour que toutes les données soient rechargées."
   },
   "Invalid backup data": {
     "string": "Données de sauvegarde invalides"
@@ -66,13 +66,13 @@
     "string": "Enregistrer dans un fichier"
   },
   "Export Complete": {
-    "string": ""
+    "string": "Exportation complète"
   },
   "Exported {count} characters in {format} format.\n\n(In production, this would be saved to a file)": {
     "string": ""
   },
   "Export Error": {
-    "string": ""
+    "string": "l'exportation a échoué "
   },
   "Failed to export history": {
     "string": ""
@@ -786,13 +786,13 @@
     "string": ""
   },
   "Commands": {
-    "string": ""
+    "string": "Commande"
   },
   "Command History": {
     "string": ""
   },
   "Clear All History": {
-    "string": ""
+    "string": "Effacer tout l'historique"
   },
   "Delete every command entry": {
     "string": ""
@@ -858,31 +858,31 @@
     "string": ""
   },
   "Export History": {
-    "string": ""
+    "string": "Exporter l'historique"
   },
   "Export message history to file": {
     "string": ""
   },
   "Export as JSON": {
-    "string": ""
+    "string": "Exporter en JSON"
   },
   "Export all messages in JSON format": {
     "string": ""
   },
   "Export as TXT": {
-    "string": ""
+    "string": "Exporter en TXT"
   },
   "Export as plain text log": {
     "string": ""
   },
   "Export as CSV": {
-    "string": ""
+    "string": "Exporter en CSV"
   },
   "Export as spreadsheet-compatible CSV": {
     "string": ""
   },
   "Clear History": {
-    "string": ""
+    "string": "Effacer l'historique"
   },
   "Delete all stored message history": {
     "string": ""
@@ -1005,7 +1005,7 @@
     "string": ""
   },
   "Advanced": {
-    "string": ""
+    "string": "Avancé"
   },
   "Scripts": {
     "string": ""
@@ -1020,7 +1020,7 @@
     "string": ""
   },
   "About": {
-    "string": ""
+    "string": "A propos"
   },
   "About AndroidIRCX": {
     "string": ""
@@ -6273,7 +6273,7 @@
     "string": ""
   },
   "File not found: {path}": {
-    "string": ""
+    "string": "Fichier non trouvé: {path}"
   },
   "Cannot read file info: {error}": {
     "string": ""
@@ -12249,6 +12249,9 @@
     "string": ""
   },
   "Enable Debug Logging:\\nSettings → Development → Enable Console Logging (debug builds only)\\nSend logs with your report.": {
+    "string": ""
+  },
+  "Some errors occurred:": {
     "string": ""
   }
 }

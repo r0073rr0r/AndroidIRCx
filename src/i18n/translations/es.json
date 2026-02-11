@@ -1149,7 +1149,7 @@
     "string": "Autenticarse para ver contraseñas"
   },
   "Manage Encryption Keys": {
-    "string": "Adminsitrar claves de cifrado"
+    "string": "Administrar claves de cifrado"
   },
   "Migrate Old Keys": {
     "string": "Migrar Claves Antiguas"
@@ -1449,7 +1449,7 @@
     "string": "Nombre Real"
   },
   "Ident/Username": {
-    "string": "Ident/Usuario"
+    "string": "Ident"
   },
   "SASL Account": {
     "string": "Cuenta SASL"
@@ -1875,7 +1875,7 @@
     "string": "Topic Protegido (+t)"
   },
   "No External Messages (n)": {
-    "string": "No Permite Mensajes Externos (+n)"
+    "string": "No Mensajes Externos (+n)"
   },
   "Moderated (m)": {
     "string": "Moderado (+m)"
@@ -2748,19 +2748,19 @@
     "string": "Controles de Operadores >"
   },
   "Take Voice": {
-    "string": "Recibir Voice"
+    "string": "Sacar Voice"
   },
   "Give Voice": {
     "string": "Dar Voice"
   },
   "Take Half-Op": {
-    "string": "Recibir Half-Op"
+    "string": "Sacar Half-Op"
   },
   "Give Half-Op": {
     "string": "Dar Half-Op"
   },
   "Take Op": {
-    "string": "Recibir Op"
+    "string": "Sacar Op"
   },
   "Give Op": {
     "string": "Dar Op"
@@ -4917,7 +4917,7 @@
     "string": "Mostrar el icono 🔒  para indicar el cifrado"
   },
   "Auto-Download Media": {
-    "string": "Descarga automática de Multimedia"
+    "string": "Descarga Automática de Multimedia"
   },
   "Automatically download media when received": {
     "string": "Descargar automáticamente archivos multimedia cuando se reciben"
@@ -5832,7 +5832,7 @@
     "string": "Servidor Predeterminado"
   },
   "Set as default server for \"Tap to connect\" header. This server will be used when tapping the network name in the header.": {
-    "string": "Establezca como servidor predeterminado el encabezado \"Tocar para conectarse\". Este servidor se utilizará al tocar el nombre de la red en el encabezado."
+    "string": "Establezca como Servidor por Defecto el encabezado \"Toca para conectarte\". Este servidor se utilizará al tocar el nombre de la red en el encabezado."
   },
   "📖 Help & Documentation": {
     "string": "📖 Ayuda y Documentación"
@@ -8307,7 +8307,7 @@
     "string": "Lista de canales"
   },
   "Connect to Default": {
-    "string": "Conectar al Servidor Predeterminado"
+    "string": "Conectar al Servidor por Defecto"
   },
   "Choose Network": {
     "string": "Elija Red"
@@ -9222,2554 +9222,2554 @@
     "string": "*** STATS {type}: {message}"
   },
   "Ban mask type (0-11)": {
-    "string": ""
+    "string": "Tipo de máscara de Ban (0-11)"
   },
   "Select Ban Mask Type": {
-    "string": ""
+    "string": "Seleccione Tipo de máscara de Ban"
   },
   "Ban mask types (0-11):": {
-    "string": ""
+    "string": "Tipo de máscara de Ban (0-11)"
   },
   "SASL Mechanism": {
-    "string": ""
+    "string": "Mecanismo SASL"
   },
   "PLAIN": {
-    "string": ""
+    "string": "PLAIN"
   },
   "SCRAM-SHA-256": {
-    "string": ""
+    "string": "SCRAM-SHA-256"
   },
   "SCRAM-SHA-256-PLUS (coming soon)": {
-    "string": ""
+    "string": "SCRAM-SHA-256-PLUS (próximamente)"
   },
   "help.channel.title": {
-    "string": ""
+    "string": "help.channel.title"
   },
   "help.channel.basics": {
-    "string": ""
+    "string": "help.channel.basics"
   },
   "help.channel.whatIsChannel": {
-    "string": ""
+    "string": "help.channel.whatIsChannel"
   },
   "help.channel.whatIsChannel.desc": {
-    "string": ""
+    "string": "help.channel.whatIsChannel.desc"
   },
   "help.channel.types": {
-    "string": ""
+    "string": "help.channel.types"
   },
   "help.channel.types.public": {
-    "string": ""
+    "string": "help.channel.types.public"
   },
   "help.channel.types.private": {
-    "string": ""
+    "string": "help.channel.types.private"
   },
   "help.channel.types.secret": {
-    "string": ""
+    "string": "help.channel.types.secret"
   },
   "help.channel.types.moderated": {
-    "string": ""
+    "string": "help.channel.types.moderated"
   },
   "help.channel.creating": {
-    "string": ""
+    "string": "help.channel.creating"
   },
   "help.channel.creating.joinCreate": {
-    "string": ""
+    "string": "help.channel.creating.joinCreate"
   },
   "help.channel.creating.joinCreate.desc": {
-    "string": ""
+    "string": "help.channel.creating.joinCreate.desc"
   },
   "help.channel.creating.setTopic": {
-    "string": ""
+    "string": "help.channel.creating.setTopic"
   },
   "help.channel.modes": {
-    "string": ""
+    "string": "help.channel.modes"
   },
   "help.channel.modes.userModes": {
-    "string": ""
+    "string": "help.channel.modes.userModes"
   },
   "help.channel.modes.op": {
-    "string": ""
+    "string": "help.channel.modes.op"
   },
   "help.channel.modes.voice": {
-    "string": ""
+    "string": "help.channel.modes.voice"
   },
   "help.channel.modes.halfop": {
-    "string": ""
+    "string": "help.channel.modes.halfop"
   },
   "help.channel.modes.owner": {
-    "string": ""
+    "string": "help.channel.modes.owner"
   },
   "help.channel.modes.admin": {
-    "string": ""
+    "string": "help.channel.modes.admin"
   },
   "help.channel.modes.giveOp": {
-    "string": ""
+    "string": "help.channel.modes.giveOp"
   },
   "help.channel.modes.giveVoice": {
-    "string": ""
+    "string": "help.channel.modes.giveVoice"
   },
   "help.channel.modes.removeOp": {
-    "string": ""
+    "string": "help.channel.modes.removeOp"
   },
   "help.channel.settings": {
-    "string": ""
+    "string": "help.channel.settings"
   },
   "help.channel.settings.moderated": {
-    "string": ""
+    "string": "help.channel.settings.moderated"
   },
   "help.channel.settings.moderated.desc": {
-    "string": ""
+    "string": "help.channel.settings.moderated.desc"
   },
   "help.channel.settings.private": {
-    "string": ""
+    "string": "help.channel.settings.private"
   },
   "help.channel.settings.private.desc": {
-    "string": ""
+    "string": "help.channel.settings.private.desc"
   },
   "help.channel.settings.secret": {
-    "string": ""
+    "string": "help.channel.settings.secret"
   },
   "help.channel.settings.secret.desc": {
-    "string": ""
+    "string": "help.channel.settings.secret.desc"
   },
   "help.channel.settings.inviteOnly": {
-    "string": ""
+    "string": "help.channel.settings.inviteOnly"
   },
   "help.channel.settings.inviteOnly.desc": {
-    "string": ""
+    "string": "help.channel.settings.inviteOnly.desc"
   },
   "help.channel.settings.noExt": {
-    "string": ""
+    "string": "help.channel.settings.noExt"
   },
   "help.channel.settings.noExt.desc": {
-    "string": ""
+    "string": "help.channel.settings.noExt.desc"
   },
   "help.channel.settings.topicLock": {
-    "string": ""
+    "string": "help.channel.settings.topicLock"
   },
   "help.channel.settings.topicLock.desc": {
-    "string": ""
+    "string": "help.channel.settings.topicLock.desc"
   },
   "help.channel.settings.userLimit": {
-    "string": ""
+    "string": "help.channel.settings.userLimit"
   },
   "help.channel.settings.userLimit.desc": {
-    "string": ""
+    "string": "help.channel.settings.userLimit.desc"
   },
   "help.channel.settings.channelKey": {
-    "string": ""
+    "string": "help.channel.settings.channelKey"
   },
   "help.channel.settings.channelKey.desc": {
-    "string": ""
+    "string": "help.channel.settings.channelKey.desc"
   },
   "help.channel.moderation": {
-    "string": ""
+    "string": "help.channel.moderation"
   },
   "help.channel.moderation.kick": {
-    "string": ""
+    "string": "help.channel.moderation.kick"
   },
   "help.channel.moderation.kick.desc": {
-    "string": ""
+    "string": "help.channel.moderation.kick.desc"
   },
   "help.channel.moderation.ban": {
-    "string": ""
+    "string": "help.channel.moderation.ban"
   },
   "help.channel.moderation.ban.desc": {
-    "string": ""
+    "string": "help.channel.moderation.ban.desc"
   },
   "help.channel.moderation.quiet": {
-    "string": ""
+    "string": "help.channel.moderation.quiet"
   },
   "help.channel.moderation.quiet.desc": {
-    "string": ""
+    "string": "help.channel.moderation.quiet.desc"
   },
   "help.channel.moderation.unban": {
-    "string": ""
+    "string": "help.channel.moderation.unban"
   },
   "help.channel.moderation.viewBanList": {
-    "string": ""
+    "string": "help.channel.moderation.viewBanList"
   },
   "help.channel.advanced": {
-    "string": ""
+    "string": "help.channel.advanced"
   },
   "help.channel.advanced.registration": {
-    "string": ""
+    "string": "help.channel.advanced.registration"
   },
   "help.channel.advanced.registration.desc": {
-    "string": ""
+    "string": "help.channel.advanced.registration.desc"
   },
   "help.channel.advanced.accessList": {
-    "string": ""
+    "string": "help.channel.advanced.accessList"
   },
   "help.channel.advanced.accessList.desc": {
-    "string": ""
+    "string": "help.channel.advanced.accessList.desc"
   },
   "help.channel.advanced.autoOp": {
-    "string": ""
+    "string": "help.channel.advanced.autoOp"
   },
   "help.channel.advanced.autoOp.desc": {
-    "string": ""
+    "string": "help.channel.advanced.autoOp.desc"
   },
   "help.channel.bestPractices": {
-    "string": ""
+    "string": "help.channel.bestPractices"
   },
   "help.channel.bestPractices.security": {
-    "string": ""
+    "string": "help.channel.bestPractices.security"
   },
   "help.channel.bestPractices.security.1": {
-    "string": ""
+    "string": "help.channel.bestPractices.security.1"
   },
   "help.channel.bestPractices.security.2": {
-    "string": ""
+    "string": "help.channel.bestPractices.security.2"
   },
   "help.channel.bestPractices.security.3": {
-    "string": ""
+    "string": "help.channel.bestPractices.security.3"
   },
   "help.channel.bestPractices.security.4": {
-    "string": ""
+    "string": "help.channel.bestPractices.security.4"
   },
   "help.channel.bestPractices.moderation": {
-    "string": ""
+    "string": "help.channel.bestPractices.moderation"
   },
   "help.channel.bestPractices.moderation.1": {
-    "string": ""
+    "string": "help.channel.bestPractices.moderation.1"
   },
   "help.channel.bestPractices.moderation.2": {
-    "string": ""
+    "string": "help.channel.bestPractices.moderation.2"
   },
   "help.channel.bestPractices.moderation.3": {
-    "string": ""
+    "string": "help.channel.bestPractices.moderation.3"
   },
   "help.channel.bestPractices.moderation.4": {
-    "string": ""
+    "string": "help.channel.bestPractices.moderation.4"
   },
   "help.channel.bestPractices.growth": {
-    "string": ""
+    "string": "help.channel.bestPractices.growth"
   },
   "help.channel.bestPractices.growth.1": {
-    "string": ""
+    "string": "help.channel.bestPractices.growth.1"
   },
   "help.channel.bestPractices.growth.2": {
-    "string": ""
+    "string": "help.channel.bestPractices.growth.2"
   },
   "help.channel.bestPractices.growth.3": {
-    "string": ""
+    "string": "help.channel.bestPractices.growth.3"
   },
   "help.channel.bestPractices.growth.4": {
-    "string": ""
+    "string": "help.channel.bestPractices.growth.4"
   },
   "help.channel.troubleshooting": {
-    "string": ""
+    "string": "help.channel.troubleshooting"
   },
   "help.channel.troubleshooting.lostOp": {
-    "string": ""
+    "string": "help.channel.troubleshooting.lostOp"
   },
   "help.channel.troubleshooting.lostOp.desc": {
-    "string": ""
+    "string": "help.channel.troubleshooting.lostOp.desc"
   },
   "help.channel.troubleshooting.cantChangeModes": {
-    "string": ""
+    "string": "help.channel.troubleshooting.cantChangeModes"
   },
   "help.channel.troubleshooting.cantChangeModes.desc": {
-    "string": ""
+    "string": "help.channel.troubleshooting.cantChangeModes.desc"
   },
   "help.channel.troubleshooting.userRejoins": {
-    "string": ""
+    "string": "help.channel.troubleshooting.userRejoins"
   },
   "help.channel.troubleshooting.userRejoins.desc": {
-    "string": ""
+    "string": "help.channel.troubleshooting.userRejoins.desc"
   },
   "help.channel.troubleshooting.channelStolen": {
-    "string": ""
+    "string": "help.channel.troubleshooting.channelStolen"
   },
   "help.channel.troubleshooting.channelStolen.desc": {
-    "string": ""
+    "string": "help.channel.troubleshooting.channelStolen.desc"
   },
   "help.commands.title": {
-    "string": ""
+    "string": "help.commands.title"
   },
   "help.commands.basicCommands": {
-    "string": ""
+    "string": "help.commands.basicCommands"
   },
   "help.commands.joinDesc": {
-    "string": ""
+    "string": "help.commands.joinDesc"
   },
   "help.commands.example": {
-    "string": ""
+    "string": "help.commands.example"
   },
   "help.commands.partDesc": {
-    "string": ""
+    "string": "help.commands.partDesc"
   },
   "help.commands.msgDesc": {
-    "string": ""
+    "string": "help.commands.msgDesc"
   },
   "help.commands.queryDesc": {
-    "string": ""
+    "string": "help.commands.queryDesc"
   },
   "help.commands.nickDesc": {
-    "string": ""
+    "string": "help.commands.nickDesc"
   },
   "help.commands.quitDesc": {
-    "string": ""
+    "string": "help.commands.quitDesc"
   },
   "help.commands.channelManagement": {
-    "string": ""
+    "string": "help.commands.channelManagement"
   },
   "help.commands.modeDesc": {
-    "string": ""
+    "string": "help.commands.modeDesc"
   },
   "help.commands.examples": {
-    "string": ""
+    "string": "help.commands.examples"
   },
   "help.commands.topicDesc": {
-    "string": ""
+    "string": "help.commands.topicDesc"
   },
   "help.commands.kickDesc": {
-    "string": ""
+    "string": "help.commands.kickDesc"
   },
   "help.commands.banDesc": {
-    "string": ""
+    "string": "help.commands.banDesc"
   },
   "help.commands.userInfo": {
-    "string": ""
+    "string": "help.commands.userInfo"
   },
   "help.commands.whoisDesc": {
-    "string": ""
+    "string": "help.commands.whoisDesc"
   },
   "help.commands.whowasDesc": {
-    "string": ""
+    "string": "help.commands.whowasDesc"
   },
   "help.commands.clonesDesc": {
-    "string": ""
+    "string": "help.commands.clonesDesc"
   },
   "help.commands.aliases": {
-    "string": ""
+    "string": "help.commands.aliases"
   },
   "help.commands.actionFormatting": {
-    "string": ""
+    "string": "help.commands.actionFormatting"
   },
   "help.commands.meDesc": {
-    "string": ""
+    "string": "help.commands.meDesc"
   },
   "help.commands.actionDesc": {
-    "string": ""
+    "string": "help.commands.actionDesc"
   },
   "help.commands.encryptionCommands": {
-    "string": ""
+    "string": "help.commands.encryptionCommands"
   },
   "help.commands.sharekeyDesc": {
-    "string": ""
+    "string": "help.commands.sharekeyDesc"
   },
   "help.commands.requestkeyDesc": {
-    "string": ""
+    "string": "help.commands.requestkeyDesc"
   },
   "help.commands.encmsgDesc": {
-    "string": ""
+    "string": "help.commands.encmsgDesc"
   },
   "help.commands.chankeyDesc": {
-    "string": ""
+    "string": "help.commands.chankeyDesc"
   },
   "help.commands.advanced": {
-    "string": ""
+    "string": "help.commands.advanced"
   },
   "help.commands.quoteDesc": {
-    "string": ""
+    "string": "help.commands.quoteDesc"
   },
   "help.commands.setnameDesc": {
-    "string": ""
+    "string": "help.commands.setnameDesc"
   },
   "help.commands.botDesc": {
-    "string": ""
+    "string": "help.commands.botDesc"
   },
   "help.commands.registerDesc": {
-    "string": ""
+    "string": "help.commands.registerDesc"
   },
   "help.commands.tabCompletionTip": {
-    "string": ""
+    "string": "help.commands.tabCompletionTip"
   },
   "help.connection.title": {
-    "string": ""
+    "string": "help.connection.title"
   },
   "help.connection.quickStart": {
-    "string": ""
+    "string": "help.connection.quickStart"
   },
   "help.connection.quickStartDesc": {
-    "string": ""
+    "string": "help.connection.quickStartDesc"
   },
   "help.connection.step1": {
-    "string": ""
+    "string": "help.connection.step1"
   },
   "help.connection.step2": {
-    "string": ""
+    "string": "help.connection.step2"
   },
   "help.connection.step3": {
-    "string": ""
+    "string": "help.connection.step3"
   },
   "help.connection.step4": {
-    "string": ""
+    "string": "help.connection.step4"
   },
   "help.connection.detailedGuide": {
-    "string": ""
+    "string": "help.connection.detailedGuide"
   },
   "help.connection.step1Title": {
-    "string": ""
+    "string": "help.connection.step1Title"
   },
   "help.connection.step1Bullet1": {
-    "string": ""
+    "string": "help.connection.step1Bullet1"
   },
   "help.connection.step1Bullet2": {
-    "string": ""
+    "string": "help.connection.step1Bullet2"
   },
   "help.connection.step2Title": {
-    "string": ""
+    "string": "help.connection.step2Title"
   },
   "help.connection.step2Desc": {
-    "string": ""
+    "string": "help.connection.step2Desc"
   },
   "help.connection.step2Bullet1": {
-    "string": ""
+    "string": "help.connection.step2Bullet1"
   },
   "help.connection.step2Bullet2": {
-    "string": ""
+    "string": "help.connection.step2Bullet2"
   },
   "help.connection.step2Bullet3": {
-    "string": ""
+    "string": "help.connection.step2Bullet3"
   },
   "help.connection.step2Bullet4": {
-    "string": ""
+    "string": "help.connection.step2Bullet4"
   },
   "help.connection.step2Bullet5": {
-    "string": ""
+    "string": "help.connection.step2Bullet5"
   },
   "help.connection.step3Title": {
-    "string": ""
+    "string": "help.connection.step3Title"
   },
   "help.connection.step3Desc": {
-    "string": ""
+    "string": "help.connection.step3Desc"
   },
   "help.connection.step3Bullet1": {
-    "string": ""
+    "string": "help.connection.step3Bullet1"
   },
   "help.connection.step3Bullet2": {
-    "string": ""
+    "string": "help.connection.step3Bullet2"
   },
   "help.connection.step3Bullet3": {
-    "string": ""
+    "string": "help.connection.step3Bullet3"
   },
   "help.connection.step3Bullet4": {
-    "string": ""
+    "string": "help.connection.step3Bullet4"
   },
   "help.connection.step3Bullet5": {
-    "string": ""
+    "string": "help.connection.step3Bullet5"
   },
   "help.connection.step4Title": {
-    "string": ""
+    "string": "help.connection.step4Title"
   },
   "help.connection.step4Desc": {
-    "string": ""
+    "string": "help.connection.step4Desc"
   },
   "help.connection.step4Bullet1": {
-    "string": ""
+    "string": "help.connection.step4Bullet1"
   },
   "help.connection.step4Bullet2": {
-    "string": ""
+    "string": "help.connection.step4Bullet2"
   },
   "help.connection.step4Bullet3": {
-    "string": ""
+    "string": "help.connection.step4Bullet3"
   },
   "help.connection.step4Bullet4": {
-    "string": ""
+    "string": "help.connection.step4Bullet4"
   },
   "help.connection.step4Bullet5": {
-    "string": ""
+    "string": "help.connection.step4Bullet5"
   },
   "help.connection.step5Title": {
-    "string": ""
+    "string": "help.connection.step5Title"
   },
   "help.connection.step5Bullet1": {
-    "string": ""
+    "string": "help.connection.step5Bullet1"
   },
   "help.connection.step5Bullet2": {
-    "string": ""
+    "string": "help.connection.step5Bullet2"
   },
   "help.connection.step5Bullet3": {
-    "string": ""
+    "string": "help.connection.step5Bullet3"
   },
   "help.connection.quickTips": {
-    "string": ""
+    "string": "help.connection.quickTips"
   },
   "help.connection.quickTip1": {
-    "string": ""
+    "string": "help.connection.quickTip1"
   },
   "help.connection.quickTip2": {
-    "string": ""
+    "string": "help.connection.quickTip2"
   },
   "help.connection.popularNetworks": {
-    "string": ""
+    "string": "help.connection.popularNetworks"
   },
   "help.connection.dbaseNetwork": {
-    "string": ""
+    "string": "help.connection.dbaseNetwork"
   },
   "help.connection.liberaNetwork": {
-    "string": ""
+    "string": "help.connection.liberaNetwork"
   },
   "help.connection.oftcNetwork": {
-    "string": ""
+    "string": "help.connection.oftcNetwork"
   },
   "help.connection.troubleshooting": {
-    "string": ""
+    "string": "help.connection.troubleshooting"
   },
   "help.connection.connFailed": {
-    "string": ""
+    "string": "help.connection.connFailed"
   },
   "help.connection.connFailedBullet1": {
-    "string": ""
+    "string": "help.connection.connFailedBullet1"
   },
   "help.connection.connFailedBullet2": {
-    "string": ""
+    "string": "help.connection.connFailedBullet2"
   },
   "help.connection.connFailedBullet3": {
-    "string": ""
+    "string": "help.connection.connFailedBullet3"
   },
   "help.connection.connFailedBullet4": {
-    "string": ""
+    "string": "help.connection.connFailedBullet4"
   },
   "help.connection.nickInUse": {
-    "string": ""
+    "string": "help.connection.nickInUse"
   },
   "help.connection.nickInUseBullet1": {
-    "string": ""
+    "string": "help.connection.nickInUseBullet1"
   },
   "help.connection.nickInUseBullet2": {
-    "string": ""
+    "string": "help.connection.nickInUseBullet2"
   },
   "help.connection.nickInUseBullet3": {
-    "string": ""
+    "string": "help.connection.nickInUseBullet3"
   },
   "help.connection.cantJoin": {
-    "string": ""
+    "string": "help.connection.cantJoin"
   },
   "help.connection.cantJoinBullet1": {
-    "string": ""
+    "string": "help.connection.cantJoinBullet1"
   },
   "help.connection.cantJoinBullet2": {
-    "string": ""
+    "string": "help.connection.cantJoinBullet2"
   },
   "help.connection.cantJoinBullet3": {
-    "string": ""
+    "string": "help.connection.cantJoinBullet3"
   },
   "help.connection.needMoreHelp": {
-    "string": ""
+    "string": "help.connection.needMoreHelp"
   },
   "help.connection.supportInfo": {
-    "string": ""
+    "string": "help.connection.supportInfo"
   },
   "help.encryption.title": {
-    "string": ""
+    "string": "help.encryption.title"
   },
   "help.encryption.whatIsE2ee.title": {
-    "string": ""
+    "string": "help.encryption.whatIsE2ee.title"
   },
   "help.encryption.whatIsE2ee.description": {
-    "string": ""
+    "string": "help.encryption.whatIsE2ee.description"
   },
   "help.encryption.dmEncryption.title": {
-    "string": ""
+    "string": "help.encryption.dmEncryption.title"
   },
   "help.encryption.dmEncryption.step1.title": {
-    "string": ""
+    "string": "help.encryption.dmEncryption.step1.title"
   },
   "help.encryption.dmEncryption.step1.description": {
-    "string": ""
+    "string": "help.encryption.dmEncryption.step1.description"
   },
   "help.encryption.dmEncryption.step2.title": {
-    "string": ""
+    "string": "help.encryption.dmEncryption.step2.title"
   },
   "help.encryption.dmEncryption.step2.instruction": {
-    "string": ""
+    "string": "help.encryption.dmEncryption.step2.instruction"
   },
   "help.encryption.dmEncryption.step2.bullet1": {
-    "string": ""
+    "string": "help.encryption.dmEncryption.step2.bullet1"
   },
   "help.encryption.dmEncryption.step2.bullet2": {
-    "string": ""
+    "string": "help.encryption.dmEncryption.step2.bullet2"
   },
   "help.encryption.dmEncryption.step2.bullet3": {
-    "string": ""
+    "string": "help.encryption.dmEncryption.step2.bullet3"
   },
   "help.encryption.dmEncryption.step2.bullet4": {
-    "string": ""
+    "string": "help.encryption.dmEncryption.step2.bullet4"
   },
   "help.encryption.dmEncryption.requestKey.title": {
-    "string": ""
+    "string": "help.encryption.dmEncryption.requestKey.title"
   },
   "help.encryption.channelEncryption.title": {
-    "string": ""
+    "string": "help.encryption.channelEncryption.title"
   },
   "help.encryption.channelEncryption.generateKey.title": {
-    "string": ""
+    "string": "help.encryption.channelEncryption.generateKey.title"
   },
   "help.encryption.channelEncryption.generateKey.description": {
-    "string": ""
+    "string": "help.encryption.channelEncryption.generateKey.description"
   },
   "help.encryption.channelEncryption.shareKey.title": {
-    "string": ""
+    "string": "help.encryption.channelEncryption.shareKey.title"
   },
   "help.encryption.channelEncryption.shareKey.description": {
-    "string": ""
+    "string": "help.encryption.channelEncryption.shareKey.description"
   },
   "help.encryption.channelEncryption.checkStatus.title": {
-    "string": ""
+    "string": "help.encryption.channelEncryption.checkStatus.title"
   },
   "help.encryption.channelEncryption.revokeAccess.title": {
-    "string": ""
+    "string": "help.encryption.channelEncryption.revokeAccess.title"
   },
   "help.encryption.channelEncryption.revokeAccess.description": {
-    "string": ""
+    "string": "help.encryption.channelEncryption.revokeAccess.description"
   },
   "help.encryption.securityBestPractices.title": {
-    "string": ""
+    "string": "help.encryption.securityBestPractices.title"
   },
   "help.encryption.securityBestPractices.do1": {
-    "string": ""
+    "string": "help.encryption.securityBestPractices.do1"
   },
   "help.encryption.securityBestPractices.do2": {
-    "string": ""
+    "string": "help.encryption.securityBestPractices.do2"
   },
   "help.encryption.securityBestPractices.do3": {
-    "string": ""
+    "string": "help.encryption.securityBestPractices.do3"
   },
   "help.encryption.securityBestPractices.do4": {
-    "string": ""
+    "string": "help.encryption.securityBestPractices.do4"
   },
   "help.encryption.securityBestPractices.dont1": {
-    "string": ""
+    "string": "help.encryption.securityBestPractices.dont1"
   },
   "help.encryption.securityBestPractices.dont2": {
-    "string": ""
+    "string": "help.encryption.securityBestPractices.dont2"
   },
   "help.encryption.securityBestPractices.dont3": {
-    "string": ""
+    "string": "help.encryption.securityBestPractices.dont3"
   },
   "help.encryption.securityBestPractices.dont4": {
-    "string": ""
+    "string": "help.encryption.securityBestPractices.dont4"
   },
   "help.encryption.troubleshooting.title": {
-    "string": ""
+    "string": "help.encryption.troubleshooting.title"
   },
   "help.encryption.troubleshooting.gibberish.title": {
-    "string": ""
+    "string": "help.encryption.troubleshooting.gibberish.title"
   },
   "help.encryption.troubleshooting.gibberish.description": {
-    "string": ""
+    "string": "help.encryption.troubleshooting.gibberish.description"
   },
   "help.encryption.troubleshooting.gibberish.solutionLabel": {
-    "string": ""
+    "string": "help.encryption.troubleshooting.gibberish.solutionLabel"
   },
   "help.encryption.troubleshooting.cantDecrypt.title": {
-    "string": ""
+    "string": "help.encryption.troubleshooting.cantDecrypt.title"
   },
   "help.encryption.troubleshooting.cantDecrypt.description": {
-    "string": ""
+    "string": "help.encryption.troubleshooting.cantDecrypt.description"
   },
   "help.encryption.troubleshooting.cantDecrypt.solution": {
-    "string": ""
+    "string": "help.encryption.troubleshooting.cantDecrypt.solution"
   },
   "help.encryption.troubleshooting.noLockIcon.title": {
-    "string": ""
+    "string": "help.encryption.troubleshooting.noLockIcon.title"
   },
   "help.encryption.troubleshooting.noLockIcon.description": {
-    "string": ""
+    "string": "help.encryption.troubleshooting.noLockIcon.description"
   },
   "help.encryption.troubleshooting.noLockIcon.solution": {
-    "string": ""
+    "string": "help.encryption.troubleshooting.noLockIcon.solution"
   },
   "help.encryption.keyManagement.title": {
-    "string": ""
+    "string": "help.encryption.keyManagement.title"
   },
   "help.encryption.keyManagement.description": {
-    "string": ""
+    "string": "help.encryption.keyManagement.description"
   },
   "help.encryption.keyManagement.location": {
-    "string": ""
+    "string": "help.encryption.keyManagement.location"
   },
   "help.media.title": {
-    "string": ""
+    "string": "help.media.title"
   },
   "help.media.overview": {
-    "string": ""
+    "string": "help.media.overview"
   },
   "help.media.overviewDescription": {
-    "string": ""
+    "string": "help.media.overviewDescription"
   },
   "help.media.photoType": {
-    "string": ""
+    "string": "help.media.photoType"
   },
   "help.media.videoType": {
-    "string": ""
+    "string": "help.media.videoType"
   },
   "help.media.voiceType": {
-    "string": ""
+    "string": "help.media.voiceType"
   },
   "help.media.fileType": {
-    "string": ""
+    "string": "help.media.fileType"
   },
   "help.media.requirements": {
-    "string": ""
+    "string": "help.media.requirements"
   },
   "help.media.requirementE2ee": {
-    "string": ""
+    "string": "help.media.requirementE2ee"
   },
   "help.media.requirementKeys": {
-    "string": ""
+    "string": "help.media.requirementKeys"
   },
   "help.media.requirementInternet": {
-    "string": ""
+    "string": "help.media.requirementInternet"
   },
   "help.media.howToSend": {
-    "string": ""
+    "string": "help.media.howToSend"
   },
   "help.media.step1Title": {
-    "string": ""
+    "string": "help.media.step1Title"
   },
   "help.media.step1OpenSettings": {
-    "string": ""
+    "string": "help.media.step1OpenSettings"
   },
   "help.media.step1GoToMedia": {
-    "string": ""
+    "string": "help.media.step1GoToMedia"
   },
   "help.media.step1EnableMedia": {
-    "string": ""
+    "string": "help.media.step1EnableMedia"
   },
   "help.media.step2Title": {
-    "string": ""
+    "string": "help.media.step2Title"
   },
   "help.media.step2OpenChannel": {
-    "string": ""
+    "string": "help.media.step2OpenChannel"
   },
   "help.media.step2TapAttachment": {
-    "string": ""
+    "string": "help.media.step2TapAttachment"
   },
   "help.media.step2SelectPhoto": {
-    "string": ""
+    "string": "help.media.step2SelectPhoto"
   },
   "help.media.step2ChoosePhoto": {
-    "string": ""
+    "string": "help.media.step2ChoosePhoto"
   },
   "help.media.step2AddCaption": {
-    "string": ""
+    "string": "help.media.step2AddCaption"
   },
   "help.media.step2TapSend": {
-    "string": ""
+    "string": "help.media.step2TapSend"
   },
   "help.media.step3Title": {
-    "string": ""
+    "string": "help.media.step3Title"
   },
   "help.media.step3TapAttachment": {
-    "string": ""
+    "string": "help.media.step3TapAttachment"
   },
   "help.media.step3SelectVideo": {
-    "string": ""
+    "string": "help.media.step3SelectVideo"
   },
   "help.media.step3ChooseVideo": {
-    "string": ""
+    "string": "help.media.step3ChooseVideo"
   },
   "help.media.step3PreviewCaption": {
-    "string": ""
+    "string": "help.media.step3PreviewCaption"
   },
   "help.media.step3TapSend": {
-    "string": ""
+    "string": "help.media.step3TapSend"
   },
   "help.media.step4Title": {
-    "string": ""
+    "string": "help.media.step4Title"
   },
   "help.media.step4TapAttachment": {
-    "string": ""
+    "string": "help.media.step4TapAttachment"
   },
   "help.media.step4SelectVoice": {
-    "string": ""
+    "string": "help.media.step4SelectVoice"
   },
   "help.media.step4Record": {
-    "string": ""
+    "string": "help.media.step4Record"
   },
   "help.media.step4PreviewSend": {
-    "string": ""
+    "string": "help.media.step4PreviewSend"
   },
   "help.media.howToReceive": {
-    "string": ""
+    "string": "help.media.howToReceive"
   },
   "help.media.autoDownloadTitle": {
-    "string": ""
+    "string": "help.media.autoDownloadTitle"
   },
   "help.media.autoDownloadDescription": {
-    "string": ""
+    "string": "help.media.autoDownloadDescription"
   },
   "help.media.manualDownloadTitle": {
-    "string": ""
+    "string": "help.media.manualDownloadTitle"
   },
   "help.media.manualDownloadDescription": {
-    "string": ""
+    "string": "help.media.manualDownloadDescription"
   },
   "help.media.manualDownloadStep1": {
-    "string": ""
+    "string": "help.media.manualDownloadStep1"
   },
   "help.media.manualDownloadStep2": {
-    "string": ""
+    "string": "help.media.manualDownloadStep2"
   },
   "help.media.manualDownloadStep3": {
-    "string": ""
+    "string": "help.media.manualDownloadStep3"
   },
   "help.media.viewMediaTitle": {
-    "string": ""
+    "string": "help.media.viewMediaTitle"
   },
   "help.media.viewMediaStep1": {
-    "string": ""
+    "string": "help.media.viewMediaStep1"
   },
   "help.media.viewMediaStep2": {
-    "string": ""
+    "string": "help.media.viewMediaStep2"
   },
   "help.media.viewMediaStep3": {
-    "string": ""
+    "string": "help.media.viewMediaStep3"
   },
   "help.media.viewMediaStep4": {
-    "string": ""
+    "string": "help.media.viewMediaStep4"
   },
   "help.media.settings": {
-    "string": ""
+    "string": "help.media.settings"
   },
   "help.media.mediaQualityTitle": {
-    "string": ""
+    "string": "help.media.mediaQualityTitle"
   },
   "help.media.mediaQualityPath": {
-    "string": ""
+    "string": "help.media.mediaQualityPath"
   },
   "help.media.qualityOriginal": {
-    "string": ""
+    "string": "help.media.qualityOriginal"
   },
   "help.media.qualityHigh": {
-    "string": ""
+    "string": "help.media.qualityHigh"
   },
   "help.media.qualityMedium": {
-    "string": ""
+    "string": "help.media.qualityMedium"
   },
   "help.media.qualityLow": {
-    "string": ""
+    "string": "help.media.qualityLow"
   },
   "help.media.autoDownloadSettingsTitle": {
-    "string": ""
+    "string": "help.media.autoDownloadSettingsTitle"
   },
   "help.media.autoDownloadSettingsPath": {
-    "string": ""
+    "string": "help.media.autoDownloadSettingsPath"
   },
   "help.media.autoDownloadWifiOnly": {
-    "string": ""
+    "string": "help.media.autoDownloadWifiOnly"
   },
   "help.media.autoDownloadWifiMobile": {
-    "string": ""
+    "string": "help.media.autoDownloadWifiMobile"
   },
   "help.media.autoDownloadNever": {
-    "string": ""
+    "string": "help.media.autoDownloadNever"
   },
   "help.media.storageTitle": {
-    "string": ""
+    "string": "help.media.storageTitle"
   },
   "help.media.storagePath": {
-    "string": ""
+    "string": "help.media.storagePath"
   },
   "help.media.storageViewCache": {
-    "string": ""
+    "string": "help.media.storageViewCache"
   },
   "help.media.storageClearCache": {
-    "string": ""
+    "string": "help.media.storageClearCache"
   },
   "help.media.storageSetMaxSize": {
-    "string": ""
+    "string": "help.media.storageSetMaxSize"
   },
   "help.media.privacySecurity": {
-    "string": ""
+    "string": "help.media.privacySecurity"
   },
   "help.media.encryptionTitle": {
-    "string": ""
+    "string": "help.media.encryptionTitle"
   },
   "help.media.encryptionBullet1": {
-    "string": ""
+    "string": "help.media.encryptionBullet1"
   },
   "help.media.encryptionBullet2": {
-    "string": ""
+    "string": "help.media.encryptionBullet2"
   },
   "help.media.encryptionBullet3": {
-    "string": ""
+    "string": "help.media.encryptionBullet3"
   },
   "help.media.metadataTitle": {
-    "string": ""
+    "string": "help.media.metadataTitle"
   },
   "help.media.metadataBullet1": {
-    "string": ""
+    "string": "help.media.metadataBullet1"
   },
   "help.media.metadataBullet2": {
-    "string": ""
+    "string": "help.media.metadataBullet2"
   },
   "help.media.metadataBullet3": {
-    "string": ""
+    "string": "help.media.metadataBullet3"
   },
   "help.media.troubleshooting": {
-    "string": ""
+    "string": "help.media.troubleshooting"
   },
   "help.media.troubleshootNoButtonTitle": {
-    "string": ""
+    "string": "help.media.troubleshootNoButtonTitle"
   },
   "help.media.troubleshootNoButtonBullet1": {
-    "string": ""
+    "string": "help.media.troubleshootNoButtonBullet1"
   },
   "help.media.troubleshootNoButtonBullet2": {
-    "string": ""
+    "string": "help.media.troubleshootNoButtonBullet2"
   },
   "help.media.troubleshootNoButtonBullet3": {
-    "string": ""
+    "string": "help.media.troubleshootNoButtonBullet3"
   },
   "help.media.troubleshootUploadFailedTitle": {
-    "string": ""
+    "string": "help.media.troubleshootUploadFailedTitle"
   },
   "help.media.troubleshootUploadFailedBullet1": {
-    "string": ""
+    "string": "help.media.troubleshootUploadFailedBullet1"
   },
   "help.media.troubleshootUploadFailedBullet2": {
-    "string": ""
+    "string": "help.media.troubleshootUploadFailedBullet2"
   },
   "help.media.troubleshootUploadFailedBullet3": {
-    "string": ""
+    "string": "help.media.troubleshootUploadFailedBullet3"
   },
   "help.media.troubleshootDownloadFailedTitle": {
-    "string": ""
+    "string": "help.media.troubleshootDownloadFailedTitle"
   },
   "help.media.troubleshootDownloadFailedBullet1": {
-    "string": ""
+    "string": "help.media.troubleshootDownloadFailedBullet1"
   },
   "help.media.troubleshootDownloadFailedBullet2": {
-    "string": ""
+    "string": "help.media.troubleshootDownloadFailedBullet2"
   },
   "help.media.troubleshootDownloadFailedBullet3": {
-    "string": ""
+    "string": "help.media.troubleshootDownloadFailedBullet3"
   },
   "help.media.troubleshootEncryptedDataTitle": {
-    "string": ""
+    "string": "help.media.troubleshootEncryptedDataTitle"
   },
   "help.media.troubleshootEncryptedDataBullet1": {
-    "string": ""
+    "string": "help.media.troubleshootEncryptedDataBullet1"
   },
   "help.media.troubleshootEncryptedDataBullet2": {
-    "string": ""
+    "string": "help.media.troubleshootEncryptedDataBullet2"
   },
   "help.troubleshooting.title": {
-    "string": ""
+    "string": "help.troubleshooting.title"
   },
   "help.troubleshooting.connectionIssues": {
-    "string": ""
+    "string": "help.troubleshooting.connectionIssues"
   },
   "help.troubleshooting.cantConnect.title": {
-    "string": ""
+    "string": "help.troubleshooting.cantConnect.title"
   },
   "help.troubleshooting.cantConnect.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.cantConnect.symptoms"
   },
   "help.troubleshooting.solutions": {
-    "string": ""
+    "string": "help.troubleshooting.solutions"
   },
   "help.troubleshooting.cantConnect.checkInternet": {
-    "string": ""
+    "string": "help.troubleshooting.cantConnect.checkInternet"
   },
   "help.troubleshooting.cantConnect.verifyAddress": {
-    "string": ""
+    "string": "help.troubleshooting.cantConnect.verifyAddress"
   },
   "help.troubleshooting.cantConnect.tryDifferentPort": {
-    "string": ""
+    "string": "help.troubleshooting.cantConnect.tryDifferentPort"
   },
   "help.troubleshooting.cantConnect.disableVpn": {
-    "string": ""
+    "string": "help.troubleshooting.cantConnect.disableVpn"
   },
   "help.troubleshooting.cantConnect.checkFirewall": {
-    "string": ""
+    "string": "help.troubleshooting.cantConnect.checkFirewall"
   },
   "help.troubleshooting.cantConnect.tryMobileData": {
-    "string": ""
+    "string": "help.troubleshooting.cantConnect.tryMobileData"
   },
   "help.troubleshooting.disconnects.title": {
-    "string": ""
+    "string": "help.troubleshooting.disconnects.title"
   },
   "help.troubleshooting.disconnects.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.disconnects.symptoms"
   },
   "help.troubleshooting.disconnects.enableAutoReconnect": {
-    "string": ""
+    "string": "help.troubleshooting.disconnects.enableAutoReconnect"
   },
   "help.troubleshooting.disconnects.adjustDelays": {
-    "string": ""
+    "string": "help.troubleshooting.disconnects.adjustDelays"
   },
   "help.troubleshooting.disconnects.checkNetwork": {
-    "string": ""
+    "string": "help.troubleshooting.disconnects.checkNetwork"
   },
   "help.troubleshooting.disconnects.tryDifferentServer": {
-    "string": ""
+    "string": "help.troubleshooting.disconnects.tryDifferentServer"
   },
   "help.troubleshooting.disconnects.reviewLag": {
-    "string": ""
+    "string": "help.troubleshooting.disconnects.reviewLag"
   },
   "help.troubleshooting.sslErrors.title": {
-    "string": ""
+    "string": "help.troubleshooting.sslErrors.title"
   },
   "help.troubleshooting.sslErrors.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.sslErrors.symptoms"
   },
   "help.troubleshooting.sslErrors.verifySsl": {
-    "string": ""
+    "string": "help.troubleshooting.sslErrors.verifySsl"
   },
   "help.troubleshooting.sslErrors.disableVerify": {
-    "string": ""
+    "string": "help.troubleshooting.sslErrors.disableVerify"
   },
   "help.troubleshooting.sslErrors.updateApp": {
-    "string": ""
+    "string": "help.troubleshooting.sslErrors.updateApp"
   },
   "help.troubleshooting.sslErrors.checkCertificate": {
-    "string": ""
+    "string": "help.troubleshooting.sslErrors.checkCertificate"
   },
   "help.troubleshooting.authProblems": {
-    "string": ""
+    "string": "help.troubleshooting.authProblems"
   },
   "help.troubleshooting.nickInUse.title": {
-    "string": ""
+    "string": "help.troubleshooting.nickInUse.title"
   },
   "help.troubleshooting.nickInUse.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.nickInUse.symptoms"
   },
   "help.troubleshooting.nickInUse.tryAlternate": {
-    "string": ""
+    "string": "help.troubleshooting.nickInUse.tryAlternate"
   },
   "help.troubleshooting.nickInUse.waitTimeout": {
-    "string": ""
+    "string": "help.troubleshooting.nickInUse.waitTimeout"
   },
   "help.troubleshooting.nickInUse.useGhost": {
-    "string": ""
+    "string": "help.troubleshooting.nickInUse.useGhost"
   },
   "help.troubleshooting.nickInUse.changeNickname": {
-    "string": ""
+    "string": "help.troubleshooting.nickInUse.changeNickname"
   },
   "help.troubleshooting.nickservIdentify.title": {
-    "string": ""
+    "string": "help.troubleshooting.nickservIdentify.title"
   },
   "help.troubleshooting.nickservIdentify.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.nickservIdentify.symptoms"
   },
   "help.troubleshooting.nickservIdentify.verifyPassword": {
-    "string": ""
+    "string": "help.troubleshooting.nickservIdentify.verifyPassword"
   },
   "help.troubleshooting.nickservIdentify.waitNotice": {
-    "string": ""
+    "string": "help.troubleshooting.nickservIdentify.waitNotice"
   },
   "help.troubleshooting.nickservIdentify.manualIdentify": {
-    "string": ""
+    "string": "help.troubleshooting.nickservIdentify.manualIdentify"
   },
   "help.troubleshooting.nickservIdentify.checkSuspended": {
-    "string": ""
+    "string": "help.troubleshooting.nickservIdentify.checkSuspended"
   },
   "help.troubleshooting.saslFailed.title": {
-    "string": ""
+    "string": "help.troubleshooting.saslFailed.title"
   },
   "help.troubleshooting.saslFailed.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.saslFailed.symptoms"
   },
   "help.troubleshooting.saslFailed.verifyCredentials": {
-    "string": ""
+    "string": "help.troubleshooting.saslFailed.verifyCredentials"
   },
   "help.troubleshooting.saslFailed.checkEnabled": {
-    "string": ""
+    "string": "help.troubleshooting.saslFailed.checkEnabled"
   },
   "help.troubleshooting.saslFailed.tryPlain": {
-    "string": ""
+    "string": "help.troubleshooting.saslFailed.tryPlain"
   },
   "help.troubleshooting.saslFailed.ensureMatch": {
-    "string": ""
+    "string": "help.troubleshooting.saslFailed.ensureMatch"
   },
   "help.troubleshooting.messageIssues": {
-    "string": ""
+    "string": "help.troubleshooting.messageIssues"
   },
   "help.troubleshooting.messagesNotSending.title": {
-    "string": ""
+    "string": "help.troubleshooting.messagesNotSending.title"
   },
   "help.troubleshooting.messagesNotSending.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.messagesNotSending.symptoms"
   },
   "help.troubleshooting.messagesNotSending.checkConnected": {
-    "string": ""
+    "string": "help.troubleshooting.messagesNotSending.checkConnected"
   },
   "help.troubleshooting.messagesNotSending.verifyNotBanned": {
-    "string": ""
+    "string": "help.troubleshooting.messagesNotSending.verifyNotBanned"
   },
   "help.troubleshooting.messagesNotSending.checkModes": {
-    "string": ""
+    "string": "help.troubleshooting.messagesNotSending.checkModes"
   },
   "help.troubleshooting.messagesNotSending.ensureVoice": {
-    "string": ""
+    "string": "help.troubleshooting.messagesNotSending.ensureVoice"
   },
   "help.troubleshooting.keyboardCovers.title": {
-    "string": ""
+    "string": "help.troubleshooting.keyboardCovers.title"
   },
   "help.troubleshooting.keyboardCovers.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.keyboardCovers.symptoms"
   },
   "help.troubleshooting.keyboardCovers.goToSettings": {
-    "string": ""
+    "string": "help.troubleshooting.keyboardCovers.goToSettings"
   },
   "help.troubleshooting.keyboardCovers.androidBehavior": {
-    "string": ""
+    "string": "help.troubleshooting.keyboardCovers.androidBehavior"
   },
   "help.troubleshooting.keyboardCovers.iosBehavior": {
-    "string": ""
+    "string": "help.troubleshooting.keyboardCovers.iosBehavior"
   },
   "help.troubleshooting.keyboardCovers.adjustOffset": {
-    "string": ""
+    "string": "help.troubleshooting.keyboardCovers.adjustOffset"
   },
   "help.troubleshooting.keyboardCovers.toggleSafeArea": {
-    "string": ""
+    "string": "help.troubleshooting.keyboardCovers.toggleSafeArea"
   },
   "help.troubleshooting.cantSeeMessages.title": {
-    "string": ""
+    "string": "help.troubleshooting.cantSeeMessages.title"
   },
   "help.troubleshooting.cantSeeMessages.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.cantSeeMessages.symptoms"
   },
   "help.troubleshooting.cantSeeMessages.checkSettings": {
-    "string": ""
+    "string": "help.troubleshooting.cantSeeMessages.checkSettings"
   },
   "help.troubleshooting.cantSeeMessages.verifyFilters": {
-    "string": ""
+    "string": "help.troubleshooting.cantSeeMessages.verifyFilters"
   },
   "help.troubleshooting.cantSeeMessages.restartApp": {
-    "string": ""
+    "string": "help.troubleshooting.cantSeeMessages.restartApp"
   },
   "help.troubleshooting.cantSeeMessages.checkIgnored": {
-    "string": ""
+    "string": "help.troubleshooting.cantSeeMessages.checkIgnored"
   },
   "help.troubleshooting.encryptedGibberish.title": {
-    "string": ""
+    "string": "help.troubleshooting.encryptedGibberish.title"
   },
   "help.troubleshooting.encryptedGibberish.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.encryptedGibberish.symptoms"
   },
   "help.troubleshooting.encryptedGibberish.exchangeKeys": {
-    "string": ""
+    "string": "help.troubleshooting.encryptedGibberish.exchangeKeys"
   },
   "help.troubleshooting.encryptedGibberish.requestKey": {
-    "string": ""
+    "string": "help.troubleshooting.encryptedGibberish.requestKey"
   },
   "help.troubleshooting.encryptedGibberish.verifyE2ee": {
-    "string": ""
+    "string": "help.troubleshooting.encryptedGibberish.verifyE2ee"
   },
   "help.troubleshooting.encryptedGibberish.checkKeyManagement": {
-    "string": ""
+    "string": "help.troubleshooting.encryptedGibberish.checkKeyManagement"
   },
   "help.troubleshooting.channelProblems": {
-    "string": ""
+    "string": "help.troubleshooting.channelProblems"
   },
   "help.troubleshooting.cantJoinChannel.title": {
-    "string": ""
+    "string": "help.troubleshooting.cantJoinChannel.title"
   },
   "help.troubleshooting.cantJoinChannel.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.cantJoinChannel.symptoms"
   },
   "help.troubleshooting.cantJoinChannel.inviteOnly": {
-    "string": ""
+    "string": "help.troubleshooting.cantJoinChannel.inviteOnly"
   },
   "help.troubleshooting.cantJoinChannel.keyRequired": {
-    "string": ""
+    "string": "help.troubleshooting.cantJoinChannel.keyRequired"
   },
   "help.troubleshooting.cantJoinChannel.userLimit": {
-    "string": ""
+    "string": "help.troubleshooting.cantJoinChannel.userLimit"
   },
   "help.troubleshooting.cantJoinChannel.banned": {
-    "string": ""
+    "string": "help.troubleshooting.cantJoinChannel.banned"
   },
   "help.troubleshooting.cantSendInChannel.title": {
-    "string": ""
+    "string": "help.troubleshooting.cantSendInChannel.title"
   },
   "help.troubleshooting.cantSendInChannel.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.cantSendInChannel.symptoms"
   },
   "help.troubleshooting.cantSendInChannel.checkModerated": {
-    "string": ""
+    "string": "help.troubleshooting.cantSendInChannel.checkModerated"
   },
   "help.troubleshooting.cantSendInChannel.askVoice": {
-    "string": ""
+    "string": "help.troubleshooting.cantSendInChannel.askVoice"
   },
   "help.troubleshooting.cantSendInChannel.checkBanned": {
-    "string": ""
+    "string": "help.troubleshooting.cantSendInChannel.checkBanned"
   },
   "help.troubleshooting.cantSendInChannel.verifyInChannel": {
-    "string": ""
+    "string": "help.troubleshooting.cantSendInChannel.verifyInChannel"
   },
   "help.troubleshooting.channelWontStay.title": {
-    "string": ""
+    "string": "help.troubleshooting.channelWontStay.title"
   },
   "help.troubleshooting.channelWontStay.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.channelWontStay.symptoms"
   },
   "help.troubleshooting.channelWontStay.addAutojoin": {
-    "string": ""
+    "string": "help.troubleshooting.channelWontStay.addAutojoin"
   },
   "help.troubleshooting.channelWontStay.rejoinManually": {
-    "string": ""
+    "string": "help.troubleshooting.channelWontStay.rejoinManually"
   },
   "help.troubleshooting.channelWontStay.checkNetwork": {
-    "string": ""
+    "string": "help.troubleshooting.channelWontStay.checkNetwork"
   },
   "help.troubleshooting.appPerformance": {
-    "string": ""
+    "string": "help.troubleshooting.appPerformance"
   },
   "help.troubleshooting.appSlow.title": {
-    "string": ""
+    "string": "help.troubleshooting.appSlow.title"
   },
   "help.troubleshooting.appSlow.clearCache": {
-    "string": ""
+    "string": "help.troubleshooting.appSlow.clearCache"
   },
   "help.troubleshooting.appSlow.reduceBatch": {
-    "string": ""
+    "string": "help.troubleshooting.appSlow.reduceBatch"
   },
   "help.troubleshooting.appSlow.disableAnimated": {
-    "string": ""
+    "string": "help.troubleshooting.appSlow.disableAnimated"
   },
   "help.troubleshooting.appSlow.closeTabs": {
-    "string": ""
+    "string": "help.troubleshooting.appSlow.closeTabs"
   },
   "help.troubleshooting.appSlow.restartApp": {
-    "string": ""
+    "string": "help.troubleshooting.appSlow.restartApp"
   },
   "help.troubleshooting.highBattery.title": {
-    "string": ""
+    "string": "help.troubleshooting.highBattery.title"
   },
   "help.troubleshooting.highBattery.disableBackground": {
-    "string": ""
+    "string": "help.troubleshooting.highBattery.disableBackground"
   },
   "help.troubleshooting.highBattery.reduceNotifications": {
-    "string": ""
+    "string": "help.troubleshooting.highBattery.reduceNotifications"
   },
   "help.troubleshooting.highBattery.useWifi": {
-    "string": ""
+    "string": "help.troubleshooting.highBattery.useWifi"
   },
   "help.troubleshooting.highBattery.enableOptimization": {
-    "string": ""
+    "string": "help.troubleshooting.highBattery.enableOptimization"
   },
   "help.troubleshooting.appCrashes.title": {
-    "string": ""
+    "string": "help.troubleshooting.appCrashes.title"
   },
   "help.troubleshooting.appCrashes.updateApp": {
-    "string": ""
+    "string": "help.troubleshooting.appCrashes.updateApp"
   },
   "help.troubleshooting.appCrashes.clearCache": {
-    "string": ""
+    "string": "help.troubleshooting.appCrashes.clearCache"
   },
   "help.troubleshooting.appCrashes.restartDevice": {
-    "string": ""
+    "string": "help.troubleshooting.appCrashes.restartDevice"
   },
   "help.troubleshooting.appCrashes.reportCrash": {
-    "string": ""
+    "string": "help.troubleshooting.appCrashes.reportCrash"
   },
   "help.troubleshooting.notificationIssues": {
-    "string": ""
+    "string": "help.troubleshooting.notificationIssues"
   },
   "help.troubleshooting.notReceiving.title": {
-    "string": ""
+    "string": "help.troubleshooting.notReceiving.title"
   },
   "help.troubleshooting.notReceiving.checkPermissions": {
-    "string": ""
+    "string": "help.troubleshooting.notReceiving.checkPermissions"
   },
   "help.troubleshooting.notReceiving.verifySettings": {
-    "string": ""
+    "string": "help.troubleshooting.notReceiving.verifySettings"
   },
   "help.troubleshooting.notReceiving.disableBatteryOpt": {
-    "string": ""
+    "string": "help.troubleshooting.notReceiving.disableBatteryOpt"
   },
   "help.troubleshooting.notReceiving.checkDnd": {
-    "string": ""
+    "string": "help.troubleshooting.notReceiving.checkDnd"
   },
   "help.troubleshooting.notReceiving.reenableBackground": {
-    "string": ""
+    "string": "help.troubleshooting.notReceiving.reenableBackground"
   },
   "help.troubleshooting.tooMany.title": {
-    "string": ""
+    "string": "help.troubleshooting.tooMany.title"
   },
   "help.troubleshooting.tooMany.adjustFilters": {
-    "string": ""
+    "string": "help.troubleshooting.tooMany.adjustFilters"
   },
   "help.troubleshooting.tooMany.highlightsOnly": {
-    "string": ""
+    "string": "help.troubleshooting.tooMany.highlightsOnly"
   },
   "help.troubleshooting.tooMany.muteChannels": {
-    "string": ""
+    "string": "help.troubleshooting.tooMany.muteChannels"
   },
   "help.troubleshooting.tooMany.quietHours": {
-    "string": ""
+    "string": "help.troubleshooting.tooMany.quietHours"
   },
   "help.troubleshooting.mediaIssues": {
-    "string": ""
+    "string": "help.troubleshooting.mediaIssues"
   },
   "help.troubleshooting.cantSendMedia.title": {
-    "string": ""
+    "string": "help.troubleshooting.cantSendMedia.title"
   },
   "help.troubleshooting.cantSendMedia.symptoms": {
-    "string": ""
+    "string": "help.troubleshooting.cantSendMedia.symptoms"
   },
   "help.troubleshooting.cantSendMedia.verifyE2ee": {
-    "string": ""
+    "string": "help.troubleshooting.cantSendMedia.verifyE2ee"
   },
   "help.troubleshooting.cantSendMedia.enableMedia": {
-    "string": ""
+    "string": "help.troubleshooting.cantSendMedia.enableMedia"
   },
   "help.troubleshooting.cantSendMedia.exchangeKeys": {
-    "string": ""
+    "string": "help.troubleshooting.cantSendMedia.exchangeKeys"
   },
   "help.troubleshooting.cantSendMedia.checkSize": {
-    "string": ""
+    "string": "help.troubleshooting.cantSendMedia.checkSize"
   },
   "help.troubleshooting.mediaWontDownload.title": {
-    "string": ""
+    "string": "help.troubleshooting.mediaWontDownload.title"
   },
   "help.troubleshooting.mediaWontDownload.checkInternet": {
-    "string": ""
+    "string": "help.troubleshooting.mediaWontDownload.checkInternet"
   },
   "help.troubleshooting.mediaWontDownload.enableAutodownload": {
-    "string": ""
+    "string": "help.troubleshooting.mediaWontDownload.enableAutodownload"
   },
   "help.troubleshooting.mediaWontDownload.verifyStorage": {
-    "string": ""
+    "string": "help.troubleshooting.mediaWontDownload.verifyStorage"
   },
   "help.troubleshooting.mediaWontDownload.clearCache": {
-    "string": ""
+    "string": "help.troubleshooting.mediaWontDownload.clearCache"
   },
   "help.troubleshooting.mediaEncrypted.title": {
-    "string": ""
+    "string": "help.troubleshooting.mediaEncrypted.title"
   },
   "help.troubleshooting.mediaEncrypted.requestKey": {
-    "string": ""
+    "string": "help.troubleshooting.mediaEncrypted.requestKey"
   },
   "help.troubleshooting.mediaEncrypted.verifyExchange": {
-    "string": ""
+    "string": "help.troubleshooting.mediaEncrypted.verifyExchange"
   },
   "help.troubleshooting.mediaEncrypted.checkKeys": {
-    "string": ""
+    "string": "help.troubleshooting.mediaEncrypted.checkKeys"
   },
   "help.troubleshooting.accountSettings": {
-    "string": ""
+    "string": "help.troubleshooting.accountSettings"
   },
   "help.troubleshooting.lostPin.title": {
-    "string": ""
+    "string": "help.troubleshooting.lostPin.title"
   },
   "help.troubleshooting.lostPin.useBiometric": {
-    "string": ""
+    "string": "help.troubleshooting.lostPin.useBiometric"
   },
   "help.troubleshooting.lostPin.resetPin": {
-    "string": ""
+    "string": "help.troubleshooting.lostPin.resetPin"
   },
   "help.troubleshooting.lostPin.backupRestore": {
-    "string": ""
+    "string": "help.troubleshooting.lostPin.backupRestore"
   },
   "help.troubleshooting.lostPin.clearData": {
-    "string": ""
+    "string": "help.troubleshooting.lostPin.clearData"
   },
   "help.troubleshooting.settingsNotSaving.title": {
-    "string": ""
+    "string": "help.troubleshooting.settingsNotSaving.title"
   },
   "help.troubleshooting.settingsNotSaving.checkPermission": {
-    "string": ""
+    "string": "help.troubleshooting.settingsNotSaving.checkPermission"
   },
   "help.troubleshooting.settingsNotSaving.verifySpace": {
-    "string": ""
+    "string": "help.troubleshooting.settingsNotSaving.verifySpace"
   },
   "help.troubleshooting.settingsNotSaving.restartApp": {
-    "string": ""
+    "string": "help.troubleshooting.settingsNotSaving.restartApp"
   },
   "help.troubleshooting.settingsNotSaving.clearCache": {
-    "string": ""
+    "string": "help.troubleshooting.settingsNotSaving.clearCache"
   },
   "help.troubleshooting.backupRestoreFailed.title": {
-    "string": ""
+    "string": "help.troubleshooting.backupRestoreFailed.title"
   },
   "help.troubleshooting.backupRestoreFailed.verifyIntegrity": {
-    "string": ""
+    "string": "help.troubleshooting.backupRestoreFailed.verifyIntegrity"
   },
   "help.troubleshooting.backupRestoreFailed.checkPermission": {
-    "string": ""
+    "string": "help.troubleshooting.backupRestoreFailed.checkPermission"
   },
   "help.troubleshooting.backupRestoreFailed.useLatest": {
-    "string": ""
+    "string": "help.troubleshooting.backupRestoreFailed.useLatest"
   },
   "help.troubleshooting.backupRestoreFailed.tryIndividual": {
-    "string": ""
+    "string": "help.troubleshooting.backupRestoreFailed.tryIndividual"
   },
   "help.troubleshooting.stillNeedHelp": {
-    "string": ""
+    "string": "help.troubleshooting.stillNeedHelp"
   },
   "help.troubleshooting.getSupport.title": {
-    "string": ""
+    "string": "help.troubleshooting.getSupport.title"
   },
   "help.troubleshooting.getSupport.joinChannel": {
-    "string": ""
+    "string": "help.troubleshooting.getSupport.joinChannel"
   },
   "help.troubleshooting.getSupport.email": {
-    "string": ""
+    "string": "help.troubleshooting.getSupport.email"
   },
   "help.troubleshooting.getSupport.github": {
-    "string": ""
+    "string": "help.troubleshooting.getSupport.github"
   },
   "help.troubleshooting.gatherInfo.title": {
-    "string": ""
+    "string": "help.troubleshooting.gatherInfo.title"
   },
   "help.troubleshooting.gatherInfo.beforeReporting": {
-    "string": ""
+    "string": "help.troubleshooting.gatherInfo.beforeReporting"
   },
   "help.troubleshooting.gatherInfo.appVersion": {
-    "string": ""
+    "string": "help.troubleshooting.gatherInfo.appVersion"
   },
   "help.troubleshooting.gatherInfo.androidVersion": {
-    "string": ""
+    "string": "help.troubleshooting.gatherInfo.androidVersion"
   },
   "help.troubleshooting.gatherInfo.deviceModel": {
-    "string": ""
+    "string": "help.troubleshooting.gatherInfo.deviceModel"
   },
   "help.troubleshooting.gatherInfo.errorScreenshot": {
-    "string": ""
+    "string": "help.troubleshooting.gatherInfo.errorScreenshot"
   },
   "help.troubleshooting.gatherInfo.steps": {
-    "string": ""
+    "string": "help.troubleshooting.gatherInfo.steps"
   },
   "help.troubleshooting.debugLogging.info": {
-    "string": ""
+    "string": "help.troubleshooting.debugLogging.info"
   },
   "Migrated {count} channels.": {
-    "string": ""
+    "string": "Migrado {count} canales."
   },
   "Migrating history... {done}/{total}": {
-    "string": ""
+    "string": "Migrando historial... {done}/{total}"
   },
   "SASL Authentication (Optional)": {
-    "string": ""
+    "string": "SASL Autenticación (Opcional)"
   },
   "PLAIN - Simple username/password": {
-    "string": ""
+    "string": "PLAIN - Simple username/password"
   },
   "SCRAM-SHA-256 - Secure challenge-response": {
-    "string": ""
+    "string": "SCRAM-SHA-256 - Desafío-respuesta seguro"
   },
   "SCRAM-SHA-256-PLUS - Channel binding (coming soon)": {
-    "string": ""
+    "string": "SCRAM-SHA-256-PLUS - Enlace de canal (próximamente)"
   },
   "SCRAM-SHA-256 provides better security by using challenge-response authentication. Your password is never sent over the network.": {
-    "string": ""
+    "string": "SCRAM-SHA-256 proporciona una mayor seguridad mediante el uso de autenticación desafío-respuesta. Su contraseña nunca se envía a través de la red."
   },
   "SCRAM-SHA-256-PLUS with channel binding will be available in a future update. For now, SCRAM-SHA-256 is recommended.": {
-    "string": ""
+    "string": "SCRAM-SHA-256-PLUS con enlace de canal estará disponible en una actualización futura. Por ahora, se recomienda SCRAM-SHA-256."
   },
   "*** Channel {oldChannel} has been renamed to {newChannel}: {reason}": {
-    "string": ""
+    "string": "*** El canal {oldChannel} ha sido renombrado a {newChannel}: {reason}"
   },
   "*** Channel {oldChannel} has been renamed to {newChannel}": {
-    "string": ""
+    "string": "*** El canal {oldChannel} ha sido renombrado a {newChannel}"
   },
   "*** Account {account} registered successfully: {message}": {
-    "string": ""
+    "string": "*** Cuenta {account} registrada con éxito: {message}"
   },
   "*** Account {account} requires verification: {message}": {
-    "string": ""
+    "string": "*** La cuenta {account} requiere verificación: {message}"
   },
   "*** REGISTER response: {params}": {
-    "string": ""
+    "string": "*** Respuesta de REGISTER: {params}"
   },
   "*** {channel} exception list: {mask}": {
-    "string": ""
+    "string": "*** {channel} lista de excepciones: {mask}"
   },
   "*** {channel} ban: {mask}": {
-    "string": ""
+    "string": "*** {channel} ban: {mask}"
   },
   " (set by {nick}": {
-    "string": ""
+    "string": "(puesto por {nick}"
   },
   " on {date})": {
-    "string": ""
+    "string": "el {date})"
   },
   "*** Link: {server} ({info})": {
-    "string": ""
+    "string": "*** Link: {server} ({info})"
   },
   "*** End of LINKS ({mask})": {
-    "string": ""
+    "string": "*** Fin de LINKS ({mask})"
   },
   "is an unknown mode char": {
-    "string": ""
+    "string": "es un carácter de modo desconocido"
   },
   "Cannot join channel (banned)": {
-    "string": ""
+    "string": "No se puede unir al canal (baneado)"
   },
   "You need to be identified to join this channel": {
-    "string": ""
+    "string": "Necesitas estar identificado para unirte a este canal"
   },
   "{source} -> {target}: {message}": {
-    "string": ""
+    "string": "{source} -> {target}: {message}"
   },
   "*** WHOWAS {nick}: {info}": {
-    "string": ""
+    "string": "*** WHOWAS {nick}: {info}"
   },
   "End of WHOWAS": {
-    "string": ""
+    "string": "Fin de WHOWAS."
   },
   "is now online": {
-    "string": ""
+    "string": "ahora está en línea"
   },
   "is now offline": {
-    "string": ""
+    "string": "ahora está fuera de línea"
   },
   "has knocked": {
-    "string": ""
+    "string": "ha golpeado"
   },
   "Operator MOTD": {
-    "string": ""
+    "string": "Operador MOTD"
   },
   "*** {channel} modes: {modes}": {
-    "string": ""
+    "string": "*** {channel} modos: {modes}"
   },
   "added to watch list": {
-    "string": ""
+    "string": "agregado a la lista de watch"
   },
   "removed from watch list": {
-    "string": ""
+    "string": "eliminado de la lista de watch"
   },
   "*** Watch: {nick} {message}": {
-    "string": ""
+    "string": "*** Watch: {nick} {message}"
   },
   "Watch list cleared": {
-    "string": ""
+    "string": "Lista de watch eliminada"
   },
   "*** Now online: {nicks}": {
-    "string": ""
+    "string": "*** Ahora en línea: {nicks}"
   },
   "*** Now offline: {nicks}": {
-    "string": ""
+    "string": "*** Ahora fuera de línea: {nicks}"
   },
   "*** Your unique ID: {id}": {
-    "string": ""
+    "string": "*** Su ID único: {id}"
   },
   "Nick saved": {
-    "string": ""
+    "string": "Nick guardado"
   },
   "Please wait a while and try again": {
-    "string": ""
+    "string": "Espere un momento e inténtelo de nuevo"
   },
   "*** {mask} -> {server} {info}": {
-    "string": ""
+    "string": "*** {mask} -> {server} {info}"
   },
   "End of LINKS": {
-    "string": ""
+    "string": "Fin de LINKS."
   },
   "*** {mask}: {message}": {
-    "string": ""
+    "string": "*** {mask}: {message}"
   },
   "Users start": {
-    "string": ""
+    "string": "Inicio de Users"
   },
   "*** {info}": {
-    "string": ""
+    "string": "*** {info}"
   },
   "is an admin": {
-    "string": ""
+    "string": "es un administrador"
   },
   "is a services admin": {
-    "string": ""
+    "string": "es un administrador de servicios"
   },
   "is special": {
-    "string": ""
+    "string": "es especial"
   },
   "*** {nick} is connecting from {host}": {
-    "string": ""
+    "string": "*** {nick} conectado desde {host}"
   },
   "*** {nick} is using modes {modes}": {
-    "string": ""
+    "string": "*** {nick} está usando modos {modes}"
   },
   "*** Users online: {nicks}": {
-    "string": ""
+    "string": "*** Usuarios en línea: {nicks}"
   },
   "*** {text}": {
-    "string": ""
+    "string": "*** {text}"
   },
   "is a channel operator": {
-    "string": ""
+    "string": "es un operador de canal"
   },
   "Account registration is not supported by this server": {
-    "string": ""
+    "string": "El registro de la cuenta no es compatible con este servidor"
   },
   "Usage: /register <email|*> <password> OR /register <account> <email|*> <password>": {
-    "string": ""
+    "string": "Uso: /register <email|*> <password> O /register <account> <email|*> <password>"
   },
   "Usage: /MSG <nick|channel> <message>": {
-    "string": ""
+    "string": "Uso: /MSG <nick|channel> <message>"
   },
   "Channel Management Guide": {
-    "string": ""
+    "string": "Guía de Gestión de Canales"
   },
   "Channel Basics": {
-    "string": ""
+    "string": "Conceptos Básicos del Canal"
   },
   "What is a Channel?": {
-    "string": ""
+    "string": "¿Qué es un Canal?"
   },
   "IRC channels are group chat rooms where multiple users can communicate.\\nChannel names start with # (e.g., #DBase).": {
-    "string": ""
+    "string": "Los canales de IRC son salas de chat grupales donde varios usuarios pueden comunicarse.\\nLos nombres empiezan con # (e.j., #Ayuda)."
   },
   "Channel Types": {
-    "string": ""
+    "string": "Tipos de Canal"
   },
   "Public Channels - Anyone can join": {
-    "string": ""
+    "string": "Canales públicos - Cualquiera puede unirse"
   },
   "Private Channels - Require invite": {
-    "string": ""
+    "string": "Canales privados - Requiere invitación"
   },
   "Secret Channels - Hidden from channel list": {
-    "string": ""
+    "string": "Canales secretos - Ocultos de la lista de canales"
   },
   "Moderated Channels - Only voiced users can speak": {
-    "string": ""
+    "string": "Canales moderados - Solo los usuarios con voz + pueden hablar"
   },
   "Creating a Channel": {
-    "string": ""
+    "string": "Creando un Canal"
   },
   "Join/Create Channel": {
-    "string": ""
+    "string": "Unirse/Crear Canal"
   },
   "If the channel doesn't exist, you'll create it and become the operator.": {
-    "string": ""
+    "string": "Si el canal no existe, se creará y te convertirás en el operador."
   },
   "Set Channel Topic": {
-    "string": ""
+    "string": "Establecer Topic de Canal"
   },
   "User Modes": {
-    "string": ""
+    "string": "Modos de Usuario"
   },
   "+o (Operator) - Full channel control": {
-    "string": ""
+    "string": "+o (Operador) - Control total del canal"
   },
   "+v (Voice) - Can speak in moderated channels": {
-    "string": ""
+    "string": "+v (Voz) - Puede hablar en canales moderados +m"
   },
   "+h (Half-op) - Limited operator powers": {
-    "string": ""
+    "string": "+h (Half-op) - Poderes limitados del operador"
   },
   "+q (Owner) - Channel owner (some networks)": {
-    "string": ""
+    "string": "+q (Propietario) - Propietario del canal (en algunas redes)"
   },
   "+a (Admin) - Channel admin (some networks)": {
-    "string": ""
+    "string": "+a (Administrador) - Administrador del canal (en algunas redes)"
   },
   "Give Operator Status": {
-    "string": ""
+    "string": "Dar estado de Operador"
   },
   "Remove Operator": {
-    "string": ""
+    "string": "Remover Operador"
   },
   "Moderated (+m)": {
-    "string": ""
+    "string": "Moderado (+m)"
   },
   "Only ops and voiced users can speak:": {
-    "string": ""
+    "string": "Solo los usuarios op y voz pueden hablar:"
   },
   "Private (+p)": {
-    "string": ""
+    "string": "Privado (+p)"
   },
   "Channel won't appear in /list:": {
-    "string": ""
+    "string": "El canal no aparecerá en /list:"
   },
   "Secret (+s)": {
-    "string": ""
+    "string": "Secreto (+s)"
   },
   "Hide channel completely:": {
-    "string": ""
+    "string": "Ocultar el canal por completo:"
   },
   "Invite Only (+i)": {
-    "string": ""
+    "string": "Solo invitados (+i)"
   },
   "Requires invitation to join:": {
-    "string": ""
+    "string": "Requiere invitación para unirse:"
   },
   "No External Messages (+n)": {
-    "string": ""
+    "string": "No Mensajes Externos (+n)"
   },
   "Only members can send messages:": {
-    "string": ""
+    "string": "Solo los miembros pueden enviar mensajes:"
   },
   "Topic Lock (+t)": {
-    "string": ""
+    "string": "Bloqueo de topic (+t)"
   },
   "Only ops can change topic:": {
-    "string": ""
+    "string": "Solo ops puede cambiar de topic:"
   },
   "User Limit (+l)": {
-    "string": ""
+    "string": "Límite de usuarios (+l)"
   },
   "Set maximum users:": {
-    "string": ""
+    "string": "Establecer límite de usuarios máx.:"
   },
   "Channel Key (+k)": {
-    "string": ""
+    "string": "Clave del canal (+k)"
   },
   "Set password:": {
-    "string": ""
+    "string": "Establecer clave:"
   },
   "Moderation": {
-    "string": ""
+    "string": "Moderación"
   },
   "Remove user from channel:": {
-    "string": ""
+    "string": "Eliminar usuario del canal:"
   },
   "Prevent user from rejoining:": {
-    "string": ""
+    "string": "Evitar que el usuario haga rejoin:"
   },
   "Quiet/Mute User": {
-    "string": ""
+    "string": "Usuario Quiet/Mute"
   },
   "Prevent user from speaking:": {
-    "string": ""
+    "string": "Evitar que el usuario hable:"
   },
   "View Ban List": {
-    "string": ""
+    "string": "Ver Lista de Ban"
   },
   "Advanced Management": {
-    "string": ""
+    "string": "Gestión Avanzada"
   },
   "Channel Registration": {
-    "string": ""
+    "string": "Registro de Canal"
   },
   "Register channel with ChanServ (if available):": {
-    "string": ""
+    "string": "Registre el canal con ChanServ (si está disponible):"
   },
   "Access List": {
-    "string": ""
+    "string": "Lista de Access"
   },
   "Add user to channel access list:": {
-    "string": ""
+    "string": "Agregar usuario a la lista de acceso del canal:"
   },
   "Set user to auto-op on join:": {
-    "string": ""
+    "string": "Establezca el usuario en autoop al unirse:"
   },
   "Best Practices": {
-    "string": ""
+    "string": "Mejores Prácticas"
   },
   "Set +n and +t modes for public channels": {
-    "string": ""
+    "string": "Establecer los modos +n y +t para canales públicos"
   },
   "Use +i for private channels": {
-    "string": ""
+    "string": "Usa +i para canales solo invitados"
   },
   "Register your channel with ChanServ": {
-    "string": ""
+    "string": "Registra tu canal con ChanServ"
   },
   "Keep access list updated": {
-    "string": ""
+    "string": "Mantener actualizada la lista de access"
   },
   "Have at least 2-3 trusted operators": {
-    "string": ""
+    "string": "Tener al menos 2-3 ops de confianza"
   },
   "Clearly communicate channel rules": {
-    "string": ""
+    "string": "Comunique claramente las reglas del canal"
   },
   "Use +q (quiet) before +b (ban) for first offenses": {
-    "string": ""
+    "string": "Usa +q (silencio) antes de +b (ban) para las primeras ofensas"
   },
   "Document bans with reasons": {
-    "string": ""
+    "string": "Documentos de bans con motivos"
   },
   "Growth": {
-    "string": ""
+    "string": "Growth"
   },
   "Set clear, welcoming topic": {
-    "string": ""
+    "string": "Establezca un topic de bienvenida"
   },
   "Make channel public (+p/-s) if you want growth": {
-    "string": ""
+    "string": "Haz público el canal (+p/-s) si quieres crecer"
   },
   "Promote on social media or forums": {
-    "string": ""
+    "string": "Promocione en redes sociales o foros"
   },
   "Keep conversation active and friendly": {
-    "string": ""
+    "string": "Mantenga la conversación activa y amigable"
   },
   "Troubleshooting": {
-    "string": ""
+    "string": "Solución de Problemas"
   },
   "Lost operator status": {
-    "string": ""
+    "string": "Estado de operador perdido"
   },
   "If you're the channel founder, ask ChanServ to op you:": {
-    "string": ""
+    "string": "Si sos el fundador del canal, pídele a ChanServ que te dé op:"
   },
   "Can't change modes": {
-    "string": ""
+    "string": "No se pueden cambiar los modos"
   },
   "You need operator (+o) status.": {
-    "string": ""
+    "string": "Necesita el estado de operador (+o)."
   },
   "User keeps rejoining after kick": {
-    "string": ""
+    "string": "El usuario mantiene reentrar después del kick"
   },
   "Use ban (+b) mode instead.": {
-    "string": ""
+    "string": "Usa el modo ban (+b) en su lugar."
   },
   "Channel stolen/taken over": {
-    "string": ""
+    "string": "Canal robado/tomado"
   },
   "Contact network administrators or register the channel with ChanServ.": {
-    "string": ""
+    "string": "Póngase en contacto con los administradores de red o registre el canal con ChanServ."
   },
   "IRC Commands Reference": {
-    "string": ""
+    "string": "Referencia de Comandos de IRC"
   },
   "Basic Commands": {
-    "string": ""
+    "string": "Comandos Básicos"
   },
   "Join an IRC channel": {
-    "string": ""
+    "string": "Únete a un canal de IRC"
   },
   "Example: /join #DBase": {
-    "string": ""
+    "string": "Ejemplo: /join #Ayuda"
   },
   "Example: /part #channel Goodbye!": {
-    "string": ""
+    "string": "Ejemplo: /part #Ayuda Adiós"
   },
   "Example: /msg John Hello there!": {
-    "string": ""
+    "string": "Ejemplo: /msg John Hola"
   },
   "Open private chat window": {
-    "string": ""
+    "string": "Abrir ventana de chat privado"
   },
   "Example: /query John": {
-    "string": ""
+    "string": "Ejemplo: /query John"
   },
   "Change your nickname": {
-    "string": ""
+    "string": "Cambia tu apodo"
   },
   "Example: /nick MyNewNick": {
-    "string": ""
+    "string": "Ejemplo: /nick MiNuevoNick"
   },
   "Example: /quit See you later": {
-    "string": ""
+    "string": "Ejemplo: /quit Hasta luego"
   },
   "Change channel modes": {
-    "string": ""
+    "string": "Cambiar modos de canal"
   },
   "Examples:\n/mode #channel +m (moderated)\n/mode #channel +o John (give op)\n/mode #channel +b *!*@spam.com (ban)": {
-    "string": ""
+    "string": "Ejemplos:\n/mode #Ayuda +m (moderado)\n/mode #Ayuda +o John (dar op)\n/mode #Ayuda +b *!*@spam.com (ban)"
   },
   "View or set channel topic": {
-    "string": ""
+    "string": "Ver o establecer topic de canal"
   },
   "Example: /topic Welcome to #DBase!": {
-    "string": ""
+    "string": "Ejemplo: /topic Bienvenido a #AndroidIRCx"
   },
   "Example: /kick Spammer Stop spamming": {
-    "string": ""
+    "string": "Ejemplo: /kick #Ayuda John Spammer deja de enviar spam"
   },
   "Ban (and optionally kick/quiet) a user. Usually used in a channel tab so the channel is implied.": {
-    "string": ""
+    "string": "Ban (y opcionalmente kick/silenciar) a un usuario. Normalmente se usa en una pestaña de canal, por lo que el canal está implícito."
   },
   "Examples:\n/ban spammer\n/ban -k spammer Stop spamming\n/ban -q spammer\n/ban #channel spammer": {
-    "string": ""
+    "string": "Ejemplos:\n/ban spammer\n/ban -ku300 spammer no spam. Ban por 5 minutos.\n/ban -k spammer no spam\n/ban -q spammer\n/ban #Ayuda John spammer"
   },
   "Tip: Options are client-side helpers. Common ones are -k (kick), -q (quiet), and -u (auto-unban).": {
-    "string": ""
+    "string": "Sugerencia: Las opciones son ayudantes del lado del cliente. Los más comunes son -k (kick), -q (silencio) y -uN (N es un número en segundos, ej: 300 seria ban por 5 minutos)."
   },
   "Remove a ban for a user mask in a channel": {
-    "string": ""
+    "string": "Eliminar un ban a una máscara de usuario en un canal"
   },
   "Example: /unban *!*@spam.com": {
-    "string": ""
+    "string": "Ejemplo: /unban *!*@spam.com"
   },
   "Kick and ban a user in one step": {
-    "string": ""
+    "string": "Kick-Ban a un usuario en un solo paso"
   },
   "Example: /kickban Spammer Stop spamming": {
-    "string": ""
+    "string": "Ejemplo: /kickban Spammer deja de enviar spam"
   },
   "Invite a user to a channel": {
-    "string": ""
+    "string": "Invitar a un usuario a un canal"
   },
   "Example: /invite FriendNick #DBase": {
-    "string": ""
+    "string": "Ejemplo: /invite NickDeConocido #Ayuda"
   },
   "Quickly part and rejoin a channel": {
-    "string": ""
+    "string": "Salir rápidamente y volver al canal"
   },
   "Example: /hop #DBase brb": {
-    "string": ""
+    "string": "Ejemplo: /hop #Ayuda ya vuelvo"
   },
   "Get information about user": {
-    "string": ""
+    "string": "Obtener información sobre el usuario"
   },
   "Example: /whois John": {
-    "string": ""
+    "string": "Ejemplo: /whois John"
   },
   "Get past information about user": {
-    "string": ""
+    "string": "Consigue la última información sobre el usuario"
   },
   "Example: /whowas OldNick": {
-    "string": ""
+    "string": "Ejemplo: /whowas OldNick"
   },
   "Detect clones (users with same hostname) in a channel. Requires userhost-in-names capability.": {
-    "string": ""
+    "string": "Detecta clones (usuarios con el mismo nombre de host) en un canal. Requiere la capacidad userhost-in-names."
   },
   "Example: /clones #channel": {
-    "string": ""
+    "string": "Ejemplo: /clones #Ayuda"
   },
   "Aliases: /dc, /detectclones, /clonesdetect": {
-    "string": ""
+    "string": "Alias: /dc, /detectclones, /clonesdetect"
   },
   "Action & Formatting": {
-    "string": ""
+    "string": "Acción y Formato"
   },
   "Example: /me waves hello": {
-    "string": ""
+    "string": "Ejemplo: /me Piensa en que bueno está AndroidIRCx"
   },
   "Alternative to /me": {
-    "string": ""
+    "string": "Alternativa a /me"
   },
   "Example: /action is away": {
-    "string": ""
+    "string": "Ejemplo: /action está ausente"
   },
   "Encryption Commands": {
-    "string": ""
+    "string": "Comandos de Cifrado"
   },
   "Example: /sharekey Alice": {
-    "string": ""
+    "string": "Ejemplo: /sharekey John"
   },
   "Example: /requestkey Bob": {
-    "string": ""
+    "string": "Ejemplo: /requestkey John"
   },
   "Example: /encmsg Alice Secret message": {
-    "string": ""
+    "string": "Ejemplo: /encmsg Alice Mensaje secreto"
   },
   "Channel encryption management": {
-    "string": ""
+    "string": "Gestión de cifrado de canales"
   },
   "Examples:\n/chankey generate\n/chankey share Nick1,Nick2\n/chankey status": {
-    "string": ""
+    "string": "Ejemplos:\n/chankey generate\n/chankey share Nick1,Nick2\n/chankey status"
   },
   "Example: /quote NAMES #channel": {
-    "string": ""
+    "string": "Ejemplo: /quote NAMES #Ayuda"
   },
   "Alias for /quote (send a raw IRC command)": {
-    "string": ""
+    "string": "Alias para /quote (enviar un comando IRC RAW)"
   },
   "Example: /raw NAMES #channel": {
-    "string": ""
+    "string": "Ejemplo: /raw NAMES #Ayuda"
   },
   "Example: /setname John Smith": {
-    "string": ""
+    "string": "Ejemplo: /setname John Smith"
   },
   "Example: /bot on": {
-    "string": ""
+    "string": "Ejemplo: /bot on"
   },
   "Register an account using IRCv3 account registration (only if supported by the server).": {
-    "string": ""
+    "string": "Registre una cuenta usando el registro de cuenta IRCv3 (solo si es compatible con el servidor)."
   },
   "Example: /register user@example.com mypassword": {
-    "string": ""
+    "string": "Ejemplo: /register user@example.com miclave"
   },
   "Alternative syntax that includes an explicit account name": {
-    "string": ""
+    "string": "Sintaxis alternativa que incluye un nombre de cuenta explícito"
   },
   "Example: /register MyAccount user@example.com mypassword": {
-    "string": ""
+    "string": "Ejemplo: /register MiCuenta user@example.com miclave"
   },
   "Connection & Status": {
-    "string": ""
+    "string": "Conexión y Status"
   },
   "Set an away message (no message clears away status)": {
-    "string": ""
+    "string": "Establecer un mensaje ausente (ningún mensaje borra el estado ausente)"
   },
   "Example: /away AFK for 10 minutes": {
-    "string": ""
+    "string": "Ejemplo: /away AFK durante 10 minutos"
   },
   "Clear away status (same as /away with no message)": {
-    "string": ""
+    "string": "Eliminar estado ausente (lo mismo que /away con ningún mensaje)"
   },
   "Example: /back": {
-    "string": ""
+    "string": "Ejemplo: /back"
   },
   "Reconnect to the current server": {
-    "string": ""
+    "string": "Vuelva a conectarse al servidor actual"
   },
   "Example: /reconnect": {
-    "string": ""
+    "string": "Ejemplo: /reconnect"
   },
   "Disconnect from server (alias for /quit)": {
-    "string": ""
+    "string": "Desconectar del servidor (alias para salir /quit)"
   },
   "Example: /disconnect brb": {
-    "string": ""
+    "string": "Ejemplo: /disconnect Desconectado."
   },
   "Connect to a server using mIRC-compatible /server parameters": {
-    "string": ""
+    "string": "Conéctese a un servidor utilizando parámetros de /server compatibles con mIRC"
   },
   "Example: /server irc.libera.chat 6697": {
-    "string": ""
+    "string": "Ejemplo: /server irc.tuservidorfavorito.org 6697"
   },
   "Tip: In most cases it is easier to add networks/servers via the UI, but /server is useful for quick testing.": {
-    "string": ""
+    "string": "Consejo: En la mayoría de los casos, es más fácil agregar redes/servidores a través de la interfaz de usuario, pero /server es útil para realizar pruebas rápidas."
   },
   "Utility Commands": {
-    "string": ""
+    "string": "Comandos de Utilidad"
   },
   "Clear messages in the current tab": {
-    "string": ""
+    "string": "Borrar mensajes en la pestaña actual"
   },
   "Example: /clear": {
-    "string": ""
+    "string": "Ejemplo: /clear"
   },
   "Close the current tab": {
-    "string": ""
+    "string": "Cerrar la pestaña actual"
   },
   "Example: /close": {
-    "string": ""
+    "string": "Ejemplo: /close"
   },
   "Print a local message (useful for scripts/aliases)": {
-    "string": ""
+    "string": "Imprimir un mensaje local (útil para scripts/alias)"
   },
   "Example: /echo hello": {
-    "string": ""
+    "string": "Ejemplo: /echo hola"
   },
   "Show help for a command": {
-    "string": ""
+    "string": "Mostrar ayuda para un comando"
   },
   "Example: /help ban": {
-    "string": ""
+    "string": "Ejemplo: /help ban"
   },
   "Perform a DNS lookup": {
-    "string": ""
+    "string": "Realice una búsqueda de DNS"
   },
   "Example: /dns irc.libera.chat": {
-    "string": ""
+    "string": "Ejemplo: /dns irc.tuservidorfavorito.org"
   },
   "Run a command later, optionally repeated": {
-    "string": ""
+    "string": "Ejecute un comando más tarde, opcionalmente repetido"
   },
   "Example: /timer ping1 5000 1 /raw PING :test": {
-    "string": ""
+    "string": "Ejemplo: /timer ping1 5000 1 /raw PING :test"
   },
   "Open/create a tab or activate an existing tab": {
-    "string": ""
+    "string": "Abrir/crear una ficha o activar una ficha existente"
   },
   "Examples:\n/window #DBase\n/window -a #DBase": {
-    "string": ""
+    "string": "Ejemplos:\n/window #Ayuda\n/window -a #Ayuda"
   },
   "Filter messages by text (use -g for global filter)": {
-    "string": ""
+    "string": "Filtrar mensajes por texto (use -g para filtro global)"
   },
   "Examples:\n/filter error\n/filter -g timeout": {
-    "string": ""
+    "string": "Ejemplos:\n/filter error\n/filter -g timeout"
   },
   "Ignore messages from a user": {
-    "string": ""
+    "string": "Ignorar los mensajes de un usuario"
   },
   "Example: /ignore Spammer spamming": {
-    "string": ""
+    "string": "Ejemplo: /ignore Spammer spam"
   },
   "Stop ignoring a user": {
-    "string": ""
+    "string": "Deja de ignorar a un usuario"
   },
   "Example: /unignore Spammer": {
-    "string": ""
+    "string": "Ejemplo: /unignore Spammer"
   },
   "Services Shortcuts (Aliases)": {
-    "string": ""
+    "string": "Accesos directos a Servicios (Alias)"
   },
   "AndroidIRCX includes convenience aliases that expand into common NickServ/ChanServ commands. These depend on services availability on your network.": {
-    "string": ""
+    "string": "AndroidIRCX incluye alias convenientes que se expanden a comandos comunes de NickServ/ChanServ. Estos dependen de la disponibilidad de los servicios en su red."
   },
   "Examples:\n/nsid mypassword\n/nsreg mypassword user@example.com\n/nsghost YourNick mypassword\n/nsrecover YourNick mypassword": {
-    "string": ""
+    "string": "Ejemplos:\n/nsid miclave\n/nsreg miclave user@example.com\n/nsghost MiNick miclave\n/nsrecover MiNick miclave"
   },
   "Examples:\n/csop #channel Nick\n/csdeop #channel Nick\n/cvoice #channel Nick\n/csdevoice #channel Nick\n/csregister #channel password\n/cspass #channel newpassword": {
-    "string": ""
+    "string": "Ejemplos:\n/csop #canal Nick\n/csdeop #canal Nick\n/cvoice #canal Nick\n/csdevoice #canal Nick\n/csregister #canal clave\n/cspass #canal nuevaclave"
   },
   "Tip: You can also use tab completion to auto-complete commands and nicknames in the message input field.": {
-    "string": ""
+    "string": "Sugerencia: También puede usar la finalización con pestañas para auto-completar comandos y apodos en el campo de entrada del mensaje."
   },
   "Some commands may require operator privileges or services support on your network.": {
-    "string": ""
+    "string": "Algunos comandos pueden requerir privilegios de operador o soporte de servicios en su red."
   },
   "Follow these simple steps to connect to an IRC server:": {
-    "string": ""
+    "string": "Siga estos sencillos pasos para conectarse a un servidor IRC:"
   },
   "1. Tap the dropdown (▼) in the header": {
-    "string": ""
+    "string": "1. Toque el menú desplegable ( ▼ ) en el encabezado"
   },
   "2. Choose \"Choose Network\" (or \"Connect Another Network\")": {
-    "string": ""
+    "string": "2. Seleccione Conectar al Servidor por Defecto (o \"Elija Red\")"
   },
   "3. Tap the [+] button to add a network": {
-    "string": ""
+    "string": "3. Toque el botón [ + ] para agregar un Grupo de red, rellena los campos incluso genere un certificado y Guardar"
   },
   "4. Save, then tap the network name to connect": {
-    "string": ""
+    "string": "4. En el nombre del Grupo creado, pulsá en \"+ Agregar Servidor\" completar datos y Guardar. Ahora toque el nombre del servidor para conectar"
   },
   "Detailed Guide": {
-    "string": ""
+    "string": "Guía Detallada"
   },
   "Step 1: Open the Networks list": {
-    "string": ""
+    "string": "Paso 1: Abra la lista de redes"
   },
   "Tap the dropdown (▼) in the header": {
-    "string": ""
+    "string": "Toque el menú desplegable ( ▼ ) en el encabezado"
   },
   "Select \"Choose Network\" (or \"Connect Another Network\" if connected)": {
-    "string": ""
+    "string": "Seleccione \"Conectar al Servidor por Defecto\" (o \"Elija Red\")"
   },
   "Step 2: Add a network": {
-    "string": ""
+    "string": "Paso 2: Agregar un Grupo de red"
   },
   "Tap the [+] button in the Networks header to open Network Settings:": {
-    "string": ""
+    "string": "Toque el botón [ + ] en el encabezado Redes para abrir Configuración de Red:"
   },
   "Network Name: Friendly name (e.g., \"DBase\")": {
-    "string": ""
+    "string": "Nombre de la Red: Nombre descriptivo (e.j., \"DBase\")"
   },
   "Nickname + Real Name: Required identity fields": {
-    "string": ""
+    "string": "Nick + Nombre Real: Campos de identidad obligatorios"
   },
   "Alt Nick + Ident: Optional fallbacks": {
-    "string": ""
+    "string": "Nick Alternativo + Ident: Alternativas opcionales"
   },
   "Auto-Join Channels: Optional list like \"#lobby, #help\"": {
-    "string": ""
+    "string": "Canales de Auto-Join: Lista opcional ej \"#Ayuda, #AndroidIRCx\""
   },
   "Save with the [Save] button in the header": {
-    "string": ""
+    "string": "\"+ Generar Nuevo\" para el certificado, espere y Guarde con el botón [Guardar] en el encabezado"
   },
   "Step 3: Add a server (optional)": {
-    "string": ""
+    "string": "Paso 3: Agregar un Servidor (obligatorio)"
   },
   "In the Networks list, tap \"+ Add Server\" under your network:": {
-    "string": ""
+    "string": "En la lista de Redes y el Grupo creado pulse el botón \"+ Agregar Servidor\""
   },
   "Hostname: e.g., irc.dbase.in.rs": {
-    "string": ""
+    "string": "Hostname: e.j., irc.dbase.in.rs"
   },
   "Port: 6697 (SSL) or 6667 (plain)": {
-    "string": ""
+    "string": "Puerto: 6697 (SSL) o 6667 (normal)"
   },
   "Use SSL/TLS: Recommended": {
-    "string": ""
+    "string": "Usar SSL/TLS: Recomendado"
   },
   "Server Password / Favorite Server: Optional": {
-    "string": ""
+    "string": "Contraseña del Servidor es opcional / Servidor favorito y Servidor Predeterminado: recomendado"
   },
   "Tap [Save]": {
-    "string": ""
+    "string": "Toque [Guardar]"
   },
   "Step 4: Set identity profiles (advanced)": {
-    "string": ""
+    "string": "Paso 4: Establecer perfiles de identidad (avanzado)"
   },
   "Identity profiles are managed in Settings:": {
-    "string": ""
+    "string": "Los perfiles de identidad se administran en Configuración:"
   },
   "Tap the ☰ menu → Settings": {
-    "string": ""
+    "string": "Toque el ☰ menú → Configuración"
   },
   "Open \"Connection & Network\"": {
-    "string": ""
+    "string": "Abra \"Conexión y Red\""
   },
   "Tap \"Identity Profiles\"": {
-    "string": ""
+    "string": "Toca \"Perfiles de identidad\""
   },
   "Select a network, then \"+ Add / Edit Identity\"": {
-    "string": ""
+    "string": "Seleccione un Grupo de Red, luego \"+ Agregar/Editar Identificación\""
   },
   "Save and select the profile for that network": {
-    "string": ""
+    "string": "Guarde y toque el nombre del perfil para seleccionarlo en esa red"
   },
   "Step 5: Connect": {
-    "string": ""
+    "string": "Paso 5: Conectar"
   },
   "Open the Networks list again (dropdown → \"Choose Network\")": {
-    "string": ""
+    "string": "Abra la lista de redes nuevamente (▼ menú desplegable → \"Elija Red\")"
   },
   "Tap the network name to connect": {
-    "string": ""
+    "string": "Toque el nombre de la red para conectarse"
   },
   "Or tap a specific server under that network to connect to it": {
-    "string": ""
+    "string": "O toque un servidor específico en esa red para conectarse a él"
   },
   "Quick Connect Tips": {
-    "string": ""
+    "string": "Consejos de Red de Conexión Rápida"
   },
   "When disconnected, tap the network name in the header to connect": {
-    "string": ""
+    "string": "Cuando esté desconectado, toque el nombre de la red en el encabezado para conectarse"
   },
   "Use dropdown → \"Connect to Default\" for a one-tap connect": {
-    "string": ""
+    "string": "Use el ▼ menú desplegable → \"Conectar al Servidor por Defecto\" para conectarse con un toque"
   },
   "Popular IRC Networks": {
-    "string": ""
+    "string": "Redes IRC populares"
   },
   "DBase IRC (Recommended)": {
-    "string": ""
+    "string": "DBase IRC (Recomendado)"
   },
   "Libera.Chat": {
-    "string": ""
+    "string": "Libera.Chat"
   },
   "OFTC": {
-    "string": ""
+    "string": "OFTC"
   },
   "Check your internet connection": {
-    "string": ""
+    "string": "Comprueba tu conexión a Internet"
   },
   "Verify server address and port": {
-    "string": ""
+    "string": "Verifique la dirección y el puerto del servidor"
   },
   "Try disabling SSL/TLS": {
-    "string": ""
+    "string": "Pruebe a deshabilitar SSL/TLS"
   },
   "Check if firewall is blocking IRC ports": {
-    "string": ""
+    "string": "Compruebe si el firewall está bloqueando los puertos IRC"
   },
   "Nickname Already in Use": {
-    "string": ""
+    "string": "Apodo Ya en uso"
   },
   "Use your alternate nickname": {
-    "string": ""
+    "string": "Usa tu apodo alternativo"
   },
   "Register your nickname with NickServ": {
-    "string": ""
+    "string": "Registre su apodo con NickServ"
   },
   "Choose a different nickname": {
-    "string": ""
+    "string": "Elige un apodo diferente"
   },
   "Can't Join Channels": {
-    "string": ""
+    "string": "No puede unirse a los canales"
   },
   "Some channels require registration": {
-    "string": ""
+    "string": "Algunos canales requieren registro"
   },
   "Channel may be invite-only (+i mode)": {
-    "string": ""
+    "string": "El canal puede ser solo invitados. Modo (+i)"
   },
   "You may be banned from the channel": {
-    "string": ""
+    "string": "Es posible que estés baneado del canal"
   },
   "Need More Help?": {
-    "string": ""
+    "string": "¿Necesita Más Ayuda?"
   },
   "Join #AndroidIRCX on irc.dbase.in.rs\\nVisit our website: androidircx.com\\nEmail: support@androidircx.com": {
-    "string": ""
+    "string": "Únase a #AndroidIRCX en irc.dbase.in.rs\\nVisite nuestro sitio web: androidircx.com\\nCorreo electrónico: support@androidircx.com"
   },
   "What is E2EE?": {
-    "string": ""
+    "string": "¿Qué es E2EE?"
   },
   "End-to-End Encryption ensures that only you and the recipient can read messages.\\nEven the IRC server cannot decrypt them.": {
-    "string": ""
+    "string": "El cifrado de extremo-a-extremo garantiza que solo usted y el destinatario puedan leer los mensajes.\\nIncluso el servidor IRC no puede descifrarlos."
   },
   "DM (Direct Message) Encryption": {
-    "string": ""
+    "string": "Cifrado DM (Mensaje directo) "
   },
   "Step 1: Generate Keys": {
-    "string": ""
+    "string": "Paso 1: Generar claves"
   },
   "Encryption keys are automatically generated when you install AndroidIRCX.": {
-    "string": ""
+    "string": "Las claves de cifrado se generan automáticamente al instalar AndroidIRCX."
   },
   "Step 2: Share Your Key": {
-    "string": ""
+    "string": "Paso 2: Comparte tu Clave"
   },
   "To start encrypted conversation:": {
-    "string": ""
+    "string": "Para iniciar una conversación cifrada:"
   },
   "Open private chat: /query Nick": {
-    "string": ""
+    "string": "Abrir chat privado: /query Nick"
   },
   "Share your key: /sharekey Nick": {
-    "string": ""
+    "string": "Comparte tu clave: /sharekey Nick"
   },
   "Wait for them to share their key": {
-    "string": ""
+    "string": "Espere a que compartan su clave"
   },
   "Messages are now automatically encrypted 🔒": {
-    "string": ""
+    "string": "Los mensajes ahora se cifran automáticamente 🔒"
   },
   "Request Someone's Key": {
-    "string": ""
+    "string": "Solicitar la Clave de Alguien"
   },
   "Channel Encryption": {
-    "string": ""
+    "string": "Cifrado de Canales"
   },
   "As a channel operator:": {
-    "string": ""
+    "string": "Como operador de canal:"
   },
   "Share key with trusted members:": {
-    "string": ""
+    "string": "Compartir clave con miembros de confianza:"
   },
   "Check Encryption Status": {
-    "string": ""
+    "string": "Comprobar el Estado de Cifrado"
   },
   "Revoke Access": {
-    "string": ""
+    "string": "Revocar Acceso"
   },
   "Remove someone's access:": {
-    "string": ""
+    "string": "Eliminar el acceso de alguien:"
   },
   "Security Best Practices": {
-    "string": ""
+    "string": "Mejores Prácticas de Seguridad"
   },
   "✅ Verify key fingerprints out-of-band (phone call)\n✅ Rotate channel keys periodically\n✅ Only share keys with trusted users\n✅ Keep your device secure with PIN/biometric lock": {
-    "string": ""
+    "string": "✅ Verifique las huellas dactilares clave fuera de banda (llamada telefónica)\n✅ Gire las claves de canal periódicamente\n✅ Comparta claves solo con usuarios de confianza\n✅ Mantenga su dispositivo seguro con PIN/bloqueo biométrico"
   },
   "❌ Don't share keys over unencrypted channels\n❌ Don't share keys publicly\n❌ Don't ignore key verification warnings\n❌ Don't leave encrypted channels unattended": {
-    "string": ""
+    "string": "❌ No comparta claves a través de canales no cifrados\n❌ No compartas claves públicamente\n❌ No ignore las advertencias de verificación de claves\n❌ No deje desatendidos los canales cifrados"
   },
   "Messages appear as gibberish": {
-    "string": ""
+    "string": "Los mensajes aparecen como gibberish"
   },
   "The sender hasn't shared their encryption key with you yet.": {
-    "string": ""
+    "string": "El remitente aún no ha compartido su clave de cifrado contigo."
   },
   "Solution:": {
-    "string": ""
+    "string": "Solución:"
   },
   "Can't decrypt old messages": {
-    "string": ""
+    "string": "No se pueden descifrar mensajes antiguos"
   },
   "You joined the channel after messages were sent, or key was rotated.": {
-    "string": ""
+    "string": "Te uniste al canal después de que se enviaran mensajes o se girara la clave."
   },
   "Solution: Ask channel operator to reshare the key.": {
-    "string": ""
+    "string": "Solución: Solicite al operador del canal que vuelva a compartir la clave."
   },
   "Lock icon not showing": {
-    "string": ""
+    "string": "El icono de candado no se muestra"
   },
   "Encryption may be disabled or keys not exchanged.": {
-    "string": ""
+    "string": "El cifrado puede estar deshabilitado o las claves no intercambiadas."
   },
   "Solution: Check Settings → Display & UI → Show Encryption Indicators": {
-    "string": ""
+    "string": "Solución: Verifique ☰ Configuración → Pantalla y UI → Mostrar Indicadores de Cifrado tiene que estar marcado"
   },
   "Key Management": {
-    "string": ""
+    "string": "Gestión de Claves"
   },
   "View and manage your keys in:\nSettings → Security → Manage Encryption Keys": {
-    "string": ""
+    "string": "Ver y administrar sus llaves en:\n☰ Configuración → Seguridad → Administrar claves de cifrado"
   },
   "Overview": {
-    "string": ""
+    "string": "Visión general"
   },
   "AndroidIRCX supports end-to-end encrypted media sharing:": {
-    "string": ""
+    "string": "AndroidIRCX admite el intercambio de medios cifrados de extremo-a-extremo:"
   },
   "📷 Photos (camera or gallery)": {
-    "string": ""
+    "string": "📷 Fotos (cámara o galería)"
   },
   "🎥 Videos (camera or gallery)": {
-    "string": ""
+    "string": "🎥 Videos (cámara o galería)"
   },
   "🎤 Voice messages": {
-    "string": ""
+    "string": "🎤 Mensajes de voz"
   },
   "📁 Files": {
-    "string": ""
+    "string": "📁 Archivos"
   },
   "Requirements": {
-    "string": ""
+    "string": "Requisitos"
   },
   "E2EE must be enabled for the channel/DM": {
-    "string": ""
+    "string": "E2EE debe estar habilitado para el canal/DM"
   },
   "Both sender and recipient must have exchanged encryption keys": {
-    "string": ""
+    "string": "Tanto el remitente como el destinatario deben haber intercambiado claves de cifrado"
   },
   "Internet connection for upload/download": {
-    "string": ""
+    "string": "Conexión a Internet para cargar/descargar"
   },
   "How to Send Media": {
-    "string": ""
+    "string": "Cómo Enviar Medios"
   },
   "Step 1: Enable Media Feature": {
-    "string": ""
+    "string": "Paso 1: Habilitar el uso compartido cifrado de multimedia"
   },
   "Open Settings (☰ menu)": {
-    "string": ""
+    "string": "Abra Configuración (☰ menú)"
   },
   "Go to \"Media\"": {
-    "string": ""
+    "string": "Vaya a \"Medios de Comunicación\""
   },
   "Enable \"Enable Encrypted Media Sharing\"": {
-    "string": ""
+    "string": "Marcar \"Habilitar el uso compartido cifrado de multimedia\""
   },
   "Step 2: Send Photo": {
-    "string": ""
+    "string": "Paso 2: Enviar foto"
   },
   "Open encrypted channel or DM (must have 🔒 icon)": {
-    "string": ""
+    "string": "Abra el canal cifrado o DM (debe tener 🔒 el icono)"
   },
   "Tap the 📎 attachment button": {
-    "string": ""
+    "string": "Toque 📎 el botón de archivo adjunto"
   },
   "Select \"Photo\" or \"Camera\"": {
-    "string": ""
+    "string": "Seleccione \"Foto\" o \"Cámara\""
   },
   "Choose or take photo": {
-    "string": ""
+    "string": "Elige o toma una foto"
   },
   "Add optional caption": {
-    "string": ""
+    "string": "Agregar pie de foto opcional"
   },
   "Tap \"Send\"": {
-    "string": ""
+    "string": "Toca \"Enviar\""
   },
   "Step 3: Send Video": {
-    "string": ""
+    "string": "Paso 3: Enviar video"
   },
   "Tap 📎 attachment button": {
-    "string": ""
+    "string": "Toque 📎 el botón de archivo adjunto"
   },
   "Select \"Video\" or \"Record Video\"": {
-    "string": ""
+    "string": "Seleccione \"Video\" o \"Grabar video\""
   },
   "Choose or record video": {
-    "string": ""
+    "string": "Elija o grabe video"
   },
   "Preview and add caption": {
-    "string": ""
+    "string": "Vista previa y agregue pie de foto"
   },
   "Step 4: Voice Message": {
-    "string": ""
+    "string": "Paso 4: Mensaje de Voz"
   },
   "Select \"Voice Message\"": {
-    "string": ""
+    "string": "Seleccione \"Mensaje de voz\""
   },
   "Record your message": {
-    "string": ""
+    "string": "Graba tu mensaje"
   },
   "Preview and send": {
-    "string": ""
+    "string": "Vista previa y envío"
   },
   "How to Receive Media": {
-    "string": ""
+    "string": "Cómo Recibir Medios"
   },
   "Automatic Download": {
-    "string": ""
+    "string": "Descarga Automática de Multimedia"
   },
   "By default, media is downloaded automatically on WiFi.": {
-    "string": ""
+    "string": "Por defecto, los medios de comunicación se descargan automáticamente con WiFi."
   },
   "Manual Download": {
-    "string": ""
+    "string": "Descarga Manual"
   },
   "If auto-download is disabled:": {
-    "string": ""
+    "string": "Si la auto-descarga está deshabilitada:"
   },
   "Tap the media message": {
-    "string": ""
+    "string": "Toque el mensaje multimedia"
   },
   "Tap \"Download\" button": {
-    "string": ""
+    "string": "Pulsa el botón \"Descargar\""
   },
   "Wait for decryption": {
-    "string": ""
+    "string": "Espere el descifrado"
   },
   "View Media": {
-    "string": ""
+    "string": "Ver Medios"
   },
   "Tap image/video to open in full screen": {
-    "string": ""
+    "string": "Toque imagen/video para abrir en pantalla completa"
   },
   "Pinch to zoom images": {
-    "string": ""
+    "string": "Pellizca para ampliar las imágenes"
   },
   "Play/pause videos": {
-    "string": ""
+    "string": "Reproducir/pausar vídeos"
   },
   "Save to gallery (if enabled)": {
-    "string": ""
+    "string": "Guardar en la galería (si está habilitado)"
   },
   "Settings → Media → Media Quality": {
-    "string": ""
+    "string": "☰ Configuración → Medios de Comunicación → Calidad de Multimedia"
   },
   "Original - Full quality (larger file)": {
-    "string": ""
+    "string": "Original - Calidad completa (archivo más grande)"
   },
   "High - 90% quality": {
-    "string": ""
+    "string": "Alta - 90% de calidad"
   },
   "Medium - 70% quality": {
-    "string": ""
+    "string": "Media - 70% de calidad"
   },
   "Low - 50% quality (smaller file)": {
-    "string": ""
+    "string": "Baja - 50% de calidad (archivo más pequeño)"
   },
   "Auto-Download": {
-    "string": ""
+    "string": "Auto-Descarga"
   },
   "Settings → Media → Auto-Download Media": {
-    "string": ""
+    "string": "☰ Configuración → Medios de Comunicación → Descarga automática de Multimedia"
   },
   "WiFi only (recommended)": {
-    "string": ""
+    "string": "Solo WiFi (recomendado)"
   },
   "WiFi + Mobile Data": {
-    "string": ""
+    "string": "WiFi + Datos móviles"
   },
   "Never (manual only)": {
-    "string": ""
+    "string": "Nunca (solo manual)"
   },
   "Storage": {
-    "string": ""
+    "string": "Almacenamiento"
   },
   "Settings → Media → Maximum Cache Size / Clear Media Cache": {
-    "string": ""
+    "string": "☰ Ajustes → Medios de Comunicación → Tamaño Máximo de Caché / Borrar caché de Multimedia"
   },
   "View cache size": {
-    "string": ""
+    "string": "Ver tamaño de caché"
   },
   "Clear cache": {
-    "string": ""
+    "string": "Borrar caché"
   },
   "Set max cache size": {
-    "string": ""
+    "string": "Establecer max tamaño de la caché"
   },
   "Privacy & Security": {
-    "string": ""
+    "string": "Privacidad y Seguridad"
   },
   "All media is encrypted with XChaCha20-Poly1305 before upload": {
-    "string": ""
+    "string": "Todos los medios se cifran con XChaCha20-Poly1305 antes de cargarlos"
   },
   "Encryption keys are only shared with authorized recipients": {
-    "string": ""
+    "string": "Las claves de cifrado solo se comparten con destinatarios autorizados"
   },
   "Server cannot decrypt media": {
-    "string": ""
+    "string": "El servidor no puede descifrar los medios"
   },
   "Metadata": {
-    "string": ""
+    "string": "Metadatos"
   },
   "Original filename is encrypted": {
-    "string": ""
+    "string": "El nombre del archivo original está encriptado"
   },
   "EXIF data is stripped from photos": {
-    "string": ""
+    "string": "Los datos EXIF se eliminan de las fotos"
   },
   "GPS location is removed": {
-    "string": ""
+    "string": "Ubicación del GPS se quita"
   },
   "Can't see attachment button": {
-    "string": ""
+    "string": "No puedo ver el botón de archivo adjunto"
   },
   "Check if channel/DM has encryption enabled (🔒 icon)": {
-    "string": ""
+    "string": "Compruebe si el canal/DM tiene habilitado el cifrado (🔒 icono)"
   },
   "Enable media feature in Settings": {
-    "string": ""
+    "string": "Habilite la función multimedia en Configuración"
   },
   "Exchange encryption keys first": {
     "string": ""
@@ -12249,6 +12249,9 @@
     "string": ""
   },
   "Enable Debug Logging:\\nSettings → Development → Enable Console Logging (debug builds only)\\nSend logs with your report.": {
+    "string": ""
+  },
+  "Some errors occurred:": {
     "string": ""
   }
 }

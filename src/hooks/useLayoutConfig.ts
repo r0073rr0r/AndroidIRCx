@@ -11,21 +11,24 @@ export const useLayoutConfig = () => {
 
   useEffect(() => {
     let mounted = true;
+    let receivedChange = false;
+
+    const unsubscribe = layoutService.onConfigChange((config) => {
+      if (mounted) {
+        receivedChange = true;
+        setLayoutConfig(config);
+      }
+    });
 
     const init = async () => {
       await layoutService.initialize();
-      if (mounted) {
+      if (mounted && !receivedChange) {
         setLayoutConfig(layoutService.getConfig());
       }
     };
 
     init();
 
-    const unsubscribe = layoutService.onConfigChange((config) => {
-      if (mounted) {
-        setLayoutConfig(config);
-      }
-    });
     return () => {
       mounted = false;
       unsubscribe();

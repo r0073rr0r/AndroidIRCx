@@ -46,6 +46,16 @@ describe('ConsoleManager', () => {
       const instance2 = consoleManager;
       expect(instance1).toBe(instance2);
     });
+
+    it('should create instance only once (covers lazy instantiation branch)', () => {
+      // Reset modules to test fresh instantiation
+      jest.resetModules();
+      // First call should create instance
+      const { default: freshManager1 } = require('../../src/utils/consoleManager');
+      // Second call should return same instance without creating new one
+      const { default: freshManager2 } = require('../../src/utils/consoleManager');
+      expect(freshManager1).toBe(freshManager2);
+    });
   });
 
   describe('getEnabled', () => {

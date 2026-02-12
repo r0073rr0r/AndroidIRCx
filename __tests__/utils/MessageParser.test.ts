@@ -190,6 +190,16 @@ describe('MessageParser', () => {
       // Covers defensive branch where parsed extension is empty string
       expect(getUrlExtension('https://example.com/.')).toBeNull();
     });
+
+    it('should return null for URL ending with dot (empty extension after split)', () => {
+      // Covers line 108: when ext is empty string after split
+      expect(getUrlExtension('https://example.com/file.')).toBeNull();
+    });
+
+    it('should return null for URL with multiple dots but no extension', () => {
+      // Path with dots but no actual extension
+      expect(getUrlExtension('https://example.com/path./to/file.')).toBeNull();
+    });
   });
 
   describe('getUrlExtension', () => {
@@ -513,6 +523,21 @@ describe('MessageParser', () => {
       const result = parseMessage('!ENC-MEDIA [550e8400-e29b-41d4-a716-446655440000]');
       expect(result).toHaveLength(1);
       expect(result[0].type).toBe('media');
+    });
+
+    it('should handle empty text input (covers early return)', () => {
+      // Covers line 285-289: parts.length === 0 branch (though already handled by early return)
+      const result = parseMessage('');
+      expect(result).toEqual([]);
+    });
+
+    it('should return single text part when no URLs or media found', () => {
+      // This triggers the parts.length === 0 check at line 285
+      // because allMatches is empty, so no parts are added in the loop
+      // and remaining text is added at line 273-281
+      const result = parseMessage('Just plain text without any URLs');
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({ type: 'text', content: 'Just plain text without any URLs' });
     });
   });
 

@@ -31,7 +31,9 @@ describe('SoundService', () => {
     // @ts-ignore
     soundService.isInitialized = false;
     // @ts-ignore
-    soundService.settings = soundService.settings || { enabled: true, masterVolume: 1.0, events: {} };
+    soundService.customSchemes = [];
+    // @ts-ignore
+    soundService.settings = { enabled: true, masterVolume: 1.0, events: {} };
   });
 
   describe('initialize', () => {

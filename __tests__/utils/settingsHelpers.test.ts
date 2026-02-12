@@ -254,6 +254,40 @@ describe('settingsHelpers', () => {
       expect(result[0].id).toBe('security');
       expect(result[1].id).toBe('custom-x');
     });
+
+    it('should maintain original order when both sections are not in predefined order', () => {
+      // Covers line 172: both aIndex and bIndex are -1, neither is in order
+      const customSections: SettingsSection[] = [
+        { id: 'custom-a', title: 'Custom A', data: [] },
+        { id: 'custom-b', title: 'Custom B', data: [] },
+        { id: 'custom-c', title: 'Custom C', data: [] },
+      ];
+      const result = orderSections(customSections);
+      // When neither is in order, they should maintain original order (return 0 from sort)
+      expect(result[0].id).toBe('custom-a');
+      expect(result[1].id).toBe('custom-b');
+      expect(result[2].id).toBe('custom-c');
+    });
+
+    it('should handle mix of known and unknown sections preserving relative order of unknowns', () => {
+      const mixedSections: SettingsSection[] = [
+        { id: 'unknown-1', title: 'Unknown 1', data: [] },
+        { id: 'unknown-2', title: 'Unknown 2', data: [] },
+        { id: 'appearance', title: 'Appearance', data: [] },
+        { id: 'unknown-3', title: 'Unknown 3', data: [] },
+      ];
+      const result = orderSections(mixedSections);
+      // appearance should come first (known section)
+      expect(result[0].id).toBe('appearance');
+      // unknown sections should maintain relative order
+      const unknownIndices = [
+        result.findIndex(s => s.id === 'unknown-1'),
+        result.findIndex(s => s.id === 'unknown-2'),
+        result.findIndex(s => s.id === 'unknown-3'),
+      ];
+      expect(unknownIndices[0]).toBeLessThan(unknownIndices[1]);
+      expect(unknownIndices[1]).toBeLessThan(unknownIndices[2]);
+    });
   });
 
   describe('validateSetting', () => {

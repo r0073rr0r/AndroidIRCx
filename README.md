@@ -1,17 +1,20 @@
 # AndroidIRCX
 
-[![Build](https://img.shields.io/github/actions/workflow/status/androidircx/androidircx/tests.yml?branch=master)](https://github.com/androidircx/androidircx/actions)
+[![Build](https://github.com/androidircx/androidircx/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/androidircx/androidircx/actions/workflows/test.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/androidircx/androidircx)](https://github.com/androidircx/androidircx/releases)
 [![Downloads](https://img.shields.io/github/downloads/androidircx/androidircx/total)](https://github.com/androidircx/androidircx/releases)
-[![GitHub Issues](https://img.shields.io/github/issues/androidircx/androidircx)](https://github.com/androidircx/androidircx/issues)
 [![GitHub License](https://img.shields.io/github/license/androidircx/androidircx)](https://github.com/androidircx/androidircx/blob/master/LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/androidircx/androidircx?style=flat)](https://github.com/androidircx/androidircx/stargazers)
-[![Coverage](https://codecov.io/gh/AndroidIRCx/AndroidIRCx/branch/master/graph/badge.svg)](https://app.codecov.io/gh/AndroidIRCx/AndroidIRCx/)
+
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11929/badge)](https://www.bestpractices.dev/projects/11929)
+[![CodeQL](https://img.shields.io/badge/CodeQL-enabled-blue)](https://github.com/AndroidIRCx/AndroidIRCx/security/code-scanning)
 [![Dependabot](https://img.shields.io/badge/dependabot-enabled-brightgreen)](https://github.com/androidircx/androidircx/security/dependabot)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/androidircx/androidircx/codeql.yml?label=CodeQL)](https://github.com/androidircx/androidircx/security/code-scanning)
+[![Coverage](https://codecov.io/gh/AndroidIRCx/AndroidIRCx/branch/master/graph/badge.svg)](https://app.codecov.io/gh/AndroidIRCx/AndroidIRCx/)
+
+[![GitHub Stars](https://img.shields.io/github/stars/androidircx/androidircx?style=flat)](https://github.com/androidircx/androidircx/stargazers)
 [![Contributors](https://img.shields.io/github/contributors/androidircx/androidircx)](https://github.com/androidircx/androidircx/graphs/contributors)
+[![GitHub Issues](https://img.shields.io/github/issues/androidircx/androidircx)](https://github.com/androidircx/androidircx/issues)
 [![Last Commit](https://img.shields.io/github/last-commit/androidircx/androidircx)](https://github.com/androidircx/androidircx/commits/master)
+
 [![Google Play](https://img.shields.io/badge/Google%20Play-Download-green)](https://play.google.com/store/apps/details?id=com.androidircx)
 
 Modern IRC client for Android and iOS built with React Native, inspired by the classic AndroIRC client. This project aims to provide a full-featured, IRCv3-compliant IRC client with a clean and intuitive user interface.

@@ -190,6 +190,10 @@ reply, react, channel-context, rename
 - 50+ script hooks for events
 - Time-based access (rewarded ads) or unlimited with Pro purchase
 - Inspired by the mIRC scripting tradition
+- Quick example:
+  `module.exports = { onMessage: (msg) => {}, onCommand: (text) => text };`
+- Common API: `api.log()`, `api.sendMessage()`, `api.sendCommand()`, `api.setTimer()`
+- Full scripting API/docs: https://github.com/AndroidIRCx/AndroidIRCx/wiki/Scripting
 
 ### Internationalization
 
@@ -412,6 +416,32 @@ The `src/services/irc/` directory is a textbook implementation of the IRC protoc
 
 That's it. The context interface pattern means your handler receives only what it needs -- no god
 objects, no tight coupling.
+
+---
+
+## 📖 Wiki Guides
+
+For end-user setup guides, feature walkthroughs, and troubleshooting, see the wiki:
+
+- **Wiki Home:** https://github.com/AndroidIRCx/AndroidIRCx/wiki
+- **Getting Started:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Getting-Started
+- **Networks and Servers:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Networks-and-Servers
+- **Connecting:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Connecting
+- **User Management:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/User-Management
+- **IRC Services and Commands:
+  ** https://github.com/AndroidIRCx/AndroidIRCx/wiki/IRC-Services-and-Commands
+- **Channel Operations:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Channel-Operations
+- **Channels and Tabs:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Channels-and-Tabs
+- **DCC and File Transfers:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/DCC-%26-File-Transfers
+- **Security and Encryption:
+  ** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Security-and-Encryption
+- **SASL EXTERNAL Certificates:
+  ** https://github.com/AndroidIRCx/AndroidIRCx/wiki/SASL-EXTERNAL-Certificates
+- **Commands and Scripting:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Commands-and-Scripting
+- **Scripting (Full API):** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Scripting
+- **App Features:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/App-Features
+- **Advanced Settings:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Advanced-Settings
+- **Troubleshooting:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Troubleshooting
 
 ---
 

@@ -17,12 +17,59 @@
 
 [![Google Play](https://img.shields.io/badge/Google%20Play-Download-green)](https://play.google.com/store/apps/details?id=com.androidircx)
 
-Modern IRC client for Android and iOS built with React Native, inspired by the classic AndroIRC client. This project aims to provide a full-featured, IRCv3-compliant IRC client with a clean and intuitive user interface.
+**The open-source IRC client and framework for the mobile era.**
+
+mIRC taught a generation how to script. [IRCap](http://ircap.net) by Carlos Esteve Cremades (since
+1997) showed what a truly complete IRC experience could look like. AndroidIRCX carries that spirit
+forward -- open source, built on React Native, and designed so you can learn, hack, extend, and
+build your own IRC experience from real production code.
+
+### 📲 Download
+
+**AndroidIRCX is publicly available!**
+
+<p>
+  <a href="https://play.google.com/store/apps/details?id=com.androidircx">
+    <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" width="200" />
+  </a>
+</p>
+
+|                                                                                               Google Play                                                                                                |  |                                                                                  Direct APK Download                                                                                  |
+|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| <img src="https://api.qrserver.com/v1/create-qr-code/?size=360x360&qzone=4&ecc=M&data=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.androidircx" width="220" alt="Google Play QR" /> |  | <img src="https://api.qrserver.com/v1/create-qr-code/?size=360x360&qzone=4&ecc=M&data=https%3A%2F%2Fandroidircx.com%2Fuploads%2Fapp-release.apk" width="220" alt="APK Download QR" /> |
+|                                                            [Google Play Store](https://play.google.com/store/apps/details?id=com.androidircx)                                                            |  |                                                             [Direct APK](https://androidircx.com/uploads/app-release.apk)                                                             |
+
+### 🔒 Verified Builds
+
+Every release APK and AAB is scanned with **VirusTotal** before publishing. Only builds matching the
+published SHA-256 checksum are official releases.
+
+- **SHA-256 checksum file:
+  ** [app-release.apk.sha256](https://androidircx.com/uploads/app-release.apk.sha256)
+- **VirusTotal scanning policy:** Every release build is scanned on VirusTotal before publishing.
+
+**Verify your download:**
+
+```bash
+# Download the checksum
+curl -O https://androidircx.com/uploads/app-release.apk.sha256
+
+# Verify APK integrity
+sha256sum -c app-release.apk.sha256
+```
+
+### 📱 System Requirements
+
+|                 |                       |
+|-----------------|-----------------------|
+| **Minimum**     | Android 7.0+ (API 24) |
+| **Recommended** | Android 11+ (API 30)  |
+| **Target**      | Android 15 (API 36)   |
 
 ## 📸 Screenshots
 
 <p align="center">
-  <a 
+  <a
 href="https://cloud.dbase.in.rs/apps/files_sharing/publicpreview/N4nTYTLQy7C5CeH?file=/&fileId=1001705&x=1920&y=1080&a=true&etag=6dc8973fe555cd64a830cebb4bbda42e"
      target="_blank" rel="noopener noreferrer">
     <img src="https://cloud.dbase.in.rs/apps/files_sharing/publicpreview/N4nTYTLQy7C5CeH?file=/&fileId=1001705&x=1920&y=1080&a=true&etag=6dc8973fe555cd64a830cebb4bbda42e"
@@ -40,669 +87,462 @@ alt="AndroidIRCX screenshot 2"
 </a>
 </p>
 
-### 📲 Download
+---
 
-**🎉 AndroidIRCX is now publicly available!**
+## 💡 Why AndroidIRCX?
 
-- **Google Play Store:**
-  https://play.google.com/store/apps/details?id=com.androidircx
+Back in the day, mIRC wasn't just an IRC client -- it was a platform. Scripts like IRCap turned it
+into a complete environment with protection systems, away management, writing styles, and channel
+moderation panels. People learned scripting, built addons, automated bots, and made IRC their own.
 
-- **Direct APK Download (Official Website):**
-  https://androidircx.com/app-release.apk
+**AndroidIRCX is built for that same crowd, but open source and for today's platforms.**
 
-## 📱 About
+This is a full-featured, production IRC client -- but it's also a **learning platform** and a *
+*framework** you can study, fork, and build on top of:
 
-AndroidIRCX is a cross-platform IRC (Internet Relay Chat) client that brings the classic IRC
-experience to mobile devices. Built with React Native 0.83, it supports multiple networks, secure
-connections (SSL/TLS), end-to-end encryption for DMs and channels, and modern IRC features while
-maintaining full compatibility with IRCv3 standards.
+- **Learn TCP sockets** -- see how raw IRC protocol works over `react-native-tcp-socket`, TLS
+  handshakes, proxy tunneling, SOCKS5/Tor
+- **Learn state management** -- 4 Zustand stores, 48 custom hooks, real-world patterns for complex
+  React Native apps
+- **Learn cryptography** -- E2E encryption with libsodium (XChaCha20-Poly1305), SCRAM-SHA-256
+  authentication (RFC 7677), X.509 certificate generation
+- **Learn protocol implementation** -- 390+ IRC numeric handlers, full IRCv3 compliance, CAP
+  negotiation, SASL state machines
+- **Learn architecture** -- service-oriented design, EventEmitter patterns, context interfaces,
+  modular handler extraction
+- **Learn testing** -- 160 test files covering services, hooks, components, stores, and utilities
+- **Learn CI/CD** -- GitHub Actions, Docker-based release builds, automated coverage reports
+
+Everything is TypeScript. Everything is documented. Everything is yours to read, modify, and ship.
+
+**This isn't a toy project.** It's a real app on Google Play with real users -- and the entire
+codebase is GPL-3.0, because the best way to learn is from code that actually works in production.
+
+---
 
 ## ✨ Features
 
-### ✅ Implemented
+### Multi-Network IRC Client
 
-- **Multi-Network Support**
-  - Configure and manage multiple IRC networks
-  - Multiple servers per network with failover support
-  - Persistent network and server configurations
-  - Background service for persistent connections
+- Connect to multiple IRC networks simultaneously
+- Multiple servers per network with failover
+- Background service for persistent connections
+- Auto-connect favorites on startup
+- Auto-join channels after connect
+- Bouncer/ZNC detection and integration
 
-- **Secure Connections**
-  - SSL/TLS encryption support
-  - Certificate validation options
-  - Server password authentication
-  - **Client certificate authentication (SASL EXTERNAL)** - Passwordless login with X.509
-    certificates
-  - Proxy/Tor support
+### Full IRCv3 Compliance (27 capabilities)
 
-- **Encryption & Trust**
-    - Encrypted DMs and encrypted channels
-    - Key verification with fingerprints and QR codes
-    - Offline key exchange via file and NFC
-    - TOFU + key pinning with change warnings
-  - Context-bound AAD for encrypted messages and media (network/nick/channel/mediaId)
-  - Backward-compatible decryption for legacy ciphertext (update to v1.6.3+ for new AAD)
+**Standard capabilities:** server-time, account-notify, extended-join, userhost-in-names,
+away-notify, chghost, message-tags, batch, labeled-response, echo-message, multi-prefix, monitor,
+extended-monitor, cap-notify, account-tag, setname, standard-replies, message-ids, bot, sasl
 
-- **IRCv3 Full Compliance** 🎉
-    - **Complete Implementation**: All 18 IRCv3 capabilities supported (Standard + Draft)
-    - **Full CAP Negotiation**: Multi-line capability negotiation (CAP LS 302) with 27 total
-      capabilities requested
-    - **SASL Authentication**: Full SASL PLAIN mechanism with proper CAP integration
+**Draft capabilities:** typing indicators, chathistory, multiline, read-marker, message-redaction,
+reply, react, channel-context, rename
 
-    - **IRCv3.2 Standard Capabilities** (10):
-        - **BATCH**: Message grouping for efficient processing (netsplit, netjoin, chathistory
-          batches)
-        - **LABELED-RESPONSE**: Command/response correlation with unique labels (30s timeout)
-        - **CAP-NOTIFY**: Dynamic capability notifications (CAP NEW/DEL handling)
-        - **ACCOUNT-TAG**: Messages tagged with sender's account name
-        - **SETNAME**: Change realname without reconnecting (`/setname` command)
-        - **STANDARD-REPLIES**: Standardized FAIL/WARN/NOTE server responses
-        - **MESSAGE-IDS**: Unique message identifiers with deduplication (1000 msgid cache)
-        - **BOT**: Mark user account as bot (`/bot on|off` command)
-        - **UTF8ONLY**: UTF-8 encoding enforcement
-        - **EXTENDED-MONITOR**: Enhanced MONITOR with online/offline tracking
+### Security & Encryption
 
-    - **Draft IRCv3 Capabilities** (8):
-        - **CHATHISTORY**: Request message history from server (`/chathistory` command, up to 100
-          messages)
-        - **MULTILINE**: Send/receive multi-line messages (5s assembly timeout)
-        - **READ-MARKER**: Mark messages as read (`/markread` command)
-        - **MESSAGE-REDACTION**: Delete/redact messages (`/redact` command)
-        - **REPLY**: Reply to specific messages (threaded conversations)
-        - **REACT**: Emoji reactions to messages (MessageReactionsService integration)
-        - **TYPING**: Real-time typing indicators (see below for details)
-        - **CHANNEL-CONTEXT**: PM channel context tracking
+- **E2E Encrypted DMs** -- TOFU with key pinning, libsodium XChaCha20-Poly1305
+- **Encrypted Channels** -- shared channel keys distributed via encrypted DM
+- **SASL Authentication** -- PLAIN, SCRAM-SHA-256 (RFC 7677), EXTERNAL (client certificates)
+- **Client Certificates** -- RSA-2048 X.509 generation, NickServ CERT integration
+- **Key Verification** -- fingerprints, QR codes, NFC exchange, file export
+- **App Lock** -- PIN and biometric authentication
+- **Secure Storage** -- secrets in device Keychain, never in plain AsyncStorage
 
-    - **IRCv3.1/3.2 Base Extensions**:
-        - **Message Tags**: Complete @tag=value parsing and client-only tags (+tag)
-        - **Server-Time**: Accurate server-provided timestamps for all messages
-        - **Account Notify**: Automatic tracking of account login/logout events
-        - **Extended Join**: Enhanced JOIN messages with account information
-        - **Userhost in Names**: Support for userhost information in NAMES replies
-        - **Away Notify**: Real-time away status notifications
-        - **CHGHOST**: Support for hostname changes
-        - **Echo Message**: Support for echo-message capability
-        - **Multi-Prefix**: Multiple user mode prefixes display
-        - **Invite Notify**: Real-time invite notifications
-        - **Monitor**: Track user online/offline status
+### Smart Command System
 
-- **User Interface**
-  - Clean, modern UI inspired by AndroIRC
-  - Configurable channel tabs (top/bottom/left/right) for navigation
-  - **Real-time typing indicators**: "nick is typing..." with auto-hide (5s timeout)
-      - Multi-user support: "Alice and Bob are typing..." / "Alice, Bob, and 2 others are typing..."
-      - Fade animations for smooth display
-      - Protocol: `+typing=active|paused|done` tags via TAGMSG
-      - Debounced typing detection (active, paused after 3s, done on submit)
-  - **Smart command autocomplete**: Dropdown with up to 8 suggestions
-      - Built-in commands (21): `/join`, `/msg`, `/setname`, `/bot`, `/chathistory`, `/markread`,
-        `/redact`, etc.
-      - Aliases (70+): IRC shortcuts, ZNC commands, IRCop helpers, NickServ/ChanServ
-      - Command history (last 30 with deduplication)
-      - Context-aware scoring (prefers channel commands in channels, query commands in PMs)
-      - Touch to autocomplete with auto-space insertion
-  - Real-time message display with server-accurate timestamps
-  - User list for channels
-  - User list dockable to left/right/top/bottom
-  - RAW command logging (toggleable) with category filters
-  - Grouped, scrollable user list context menu
-  - Connection/identity profile management with scrollable lists
-  - Header lock button for quick app lock/unlock
-  - Picture-in-Picture mode (Android)
-  - Smart message routing (RAW messages to server tab only)
-  - Landscape and portrait mode support
+- 70+ command aliases (IRC, ZNC, IRCop, NickServ/ChanServ helpers)
+- Context-aware autocomplete with scoring
+- Command history (last 30 with dedup)
+- IRC services panel (NickServ, ChanServ, HostServ, OperServ) with auto-detection across major IRCds
 
-- **IRC Protocol Features**
-  - Full IRC protocol implementation
-  - Automatic nickname fallback (altnick support)
-  - Channel joining and leaving
-  - Private messaging (queries)
-  - Message sending and receiving
-  - Server status messages
-  - Topic display
-  - Mode changes tracking
-  - Proper message routing (prevents self-query windows)
+### Media & Communication
 
-- **Network Configuration**
-  - Network settings (name, nickname, altnick, realname, ident)
-  - Server settings (hostname, port, SSL/TLS, password)
-  - SASL authentication support (fully implemented)
-  - Auto-join channels configuration
-  - Identity profiles with on-connect commands
-  - Persistent storage using AsyncStorage
+- DCC file transfers and DCC chat
+- Voice messages, camera capture, video recording
+- Media encryption with context-bound AAD
+- Image/video preview and playback
+- Link previews
 
-- **Connection Management**
-  - Automatic reconnection handling
-  - Auto-connect favorite servers on startup (multi-network)
-  - Connection status indicators
-  - Ping measurement display
-  - Error handling and reporting
-  - Proper CAP negotiation before registration
+### User Interface
 
-- **Power Features**
-    - Backup/restore with file export and clipboard copy
-    - Connection quality monitoring (lag, rate limiting, flood protection)
-    - Bouncer detection and ZNC compatibility
-    - Extended command aliases (ZNC + IRCop helpers)
-  - DCC file transfers
-  - Notifications
-  - Firebase Crashlytics integration
-  - Google Mobile Ads (with premium ad removal options)
-  - In-App Purchases: Remove Ads, Pro Unlimited, Supporter Pro tiers
-  - Scripting system with time-based access (watch ads for time or purchase unlimited)
+- Configurable layout (tabs and userlist dockable to any edge)
+- Real-time typing indicators (multi-user)
+- Message search, reactions, read markers
+- 3 themes (Dark, Light, IRcap) + custom theme editor
+- Message format editor
+- RAW command logging with 7 category filters
+- Picture-in-Picture mode
+- Landscape and portrait support
 
-- **ZNC Subscription Service** 🆕
-    - **Multiple ZNC Accounts** - Purchase and manage multiple ZNC bouncer accounts
-    - **Restore Purchases** - Full Google Play restore functionality
-    - **One-Click Setup** - Auto-configure ZNC to any network (default: DBase)
-    - **Network Integration** - ZNC servers integrate with existing Network/Server settings
-    - **Account Management**:
-        - View account status (active, pending, expired)
-        - Refresh account credentials
-        - Copy username/password
-        - Assign/unassign from networks
+### Protection & Moderation
 
-## 🛠️ Technology Stack
+- Flood protection, anti-deop
+- Clone detection
+- Blacklist and ignore lists
+- Ban mask types (0-9) with kick/ban reasons
+- Away system with auto-answer, announce, presets
 
-- **Framework**: React Native 0.83.1
-- **Language**: TypeScript 5.9.3
-- **Networking**: react-native-tcp-socket 6.3.0
-- **Storage**: @react-native-async-storage/async-storage 2.2.0
-- **UI**: React Native components with custom styling
-- **Encryption**: libsodium
-- **Analytics/Crash**: Firebase (Crashlytics, App Check)
+### Built-in Scripting Engine
+
+- Write scripts to automate IRC tasks
+- 50+ script hooks for events
+- Time-based access (rewarded ads) or unlimited with Pro purchase
+- Inspired by the mIRC scripting tradition
+
+### Internationalization
+
+- 9 languages: English, French, German, Italian, Portuguese, Romanian, Russian, Serbian (Latin +
+  Cyrillic), Spanish
+- Transifex Native integration
+
+---
+
+## 🛠️ Tech Stack
+
+|                   |                                                   |
+|-------------------|---------------------------------------------------|
+| **Framework**     | React Native 0.83.1, React 19.2.4                 |
+| **Language**      | TypeScript 5.9.3                                  |
+| **State**         | Zustand 5.0.11                                    |
+| **Networking**    | react-native-tcp-socket (raw TCP/TLS)             |
+| **Encryption**    | libsodium, node-forge, @noble/curves              |
+| **Storage**       | AsyncStorage + Keychain (react-native-keychain)   |
+| **Testing**       | Jest 30.2, Testing Library (160 test files)       |
+| **CI/CD**         | GitHub Actions, Docker                            |
+| **Notifications** | @notifee/react-native                             |
+| **Media**         | vision-camera, react-native-video, audio-recorder |
+| **i18n**          | Transifex Native (9 languages)                    |
+| **Analytics**     | Firebase Crashlytics, App Check                   |
+
+---
+
+## 🏗️ Architecture
+
+AndroidIRCX follows a service-oriented architecture with clear separation of concerns:
+
+```
+App.tsx (841 lines) -- Main UI orchestrator
+|
++-- Zustand Stores (4)
+|   connectionStore, tabStore, uiStore, messageStore
+|
++-- Custom Hooks (48)
+|   Connection lifecycle, tab management, message sending,
+|   encryption, DCC, settings, UI state, and more
+|
++-- Components (74 files)
+|   AppLayout, MessageArea, MessageInput, ChannelTabs,
+|   UserList, HeaderBar, 20+ modals, 15 settings sections
+|
++-- Screens (33 files)
+|   Settings, network config, theme editor, scripting,
+|   key management, channel list, 7 help screens
+|
++-- Services (69 root + 55 IRC modules = 124 files)
+|   IRCService (2,711 lines) -- core protocol handler
+|   irc/ (9,030 lines) -- extracted protocol modules:
+|     18 command handlers, 15 numeric modules (390+ numerics),
+|     10 send-command handlers, SCRAM-SHA-256 auth,
+|     CTCP, batch/label, multiline, CAP negotiation
+|   ConnectionManager, SettingsService, TabService,
+|   EncryptedDMService, MediaEncryptionService,
+|   ScriptingService, and 60+ more
+|
++-- Utils (17 files)
+    IRCFormatter, MessageParser, encodings, tab utils
+```
+
+### Key Design Patterns
+
+- **Context Interfaces** -- extracted handler modules receive typed context objects, not full
+  service references. This keeps modules testable and decoupled.
+- **EventEmitter Communication** -- services talk via events, never cross-service direct mutation
+- **Lazy Initialization** -- handlers instantiated on first use
+- **Write Batching** -- messages batched (10/2s), tabs debounced (500ms)
+- **StorageCache** -- LRU cache with TTL over AsyncStorage
+- **Progressive Loading** -- critical data first, message history deferred per-tab
+
+---
 
 ## 📁 Project Structure
 
-```text
-AndroidIRCX/
-├── src/
-│   ├── components/          # UI components
-│   │   ├── HeaderBar.tsx    # Top navigation bar
-│   │   ├── ChannelTabs.tsx  # Channel/query tabs
-│   │   ├── MessageArea.tsx  # Message display area
-│   │   ├── MessageInput.tsx # Message input (autocomplete + typing sender)
-│   │   ├── TypingIndicator.tsx # Real-time typing display (NEW v1.4.4)
-│   │   └── UserList.tsx     # Channel user list
-│   ├── services/            # Business logic
-│   │   ├── IRCService.ts    # IRC protocol (Full IRCv3 - 18 capabilities)
-│   │   ├── MessageReactionsService.ts # Reaction tracking (NEW v1.4.4)
-│   │   ├── SubscriptionService.ts # ZNC multi-account management (NEW v1.6.6)
-│   │   ├── CommandService.ts # Command aliases (70+) and history
-│   │   └── SettingsService.ts # Network/server configuration
-│   ├── screens/             # Full-screen views
-│   │   ├── NetworksListScreen.tsx
-│   │   ├── NetworkSettingsScreen.tsx
-│   │   ├── ServerSettingsScreen.tsx
-│   │   └── ZncSubscriptionScreen.tsx # ZNC subscription management (NEW v1.6.6)
-│   └── types/               # TypeScript type definitions
-├── android/                 # Android native code
-├── ios/                     # iOS native code
-├── App.tsx                  # Main application component
-└── package.json
 ```
+AndroidIRCX/
++-- src/
+|   +-- components/     74 UI components
+|   |   +-- settings/   15 settings sections + 5 shared widgets
+|   |   +-- modals/     4 certificate/network modals
+|   +-- hooks/          48 custom hooks
+|   +-- screens/        33 screens (+ 7 help screens)
+|   +-- stores/         4 Zustand stores
+|   +-- services/       69 root services
+|   |   +-- irc/        55 extracted IRC protocol modules
+|   |       +-- numerics/     15 numeric handler modules
+|   |       +-- commands/     18 incoming command handlers
+|   |       +-- sendCommands/ 10 outgoing command handlers
+|   |       +-- protocol/     CTCP, batch/label, multiline
+|   |       +-- cap/          CAP negotiation
+|   |       +-- ScramAuth.ts  SCRAM-SHA-256 (RFC 7677)
+|   +-- config/         App config + IRCd service detection
+|   +-- themes/         Dark, Light, IRcap
+|   +-- types/          6 type definition files
+|   +-- utils/          17 utility modules
+|   +-- i18n/           10 translation files
+|   +-- core/           ServiceContainer (DI)
+|   +-- interfaces/     Service type interfaces
+|   +-- presets/        IRcap preset definitions
+|
++-- __tests__/          160 test files
+|   +-- services/       50+ service tests
+|   +-- hooks/          40+ hook tests
+|   +-- components/     15+ component tests
+|   +-- stores/         4 store tests
+|   +-- utils/          14 utility tests
+|
++-- android/            Android native code
++-- scripts/
+|   +-- docker/         Release build scripts
+|   +-- transifex/      Translation sync scripts
++-- patches/            3 patch-package patches
++-- .github/workflows/  CI/CD (tests + Docker release)
++-- Dockerfile          Docker-based release builds
++-- App.tsx             Main component (841 lines)
++-- package.json        v1.7.5, GPL-3.0-or-later
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js >= 20
+- Yarn
+- Android SDK / Android Studio
+- React Native CLI
+
+### Setup
+
+```bash
+# Clone the repo
+git clone https://github.com/androidircx/androidircx.git
+cd androidircx
+
+# Install dependencies
+yarn install
+
+# Start Metro bundler
+yarn metro
+
+# Run on Android device/emulator
+yarn android
+```
+
+### Development Commands
+
+```bash
+yarn test             # Run all 160 test files
+yarn type-check       # TypeScript check (tsc --noEmit)
+yarn lint             # ESLint
+yarn pre-push-check   # type-check + lint
+
+# Translation management
+yarn tx:pull          # Pull translations from Transifex
+yarn tx:push          # Push source strings
+yarn tx:merge-sr      # Merge missing Serbian keys
+```
+
+### Running Tests
+
+```bash
+# All tests with coverage
+yarn test --coverage
+
+# IRC protocol tests only (685+ tests)
+npx jest --testPathPatterns="IRCService" --no-coverage
+
+# Specific service
+npx jest --testPathPatterns="services/EncryptedDMService" --no-coverage
+
+# Specific hook
+npx jest --testPathPatterns="hooks/useConnectionManager" --no-coverage
+```
+
+---
+
+## 📚 For Developers & Learners
+
+### Want to understand TCP sockets?
+
+Start with `src/services/IRCService.ts` -- the `connect()` method shows raw TCP socket creation, TLS
+upgrade, proxy tunneling (SOCKS5/HTTP/Tor), and buffer processing. Then look at `processBuffer()` to
+see how IRC protocol lines are parsed from a TCP byte stream.
+
+### Want to learn real-world React Native architecture?
+
+Look at the hooks in `src/hooks/` -- 48 hooks that extract complex business logic from components.
+`useConnectionLifecycle.ts` shows how to wire up event listeners for a real-time protocol.
+`useLazyMessageHistory.ts` shows on-demand data loading patterns.
+
+### Want to implement a network protocol?
+
+The `src/services/irc/` directory is a textbook implementation of the IRC protocol:
+
+- `numerics/` -- 15 modules handling 390+ server response codes
+- `commands/` -- 18 handlers for every incoming IRC command
+- `sendCommands/` -- 10 modules for user-initiated commands
+- `cap/CAPHandlers.ts` -- IRCv3 capability negotiation state machine
+- `ScramAuth.ts` -- SCRAM-SHA-256 challenge-response auth (RFC 7677/5802)
+
+### Want to learn cryptography in practice?
+
+- `src/services/EncryptedDMService.ts` -- TOFU key exchange, key pinning, XChaCha20-Poly1305
+- `src/services/MediaEncryptionService.ts` -- file encryption with context-bound AAD
+- `src/services/irc/ScramAuth.ts` -- SCRAM-SHA-256 with HMAC, PBKDF2, salted hashing
+- `src/services/CertificateManagerService.ts` -- X.509 certificate generation with node-forge
+
+### Want to add your own IRC command?
+
+1. Create a handler in `src/services/irc/sendCommands/`
+2. Register it in `IRCSendMessageHandlers.ts`
+3. Add an alias in `CommandService.ts`
+4. Write tests in `__tests__/`
+
+That's it. The context interface pattern means your handler receives only what it needs -- no god
+objects, no tight coupling.
+
+---
 
 ## 🔧 Configuration
 
 ### Quick Connect
 
-**When disconnected**, you can quickly connect by:
+- **Tap the network name** in the header to connect
+- **Tap the dropdown** -> "Connect to Default" for one-click connection
+- **Connect Another Network** for simultaneous multi-network connections
 
-- **Tapping the network name** in the header → connects to that network
-- **Tapping the dropdown (▼)** → "Connect to Default" → connects using default configuration
+### Adding a Network
 
-### Adding a New Network
+1. Dropdown -> "Choose Network" -> tap **[+]** in the header
+2. Configure: Network Name, Nickname, Alt Nick, Real Name, Auto-Join Channels
+3. Add servers with hostname, port, SSL/TLS settings
+4. Optional: SASL (PLAIN/SCRAM-SHA-256/EXTERNAL), proxy, client certificate
+5. Save
 
-1. **Open Networks List:**
-    - Tap the **dropdown button (▼)** in the header
-    - Select **"Choose Network"** (when disconnected) or **"Connect Another Network"** (when
-      connected)
+### Client Certificate Authentication (SASL EXTERNAL)
 
-2. **Create New Network:**
-    - In the Networks List screen, tap the **[+]** button in the header
-    - This opens the Network Settings screen
+AndroidIRCX supports passwordless authentication with X.509 client certificates:
 
-3. **Configure Network Details:**
-    - **Network Name** (e.g., "dbase.in.rs") - required
-    - **Nickname** (e.g., "MyNick") - required, set per network
-    - **Alternative Nickname** - fallback if primary nick is taken
-    - **Real Name** (e.g., "John Doe") - required
-    - **Ident/Username** - optional
-    - **Auto-Join Channels** - comma-separated (e.g., "#lobby, #help")
-    - **SASL PLAIN** - account and password for authentication
-    - **Proxy Settings** - Tor/SOCKS5/HTTP support
-    - **Client Certificate** - for SASL EXTERNAL
+1. **Generate** -- Settings -> Network -> SASL EXTERNAL -> Generate New (RSA-2048, SHA-256)
+2. **Register** -- `/msg NickServ CERT ADD <fingerprint>` or use `/certadd`
+3. **Connect** -- SASL EXTERNAL authenticates automatically
 
-4. **Save the Network:**
-    - Tap **[Save]** in the header
+Commands: `/certfp` (view fingerprint), `/certadd [service]` (register with
+NickServ/CertFP/HostServ)
 
-### Adding a Server to Network
+### SCRAM-SHA-256 Authentication
 
-1. In the **Networks List**, find your network
-2. Tap **[+ Add Server]** under that network
-3. **Configure Server Settings:**
-    - **Hostname** (e.g., "irc.example.com") - required
-    - **Port** (default: 6697 for SSL, 6667 for plain) - required
-    - **Display Name** - optional friendly name
-    - **Use SSL/TLS** - recommended, enabled by default
-    - **Reject Unauthorized Certificates** - disabled by default (allows self-signed certs)
-    - **Server Password** - if required by server
-    - **Favorite Server** - mark as preferred server for this network
+For networks that support it, SCRAM-SHA-256 provides challenge-response authentication without
+sending your password in cleartext. Configure SASL with mechanism "SCRAM-SHA-256" in network
+settings.
 
-4. **Save the Server:**
-    - Tap **[Save]**
+---
 
-### Connecting to a Network
+## ⚙️ CI/CD
 
-**Method 1 - Quick Connect (when disconnected):**
+### Tests (on every push/PR)
 
-- Tap the **network name** in the header
+GitHub Actions runs all 160 test files with coverage, uploaded to Codecov.
 
-**Method 2 - Via Dropdown Menu:**
+### Release Builds (Docker)
 
-1. Tap the **dropdown button (▼)** in the header
-2. Select:
-    - **"Connect to Default"** - uses default network
-    - **"Choose Network"** - opens Networks List to select a network
-
-**Method 3 - From Networks List:**
-
-1. Open Networks List (dropdown → "Choose Network")
-2. **Tap the network name** to connect to that network
-3. Or **tap a specific server** under that network to connect to that exact server
-
-**When already connected to one network:**
-
-- Use dropdown (▼) → **"Connect Another Network"** to connect to additional networks simultaneously
-
-### Changing Your Nickname
-
-**Setting Initial Nickname (per network):**
-
-1. Open Networks List (dropdown → "Choose Network")
-2. Find your network and tap **[Edit]**
-3. Edit the **"Nickname"** field
-4. Optionally set **"Alternative Nickname"** (used if primary is taken)
-5. Tap **[Save]**
-
-**Changing Nickname While Connected:**
-
-- Type in the message input:
-  ```
-  /nick NewNickname
-  ```
-  or use the alias:
-  ```
-  /n NewNickname
-  ```
-- This changes your nickname for the current session only
-- To make it permanent, edit the network settings as described above
-
-### Settings Access
-
-- **Hamburger Menu (☰)**: Opens Settings screen for app configuration (theme, notifications, etc.)
-- **Dropdown Menu (▼)**: Access connection menu and Networks List for network/server configuration
-
-**Note:** Network and server configuration is done through the **Dropdown Menu (▼)** → Networks
-List, **NOT** through the Hamburger Menu (☰).
-
-**Connection Sequence (IRCv3 Compliant):**
-
-1. **TCP Connection**: Establish connection via TcpSocketModule (with SSL/TLS if configured)
-2. **CAP Negotiation Start**: Send `CAP LS 302` (multi-line capability listing)
-3. **Server Capabilities**: Receive list of available capabilities from server
-4. **Request Capabilities**: Send `CAP REQ` with 27 supported capabilities
-5. **Capability Acknowledgment**: Receive `CAP ACK` for enabled capabilities
-6. **SASL Authentication** (if configured):
-    - Send `AUTHENTICATE PLAIN`
-    - Exchange SASL credentials
-    - Wait for authentication success (903)
-7. **End CAP Negotiation**: Send `CAP END`
-8. **IRC Registration**: Send `NICK` and `USER` commands
-9. **Connection Complete**: Receive `001` (RPL_WELCOME) - registered event
-10. **Post-Connection**:
-    - Load saved tabs for network
-    - Auto-join configured channels
-    - Enable server-time timestamps
-    - Activate all negotiated IRCv3 features
-
-## 🔐 Client Certificate Authentication (SASL EXTERNAL)
-
-AndroidIRCX supports client certificate authentication for passwordless, secure IRC connections
-using SASL EXTERNAL.
-
-### What are Client Certificates?
-
-Client certificates are X.509 digital certificates that uniquely identify you to IRC servers using
-cryptographic authentication. They provide stronger security than passwords and enable automatic
-authentication without entering credentials.
-
-**Key Features:**
-
-- RSA-2048 bit encryption
-- SHA-256 fingerprints
-- Self-signed certificates (no CA required)
-- Stored securely in device Keychain
-- Valid for 1-10 years (configurable)
-
-**Benefits:**
-
-- **No password transmission** - Identity verified cryptographically
-- **Stronger authentication** - 2048-bit keys are more secure than typical passwords
-- **Device-specific** - Each device has its own certificate
-- **Automatic login** - No need to type NickServ password on each connection
-
-### Quick Start Guide
-
-**5 Steps to Get Started:**
-
-1. **Generate Certificate**
-    - Go to Settings → Network Settings → Select your network
-    - Scroll to "SASL EXTERNAL" section
-    - Tap "➕ Generate New"
-    - Fill in: Certificate Name, Common Name, Validity Period
-    - Wait ~2 seconds for generation
-    - Copy the fingerprint
-
-2. **Add to NickServ**
-    - Connect to your IRC network
-    - Send fingerprint: `/msg NickServ CERT ADD <fingerprint>`
-    - Or use app command: `/certadd` (after connecting)
-
-3. **Configure Network**
-    - Ensure SASL EXTERNAL is enabled in Network Settings
-    - Certificate should already be applied (from step 1)
-    - Save settings
-
-4. **Connect**
-    - Connect to your IRC network
-    - Authentication happens automatically via SASL EXTERNAL
-
-5. **Verify**
-    - Check connection messages for SASL success
-    - You should be automatically identified to NickServ
-
-### Generating a Certificate
-
-1. Open **Settings** → **Network Settings**
-2. Select the network you want to configure
-3. Scroll down to **SASL EXTERNAL** section
-4. Tap **"➕ Generate New"** button
-
-**Certificate Form:**
-
-- **Certificate Name**: A friendly name (e.g., "My Phone", "Android Device")
-- **Common Name (CN)**: Your IRC nickname or identifier (e.g., "YourNick/AndroidIRCX")
-- **Validity Period**: How long the certificate is valid (1-10 years)
-    - Recommendation: 1-2 years for security, 5+ years for convenience
-
-5. Tap **"Generate Certificate"**
-6. Wait 1-2 seconds for RSA key generation
-7. **Copy the fingerprint** from the success screen
-
-The certificate is automatically applied to your network settings.
-
-### Registering Certificate with IRC Service
-
-**Option A: Using NickServ (Most Common)**
-
-1. Connect to your IRC network
-2. Send command: `/msg NickServ CERT ADD <fingerprint>`
-    - Replace `<fingerprint>` with the fingerprint you copied
-    - Use the fingerprint format: `AA:BB:CC:DD:...` (with colons)
-
-**Option B: Using App Command (After Certificate is Configured)**
-
-1. Configure certificate in Network Settings first
-2. Connect to your IRC network
-3. Use command: `/certadd` (sends to NickServ by default)
-4. Or specify service: `/certadd CertFP` or `/certadd HostServ`
-
-**Option C: Using Context Menu**
-
-1. Connect to your IRC network with certificate configured
-2. Long-press the server tab
-3. Select "Share Cert with NickServ" from context menu
-4. Fingerprint is sent automatically
-
-**Verification:**
-
-- You should receive a confirmation from NickServ
-- Typical response: "Added fingerprint to your account"
-- Check your certificate list: `/msg NickServ CERT LIST`
-
-### Network Configuration
-
-**Enable SASL EXTERNAL:**
-
-1. Go to Network Settings → Your Network
-2. Scroll to **SASL** section
-3. Enable "Enable SASL"
-4. Set SASL Mechanism to **"EXTERNAL"**
-5. Ensure your certificate is configured (should show in SASL EXTERNAL section)
-
-**Certificate Options:**
-
-- **Generate New** - Create a new certificate
-- **Select Existing** - Choose from previously generated certificates
-- **View Fingerprint** - Display current certificate's fingerprint
-- **Manual Entry** - Paste PEM-encoded certificate/key manually
-
-### Managing Certificates
-
-**View All Certificates:**
-
-- Network Settings → SASL EXTERNAL → "📁 Select Existing"
-- Shows all generated certificates with status indicators:
-    - 🟢 Valid (green) - Certificate is active
-    - 🟠 Expires Soon (orange) - Less than 30 days remaining
-    - 🔴 Expired (red) - Certificate has expired
-
-**View Fingerprint:**
-
-- Network Settings → SASL EXTERNAL → "🔑 View Fingerprint"
-- Or long-press server tab → "View Certificate Fingerprint"
-- Or use command: `/certfp` (when connected)
-
-**Delete Certificate:**
-
-- Open Certificate Selector
-- Tap certificate → Delete button
-- Confirm deletion
-- Remember to remove from NickServ: `/msg NickServ CERT DEL <fingerprint>`
-
-### IRC Commands
-
-**`/certfp`** - Display your current certificate fingerprint
-
-Usage:
+Automated Docker-based builds on push to master:
 
 ```
-/certfp
+Dockerfile -> reactnativecommunity/react-native-android
+           -> yarn install
+           -> prepare-secrets.sh (inject signing keys)
+           -> assembleRelease + bundleRelease (armeabi-v7a, arm64-v8a)
+           -> upload artifacts
 ```
 
-Output:
+---
 
+## 🤝 Contributing
+
+AndroidIRCX is open source and contributions are welcome.
+
+**Areas where you can help:**
+
+- IRC protocol -- new IRCv3 capabilities, IRCd-specific features
+- Testing -- more edge cases, integration tests
+- Translations -- add or improve translations via Transifex
+- UI/UX -- accessibility, new themes, layout improvements
+- Documentation -- guides, tutorials, examples
+- Security -- audit, improvements, new encryption features
+
+**Before submitting a PR:**
+
+```bash
+yarn pre-push-check   # Must pass type-check + lint
+yarn test             # Must pass all tests
 ```
-*** Certificate Fingerprint (SHA-256):
-*** AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99
-***
-*** To add to NickServ:
-*** /msg NickServ CERT ADD AA:BB:CC:...
-***
-*** Or use: /certadd [service] (default: NickServ)
-```
 
-**`/certadd [service]`** - Send certificate fingerprint to IRC service
+See the full architecture documentation in `secrets/PROJECT.md` for implementation details.
 
-Usage:
-
-```
-/certadd              # Sends to NickServ (default)
-/certadd NickServ     # Explicitly send to NickServ
-/certadd CertFP       # Send to CertFP service
-/certadd HostServ     # Send to HostServ service
-```
-
-### Troubleshooting
-
-**Problem: "SASL authentication failed"**
-
-Possible causes:
-
-1. **Certificate not added to NickServ**
-    - Solution: Add fingerprint with `/msg NickServ CERT ADD <fingerprint>`
-    - Verify: `/msg NickServ CERT LIST`
-
-2. **Wrong SASL mechanism**
-    - Solution: Ensure SASL mechanism is set to "EXTERNAL" (not PLAIN)
-    - Check: Network Settings → SASL → SASL Mechanism
-
-3. **Certificate/key mismatch**
-    - Solution: Regenerate certificate and re-add to NickServ
-
-4. **Server doesn't support SASL EXTERNAL**
-    - Solution: Contact network administrators
-    - Alternative: Use SASL PLAIN with password
-
-**Problem: "No certificate configured"**
-
-Solutions:
-
-- Go to Network Settings → SASL EXTERNAL
-- Tap "Generate New" or "Select Existing"
-- Ensure certificate is applied (should show "View Fingerprint" button)
-
-**Problem: Certificate expired**
-
-Solutions:
-
-- Generate new certificate
-- Add new fingerprint to NickServ
-- Remove old certificate from app (optional)
-
-### Security Best Practices
-
-**Certificate Management:**
-
-1. **Use separate certificates per device**
-    - Don't share certificates between devices
-    - Each device should have its own certificate
-    - Easier to revoke if device is lost
-
-2. **Set appropriate validity periods**
-    - 1-2 years: Better security (force periodic renewal)
-    - 5+ years: More convenient (less maintenance)
-    - Balance security vs. convenience
-
-3. **Backup certificates**
-    - Export certificate from NickServ: `/msg NickServ CERT LIST`
-    - Write down fingerprint for reference
-    - Don't backup private keys (defeats purpose)
-
-4. **Revoke old certificates**
-    - Remove from NickServ: `/msg NickServ CERT DEL <fingerprint>`
-    - Delete from app: Certificate Selector → Tap certificate → Delete
-
-**Lost Device:**
-
-If your device is lost or stolen:
-
-1. From another device, remove certificate from NickServ:
-   ```
-   /msg NickServ CERT DEL <fingerprint>
-   ```
-2. Change your NickServ password (if you have one)
-3. Check for unauthorized access: `/msg NickServ LISTVHOST`
-
-### Supported Networks
-
-Most modern IRC networks support SASL EXTERNAL:
-
-- Libera.Chat
-- OFTC
-- Rizon
-- EFnet (with Atheme)
-- And many others
-
-Check your network's documentation for specific instructions.
-
-### Additional Resources
-
-- **Network Documentation:**
-    - Libera.Chat: https://libera.chat/guides/certfp
-    - OFTC: https://www.oftc.net/NickServ/CertFP/
-    - Rizon: https://wiki.rizon.net/index.php?title=CertFP
-
-- **Technical References:**
-    - RFC 5280: X.509 Certificate Standard
-    - SASL EXTERNAL: RFC 4422, Section 4
-    - IRC SASL: https://ircv3.net/specs/extensions/sasl-3.1
+---
 
 ## 🔐 Security
 
-- **TLS/SSL**: Full support for encrypted connections
-- **App Lock**: Biometric/PIN lock with a quick lock action
-    - Biometric unlock with improved error handling and retry mechanism
-    - PIN unlock with error messages and retry support
-    - Auto-lock on background/launch options
-- **SASL**: Complete SASL PLAIN authentication support with proper CAP integration
-- **Certificate Validation**: Configurable certificate checking
-- **Password Storage**: Secure storage for secrets with biometric/PIN support (fallback to
-  AsyncStorage when unavailable)
+- **TLS/SSL** -- full encrypted connection support
+- **SASL** -- PLAIN, SCRAM-SHA-256, EXTERNAL (client certificates)
+- **E2E Encryption** -- libsodium XChaCha20-Poly1305 with context-bound AAD
+- **Secure Storage** -- device Keychain for secrets (AsyncStorage fallback with warning)
+- **App Lock** -- PIN and biometric with auto-lock on background/launch
+- **Kill Switch** -- emergency disconnect and optional data wipe
+- **Play Integrity** -- Google Play Integrity verification
+
+---
 
 ## 📝 IRC Protocol Compliance
 
-This client implements the IRC protocol according to:
+| Standard | Coverage                                       |
+|----------|------------------------------------------------|
+| RFC 1459 | Full compliance                                |
+| RFC 2812 | Extended numeric support (390+ handlers)       |
+| IRCv3    | 27 capabilities requested, full implementation |
+| SASL     | PLAIN + SCRAM-SHA-256 (RFC 7677) + EXTERNAL    |
+| DCC      | SEND, CHAT                                     |
+| CTCP     | Full (VERSION, TIME, PING, ACTION, etc.)       |
 
-- **RFC 1459** (Internet Relay Chat Protocol) - Full compliance
-- **RFC 2812** (IRC Client Protocol) - Extended numeric support
-- **IRCv3 Specifications** (Complete implementation - 18 capabilities)
+---
 
-  **IRCv3.2 Standard Capabilities** (10):
-    - CAP Negotiation (Multi-line LS 302 support)
-    - SASL Authentication (RFC 4422 - PLAIN mechanism)
-  - Message Tags (IRCv3.2)
-  - Server-Time (IRCv3.2)
-    - BATCH (IRCv3.2) - Message grouping
-    - LABELED-RESPONSE (IRCv3.2) - Command correlation
-    - CAP-NOTIFY (IRCv3.2) - Dynamic capabilities
-    - ACCOUNT-TAG (IRCv3.2) - Account identification
-    - SETNAME (IRCv3.2) - Realname changes
-    - STANDARD-REPLIES (IRCv3.2) - FAIL/WARN/NOTE
+## 🎨 Credits & Inspiration
 
-  **IRCv3.3 Standard Capabilities** (1):
-    - MESSAGE-IDS (IRCv3.3) - Unique message identifiers with deduplication
+**IRCap** (c) Carlos Esteve Cremades, 1997-2026 -- the legendary mIRC script that inspired
+AndroidIRCX's away system, protection features, writing styles, and the IRcap theme. If you used
+mIRC in the 2000s, you probably know IRCap. Its futuristic design and complete feature set set the
+bar for what an IRC experience should be.
 
-  **IRCv3 Additional Standards**:
-    - BOT (IRCv3.2) - Bot mode marking
-    - UTF8ONLY (IRCv3.2) - UTF-8 enforcement
-    - EXTENDED-MONITOR (IRCv3.2) - Enhanced user monitoring
-  - Account Notify (IRCv3.1)
-  - Extended Join (IRCv3.1)
-  - Away Notify (IRCv3.1)
-  - CHGHOST (IRCv3.2)
-  - Echo Message (IRCv3.2)
-    - Multi-Prefix (IRCv3.1)
-    - Invite Notify (IRCv3.2)
+**IRcap theme for AndroidIRCX** by ARGENTIN07, based on the original IRCap theme.
 
-  **Draft IRCv3 Capabilities** (8):
-    - draft/chathistory - Message history retrieval
-    - draft/multiline - Multi-line message support
-    - draft/read-marker - Read status tracking
-    - draft/message-redaction - Message deletion
-    - +draft/reply - Threaded conversations
-    - +draft/react - Emoji reactions
-    - +typing - Real-time typing indicators
-    - +draft/channel-context - PM context tracking
+**Translations:** ARGENTIN07 and Cubanita83 (Spanish). See the full credits in the app's Credits
+screen.
 
-**Total**: 27 capabilities requested, 18 major features implemented with graceful fallbacks
+As an open-source creator, I deeply respect the work of **Linus Torvalds** and **Richard Stallman**
+for the free/open-source software movement. Their vision and persistence were a direct inspiration
+for building this app as open source.
+
+[![Linux](https://img.shields.io/badge/Linux-Tux-FCC624?logo=linux&logoColor=black)](https://www.kernel.org/)
+[![GNU](https://img.shields.io/badge/GNU-Project-A42E2B?logo=gnu&logoColor=white)](https://www.gnu.org/)
 
 ---
 
 ## 📄 License
 
-This project is licensed under the GNU General Public License v3.0 or later (GPL-3.0-or-later).
+**GNU General Public License v3.0 or later (GPL-3.0-or-later)**
 
 Copyright (C) 2025-2026 Velimir Majstorov
 
@@ -723,23 +563,21 @@ see <https://www.gnu.org/licenses/>.
 
 This project was built with modern tools, including AI-assisted development.
 
-Like robotics in manufacturing, autopilot systems in agriculture, and autocomplete in software,  
-AI is a tool - no more, no less.
+Like robotics in manufacturing, autopilot systems in agriculture, and autocomplete in software,
+AI is a tool -- no more, no less.
 
-**AI did not build this project on its own.**  
-Every decision, architectural choice, security consideration, and final line of code was reviewed,  
+**AI did not build this project on its own.**
+Every decision, architectural choice, security consideration, and final line of code was reviewed,
 validated, and maintained by a human engineer with more than 25 years of professional experience.
 
-AI did not replace engineering judgment; it accelerated routine work so more time could be spent
-on  
+AI did not replace engineering judgment; it accelerated routine work so more time could be spent on
 architecture, quality, and usability.
 
-If you prefer software created without automation or AI assistance, that choice is fully
-respected.  
-At the same time, refusing tools has never stopped progress - it has only determined who  
+If you prefer software created without automation or AI assistance, that choice is fully respected.
+At the same time, refusing tools has never stopped progress -- it has only determined who
 participates in shaping it.
 
-This project exists to contribute something real to open source, with practical value and  
+This project exists to contribute something real to open source, with practical value and
 long-term maintenance. You are welcome to:
 
 - use it or study it
@@ -757,14 +595,10 @@ Some build loudly. Others build correctly.
 
 Those who recognize the work will understand. Time will explain the rest.
 
-🜂🜃🜂
+---
+
+**[androidircx.com](https://androidircx.com)**
 
 ---
 
-## 📚 Additional Documentation
-
-- [Debug Notes](DEBUG_NOTES.md) - Troubleshooting guide
-
-**Note**: This project is in active development. Some features may be incomplete or subject to change.
-
-
+*mIRC and IRCap set the standard. AndroidIRCX is the open-source platform that carries it forward.*

@@ -1,0 +1,66 @@
+# Copyright (c) 2025-2026 Velimir Majstorov
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Android Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build Android Release (Docker)
+    runs-on: ubuntu-latest
+    environment: Release
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t androidircx-release .
+
+      - name: Run release build in Docker
+        run: |
+          docker create --name androidircx-build \
+            -e ANDROID_KEYSTORE_BASE64="${{ secrets.ANDROID_KEYSTORE_BASE64 }}" \
+            -e ANDROID_KEYSTORE_PASSWORD="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
+            -e ANDROID_KEY_ALIAS="${{ secrets.ANDROID_KEY_ALIAS }}" \
+            -e ANDROID_KEY_PASSWORD="${{ secrets.ANDROID_KEY_PASSWORD }}" \
+            -e GOOGLE_SERVICES_JSON="${{ secrets.GOOGLE_SERVICES_JSON }}" \
+            -e PLAY_SERVICE_ACCOUNT_JSON="${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}" \
+            -e TRANSIFEX_API_TOKEN="${{ secrets.TRANSIFEX_API_TOKEN }}" \
+            -e TRANSIFEX_TOKEN="${{ secrets.TRANSIFEX_TOKEN }}" \
+            -e TRANSIFEX_SECRET="${{ secrets.TRANSIFEX_SECRET }}" \
+            -e TRANSIFEX_CDS_HOST="${{ secrets.TRANSIFEX_CDS_HOST }}" \
+            -e TRANSIFEX_NATIVE_TOKEN="${{ secrets.TRANSIFEX_NATIVE_TOKEN }}" \
+            androidircx-release >/dev/null
+
+          docker start -a androidircx-build
+
+      - name: Copy build artifacts
+        if: always()
+        run: |
+          mkdir -p artifacts
+          docker cp androidircx-build:/app/android/app/build/outputs ./artifacts/outputs
+          ls -la artifacts/outputs || true
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-outputs
+          path: artifacts/outputs
+          if-no-files-found: warn
+
+      - name: Cleanup container
+        if: always()
+        run: docker rm -f androidircx-build || true

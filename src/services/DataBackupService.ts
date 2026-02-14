@@ -8,6 +8,7 @@ import { tx } from '../i18n/transifex';
 import { identityProfilesService } from './IdentityProfilesService';
 import { settingsService } from './SettingsService';
 import { storageCache } from './StorageCache';
+import { secureStorageService } from './SecureStorageService';
 
 const t = (key: string, params?: Record<string, unknown>) => tx.t(key, params);
 
@@ -43,23 +44,100 @@ export interface BackupPayload {
   version: number;
   createdAt: string;
   data: Record<string, string | null>;
+  secureData?: Record<string, string | null>;
+}
+
+const SECURE_EXPORT_PREFIX = '@AndroidIRCX:secure:';
+
+function isSecureExportKey(key: string): boolean {
+  return key.startsWith(SECURE_EXPORT_PREFIX);
+}
+
+function toSecureExportKey(secretKey: string): string {
+  return `${SECURE_EXPORT_PREFIX}${secretKey}`;
+}
+
+function fromSecureExportKey(exportKey: string): string {
+  return exportKey.substring(SECURE_EXPORT_PREFIX.length);
+}
+
+function hasNetworkSelection(keys: string[] | undefined): boolean {
+  if (!keys) return false;
+  return keys.some((key) => key.includes('@AndroidIRCX:networks') || key.includes('NETWORKS'));
+}
+
+function isNetworkSecureSecret(secretKey: string): boolean {
+  const secret = secretKey.toLowerCase();
+  return (
+    secret.includes(':server:') ||
+    secret.endsWith(':saslpassword') ||
+    secret.endsWith(':nickservpassword') ||
+    secret.endsWith(':operpassword') ||
+    secret.endsWith(':proxypassword') ||
+    secret.endsWith(':clientcert') ||
+    secret.endsWith(':clientkey')
+  );
 }
 
 class DataBackupService {
+  private async getSecureExportEntries(keys?: string[]): Promise<Array<[string, string | null]>> {
+    const allSecretKeys = await secureStorageService.getAllSecretKeys();
+    const explicitSecureSelections = keys
+      ? keys.filter(isSecureExportKey).map(fromSecureExportKey)
+      : allSecretKeys;
+    const networkDerivedSelections = hasNetworkSelection(keys)
+      ? allSecretKeys.filter(isNetworkSecureSecret)
+      : [];
+    const selectedSecretKeys = Array.from(
+      new Set([...explicitSecureSelections, ...networkDerivedSelections])
+    );
+
+    if (selectedSecretKeys.length === 0) {
+      return [];
+    }
+
+    const values = await Promise.all(
+      selectedSecretKeys.map(async (secretKey) => {
+        const value = await secureStorageService.getSecret(secretKey);
+        return [toSecureExportKey(secretKey), value] as [string, string | null];
+      })
+    );
+
+    return values;
+  }
+
+  private buildPayload(
+    asyncEntries: ReadonlyArray<readonly [string, string | null]>,
+    secureEntries: ReadonlyArray<readonly [string, string | null]>
+  ): BackupPayload {
+    const payload: BackupPayload = {
+      version: 1,
+      createdAt: new Date().toISOString(),
+      data: {},
+    };
+
+    asyncEntries.forEach(([key, value]) => {
+      payload.data[key] = value;
+    });
+
+    if (secureEntries.length > 0) {
+      payload.secureData = {};
+      secureEntries.forEach(([key, value]) => {
+        payload.secureData![key] = value;
+      });
+    }
+
+    return payload;
+  }
+
   /**
    * Export all AsyncStorage data into a single JSON string.
    */
   async exportAll(): Promise<string> {
     const keys = await AsyncStorage.getAllKeys();
     const entries = await AsyncStorage.multiGet(keys);
-    const payload: BackupPayload = {
-      version: 1,
-      createdAt: new Date().toISOString(),
-      data: {},
-    };
-    entries.forEach(([key, value]) => {
-      payload.data[key] = value;
-    });
+    const secureEntries = await this.getSecureExportEntries();
+    const payload = this.buildPayload(entries, secureEntries);
     return JSON.stringify(payload);
   }
 
@@ -85,14 +163,8 @@ class DataBackupService {
     });
 
     const entries = await AsyncStorage.multiGet(filteredKeys);
-    const payload: BackupPayload = {
-      version: 1,
-      createdAt: new Date().toISOString(),
-      data: {},
-    };
-    entries.forEach(([key, value]) => {
-      payload.data[key] = value;
-    });
+    const secureEntries = await this.getSecureExportEntries();
+    const payload = this.buildPayload(entries, secureEntries);
     return JSON.stringify(payload);
   }
 
@@ -109,8 +181,35 @@ class DataBackupService {
     // Prevent stale cache/pending writes from overwriting freshly restored values.
     await storageCache.clear(false);
 
-    const pairs = Object.entries(parsed.data).map(([key, value]) => [key, value] as [string, string | null]);
-    await AsyncStorage.multiSet(pairs);
+    const entries = Object.entries(parsed.data);
+    const setPairs = entries
+      .filter(([, value]) => value !== null)
+      .map(([key, value]) => [key, value as string] as [string, string]);
+    const removeKeys = entries
+      .filter(([, value]) => value === null)
+      .map(([key]) => key);
+
+    if (setPairs.length > 0) {
+      await AsyncStorage.multiSet(setPairs);
+    }
+    if (removeKeys.length > 0) {
+      await AsyncStorage.multiRemove(removeKeys);
+    }
+
+    const securePairs = Object.entries(parsed.secureData || {});
+    if (securePairs.length > 0) {
+      await Promise.all(
+        securePairs.map(async ([key, value]) => {
+          if (!isSecureExportKey(key)) return;
+          const secretKey = fromSecureExportKey(key);
+          if (value === null || value === undefined || value === '') {
+            await secureStorageService.removeSecret(secretKey);
+          } else {
+            await secureStorageService.setSecret(secretKey, value);
+          }
+        })
+      );
+    }
     
     // Re-initialize services to reload restored data
     try {
@@ -130,15 +229,19 @@ class DataBackupService {
   async getStorageStats(): Promise<{ keyCount: number; totalBytes: number }> {
     const keys = await AsyncStorage.getAllKeys();
     const entries = await AsyncStorage.multiGet(keys);
-    const totalBytes = entries.reduce((sum, [, value]) => sum + (value ? value.length : 0), 0);
-    return { keyCount: keys.length, totalBytes };
+    const secureEntries = await this.getSecureExportEntries();
+    const totalBytes = entries.reduce((sum, [, value]) => sum + (value ? value.length : 0), 0) +
+      secureEntries.reduce((sum, [, value]) => sum + (value ? value.length : 0), 0);
+    return { keyCount: keys.length + secureEntries.length, totalBytes };
   }
 
   /**
    * Get all storage keys.
    */
   async getAllKeys(): Promise<string[]> {
-    return await AsyncStorage.getAllKeys();
+    const keys = await AsyncStorage.getAllKeys();
+    const secureKeys = (await secureStorageService.getAllSecretKeys()).map(toSecureExportKey);
+    return [...keys, ...secureKeys];
   }
 
   /**
@@ -255,15 +358,10 @@ class DataBackupService {
    * Export only specific keys.
    */
   async exportKeys(keys: string[]): Promise<string> {
-    const entries = await AsyncStorage.multiGet(keys);
-    const payload: BackupPayload = {
-      version: 1,
-      createdAt: new Date().toISOString(),
-      data: {},
-    };
-    entries.forEach(([key, value]) => {
-      payload.data[key] = value;
-    });
+    const asyncKeys = keys.filter(key => !isSecureExportKey(key));
+    const entries = await AsyncStorage.multiGet(asyncKeys);
+    const secureEntries = await this.getSecureExportEntries(keys);
+    const payload = this.buildPayload(entries, secureEntries);
     return JSON.stringify(payload);
   }
 }

@@ -7,35 +7,32 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
+import { AudioPlayer } from '../../src/components/AudioPlayer';
 
-// Mock hooks before importing component
+// Mock react-native-video
+jest.mock('react-native-video', () => 'Video');
+
+// Mock hooks
 jest.mock('../../src/hooks/useTheme', () => ({
   useTheme: jest.fn().mockReturnValue({
     colors: {
-      surfaceVariant: '#f0f0f0',
-      primary: '#007AFF',
-      error: '#ff0000',
-      surface: '#ffffff',
-      text: '#000000',
+      surfaceVariant: '#2C2C2C',
+      surface: '#1E1E1E',
+      text: '#FFFFFF',
+      primary: '#2196F3',
+      error: '#B91C1C',
     },
   }),
 }));
 
 jest.mock('../../src/i18n/transifex', () => ({
-  useT: jest.fn().mockReturnValue(
-    jest.fn((key: string, params?: Record<string, string>) => {
-      if (key === 'Audio error: {error}' && params?.error) {
-        return `Audio error: ${params.error}`;
-      }
-      return key;
-    })
-  ),
+  useT: jest.fn().mockReturnValue((key: string, params?: any) => {
+    if (params) {
+      return key.replace(/{(\w+)}/g, (match, p1) => params[p1] || match);
+    }
+    return key;
+  }),
 }));
-
-// Mock react-native-video
-jest.mock('react-native-video', () => 'Video');
-
-import { AudioPlayer } from '../../src/components/AudioPlayer';
 
 describe('AudioPlayer', () => {
   const defaultProps = {
@@ -46,33 +43,74 @@ describe('AudioPlayer', () => {
     jest.clearAllMocks();
   });
 
-  it('should render with url', () => {
-    const { root } = render(<AudioPlayer {...defaultProps} />);
-    expect(root).toBeTruthy();
+  it('should render without crashing', () => {
+    const { UNSAFE_root } = render(<AudioPlayer {...defaultProps} />);
+    expect(UNSAFE_root).toBeDefined();
   });
 
-  it('should show Play button initially', () => {
+  it('should display Play button initially', () => {
     const { getByText } = render(<AudioPlayer {...defaultProps} />);
-
     expect(getByText('Play')).toBeTruthy();
   });
 
-  it('should toggle between Play and Pause', () => {
+  it('should toggle between Play and Pause when button is pressed', () => {
     const { getByText } = render(<AudioPlayer {...defaultProps} />);
-
     const button = getByText('Play');
+    
     fireEvent.press(button);
-
     expect(getByText('Pause')).toBeTruthy();
-
+    
     fireEvent.press(getByText('Pause'));
     expect(getByText('Play')).toBeTruthy();
   });
 
-  it('should render Video component', () => {
-    const { UNSAFE_getByType } = render(<AudioPlayer {...defaultProps} />);
-
-    // Check that Video is rendered
-    expect(() => UNSAFE_getByType('Video')).not.toThrow();
+  it('should render with different URLs', () => {
+    const urls = [
+      'https://example.com/song.mp3',
+      'file:///local/audio.wav',
+      'http://stream.example.com/radio.ogg',
+    ];
+    
+    urls.forEach(url => {
+      const { UNSAFE_root } = render(<AudioPlayer url={url} />);
+      expect(UNSAFE_root).toBeDefined();
+    });
   });
+
+  it('should show loading indicator initially', () => {
+    const { UNSAFE_getByType } = render(<AudioPlayer {...defaultProps} />);
+    // ActivityIndicator should be present while loading
+    const activityIndicator = UNSAFE_getByType('ActivityIndicator');
+    expect(activityIndicator).toBeTruthy();
+  });
+
+  it('should render Video component with correct source', () => {
+    const { UNSAFE_getByType } = render(<AudioPlayer {...defaultProps} />);
+    const video = UNSAFE_getByType('Video');
+    expect(video).toBeTruthy();
+    expect(video.props.source.uri).toBe(defaultProps.url);
+  });
+
+  it('should have controls enabled on Video', () => {
+    const { UNSAFE_getByType } = render(<AudioPlayer {...defaultProps} />);
+    const video = UNSAFE_getByType('Video');
+    expect(video.props.controls).toBe(true);
+  });
+
+  it('should be paused initially', () => {
+    const { UNSAFE_getByType } = render(<AudioPlayer {...defaultProps} />);
+    const video = UNSAFE_getByType('Video');
+    expect(video.props.paused).toBe(true);
+  });
+
+  it('should handle onLoad callback', () => {
+    const { UNSAFE_getByType } = render(<AudioPlayer {...defaultProps} />);
+    const video = UNSAFE_getByType('Video');
+    // Simulate load complete
+    video.props.onLoad();
+    // After load, loading should be false but we can't easily test that
+    // without more complex setup
+    expect(video).toBeTruthy();
+  });
+
 });

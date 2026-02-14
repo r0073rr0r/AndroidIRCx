@@ -70,9 +70,9 @@ describe('BackupScreen', () => {
   });
 
   it('renders header and storage section when visible', async () => {
-    const { findByText } = render(<BackupScreen visible={true} onClose={onClose} />);
-    expect(await findByText('Backup & Restore')).toBeTruthy();
-    expect(await findByText('Storage Statistics')).toBeTruthy();
+    const { getByText } = render(<BackupScreen visible={true} onClose={onClose} />);
+    expect(getByText('Backup & Restore')).toBeTruthy();
+    expect(getByText('Storage Statistics')).toBeTruthy();
   });
 
   it('opens restore modal from Restore from Backup button', async () => {
@@ -182,4 +182,5 @@ describe('BackupScreen', () => {
 
     expect(dataBackupService.importAll).toHaveBeenCalledWith(plainJson);
   });
+
 });

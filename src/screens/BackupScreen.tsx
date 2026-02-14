@@ -354,7 +354,7 @@ export const BackupScreen: React.FC<BackupScreenProps> = ({ visible, onClose }) 
         copyTo: 'documentDirectory',
       });
 
-      const fileUri = result?.fileCopyUri ?? result?.uri;
+      const fileUri = (result as any)?.fileCopyUri ?? result?.uri;
       if (!fileUri) {
         Alert.alert(t('Error', { _tags: tags }), t('No file selected', { _tags: tags }));
         return;

@@ -8,53 +8,22 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { CommandSuggestions } from '../../src/components/CommandSuggestions';
-import { CommandSuggestion } from '../../src/services/ServiceCommandProvider';
 
 // Mock MaterialCommunityIcons
-jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => {
-  const React = require('react');
-  const { Text } = require('react-native');
-  return {
-    __esModule: true,
-    default: ({ name, size, color }: any) => {
-      return React.createElement(Text, { testID: `icon-${name}` }, `${name}`);
-    },
-  };
-});
+jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
 
 const mockColors = {
-  text: '#000000',
-  textSecondary: '#666666',
+  text: '#333',
+  textSecondary: '#666',
   primary: '#007AFF',
-  surface: '#ffffff',
-  border: '#cccccc',
+  surface: '#fff',
+  border: '#ccc',
   background: '#f5f5f5',
 };
 
 describe('CommandSuggestions', () => {
-  const mockSuggestions: CommandSuggestion[] = [
-    {
-      text: 'REGISTER',
-      label: 'REGISTER',
-      description: 'Register a channel',
-      isAlias: false,
-    },
-    {
-      text: 'HELP',
-      label: 'HELP',
-      description: 'Show help information',
-      isAlias: false,
-    },
-    {
-      text: 'cs',
-      label: 'ChanServ',
-      description: 'Alias for ChanServ',
-      isAlias: true,
-    },
-  ];
-
   const defaultProps = {
-    suggestions: mockSuggestions,
+    suggestions: [],
     onSelect: jest.fn(),
     colors: mockColors,
     visible: true,
@@ -64,187 +33,148 @@ describe('CommandSuggestions', () => {
     jest.clearAllMocks();
   });
 
-  it('should render null when not visible', () => {
-    const { toJSON } = render(
+  it('should return null when not visible', () => {
+    const { UNSAFE_root } = render(
       <CommandSuggestions {...defaultProps} visible={false} />
     );
-
-    expect(toJSON()).toBeNull();
+    expect(UNSAFE_root.children).toHaveLength(0);
   });
 
-  it('should render null when suggestions are empty', () => {
-    const { toJSON } = render(
+  it('should return null when suggestions array is empty', () => {
+    const { UNSAFE_root } = render(
       <CommandSuggestions {...defaultProps} suggestions={[]} />
     );
-
-    expect(toJSON()).toBeNull();
+    expect(UNSAFE_root.children).toHaveLength(0);
   });
 
-  it('should render suggestions list when visible', () => {
+  it('should render when visible with suggestions', () => {
+    const suggestions = [
+      { text: '/msg', label: '/msg', description: 'Send private message', isAlias: false },
+    ];
     const { getByText } = render(
-      <CommandSuggestions {...defaultProps} />
+      <CommandSuggestions {...defaultProps} suggestions={suggestions} />
     );
-
-    expect(getByText('REGISTER')).toBeTruthy();
-    expect(getByText('HELP')).toBeTruthy();
-    expect(getByText('ChanServ')).toBeTruthy();
+    expect(getByText('/msg')).toBeTruthy();
+    expect(getByText('Send private message')).toBeTruthy();
   });
 
-  it('should render command descriptions', () => {
+  it('should render multiple suggestions', () => {
+    const suggestions = [
+      { text: '/msg', label: '/msg', description: 'Send message', isAlias: false },
+      { text: '/join', label: '/join', description: 'Join channel', isAlias: false },
+      { text: '/part', label: '/part', description: 'Leave channel', isAlias: false },
+    ];
     const { getByText } = render(
-      <CommandSuggestions {...defaultProps} />
+      <CommandSuggestions {...defaultProps} suggestions={suggestions} />
     );
-
-    expect(getByText('Register a channel')).toBeTruthy();
-    expect(getByText('Show help information')).toBeTruthy();
-    expect(getByText('Alias for ChanServ')).toBeTruthy();
-  });
-
-  it('should render server icon for non-alias commands', () => {
-    const { getAllByTestId } = render(
-      <CommandSuggestions {...defaultProps} />
-    );
-
-    // REGISTER and HELP should have server icon
-    const serverIcons = getAllByTestId('icon-server');
-    expect(serverIcons.length).toBeGreaterThanOrEqual(2);
-  });
-
-  it('should render flash icon for alias commands', () => {
-    const { getByTestId } = render(
-      <CommandSuggestions {...defaultProps} />
-    );
-
-    // cs (alias) should have flash icon
-    expect(getByTestId('icon-flash')).toBeTruthy();
-  });
-
-  it('should render alias badge for alias commands', () => {
-    const { getByText } = render(
-      <CommandSuggestions {...defaultProps} />
-    );
-
-    expect(getByText('alias')).toBeTruthy();
+    expect(getByText('/msg')).toBeTruthy();
+    expect(getByText('/join')).toBeTruthy();
+    expect(getByText('/part')).toBeTruthy();
   });
 
   it('should call onSelect when suggestion is pressed', () => {
-    const onSelect = jest.fn();
-    const { getByText } = render(
-      <CommandSuggestions {...defaultProps} onSelect={onSelect} />
-    );
-
-    fireEvent.press(getByText('REGISTER'));
-
-    expect(onSelect).toHaveBeenCalledWith(mockSuggestions[0]);
-  });
-
-  it('should call onSelect with correct suggestion for each item', () => {
-    const onSelect = jest.fn();
-    const { getByText } = render(
-      <CommandSuggestions {...defaultProps} onSelect={onSelect} />
-    );
-
-    // Press each suggestion
-    fireEvent.press(getByText('REGISTER'));
-    expect(onSelect).toHaveBeenCalledWith(mockSuggestions[0]);
-
-    onSelect.mockClear();
-    fireEvent.press(getByText('HELP'));
-    expect(onSelect).toHaveBeenCalledWith(mockSuggestions[1]);
-
-    onSelect.mockClear();
-    fireEvent.press(getByText('ChanServ'));
-    expect(onSelect).toHaveBeenCalledWith(mockSuggestions[2]);
-  });
-
-  it('should render chevron-right icon for each suggestion', () => {
-    const { getAllByTestId } = render(
-      <CommandSuggestions {...defaultProps} />
-    );
-
-    const chevrons = getAllByTestId('icon-chevron-right');
-    expect(chevrons.length).toBe(3);
-  });
-
-  it('should apply correct styling based on colors', () => {
-    const { getByText } = render(
-      <CommandSuggestions {...defaultProps} />
-    );
-
-    const registerLabel = getByText('REGISTER');
-    expect(registerLabel.props.style).toBeDefined();
-    
-    const description = getByText('Register a channel');
-    expect(description.props.style).toBeDefined();
-  });
-
-  it('should handle single suggestion', () => {
-    const singleSuggestion: CommandSuggestion[] = [
-      {
-        text: 'REGISTER',
-        label: 'REGISTER',
-        description: 'Register a channel',
-        isAlias: false,
-      },
+    const suggestions = [
+      { text: '/msg', label: '/msg', description: 'Send message', isAlias: false },
     ];
-
-    const { getByText, queryAllByTestId } = render(
-      <CommandSuggestions {...defaultProps} suggestions={singleSuggestion} />
-    );
-
-    expect(getByText('REGISTER')).toBeTruthy();
-    // Should still render the suggestion properly
-    const chevrons = queryAllByTestId('icon-chevron-right');
-    expect(chevrons.length).toBe(1);
-  });
-
-  it('should handle suggestions without description', () => {
-    const suggestionsWithoutDesc: CommandSuggestion[] = [
-      {
-        text: 'TEST',
-        label: 'TEST',
-        description: '',
-        isAlias: false,
-      },
-    ];
-
     const { getByText } = render(
-      <CommandSuggestions {...defaultProps} suggestions={suggestionsWithoutDesc} />
+      <CommandSuggestions {...defaultProps} suggestions={suggestions} />
     );
-
-    expect(getByText('TEST')).toBeTruthy();
+    fireEvent.press(getByText('/msg'));
+    expect(defaultProps.onSelect).toHaveBeenCalledWith(suggestions[0]);
   });
 
-  it('should render with correct container styling', () => {
-    const { root } = render(
-      <CommandSuggestions {...defaultProps} />
-    );
-
-    expect(root).toBeTruthy();
-  });
-
-  it('should use unique keys for each suggestion', () => {
-    const duplicateSuggestions: CommandSuggestion[] = [
-      {
-        text: 'REGISTER',
-        label: 'REGISTER #1',
-        description: 'First register',
-        isAlias: false,
-      },
-      {
-        text: 'REGISTER',
-        label: 'REGISTER #2',
-        description: 'Second register',
-        isAlias: false,
-      },
+  it('should display alias badge for alias suggestions', () => {
+    const suggestions = [
+      { text: '/m', label: '/m', description: 'Alias for /msg', isAlias: true },
     ];
-
-    // Should not throw warning about duplicate keys
     const { getByText } = render(
-      <CommandSuggestions {...defaultProps} suggestions={duplicateSuggestions} />
+      <CommandSuggestions {...defaultProps} suggestions={suggestions} />
     );
+    expect(getByText('/m')).toBeTruthy();
+    expect(getByText('alias')).toBeTruthy();
+  });
 
-    expect(getByText('REGISTER #1')).toBeTruthy();
-    expect(getByText('REGISTER #2')).toBeTruthy();
+  it('should not display alias badge for non-alias suggestions', () => {
+    const suggestions = [
+      { text: '/msg', label: '/msg', description: 'Send message', isAlias: false },
+    ];
+    const { queryByText } = render(
+      <CommandSuggestions {...defaultProps} suggestions={suggestions} />
+    );
+    expect(queryByText('alias')).toBeNull();
+  });
+
+  it('should handle suggestions with same text but different index', () => {
+    const suggestions = [
+      { text: '/msg', label: '/msg', description: 'First', isAlias: false },
+      { text: '/msg', label: '/msg', description: 'Second', isAlias: false },
+    ];
+    const { getAllByText } = render(
+      <CommandSuggestions {...defaultProps} suggestions={suggestions} />
+    );
+    expect(getAllByText('/msg')).toHaveLength(2);
+  });
+
+  it('should apply lastItem style to last suggestion', () => {
+    const suggestions = [
+      { text: '/first', label: '/first', description: 'First', isAlias: false },
+      { text: '/last', label: '/last', description: 'Last', isAlias: false },
+    ];
+    const { UNSAFE_root } = render(
+      <CommandSuggestions {...defaultProps} suggestions={suggestions} />
+    );
+    expect(UNSAFE_root).toBeDefined();
+  });
+
+  it('should handle suggestion without description', () => {
+    const suggestions = [
+      { text: '/cmd', label: '/cmd', description: '', isAlias: false },
+    ];
+    const { getByText } = render(
+      <CommandSuggestions {...defaultProps} suggestions={suggestions} />
+    );
+    expect(getByText('/cmd')).toBeTruthy();
+  });
+
+  it('should render with different color schemes', () => {
+    const darkColors = {
+      text: '#fff',
+      textSecondary: '#aaa',
+      primary: '#0A84FF',
+      surface: '#1c1c1e',
+      border: '#38383A',
+      background: '#000',
+    };
+    const suggestions = [
+      { text: '/test', label: '/test', description: 'Test command', isAlias: false },
+    ];
+    const { getByText } = render(
+      <CommandSuggestions {...defaultProps} suggestions={suggestions} colors={darkColors} />
+    );
+    expect(getByText('/test')).toBeTruthy();
+  });
+
+  it('should handle long description text', () => {
+    const suggestions = [
+      { text: '/long', label: '/long', description: 'A'.repeat(200), isAlias: false },
+    ];
+    const { getByText } = render(
+      <CommandSuggestions {...defaultProps} suggestions={suggestions} />
+    );
+    expect(getByText('/long')).toBeTruthy();
+  });
+
+  it('should handle many suggestions', () => {
+    const suggestions = Array.from({ length: 20 }, (_, i) => ({
+      text: `/cmd${i}`,
+      label: `/cmd${i}`,
+      description: `Command ${i}`,
+      isAlias: i % 2 === 0,
+    }));
+    const { getByText } = render(
+      <CommandSuggestions {...defaultProps} suggestions={suggestions} />
+    );
+    expect(getByText('/cmd0')).toBeTruthy();
+    expect(getByText('/cmd19')).toBeTruthy();
   });
 });

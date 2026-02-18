@@ -426,15 +426,12 @@ For end-user setup guides, feature walkthroughs, and troubleshooting, see the wi
 - **Networks and Servers:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Networks-and-Servers
 - **Connecting:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Connecting
 - **User Management:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/User-Management
-- **IRC Services and Commands:
-  ** https://github.com/AndroidIRCx/AndroidIRCx/wiki/IRC-Services-and-Commands
+- **IRC Services and Commands:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/IRC-Services-and-Commands
 - **Channel Operations:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Channel-Operations
 - **Channels and Tabs:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Channels-and-Tabs
 - **DCC and File Transfers:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/DCC-%26-File-Transfers
-- **Security and Encryption:
-  ** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Security-and-Encryption
-- **SASL EXTERNAL Certificates:
-  ** https://github.com/AndroidIRCx/AndroidIRCx/wiki/SASL-EXTERNAL-Certificates
+- **Security and Encryption:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Security-and-Encryption
+- **SASL EXTERNAL Certificates:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/SASL-EXTERNAL-Certificates
 - **Commands and Scripting:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Commands-and-Scripting
 - **Scripting (Full API):** https://github.com/AndroidIRCx/AndroidIRCx/wiki/Scripting
 - **App Features:** https://github.com/AndroidIRCx/AndroidIRCx/wiki/App-Features
@@ -638,3 +635,4 @@ Those who recognize the work will understand. Time will explain the rest.
 ---
 
 *mIRC and IRCap set the standard. AndroidIRCX is the open-source platform that carries it forward.*
+

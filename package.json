@@ -39,7 +39,7 @@
     "@transifex/native": "^7.1.6",
     "@transifex/react": "^7.1.6",
     "buffer": "^6.0.3",
-    "node-forge": "^1.4.0",
+    "node-forge": "^1.4.3",
     "prismjs": "^1.30.0",
     "prop-types": "^15.8.1",
     "react": "19.2.7",
